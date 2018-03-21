@@ -39,21 +39,21 @@ function step001()
 	call waitfor_Zone "Coliseum of Valor: Hero's Devotion"
 	do
 	{
-		call AutoHunt vaedenmoor 200
+		call AutoHunt 200
 		call 2DNav 62 111
 		wait 50
 		call 2DNav 0 0
-		call AutoHunt vaedenmoor 200
+		call AutoHunt 200
 		call 2DNav -60 100
 		wait 50
 		call 2DNav 0 0
-		call AutoHunt vaedenmoor 200
+		call AutoHunt 200
 		call CheckQuestStep 2
 	}
 	while (!${Return})
 	call StopHunt
 	call 2DNav 0 0
-	call ConversetoNPC "Mithaniel Marr" 5 0 0 0 TRUE
+	call ConversetoNPC "Mithaniel Marr" 5 0 5 0 TRUE
 }
 
 function step002()
@@ -62,12 +62,13 @@ function step002()
 	{	
 		call ActivateVerb "sig_x2_pov_zone_exit - click to zone to the true Coliseum of Valor or back to Plane of Magic" 0 0 0 "Leave the Coliseum of Valor"
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+		wait 50
 	}
 	call waitfor_Zone "Coliseum of Valor"
 	call 2DNav 0 0
 	call ConversetoNPC "Druzzil Ro" 5 0 5 0 TRUE
 	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]	
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]	
 }

@@ -187,7 +187,7 @@ function AutoCraft(string tool, string myrecipe, int quantity)
 	ogre end craft
 }
 
-function AutoHunt(string target, int distance)
+function AutoHunt(int distance)
 {
 	
 	variable index:actor Actors
@@ -344,7 +344,7 @@ function Converse(string NPCName, int bubbles, bool giant)
 	{
 		echo ${NPCName} is really a big fellow
 		call PKey "MOVEBACKWARD" 5
-		call PKey "Page Up" 10
+		call PKey "Page Up" 5
 		call PKey "ZOOMOUT" 20		
 	}
 	
@@ -361,7 +361,7 @@ function Converse(string NPCName, int bubbles, bool giant)
 function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, bool giant)
 {
 	target ${Me.Name}
-	call TestArrivalCoord  ${X} ${Y} ${Z}
+	call TestArrivalCoord ${X} ${Y} ${Z}
 	if (!${Return})
 		call Move "${NPCName}" ${X} ${Y} ${Z}
 	wait 20
@@ -417,6 +417,14 @@ function CurrentQuestStep()
         while ${DetailsIterator:Next(exists)}
     }
 }
+
+function DMove(float X, float Z)
+{
+	call waitfor_Health 90
+	call waitfor_Combat
+	call 2DNav ${X} ${Z}
+}
+
 function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb, int quantity)
 {
 	call CountItem "${ActorName}"
@@ -517,13 +525,13 @@ function HarvestItem(string ItemName, int number)
 }
 
 
-function Hunt(string ActorName, int number)
+function Hunt(string ActorName, int distance, int number, bool nofly)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
 	
-	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 100]
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -543,14 +551,18 @@ function Hunt(string ActorName, int number)
 	{
 		do
 		{
+			call waitfor_Health 90
 			echo ${ActorIterator.Value.Name} found at ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-			call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+			if (!${nofly})
+				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+			else
+				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
 }
 
-function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number)
+function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number, int distance)
 {
     variable int Counter
 	call CountItem "${ItemName}"
@@ -563,7 +575,7 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 		{
 			Counter:Set[0]
 			
-			call Hunt "${ActorName}" ${number}
+			call Hunt "${ActorName}" ${distance} ${number}
 			call CountItem "${ItemName}"
 			Counter:Set[${Return}]
 		}	
@@ -597,7 +609,7 @@ function MoveCloseTo(string ActorName)
 	do
 	{
 		wait 1
-		echo ${Actor["${ActorName}"].Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z} ${Me.X} ${Me.Z} ${Actor["${ActorName}"].Distance} ${Actor["${ActorName}"].Distance(exists)}
+		;echo ${Actor["${ActorName}"].Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z} ${Me.X} ${Me.Z} ${Actor["${ActorName}"].Distance} ${Actor["${ActorName}"].Distance(exists)}
 	}
 	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)})
 	press -release MOVEFORWARD
@@ -685,10 +697,12 @@ function StopHunt()
 function strip_QN(string questname)
 {
 	variable string sQN
+	echo IN:${questname}
 	sQN:Set[${questname.Replace[",",""]}]
 	sQN:Set[${sQN.Replace[":",""]}]
 	sQN:Set[${sQN.Replace["'",""]}]
 	sQN:Set[${sQN.Replace[" ",""]}]
+	echo OUT:${sQN}
 	return ${sQN}
 }
 
@@ -735,7 +749,24 @@ function TestArrivalCoord(float X, float Y, float Z)
 		return FALSE
 	}
 }
+function waitfor_Combat()
+{
+	do
+	{
+		wait 5
+	} 
+	while (${Me.InCombatMode})
+}
 
+function waitfor_Health(int health)
+{
+	do
+	{
+		wait 5
+	} 
+	while (${Me.Health} <${Health})
+	
+}
 
 function waitfor_NPC(string NPCName)
 {
