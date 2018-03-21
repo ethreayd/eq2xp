@@ -311,6 +311,44 @@ function CountItem(string ItemName)
 	return ${Counter}
 }
 
+function CurrentQuestStep()
+{
+    variable index:collection:string Details    
+    variable iterator DetailsIterator
+    variable int DetailsCounter = 0
+    
+    QuestJournalWindow.CurrentQuest:GetDetails[Details]
+    Details:GetIterator[DetailsIterator]
+	if (${DetailsIterator:First(exists)})
+    {
+        do
+        {
+            if (${DetailsIterator.Value.FirstKey(exists)})
+            {
+                do
+                {
+					if (${DetailsIterator.Value.CurrentKey.Equal["Check"]} && ${DetailsIterator.Value.CurrentValue.Equal["false"]})
+                    return ${DetailsCounter}
+                }
+                while (${DetailsIterator.Value.NextKey(exists)} || ${DetailsIterator.Value.CurrentValue.Equal["false"]})
+            }
+            DetailsCounter:Inc
+        }
+        while ${DetailsIterator:Next(exists)}
+    }
+}
+function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb, int quantity)
+{
+	call CountItem "${ActorName}"
+	if (${Return}<2)
+	{
+		call ActivateVerb "${ActorName}" ${X} ${Y} ${Z} ${verb}
+	}
+	else
+	{
+		echo Already have ${quantity} ${ActorName} in Inventory
+	}
+}
 function GoDown()
 {
 	echo "Going Down : 5 5 5"
@@ -345,6 +383,80 @@ function goto_GH()
 	}
 }
 
+
+function HarvestItem(string ItemName, int number)
+{
+    variable int Counter=0
+	
+	call Harvest "${ItemName}" ${number}
+	call CountItem "${ItemName}"
+	Counter:Set[${Return}]
+	if (${Counter}>=${number})
+		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
+}
+
+function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number)
+{
+    variable int Counter
+	call CountItem "${ItemName}"
+	Counter:Set[${Return}]
+	if (${Counter}<${number})
+	{
+	    echo looting ${number} ${ItemName} from "${ActorName}" in progress
+		call navwrap ${X} ${Y} ${Z}
+		do
+		{
+			Counter:Set[0]
+			
+			call Hunt "${ActorName}" ${number}
+			call CountItem "${ItemName}"
+			Counter:Set[${Return}]
+		}	
+		while (${Counter}<${number})
+	}
+	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
+	call StopHunt
+}
+function Harvest(string ItemName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Count=0
+	
+	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= 100]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Count:Inc	
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+	
+	echo "There is ${Count} ${ItemName}"
+	if (${Count}>0)
+	{
+		if ${ActorIterator:First(exists)}
+		{
+			do
+			{
+				eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+				echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+				call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}
+				wait 10
+				call GoDown
+				eq2execute loc
+				wait 20
+				ogre harvestlite
+				wait 10
+				echo trying to harvest ${ItemName}
+				wait 200
+			}
+			while ${ActorIterator:Next(exists)}
+		}		
+	}
+}
 
 function Hunt(string ActorName, int number)
 {
@@ -476,6 +588,12 @@ function navwrap(float X, float Y, float Z)
 	eq2execute loc
 }
 
+function StopHunt()
+{
+	Ob_AutoTarget:Clear
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","FALSE","FALSE"]
+    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
+}
 function strip_QN(string questname)
 {
 	variable string sQN
@@ -485,6 +603,27 @@ function strip_QN(string questname)
 	return ${sQN}
 }
 
+function StartQuest(int stepstart, int stepstop)
+{
+	variable string n
+	variable int i
+	
+	if (${stepstart}==0)
+	{
+		call CurrentQuestStep
+		stepstart:Set[${Return}]
+	}
+	if (${stepstart}<=${stepstop})
+	{
+		for ( i:Set[${stepstart} ] ; ${i} <= ${stepstop} ; i:Inc )
+		{
+			n:Set["00${i}"]
+			echo "Starting step${n.Right[3]} to step${stepstop}"
+			call step${n.Right[3]}
+			wait 10
+		}
+	}
+}
 function TestArrivalCoord(float X, float Y, float Z)
 {
 	variable float Ax
@@ -505,102 +644,6 @@ function TestArrivalCoord(float X, float Y, float Z)
 	else
 	{
 		return FALSE
-	}
-}
-
-
-function StopHunt()
-{
-	Ob_AutoTarget:Clear
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","FALSE","FALSE"]
-    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
-}
-
-function HuntItem(string ActorName, string ItemName, int number)
-{
-    variable int Counter
-	call CountItem "${ItemName}"
-	Counter:Set[${Return}]
-	if (${Counter}<${number})
-	{
-	    echo looting ${number} ${ItemName} from "${ActorName}" in progress
-		do
-		{
-			Counter:Set[0]
-			call Hunt "${ActorName}" ${number}
-			call CountItem "${ItemName}"
-			Counter:Set[${Return}]
-		}	
-		while (${Counter}<${number})
-	}
-	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
-	call StopHunt
-}
-
-
-
-function HarvestItem(string ItemName, int number)
-{
-    variable int Counter=0
-	
-	call Harvest "${ItemName}" ${number}
-	call CountItem "${ItemName}"
-	Counter:Set[${Return}]
-	if (${Counter}>=${number})
-		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
-}
-
-function Harvest(string ItemName)
-{
-	variable index:actor Actors
-	variable iterator ActorIterator
-	variable int Count=0
-	
-	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= 100]
-	Actors:GetIterator[ActorIterator]
-	if ${ActorIterator:First(exists)}
-	{
-		do
-		{
-			Count:Inc	
-		}	
-		while ${ActorIterator:Next(exists)}
-	}
-	
-	echo "There is ${Count} ${ItemName}"
-	if (${Count}>0)
-	{
-		if ${ActorIterator:First(exists)}
-		{
-			do
-			{
-				eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-				echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-				call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}
-				wait 10
-				call GoDown
-				eq2execute loc
-				wait 20
-				ogre harvestlite
-				wait 10
-				echo trying to harvest ${ItemName}
-				wait 200
-			}
-			while ${ActorIterator:Next(exists)}
-		}		
-	}
-}
-
-function StartQuest(int nbsteps, int step)
-{
-	variable string n
-	variable int i
-	for ( i:Set[${step} ] ; ${i} <= ${nbsteps} ; i:Inc )
-	{
-		n:Set["00${i}"]
-		echo "Starting step${n.Right[3]}"
-		call step${n.Right[3]}
-		wait 10
 	}
 }
 
