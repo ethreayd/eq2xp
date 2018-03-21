@@ -9,14 +9,10 @@ function main(int stepstart, int stepstop)
 	variable index:string ScriptsToRun
 	variable string sQN
 	ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
-   
-	echo "Starting PoP quests (will loop until you are in PoM if you are not there already)"
+	ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
+	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
-	do
-	{
-		wait 5
-	}
-	while (!${Zone.Name.Equal["Plane of Magic"]})
+	
 	
 	variable int x
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )

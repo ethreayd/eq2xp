@@ -7,6 +7,8 @@
 #define TURNRIGHT d
 #define FLYUP space
 #define FLYDOWN x
+#define PAGEUP "Page Up"
+#define PAGEDOWN "Page Down"
 #define ZOOMIN MouseWheelUp
 #define ZOOMOUT MouseWheelDown
 
@@ -110,7 +112,9 @@ function Abs(float A)
 
 function ActivateSpecial(string ActorName, float X, float Y, float Z)
 {
-	call Move "${ActorName}" ${X} ${Y} ${Z}
+	call TestArrivalCoord  ${X} ${Y} ${Z}
+	if (!${Return})
+		call Move "${ActorName}" ${X} ${Y} ${Z}
 	OgreBotAPI:Special["${Me.Name}"]
 	wait 50
 }
@@ -118,7 +122,9 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 function ActivateVerb(string ActorName, float X, float Y, float Z, string verb)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
-	call Move "${ActorName}" ${X} ${Y} ${Z}
+	call TestArrivalCoord  ${X} ${Y} ${Z}
+	if (!${Return})
+		call Move "${ActorName}" ${X} ${Y} ${Z}
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
 }
@@ -181,6 +187,50 @@ function AutoCraft(string tool, string myrecipe, int quantity)
 	ogre end craft
 }
 
+function AutoHunt(string target, int distance)
+{
+	
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Count=0
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${distance}]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+	EQ2:QueryActors[Actors, Type  =- "NPC" && Distance <= ${distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Count:Inc	
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+	
+	echo "There is ${Count} NPC within ${distance}m"
+	if (${Count}>0)
+	{
+		if ${ActorIterator:First(exists)}
+		{
+			do
+			{
+				do
+				{	
+					wait 5
+				}
+				while (${Me.InCombatMode})
+				eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+				echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+				wait 10
+			}
+			while ${ActorIterator:Next(exists)}
+		}		
+	}
+}
+
+
 function check_quest(string questname)
 {
 	variable index:quest Quests
@@ -203,7 +253,7 @@ function check_quest(string questname)
         {
 			if (${It.Value.Name.Equal["${questname}"]})
 			{
-				echo already on ${questname} - RESUME NOT SUPPORTED YET
+				echo already on ${questname}
 				return TRUE
         	}
 		}
@@ -212,16 +262,36 @@ function check_quest(string questname)
 	return FALSE
 }    
 
-function check_quest_step(string questname, int step)
+function CheckQuestStep(int step)
 {
-	if (TRUE)
-	{
-		return TRUE
-	}
-	else
-	{
+	variable index:collection:string Details    
+    variable iterator DetailsIterator
+    variable int DetailsCounter = 0
+    
+    QuestJournalWindow.CurrentQuest:GetDetails[Details]
+    Details:GetIterator[DetailsIterator]
+	if (${DetailsIterator:First(exists)})
+    {
+        do
+        {
+            if (${DetailsIterator.Value.FirstKey(exists)})
+            {
+                do
+                {
+					echo ${DetailsCounter}==${step} && ${DetailsIterator.Value.CurrentKey.Equal["Check"]} && ${DetailsIterator.Value.CurrentValue.Equal["true"]}
+					if (${DetailsCounter}==${step} && ${DetailsIterator.Value.CurrentKey.Equal["Check"]} && ${DetailsIterator.Value.CurrentValue.Equal["true"]})
+                    {
+						echo step ${step} is done
+						return TRUE
+					}
+                }
+                while (${DetailsIterator.Value.NextKey(exists)})
+            }
+            DetailsCounter:Inc
+        }
+        while ${DetailsIterator:Next(exists)}
 		return FALSE
-	}
+    }
 }
 
 function CheckCombat()
@@ -267,9 +337,17 @@ function CheckStuck(float loc)
 	}
 }
 
-function Converse(string NPCName, int bubbles)
+function Converse(string NPCName, int bubbles, bool giant)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
+	if (${giant})
+	{
+		echo ${NPCName} is really a big fellow
+		call PKey "MOVEBACKWARD" 5
+		call PKey "Page Up" 10
+		call PKey "ZOOMOUT" 20		
+	}
+	
 	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
 	wait 10
 	variable int x
@@ -280,13 +358,15 @@ function Converse(string NPCName, int bubbles)
 	}
 }
 
-function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z)
+function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, bool giant)
 {
 	target ${Me.Name}
-	call Move "${NPCName}" ${X} ${Y} ${Z}
-	wait 100
+	call TestArrivalCoord  ${X} ${Y} ${Z}
+	if (!${Return})
+		call Move "${NPCName}" ${X} ${Y} ${Z}
+	wait 20
 	call waitfor_NPC "${NPCName}"
-	call Converse "${NPCName}" ${bubbles}
+	call Converse "${NPCName}" ${bubbles} ${giant}
 	wait 20
 	OgreBotAPI:NoTarget[${Me.Name}]
 }
@@ -384,39 +464,6 @@ function goto_GH()
 }
 
 
-function HarvestItem(string ItemName, int number)
-{
-    variable int Counter=0
-	
-	call Harvest "${ItemName}" ${number}
-	call CountItem "${ItemName}"
-	Counter:Set[${Return}]
-	if (${Counter}>=${number})
-		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
-}
-
-function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number)
-{
-    variable int Counter
-	call CountItem "${ItemName}"
-	Counter:Set[${Return}]
-	if (${Counter}<${number})
-	{
-	    echo looting ${number} ${ItemName} from "${ActorName}" in progress
-		call navwrap ${X} ${Y} ${Z}
-		do
-		{
-			Counter:Set[0]
-			
-			call Hunt "${ActorName}" ${number}
-			call CountItem "${ItemName}"
-			Counter:Set[${Return}]
-		}	
-		while (${Counter}<${number})
-	}
-	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
-	call StopHunt
-}
 function Harvest(string ItemName)
 {
 	variable index:actor Actors
@@ -458,6 +505,18 @@ function Harvest(string ItemName)
 	}
 }
 
+function HarvestItem(string ItemName, int number)
+{
+    variable int Counter=0
+	
+	call Harvest "${ItemName}" ${number}
+	call CountItem "${ItemName}"
+	Counter:Set[${Return}]
+	if (${Counter}>=${number})
+		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
+}
+
+
 function Hunt(string ActorName, int number)
 {
 	variable index:actor Actors
@@ -491,7 +550,28 @@ function Hunt(string ActorName, int number)
 	}
 }
 
-
+function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number)
+{
+    variable int Counter
+	call CountItem "${ItemName}"
+	Counter:Set[${Return}]
+	if (${Counter}<${number})
+	{
+	    echo looting ${number} ${ItemName} from "${ActorName}" in progress
+		call navwrap ${X} ${Y} ${Z}
+		do
+		{
+			Counter:Set[0]
+			
+			call Hunt "${ActorName}" ${number}
+			call CountItem "${ItemName}"
+			Counter:Set[${Return}]
+		}	
+		while (${Counter}<${number})
+	}
+	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
+	call StopHunt
+}
 	
 function Move(string ActorName, float X, float Y, float Z)
 {
@@ -517,6 +597,7 @@ function MoveCloseTo(string ActorName)
 	do
 	{
 		wait 1
+		echo ${Actor["${ActorName}"].Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z} ${Me.X} ${Me.Z} ${Actor["${ActorName}"].Distance} ${Actor["${ActorName}"].Distance(exists)}
 	}
 	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)})
 	press -release MOVEFORWARD
@@ -587,18 +668,26 @@ function navwrap(float X, float Y, float Z)
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
 }
-
+function PKey(string KName, int ntime)
+{
+	press -hold "${KName}"
+	wait ${ntime}
+	press -release "${KName}"
+}
 function StopHunt()
 {
 	Ob_AutoTarget:Clear
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","FALSE","FALSE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius","0"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 }
 function strip_QN(string questname)
 {
 	variable string sQN
 	sQN:Set[${questname.Replace[",",""]}]
 	sQN:Set[${sQN.Replace[":",""]}]
+	sQN:Set[${sQN.Replace["'",""]}]
 	sQN:Set[${sQN.Replace[" ",""]}]
 	return ${sQN}
 }
@@ -658,13 +747,15 @@ function waitfor_NPC(string NPCName)
 	echo Debug: I have reach ${NPCName} 
 }
 
-function ZoomOut(int ntime)
+function waitfor_Zone(string ZoneName)
 {
-	variable int i
-	for ( i:Set[1] ; ${i} <= ${ntime} ; i:Inc )
+	do
 	{
-		press ZOOMOUT
 		wait 5
 	}
+	while (!${Zone.Name.Equal["${ZoneName}"]})
+	echo I am in ${ZoneName}
 }
+
+
 
