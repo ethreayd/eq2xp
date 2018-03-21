@@ -1,0 +1,49 @@
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreCommon/EQ2OgreObjects/Object_Get_SpewStats.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+variable(global) Object_Get_SpewStats MyFaction_Get_SpewStats
+variable(script) int64 iFaction
+;You need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
+function main(int step)
+{
+	; thanks to Kannkor for the index usage example
+	variable index:string ScriptsToRun
+	variable string sQN
+	ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
+   
+	echo "Starting PoP quests (will loop until you are in PoM if you are not there already)"
+	echo " ${ScriptsToRun.Used} are supported"
+	do
+	{
+		wait 5
+	}
+	while (!${Zone.Name.Equal["Plane of Magic"]})
+	
+	variable int x
+	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
+	{
+        	echo Running script ${ScriptsToRun[${x}]}
+		;Thanks to Pork for the quest check
+		if (${QuestJournalWindow.CompletedQuest["${ScriptsToRun[${x}]}"](exists)})
+		{
+			echo "Quest ${ScriptsToRun[${x}]} already done"
+		}
+		else
+		{
+			call strip_QN "${ScriptsToRun[${x}]}"
+			sQN:Set[${Return}]
+			echo will run "${ScriptsToRun[${x}]}" step ${step} Now !
+    			runscript ${sQN} "${ScriptsToRun[${x}]}" ${step}
+        		wait 5
+        		while ${Script[${sQN}](exists)}
+            		wait 5
+			echo ${ScriptsToRun[${x}]} finished
+		}
+	}
+	echo "autopop ended normally" 
+}
+
+
+
+
+
+
