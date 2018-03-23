@@ -8,8 +8,7 @@ function main(string qn, int speed)
 	echo zone is ${Zone.Name}
 	eq2execute merc resume
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
-	if (1>3)
-	{
+
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
@@ -163,13 +162,10 @@ function main(string qn, int speed)
 	}
 	while (${Return})
 	eq2execute summon
-	}
 	call StopHunt
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance"
 	OgreBotAPI:Special["${Me.Name}"]
 }
-
-
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
  {
