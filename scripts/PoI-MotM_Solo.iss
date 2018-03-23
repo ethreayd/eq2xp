@@ -169,6 +169,7 @@ function main(string qn, int speed)
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
  {
+	echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
     if (${Message.Find["begins to overheat"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0

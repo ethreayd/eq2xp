@@ -1,4 +1,5 @@
 #define AUTORUN "num lock"
+#define CENTER shift+g
 #define MOVEFORWARD w
 #define MOVEBACKWARD s
 #define STRAFELEFT q
@@ -318,6 +319,10 @@ function CheckCombat()
 	do
 	{	
 		wait 5
+		if (${Target.Distance} > 30)
+		{
+			press MOVEFORWARD
+		} 
 	}
 	while (${Me.InCombatMode})
 }
@@ -370,8 +375,9 @@ function Converse(string NPCName, int bubbles, bool giant)
 	if (${giant})
 	{
 		echo ${NPCName} is really a big fellow
+		press CENTER
 		call PKey "MOVEBACKWARD" 5
-		call PKey "Page Up" 5
+		call PKey "Page Up" 3
 		call PKey "ZOOMOUT" 20		
 	}
 	
@@ -396,6 +402,7 @@ function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, b
 	call Converse "${NPCName}" ${bubbles} ${giant}
 	wait 20
 	OgreBotAPI:NoTarget[${Me.Name}]
+	press CENTER
 }
 
 function CountItem(string ItemName)
@@ -449,7 +456,7 @@ function DMove(float X, float Y, float Z, int speed)
 {
 	eq2execute waypoint ${X}, ${Y}, ${Z}
 	call waitfor_Health 90
-	call waitfor_Combat
+	call CheckCombat
 	call Get2DDirection ${X} ${Z}
 	call Go2D ${X} ${Y} ${Z} ${Return} ${speed} 
 }
@@ -920,15 +927,6 @@ function WaitByPass(string ActorName, float GLeft, float GRight)
 	}		
 }
 
-function waitfor_Combat()
-{
-	do
-	{
-		wait 5
-	} 
-	while (${Me.InCombatMode})
-}
-
 function waitfor_Health(int health)
 {
 	do
@@ -956,6 +954,7 @@ function waitfor_Zone(string ZoneName)
 		wait 5
 	}
 	while (!${Zone.Name.Equal["${ZoneName}"]})
+	wait 100
 	echo I am in ${ZoneName}
 }
 
