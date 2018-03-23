@@ -63,7 +63,7 @@ function step003()
 	do
 	{
 		call StopHunt
-		call HuntItem "ignus" "Ignus Manaflare" 885 12 -206 1
+		call HuntItem "ignus" "Ignus Manaflare" 885 12 -206 1 100
 		call GetSpecialQty "Luminia Sapphire" 212 124 -171 "Gather" 2
 		call GetSpecialQty "Luminia Sapphire" 525 24 -875 "Gather" 2
 		call GetSpecialQty "Luminia Sapphire" 663 15 -697 "Gather" 2
