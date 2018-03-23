@@ -68,7 +68,7 @@ function step003()
 		if (!${Return})
 			call step002
 		call ActivateVerb "zone_to_poi" -94 3 163 "Enter the Plane of Innovation"
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
 	}
 	call waitfor_Zone "Plane of Innovation: Gears in the Marvelous [Solo]"
