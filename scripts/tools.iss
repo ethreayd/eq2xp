@@ -1,5 +1,5 @@
 #define AUTORUN "num lock"
-#define CENTER shift+g
+#define CENTER p
 #define MOVEFORWARD w
 #define MOVEBACKWARD s
 #define STRAFELEFT q
@@ -28,21 +28,25 @@ function 2DNav(float X, float Z, bool ForceWalk)
 		Stucky:Set[0]
 		echo "doing X>"
 		press -hold MOVEFORWARD
+		
 		do
 		{	
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
+			wait 3
 			call CheckWalking
 			if (${ForceWalk} && !${Return})
-				{
-					WasRunning:Set[TRUE]
-					press WALK
-				}
+			{
+				WasRunning:Set[TRUE]
+				press WALK
+			}
 			call CheckStuck ${loc0}
 			if (${Return})
+			{
 				Stucky:Inc
+			}
+			call CheckCombat
 		}
-		while (${Me.Loc.X}>${X} && ${Stucky}<10 )
+		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
 		eq2execute loc
 	}
@@ -55,59 +59,74 @@ function 2DNav(float X, float Z, bool ForceWalk)
 		do
 		{	
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
+			wait 3
 			call CheckWalking
 			if (${ForceWalk} && !${Return})
-				{
-					WasRunning:Set[TRUE]
-					press WALK
-				}
+			{
+				WasRunning:Set[TRUE]
+				press WALK
+			}
 			call CheckStuck ${loc0}
 			if (${Return})
+			{
 				Stucky:Inc
+			}
+			call CheckCombat
 		}
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
 		eq2execute loc
 	}
 
-	face ${X} ${Z}
-	if (${Me.Loc.Z}>${Z})
+	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+	if (!${Return})
 	{
-		Stucky:Set[0]
-		echo "doing Z>"
+		face ${X} ${Z}
+		if (${Me.Loc.Z}>${Z})
+		{
+			Stucky:Set[0]
+			echo "doing Z>"
 	
-		press -hold MOVEFORWARD
-		do
-		{	
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			call CheckStuck ${loc0}
-			if (${Return})
-				Stucky:Inc
+			press -hold MOVEFORWARD
+			do
+			{	
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				wait 2
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
+				call CheckCombat
+			}
+			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+			press -release MOVEFORWARD
+			eq2execute loc
 		}
-		while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
-		press -release MOVEFORWARD
-		eq2execute loc
-	}
-	else
-	{
-		Stucky:Set[0]
-		echo "doing Z<"
+		else
+		{
+			Stucky:Set[0]
+			echo "doing Z<"
 	
-		press -hold MOVEFORWARD
-		do
-		{	
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			call CheckStuck ${loc0}
-			if (${Return})
-				Stucky:Inc
+			press -hold MOVEFORWARD
+			do
+			{	
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				wait 2
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
+				call CheckCombat
+			}
+			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+			press -release MOVEFORWARD
+			eq2execute loc
 		}
-		while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
-		press -release MOVEFORWARD
-		eq2execute loc
 	}
+	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+
 	if (${WasRunning})
 		press WALK
 }
@@ -165,6 +184,7 @@ function Ascend(float Y)
 			Stucky:Inc
 		if (${Stucky}>5)
 			{	
+				echo stucked when ascending
 				press -hold STRAFELEFT
 				wait 5
 				press -release STRAFELEFT
@@ -316,15 +336,18 @@ function CheckCombat()
 {
 	OgreBotAPI:NoTarget[${Me.Name}]
 	wait 20
-	do
-	{	
-		wait 5
-		if (${Target.Distance} > 30)
-		{
-			press MOVEFORWARD
-		} 
+	if (${Me.InCombatMode})
+	{
+		do
+		{	
+			wait 5
+			if (${Target.Distance} > 30)
+				press -hold MOVEFORWARD
+			else
+				press -release MOVEFORWARD
+		}
+		while (${Me.InCombatMode})
 	}
-	while (${Me.InCombatMode})
 }
 
 function CheckSwimming()
@@ -455,10 +478,26 @@ function CurrentQuestStep()
 function DMove(float X, float Y, float Z, int speed)
 {
 	eq2execute waypoint ${X}, ${Y}, ${Z}
-	call waitfor_Health 90
-	call CheckCombat
-	call Get2DDirection ${X} ${Z}
-	call Go2D ${X} ${Y} ${Z} ${Return} ${speed} 
+	call TestArrivalCoord ${X} ${Y} ${Z}
+	if (!${Return})
+	{
+		do
+		{
+			call waitfor_Health 90
+			call CheckCombat
+			if (${speed} < 2)
+			{
+				call Get2DDirection ${X} ${Z}
+				call Go2D ${X} ${Y} ${Z} ${Return}
+			}
+			if (${speed} == 2)
+				call 2DNav ${X} ${Z} TRUE
+			if (${speed} > 2)
+				call 2DNav ${X} ${Z} FALSE
+			call TestArrivalCoord ${X} ${Y} ${Z}
+		}
+		while (!${Return})
+	}
 }
 
 function Follow2D(string ActorName,float X, float Y, float Z, float RespectDistance, bool Walk)
@@ -516,13 +555,12 @@ function GoDown()
 	}
 	wait 10
 }
-function Go2D(float X, float Y, float Z, string strafe, int speed)
+function Go2D(float X, float Y, float Z, string strafe)
 {
 	variable float loc0 
 	variable int Stucky
 	variable bool There
-	if (${speed}==0)
-		speed:Set[1]
+	
 	do
 	{
 		Stucky:Set[0]
@@ -533,11 +571,11 @@ function Go2D(float X, float Y, float Z, string strafe, int speed)
 			call waitfor_Health 99
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			press -hold MOVEFORWARD
-			wait ${speed}
+			wait 1
 			press -release MOVEFORWARD
 			wait 1
 			press -hold MOVEFORWARD
-			wait ${speed}
+			wait 1
 			press -release MOVEFORWARD
 			call CheckStuck ${loc0}
 			if (${Return})
@@ -695,7 +733,7 @@ function IsPresent(string ActorName)
 	variable iterator ActorIterator
 	variable int Count=0
 	
-	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 100]
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 200]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -838,7 +876,6 @@ function StopHunt()
 	Ob_AutoTarget:Clear
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","FALSE","FALSE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius","0"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 }
@@ -854,12 +891,12 @@ function strip_QN(string questname)
 	return ${sQN}
 }
 
-function StartQuest(int stepstart, int stepstop)
+function StartQuest(int stepstart, int stepstop, bool noquest)
 {
 	variable string n
 	variable int i
 	
-	if (${stepstart}==0)
+	if (${stepstart}==0 && !${noquest})
 	{
 		call CurrentQuestStep
 		stepstart:Set[${Return}]
@@ -875,7 +912,14 @@ function StartQuest(int stepstart, int stepstop)
 		}
 	}
 }
-function TestArrivalCoord(float X, float Y, float Z, int Precision)
+
+function TargetAfterTime(string mytarget, int time)
+{
+	wait ${time}
+	target ${mytarget}
+}
+
+function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
 {
 	variable float Ax
 	variable float Ay
@@ -887,7 +931,12 @@ function TestArrivalCoord(float X, float Y, float Z, int Precision)
 	call Abs ${Math.Calc64[${Me.Loc.X}-${X}]}
 	Ax:Set[${Return}]
 	call Abs ${Math.Calc64[${Me.Loc.Y}-${Y}]}
-	Ay:Set[${Return}]
+
+	if (${2D})
+		Ay:Set[0]
+	else
+		Ay:Set[${Return}]
+
 	call Abs ${Math.Calc64[${Me.Loc.Z}-${Z}]}
 	Az:Set[${Return}]
 	echo Debug : Me (${Me.Loc.X},${Me.Loc.Y},${Me.Loc.Z} must go ${X},${Y},${Z} - Test found ${Ax},${Ay},${Az}
@@ -926,6 +975,8 @@ function WaitByPass(string ActorName, float GLeft, float GRight)
 		echo "${ActorName}" has bypassed ${GLeft}) and ${GRight}
 	}		
 }
+
+
 
 function waitfor_Health(int health)
 {

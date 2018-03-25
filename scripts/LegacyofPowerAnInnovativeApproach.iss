@@ -4,10 +4,10 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=3
+	variable int laststep=4
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	
+	NPCName:Set["Druzzil Ro"]
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -33,6 +33,7 @@ function step000()
 		do
 		{
 			ogre qh
+			call 2DNav -2 4
 			call ConversetoNPC "${NPCName}" 0 -2 6 4 TRUE
 			wait 100
 			ogre end qh
@@ -65,36 +66,47 @@ function step001()
 }
 function step002()
 {
-	call 2DNav 63 127
-	call 2DNav -25 144
-	call 2DNav -66 123
-	
+	call waitfor_Zone "Coliseum of Valor"
+	call TestArrivalCoord -94 3 163
+	if (!${Return})
+	{	
+		call 2DNav 0 0
+		call 2DNav -94 163
+	}
 }
 function step003()
 {	
 	call goCoV
-	call 2DNav -94 163
+	call waitfor_Zone "Coliseum of Valor"
 	
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	
 		call TestArrivalCoord -94 3 163
 		if (!${Return})
 			call step002
-		call ActivateVerb "zone_to_poi" -94 3 163 "Enter the Plane of Innovation"
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
+		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
 	}
-	call waitfor_Zone "Plane of Innovation: Gears in the Marvelous [Solo]"
+	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
 		
 	variable string sQN="PoI-GitM_Solo"
 	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN}
+    runscript ${sQN} 
     wait 5
     while ${Script[${sQN}](exists)}
 		wait 5
 	echo zone "${Zone.Name}" Cleared !
 }
-
+function step004()
+{
+	call waitfor_Zone "Coliseum of Valor"
+	wait 50
+		call 2DNav -6 2
+		call ConversetoNPC "${NPCName}" 10 -6 6 2 TRUE
+			
+}
 function goCoV()
 {	
 	if (${Zone.Name.Equal["Plane of Magic"]})

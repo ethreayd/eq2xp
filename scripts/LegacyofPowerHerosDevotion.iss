@@ -6,7 +6,6 @@ function main(string qn, int stepstart, int stepstop)
 {
 	variable int laststep=2
 	questname:Set["${qn}"]
-	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -26,34 +25,54 @@ function step000()
 	call check_quest "${questname}"
 	if (!${Return})
 	{
-		call ConversetoNPC "${NPCName}" 5 58 368 -179 TRUE
+		call MoveTo "${NPCName}"  58 368 -179
+		
+		do
+		{
+			call ConversetoNPC "${NPCName}" 5 58 368 -179 TRUE
+			wait 20
+			call check_quest "${questname}"
+		}
+		while (!${Return})
 	}
+	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	OgreBotAPI:UseItem[${Me.Name},"Totem of the Otter"]
 	call navwrap 34 312 -291
-	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call ActivateVerb "zone_to_pov" -785, 345, 1116 "Enter the Coliseum of Valor"
 } 
 	
 function step001()
 {	
 	call waitfor_Zone "Coliseum of Valor: Hero's Devotion"
-	do
+	eq2execute merc resume
+	
+	call CheckQuestStep 2
+	if (!${Return})
 	{
-		call AutoHunt 200
-		call 2DNav 62 111
-		wait 50
-		call 2DNav 0 0
-		call AutoHunt 200
-		call 2DNav -60 100
-		wait 50
-		call 2DNav 0 0
-		call AutoHunt 200
-		call CheckQuestStep 2
+		do
+		{
+			call AutoHunt 200
+			call 2DNav 62 111
+			wait 50
+			call 2DNav 0 0
+			call AutoHunt 200
+			call 2DNav -60 100
+			wait 50
+			call 2DNav 0 0
+			call AutoHunt 200
+			call CheckQuestStep 2
+		}
+		while (!${Return})
 	}
-	while (!${Return})
 	call StopHunt
 	call 2DNav 0 0
-	call ConversetoNPC "Mithaniel Marr" 5 0 5 0 TRUE
+	do
+	{
+		call ConversetoNPC "Mithaniel Marr" 5 0 5 0 TRUE
+		call isPresent "Mithaniel Marr"
+	}
+	while (${Return})
+	
 }
 
 function step002()
