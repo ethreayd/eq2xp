@@ -14,7 +14,62 @@
 #define ZOOMIN MouseWheelUp
 #define ZOOMOUT MouseWheelDown
 
-function 2DNav(float X, float Z, bool ForceWalk)
+function 2DNav(float X, float Z)
+{
+	variable float loc0 
+	variable int Stucky=0
+	variable bool WasRunning
+	
+	echo Moving on my own to ${X} ${Z}
+	face ${X} ${Z}
+
+	if (${Me.Loc.X}>${X})
+	{
+		Stucky:Set[0]
+		echo "doing X>"
+		press -hold MOVEFORWARD
+		
+		do
+		{	
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			wait 5
+			
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+			}
+			call CheckCombat
+		}
+		while (${Me.Loc.X}>${X} && ${Stucky}<10)
+		press -release MOVEFORWARD
+		eq2execute loc
+	}
+	else
+	{
+		Stucky:Set[0]
+		echo "doing X<"
+	
+		press -hold MOVEFORWARD
+		do
+		{	
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			wait 5
+			
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+			}
+			call CheckCombat
+		}
+		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
+		press -release MOVEFORWARD
+		eq2execute loc
+	}
+	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+}
+function 2DWalk(float X, float Z)
 {
 	variable float loc0 
 	variable int Stucky=0
@@ -34,7 +89,7 @@ function 2DNav(float X, float Z, bool ForceWalk)
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 3
 			call CheckWalking
-			if (${ForceWalk} && !${Return})
+			if (!${Return})
 			{
 				WasRunning:Set[TRUE]
 				press WALK
@@ -61,7 +116,7 @@ function 2DNav(float X, float Z, bool ForceWalk)
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 3
 			call CheckWalking
-			if (${ForceWalk} && !${Return})
+			if (!${Return})
 			{
 				WasRunning:Set[TRUE]
 				press WALK
@@ -77,7 +132,6 @@ function 2DNav(float X, float Z, bool ForceWalk)
 		press -release MOVEFORWARD
 		eq2execute loc
 	}
-
 	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
 	if (!${Return})
 	{
@@ -148,6 +202,27 @@ function Abs(float A)
 	return ${absv}
 }
 
+function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
+{
+	variable string ItemSwap
+	
+	if (!${Me.Effect["${ItemEffectName}"]})
+	{
+		echo Equipping ${ItemName}
+		ItemSwap:Set["${Me.Equipment["${EquipSlot}"]}"]
+		Me.Inventory["${ItemName}"]:Equip
+		wait 20
+		echo Using ${ItemName}
+		Me.Inventory["${ItemName}"]:Use
+		do
+		{
+			waitframe
+		}
+		while ${Me.CastingSpell}
+		wait 20
+		Me.Inventory["${ItemSwap}"]:Equip
+	}
+}
 function ActivateSpecial(string ActorName, float X, float Y, float Z)
 {
 	call TestArrivalCoord  ${X} ${Y} ${Z}
@@ -235,6 +310,7 @@ function AutoHunt(int distance)
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${distance}]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	
 	EQ2:QueryActors[Actors, Type  =- "NPC" && Distance <= ${distance}]
 	Actors:GetIterator[ActorIterator]
@@ -335,7 +411,6 @@ function CheckQuestStep(int step)
 function CheckCombat()
 {
 	OgreBotAPI:NoTarget[${Me.Name}]
-	wait 20
 	if (${Me.InCombatMode})
 	{
 		do
@@ -491,9 +566,9 @@ function DMove(float X, float Y, float Z, int speed)
 				call Go2D ${X} ${Y} ${Z} ${Return}
 			}
 			if (${speed} == 2)
-				call 2DNav ${X} ${Z} TRUE
+				call 2DWalk ${X} ${Z}
 			if (${speed} > 2)
-				call 2DNav ${X} ${Z} FALSE
+				call 2DNav ${X} ${Z}
 			call TestArrivalCoord ${X} ${Y} ${Z}
 		}
 		while (!${Return})
@@ -748,6 +823,7 @@ function IsPresent(string ActorName)
 	else
 		return FALSE
 }
+
 	
 function Move(string ActorName, float X, float Y, float Z)
 {
@@ -913,10 +989,24 @@ function StartQuest(int stepstart, int stepstop, bool noquest)
 	}
 }
 
-function TargetAfterTime(string mytarget, int time)
+function TargetAfterTime(string mytarget, int ntime)
 {
-	wait ${time}
+	wait ${ntime}
 	target ${mytarget}
+}
+
+function AutoPassDoor(string DoorName, float X, float Y, float Z)
+{
+	do
+	{
+		press -hold MOVEFORWARD
+		wait 10
+		press -release MOVEFORWARD
+		call OpenDoor "${DoorName}"
+		wait 10
+		call TestArrivalCoord ${X} ${Y} ${Z} 5 TRUE
+	}
+	while (!${Return})
 }
 
 function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
@@ -1000,6 +1090,7 @@ function waitfor_NPC(string NPCName)
 
 function waitfor_Zone(string ZoneName)
 {
+	echo Zoning to ${ZoneName}, please be patient
 	do
 	{
 		wait 5

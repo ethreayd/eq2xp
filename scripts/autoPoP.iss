@@ -10,6 +10,7 @@ function main(int stepstart, int stepstop)
 	variable string sQN
 	ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
 	ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
+	ScriptsToRun:Insert["Legacy of Power: An Innovative Approach"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
 	

@@ -28,6 +28,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",35]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","slider_autotarget_scanradius",30]
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
@@ -38,10 +39,10 @@ function step000()
 {
 
 	eq2execute merc resume
-
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	wait 20
+	eq2execute merc resume
 	call DMove -59 -10 133 ${speed}
 }
 
@@ -107,10 +108,12 @@ function step003()
 	call DMove 92 3 -119 ${speed}
 	call DMove 95 3 -164 ${speed}
 	
+	eq2execute merc resume
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 	oc !c -Campspot ${Me.Name}
+	Ob_AutoTarget:AddActor["prodding gearlet",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["The Glitched Guardian 10101",0,TRUE,FALSE]
 	
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 80 0 0
@@ -141,14 +144,16 @@ function step004()
 	
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call 2DNav 68 -126
+	call DMove 85 3 -128 3
+	call DMove 68 4 -127 1
 	wait 20
 	call OpenDoor "Junkyard West Door 03"
 	wait 20
 	call 2DNav 51 -129
 	call 2DNav 48 -93
-	call DMove 69 -101 1
-	call 2DNav 70 -90
+	call DMove 58 4 -96 2
+	call DMove 69 4 -101 2
+	call DMove 70 4 -90 1
 	wait 20
 	call OpenDoor "Junkyard West Door 01"
 	wait 20
@@ -165,20 +170,23 @@ function step004()
 	call CheckCombat
 	Me.Inventory["${PrimaryWeapon}"]:Equip
 	target "an erratic clockwork"
-	wait 20
+	wait 50
 	call CheckCombat
 	call IsPresent "an erratic clockwork"
 	if (${Return})
 	{
 		call MoveCloseTo "an erratic clockwork"
+		wait 20
 		ogre qh
+		wait 50
 		Actor[name,"an erratic clockwork"]:DoubleClick
 		wait 30
 		ogre end qh
 	}
 	call StopHunt
-	call 2DNav 180 -67
-	call 2DNav 197 -67
+	call DMove 153 3 -62 3
+	call DMove 177 4 -66 2
+	call DMove 201 -3 -67 1
 	call WaitByPass "Security Sweeper" -30 -80
 	call 2DNav 237 -69
 	call Follow2D "Security Sweeper" 237 -13 -215 30
@@ -188,7 +196,6 @@ function step004()
 	
 function step005()
 {	
-	variable string PrimaryWeapon
 	eq2execute merc resume
 		
 	oc !c -Campspot
@@ -218,13 +225,22 @@ function step006()
 	call OpenDoor "Junkyard West Door 04"
 	call 2DNav 100 -219
 	call DMove 82 10 -210 3
+	call Converse "Meldrath the Marvelous" 32
+	wait 100
+	ogre qh
 	call Converse "Meldrath the Marvelous" 16
-	call 2DNav 92 -245
+	wait 100
+	ogre end qh
+	wait 20
+	call DMove 91 10 -235 3
+	call AutoPassDoor "Junkyard West Door 05" 91 10 -247
+	
 	call DMove 87 3 -265 ${speed}
 	call DMove 44 3 -272 ${speed}
-	call DMove -65 12 -272 ${speed}
-	call DMove -71 12 -277 ${speed}
-	call DMove -99 13 -279 ${speed}
+	call DMove -27 3 -278 ${speed}
+	call DMove -59 17 -282 1
+	call DMove -72 12 -279 1
+	call DMove -97 13 -279 1
 }	
 	
 function step007()
@@ -233,9 +249,9 @@ function step007()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove -112 11 -278 ${speed}
+	call DMove -112 11 -278 1
 	Ob_AutoTarget:AddActor["Gearclaw the Collector",0,TRUE,FALSE]
-	call DMove -135 8 -278 ${speed}
+	call DMove -135 8 -278 1
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	if (!${Me.Archetype.Equal["fighter"]})
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
@@ -249,8 +265,11 @@ function step007()
 	while (${Return})
 	eq2execute summon
 	call StopHunt
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance"
 	OgreBotAPI:Special["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
@@ -267,16 +286,14 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	}
 	if (${Message.Find["need to turn his key"]} > 0)
 	{
-		call MoveCloseTo "${Speaker}"
-		
+		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press FORWARD
+		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press FORWARD
+		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press FORWARD
+		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press FORWARD
-		
+		press MOVEFORWARD
 	}
  }

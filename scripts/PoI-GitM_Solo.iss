@@ -30,6 +30,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",35]
 	
+	echo doing step ${stepstart} to ${stepstop}
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
@@ -149,7 +150,7 @@ function step003()
 	while (${Return})
 	eq2execute summon
 	wait 20	
-	
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 function step004()
@@ -192,6 +193,7 @@ function step004()
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call StopHunt
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 	
 function step005()
@@ -211,8 +213,9 @@ function step005()
 	call OpenDoor "Junkyard East Door 03"
 	call DMove -18 4 -110 3
 	call DMove -17 4 -121 3
-	call DMove 82 10 -210  3
-	call Converse "Meldrath the Marvelous" 16 
+	call DMove -15 4 -126  3
+	call Converse "Meldrath the Marvelous" 12
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 function step006()
@@ -225,7 +228,7 @@ function step006()
 	call StopHunt
 	eq2execute merc resume
 	
-	call DMove 8 4 -121 3
+	call DMove 5 4 -120 3
 	call OpenDoor "Junkyard East Door 02"
 	call DMove 25 4 -122 1
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
@@ -236,7 +239,7 @@ function step006()
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -60
 	
 	Ob_AutoTarget:AddActor["prodding gearlet",0,FALSE,FALSE]
-	
+	Ob_AutoTarget:AddActor["clockwork scanner",0,FALSE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
@@ -249,7 +252,6 @@ function step006()
 	while (!${Return})
 	
 	call PKey "ZOOMOUT" 20	
-	echo Please Kannkor HELP! Don't know how to deal with circles yet :(
 	
 	do
 	{
@@ -265,7 +267,7 @@ function step006()
 	}
 	
 	while (${Return})
-	
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c ${Me.Name} -letsgo
 	
 }	
@@ -284,6 +286,10 @@ function step007()
 	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+	
+	wait 200
+	
+	call CheckCombat
 	
 	call Converse "The Great Gear" 16 TRUE
 	
@@ -341,6 +347,6 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
     if (${Message.Find["gains an electric charge"]} > 0)
 	{
 		target ${Me.Name}
-		call TargetAfterTime "${Speaker}" 200
+		QueueCommand call TargetAfterTime "${Speaker}" 200
 	}
  }

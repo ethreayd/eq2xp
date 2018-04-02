@@ -7,11 +7,12 @@ function main(string qn, int stepstart, int stepstop)
 	variable int laststep=4
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	NPCName:Set["Druzzil Ro"]
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
 	}
+	NPCName:Set["Druzzil Ro"]
+	echo doing step ${stepstart} to ${stepstop}
 	
 	call StartQuest ${stepstart} ${stepstop}
 	
@@ -20,21 +21,20 @@ function main(string qn, int stepstart, int stepstop)
 
 function step000()
 {
-	NPCName:Set["Druzzil Ro"]
+	
 	echo DESCRIPTION : ${questname}
 	echo QUESTGIVER : ${NPCName}
 	
-	
+	call goCoV
 	call check_quest "${questname}"
-	
 	if (!${Return})
 	{
-		call goCoV
+		
 		do
 		{
 			ogre qh
-			call 2DNav -2 4
-			call ConversetoNPC "${NPCName}" 0 -2 6 4 TRUE
+			call DMove -2 5 4 3
+			call Converse "${NPCName}" 1 TRUE
 			wait 100
 			ogre end qh
 			wait 20
@@ -45,8 +45,10 @@ function step000()
 	
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	
-		call 2DNav -94 163
-		call ActivateVerb "zone_to_poi" -94 3 163 "Enter the Plane of Innovation"
+		call DMove -2 5 4 3
+		call DMove -94 3 163 3
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
+		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
 	}
@@ -67,12 +69,8 @@ function step001()
 function step002()
 {
 	call waitfor_Zone "Coliseum of Valor"
-	call TestArrivalCoord -94 3 163
-	if (!${Return})
-	{	
-		call 2DNav 0 0
-		call 2DNav -94 163
-	}
+	call DMove -2 5 4 3
+	call DMove -94 3 163 3
 }
 function step003()
 {	
@@ -81,9 +79,8 @@ function step003()
 	
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	
-		call TestArrivalCoord -94 3 163
-		if (!${Return})
-			call step002
+		call DMove -2 5 4 3
+		call DMove -94 3 163 3
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
 		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
@@ -103,16 +100,17 @@ function step004()
 {
 	call waitfor_Zone "Coliseum of Valor"
 	wait 50
-		call 2DNav -6 2
-		call ConversetoNPC "${NPCName}" 10 -6 6 2 TRUE
+	call DMove -6 6 2 3
+	call Converse "${NPCName}" 10 TRUE
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 			
 }
 function goCoV()
 {	
 	if (${Zone.Name.Equal["Plane of Magic"]})
 		{
-			call ActivateVerb "zone_to_pov" -785, 345, 1116 "Enter the Coliseum of Valor"
+			call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
 			call waitfor_Zone "Coliseum of Valor"
-			call 2DNav -2 4
+			call DMove -2 5 4 3
 		}
 }
