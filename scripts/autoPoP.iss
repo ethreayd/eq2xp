@@ -11,6 +11,7 @@ function main(int stepstart, int stepstop)
 	ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
 	ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
 	ScriptsToRun:Insert["Legacy of Power: An Innovative Approach"]
+	ScriptsToRun:Insert["Legacy of Power: Realm of the Plaguebringer"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
 	

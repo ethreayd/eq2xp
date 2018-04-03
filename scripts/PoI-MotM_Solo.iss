@@ -175,13 +175,18 @@ function step004()
 	call IsPresent "an erratic clockwork"
 	if (${Return})
 	{
+		do
+		{
 		call MoveCloseTo "an erratic clockwork"
 		wait 20
 		ogre qh
 		wait 50
 		Actor[name,"an erratic clockwork"]:DoubleClick
-		wait 30
+		wait 100
 		ogre end qh
+		call IsPresent "an erratic clockwork"
+		}
+		while (${Return})
 	}
 	call StopHunt
 	call DMove 153 3 -62 3

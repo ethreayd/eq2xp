@@ -128,8 +128,13 @@ function step003()
 	call DMove -94 4 -108 ${speed}
 	call DMove -121 3 -93 ${speed}
 	call DMove -128 4 -35 ${speed}
-	call ActivateVerb "Magnetic Ether Compensator" -128 4 -35 "Gather"
-	wait 20
+	do
+	{
+		call ActivateVerb "Magnetic	Ether Compensator" -128 4 -35 "Gather"
+		wait 20
+		call CheckQuestStep 5
+	}
+	while (!${Return})
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call DMove -161 4 -81 2
 	call DMove -175 4 -96 ${speed}
