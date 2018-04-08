@@ -1,5 +1,6 @@
 #include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
 variable(script) int speed
+variable(script) int FightDistance
 
 function main(int stepstart, int stepstop, int setspeed)
 {
@@ -9,9 +10,15 @@ function main(int stepstart, int stepstop, int setspeed)
 	if (${setspeed}==0)
 	{
 		if (${Me.Archetype.Equal["fighter"]})
+		{
 			speed:Set[3]
+			FightDistance:Set[15]
+		}
 		else
 			speed:Set[1]
+		{
+			FightDistance:Set[30]
+		}
 	}
 	else
 		speed:Set[${setspeed}]
@@ -25,10 +32,13 @@ function main(int stepstart, int stepstop, int setspeed)
 	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
 	
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",35]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	
 	echo doing step ${stepstart} to ${stepstop}
 	
@@ -44,9 +54,9 @@ function step000()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	wait 20
-	call DMove 109 -10 142 ${speed}
-	call DMove 116 3 3 ${speed}
-	call DMove 78 3 -42 ${speed}
+	call DMove 109 -10 142 ${speed} ${FightDistance}
+	call DMove 116 3 3 ${speed} ${FightDistance}
+	call DMove 78 3 -42 ${speed} ${FightDistance}
 }
 function step001()
 {
@@ -56,7 +66,7 @@ function step001()
 	if (!${Me.Archetype.Equal["fighter"]})
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
 	
-	call DMove 36 4 -31 ${speed}
+	call DMove 36 4 -31 ${speed} ${FightDistance}
 	wait 100
 	call Hunt "${named}" 50 1 TRUE
 	wait 100
@@ -82,15 +92,15 @@ function step002()
 		
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 113 3 -29 ${speed}
-	call DMove 111 -10 131 ${speed}
-	call DMove -9 -10 144 ${speed}
-	call DMove -66 -10 99 ${speed}
-	call DMove -50 3 25 ${speed}
-	call DMove -31 3 -87 ${speed}
-	call DMove -28 3 -98 ${speed}
+	call DMove 113 3 -29 ${speed} ${FightDistance}
+	call DMove 111 -10 131 ${speed} ${FightDistance}
+	call DMove -9 -10 144 ${speed} ${FightDistance}
+	call DMove -66 -10 99 ${speed} ${FightDistance}
+	call DMove -50 3 25 ${speed} ${FightDistance}
+	call DMove -31 3 -87 ${speed} ${FightDistance}
+	call DMove -28 3 -98 ${speed} ${FightDistance}
 	call OpenDoor "Junkyard East Door 01"
-	call DMove -29 4 -106 ${speed}
+	call DMove -29 4 -106 ${speed} ${FightDistance}
 	if (!${Me.Archetype.Equal["fighter"]})
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
 	wait 20
@@ -98,7 +108,7 @@ function step002()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 
-	call DMove -1 4 -116 ${speed}
+	call DMove -1 4 -116 ${speed} ${FightDistance}
 	
 	do
 	{
@@ -122,28 +132,33 @@ function step003()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 
-	call DMove -44 4 -111 3
+	call DMove -44 4 -111 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 03"
-	call DMove -55 3 -111 3
-	call DMove -94 4 -108 ${speed}
-	call DMove -121 3 -93 ${speed}
-	call DMove -128 4 -35 ${speed}
-	do
+	call DMove -55 3 -111 3 ${FightDistance}
+	call DMove -94 4 -108 ${speed} ${FightDistance}
+	call DMove -121 3 -93 ${speed} ${FightDistance}
+	call DMove -128 4 -35 ${speed} ${FightDistance}
+	
+	call check_quest "Legacy of Power: An Innovative Approach"
+	if (${Return})
 	{
-		call ActivateVerb "Magnetic	Ether Compensator" -128 4 -35 "Gather"
-		wait 20
-		call CheckQuestStep 5
+		do
+		{
+			call ActivateVerb "Magnetic	Ether Compensator" -128 4 -35 "Gather" TRUE
+			wait 20
+			call CheckQuestStep 5
+		}
+		while (!${Return})
 	}
-	while (!${Return})
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call DMove -161 4 -81 2
-	call DMove -175 4 -96 ${speed}
+	call DMove -161 4 -81 2 ${FightDistance}
+	call DMove -175 4 -96 ${speed} ${FightDistance}
 	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove -191 4 -143 ${speed}
-	call DMove -193 4 -184 ${speed}
+	call DMove -191 4 -143 ${speed} ${FightDistance}
+	call DMove -193 4 -184 ${speed} ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 
 	do
@@ -170,21 +185,21 @@ function step004()
 		
 	call StopHunt
 	
-	call DMove -158 4 -198 3
+	call DMove -158 4 -198 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 04"
-	call DMove -149 4 -197 3
-	call DMove -135 4 -198 3
+	call DMove -149 4 -197 3 ${FightDistance}
+	call DMove -135 4 -198 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 05"
-	call DMove -130 4 -199 3
+	call DMove -130 4 -199 3 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove -63 5 -200 3
+	call DMove -63 5 -200 3 ${FightDistance}
 	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 	
-	call DMove -48 4 -186  ${speed}
-	call DMove -19 12 -170  ${speed}	
+	call DMove -48 4 -186 ${speed} ${FightDistance}
+	call DMove -19 12 -170 ${speed}	${FightDistance}
 	
 	do
 	{
@@ -194,7 +209,7 @@ function step004()
 	while (${Return})
 	eq2execute summon
 	
-	call ActivateVerb "Maelin's Talismanic Whirlgurt" -19 12 -170 "Gather"
+	call ActivateVerb "Maelin's Talismanic Whirlgurt" -19 12 -170 "Gather" TRUE
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call StopHunt
@@ -206,19 +221,19 @@ function step005()
 	eq2execute merc resume
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove -130 4 -197 2	
+	call DMove -130 4 -197 2 ${FightDistance}
 	call OpenDoor "Junkyard East Door 05"
-	call DMove -155 4 -196 3	
+	call DMove -155 4 -196 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 04"
-	call DMove -166 4 -196 3	
-	call DMove -188 4 -107 3	
-	call DMove -153 3 -72 3
-	call DMove -74 3 -111 3
-	call DMove -47 4 -111 3
+	call DMove -166 4 -196 3 ${FightDistance}
+	call DMove -188 4 -107 3 ${FightDistance}
+	call DMove -153 3 -72 3 ${FightDistance}
+	call DMove -74 3 -111 3 ${FightDistance}
+	call DMove -47 4 -111 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 03"
-	call DMove -18 4 -110 3
-	call DMove -17 4 -121 3
-	call DMove -15 4 -126  3
+	call DMove -18 4 -110 3 ${FightDistance}
+	call DMove -17 4 -121 3 ${FightDistance}
+	call DMove -15 4 -126 3 ${FightDistance}
 	call Converse "Meldrath the Marvelous" 12
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
@@ -233,11 +248,11 @@ function step006()
 	call StopHunt
 	eq2execute merc resume
 	
-	call DMove 5 4 -120 3
+	call DMove 5 4 -120 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 02"
-	call DMove 25 4 -122 1
+	call DMove 25 4 -122 1 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 26 4 -180 2
+	call DMove 26 4 -180 2 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	
 	oc !c -Campspot
@@ -286,7 +301,7 @@ function step007()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove 25 21 -287 ${speed}
+	call DMove 25 21 -287 ${speed} ${FightDistance}
 	
 	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
@@ -294,7 +309,7 @@ function step007()
 	
 	wait 200
 	
-	call CheckCombat
+	call CheckCombat ${FightDistance}
 	
 	call Converse "The Great Gear" 16 TRUE
 	
@@ -322,27 +337,27 @@ function step007()
 
 function step008()
 {		
-	call DMove 46 4 -191 3
-	call ActivateVerb "Gyro-stabilized Sorcerous Generator" 46 4 -191 "Gather"
+	call DMove 46 4 -191 3 ${FightDistance}
+	call ActivateVerb "Gyro-stabilized Sorcerous Generator" 46 4 -191 "Gather" TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call DMove 26 4 -212 3
-	call DMove 23 4 -123 3
-	call DMove 12 4 -122 1
+	call DMove 26 4 -212 3 ${FightDistance}
+	call DMove 23 4 -123 3 ${FightDistance}
+	call DMove 12 4 -122 1 ${FightDistance}
 	call OpenDoor "Junkyard East Door 02"
-	call DMove 8 4 -121 3
-	call DMove -16 4 -110 3
-	call DMove -16 4 -122 2
+	call DMove 8 4 -121 3 ${FightDistance}
+	call DMove -16 4 -110 3 ${FightDistance}
+	call DMove -16 4 -122 2 ${FightDistance}
 	call Converse "Meldrath the Marvelous" 16 
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 
 }
 function step009()
 {		
-	call DMove 8 4 -121 3
+	call DMove 8 4 -121 3 ${FightDistance}
 	call OpenDoor "Junkyard East Door 02"
-	call DMove 25 4 -122 3
-	call DMove 26 4 -230 3
-	call ActivateVerb "zone_to_valor" 26 4 -230 "Coliseum of Valor"
+	call DMove 25 4 -122 3 ${FightDistance}
+	call DMove 26 4 -230 3 ${FightDistance}
+	call ActivateVerb "zone_to_valor" 26 4 -230 "Coliseum of Valor" TRUE
 	OgreBotAPI:Special["${Me.Name}"]
 }
 

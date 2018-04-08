@@ -232,14 +232,15 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	wait 50
 }
 
-function ActivateVerb(string ActorName, float X, float Y, float Z, string verb)
+function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
 	call TestArrivalCoord  ${X} ${Y} ${Z}
 	if (!${Return})
-		call Move "${ActorName}" ${X} ${Y} ${Z}
+		call Move "${ActorName}" ${X} ${Y} ${Z} ${is2D}
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
+	call CheckCombat
 }
 
 function Ascend(float Y)
@@ -344,6 +345,22 @@ function AutoHunt(int distance)
 		}		
 	}
 }
+
+function AutoPassDoor(string DoorName, float X, float Y, float Z)
+{
+	do
+	{
+		face ${Actor["${DoorName}"].X} ${Actor["${DoorName}"].Z}
+		press -hold MOVEFORWARD
+		wait 10
+		press -release MOVEFORWARD
+		call OpenDoor "${DoorName}"
+		wait 10
+		call TestArrivalCoord ${X} ${Y} ${Z} 8 TRUE
+	}
+	while (!${Return})
+}
+
 	
 function check_quest(string questname)
 {
@@ -408,15 +425,17 @@ function CheckQuestStep(int step)
     }
 }
 
-function CheckCombat()
+function CheckCombat(int MyDistance)
 {
+	if (${MyDistance}<1)
+		MyDistance:Set[30]
 	OgreBotAPI:NoTarget[${Me.Name}]
 	if (${Me.InCombatMode})
 	{
 		do
 		{	
 			wait 5
-			if (${Target.Distance} > 30)
+			if (${Target.Distance} > ${MyDistance})
 				press -hold MOVEFORWARD
 			else
 				press -release MOVEFORWARD
@@ -550,7 +569,7 @@ function CurrentQuestStep()
     }
 }
 
-function DMove(float X, float Y, float Z, int speed)
+function DMove(float X, float Y, float Z, int speed, int MyDistance)
 {
 	eq2execute waypoint ${X}, ${Y}, ${Z}
 	call TestArrivalCoord ${X} ${Y} ${Z}
@@ -559,7 +578,7 @@ function DMove(float X, float Y, float Z, int speed)
 		do
 		{
 			call waitfor_Health 90
-			call CheckCombat
+			call CheckCombat ${MyDistance}
 			if (${speed} < 2)
 			{
 				call Get2DDirection ${X} ${Z}
@@ -802,13 +821,16 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
 	call StopHunt
 }
-function IsPresent(string ActorName)
+function IsPresent(string ActorName, int Distance)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
 	
-	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 200]
+	if (${Distance}<1)
+		Distance:Set[200]
+	
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -825,7 +847,7 @@ function IsPresent(string ActorName)
 }
 
 	
-function Move(string ActorName, float X, float Y, float Z)
+function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
 	if (${Actor["${ActorName}"].Distance} < 20 && ${Actor["${ActorName}"].Distance(exists)})
@@ -834,7 +856,7 @@ function Move(string ActorName, float X, float Y, float Z)
 	{
 			call TestArrivalCoord ${X} ${Y} ${Z}
 			if (!${Return})
-				call MoveTo "${ActorName}" ${X} ${Y} ${Z}
+				call MoveTo "${ActorName}" ${X} ${Y} ${Z} ${is2D} 
 			else
 				echo I am there but does ${ActorName} exist here ?
 	}
@@ -855,27 +877,34 @@ function MoveCloseTo(string ActorName)
 	wait 10
 }
 					
-function MoveTo(string ActorName, float X, float Y, float Z)
+function MoveTo(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	target ${Me.Name}
 	wait 10
-	echo "moving to location ${X} ${Y} ${Z} (${ActorName})"
+	echo "moving to location ${X} ${Y} ${Z} (${ActorName}) 2D=${is2D}"
 	do
 	{
-		call navwrap ${X} ${Y} ${Z}
-		echo ${ActorName} is at ${Actor["${ActorName}"].Distance}m (${Actor["${ActorName}"].X},${Actor["${ActorName}"].Y},${Actor["${ActorName}"].Z})
-		
-		if (${Actor["${ActorName}"].Distance} > 20 && ${Actor["${ActorName}"].Distance(exists)})
+		if (!${is2D})
 		{
-			echo getting closer to ${ActorName} (${Actor["${ActorName}"].Distance})
-			call navwrap ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Y} ${Actor["${ActorName}"].Z}
+			call navwrap ${X} ${Y} ${Z}
+			echo ${ActorName} is at ${Actor["${ActorName}"].Distance}m (${Actor["${ActorName}"].X},${Actor["${ActorName}"].Y},${Actor["${ActorName}"].Z})
+		
+			if (${Actor["${ActorName}"].Distance} > 20 && ${Actor["${ActorName}"].Distance(exists)})
+			{
+				echo getting closer to ${ActorName} (${Actor["${ActorName}"].Distance})
+				call navwrap ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Y} ${Actor["${ActorName}"].Z}
+			}
+			else
+			{
+				call MoveCloseTo ${ActorName}
+			}
+			echo ${ActorName} at ${Actor["${ActorName}"].Distance}m
 		}
 		else
 		{
-			call MoveCloseTo ${ActorName}
+			call DMove ${X} ${Y} ${Z} 2
 		}
-		echo ${ActorName} at ${Actor["${ActorName}"].Distance}m
-	}
+	}	
 	while (${Actor["${ActorName}"].Distance} > 10)
 	OgreBotAPI:NoTarget[${Me.Name}]
 }
@@ -947,6 +976,29 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
+
+function StartQuest(int stepstart, int stepstop, bool noquest)
+{
+	variable string n
+	variable int i
+	
+	if (${stepstart}==0 && !${noquest})
+	{
+		call CurrentQuestStep
+		echo I am at step ${Return}
+		stepstart:Set[${Return}]
+	}
+	if (${stepstart}<=${stepstop})
+	{
+		for ( i:Set[${stepstart} ] ; ${i} <= ${stepstop} ; i:Inc )
+		{
+			n:Set["00${i}"]
+			echo "Starting step${n.Right[3]} to step${stepstop}"
+			call step${n.Right[3]}
+			wait 10
+		}
+	}
+}
 function StopHunt()
 {
 	Ob_AutoTarget:Clear
@@ -967,27 +1019,7 @@ function strip_QN(string questname)
 	return ${sQN}
 }
 
-function StartQuest(int stepstart, int stepstop, bool noquest)
-{
-	variable string n
-	variable int i
-	
-	if (${stepstart}==0 && !${noquest})
-	{
-		call CurrentQuestStep
-		stepstart:Set[${Return}]
-	}
-	if (${stepstart}<=${stepstop})
-	{
-		for ( i:Set[${stepstart} ] ; ${i} <= ${stepstop} ; i:Inc )
-		{
-			n:Set["00${i}"]
-			echo "Starting step${n.Right[3]} to step${stepstop}"
-			call step${n.Right[3]}
-			wait 10
-		}
-	}
-}
+
 
 function TargetAfterTime(string mytarget, int ntime)
 {
@@ -995,19 +1027,7 @@ function TargetAfterTime(string mytarget, int ntime)
 	target ${mytarget}
 }
 
-function AutoPassDoor(string DoorName, float X, float Y, float Z)
-{
-	do
-	{
-		press -hold MOVEFORWARD
-		wait 10
-		press -release MOVEFORWARD
-		call OpenDoor "${DoorName}"
-		wait 10
-		call TestArrivalCoord ${X} ${Y} ${Z} 5 TRUE
-	}
-	while (!${Return})
-}
+
 
 function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
 {
