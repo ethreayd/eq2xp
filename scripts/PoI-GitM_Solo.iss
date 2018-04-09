@@ -296,66 +296,70 @@ function step007()
 {	
 	variable string Named
 	Named:Set["Glitching clockwork"]
-	
-	eq2execute merc resume
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
-	call DMove 25 21 -287 ${speed} ${FightDistance}
-	
-	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
-	
-	wait 200
-	
-	call CheckCombat ${FightDistance}
-	
-	call Converse "The Great Gear" 16 TRUE
-	
-	do
+	call check_quest "Legacy of Power: An Innovative Approach"
+	echo ${Return}
+	if (${Return})
 	{
-		wait 10
-		call IsPresent "${Named}"
+		eq2execute merc resume	
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+		call DMove 25 21 -287 ${speed} ${FightDistance}
+	
+		Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+		wait 200
+		call CheckCombat ${FightDistance}
+		call Converse "The Great Gear" 16 TRUE
+		do
+		{
+			wait 10
+			call IsPresent "${Named}"
+		}
+		while (!${Return})
+		if (!${Me.Archetype.Equal["fighter"]})
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
+		do
+		{
+			wait 10
+			call IsPresent "The Great Gear"
+		}
+		while (${Return})
+	
+		eq2execute summon
+		call StopHunt
 	}
-	while (!${Return})
-	
-	if (!${Me.Archetype.Equal["fighter"]})
-	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
-	
-	do
-	{
-		wait 10
-		call IsPresent "The Great Gear"
-	}
-	while (${Return})
-	
-	
-	eq2execute summon
-	call StopHunt
 }
 
 function step008()
-{		
-	call DMove 46 4 -191 3 ${FightDistance}
-	call ActivateVerb "Gyro-stabilized Sorcerous Generator" 46 4 -191 "Gather" TRUE
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call DMove 26 4 -212 3 ${FightDistance}
-	call DMove 23 4 -123 3 ${FightDistance}
-	call DMove 12 4 -122 1 ${FightDistance}
-	call OpenDoor "Junkyard East Door 02"
-	call DMove 8 4 -121 3 ${FightDistance}
-	call DMove -16 4 -110 3 ${FightDistance}
-	call DMove -16 4 -122 2 ${FightDistance}
-	call Converse "Meldrath the Marvelous" 16 
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-
+{	
+	call check_quest "Legacy of Power: An Innovative Approach"
+	if (${Return})
+	{
+		call DMove 46 4 -191 3 ${FightDistance}
+		call ActivateVerb "Gyro-stabilized Sorcerous Generator" 46 4 -191 "Gather" TRUE
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		call DMove 26 4 -212 3 ${FightDistance}
+		call DMove 23 4 -123 3 ${FightDistance}
+		call DMove 12 4 -122 1 ${FightDistance}
+		call OpenDoor "Junkyard East Door 02"
+		call DMove 8 4 -121 3 ${FightDistance}
+		call DMove -16 4 -110 3 ${FightDistance}
+		call DMove -16 4 -122 2 ${FightDistance}
+		call Converse "Meldrath the Marvelous" 16 
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+	}
 }
 function step009()
-{		
-	call DMove 8 4 -121 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 02"
-	call DMove 25 4 -122 3 ${FightDistance}
+{
+	call check_quest "Legacy of Power: An Innovative Approach"
+	if (${Return})
+	{
+		call DMove 8 4 -121 3 ${FightDistance}
+		call OpenDoor "Junkyard East Door 02"
+		call DMove 25 4 -122 3 ${FightDistance}
+	}
 	call DMove 26 4 -230 3 ${FightDistance}
 	call ActivateVerb "zone_to_valor" 26 4 -230 "Coliseum of Valor" TRUE
 	OgreBotAPI:Special["${Me.Name}"]

@@ -4,6 +4,7 @@ function main(string qn, int stepstart, int stepstop)
 {
 	variable string sQN
 	variable int myTime
+	variable string ToonName
 	call goCoV
 	do
 	{	
@@ -25,7 +26,7 @@ function main(string qn, int stepstart, int stepstop)
 		wait 5
 		while ${Script[${sQN}](exists)}
 			wait 5
-		echo zone "${Zone.Name}" Cleared !
+		echo MotM terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
 		call DMove -2 5 4 3
@@ -42,9 +43,10 @@ function main(string qn, int stepstart, int stepstop)
 		wait 5
 		while ${Script[${sQN}](exists)}
 			wait 5
-		echo zone "${Zone.Name}" Cleared !
+		echo GitM terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		ToonName:Set["${Me.Name}"]
+		echo will now quit and reconnect ${ToonName} in ${Math.Calc[(5400+${MyTime}-${Time.Timestamp})]} seconds
 		eq2execute quit login
 		wait ${Math.Calc[(5400+${MyTime}-${Time.Timestamp})*10]}
 		ogre ${ToonName}

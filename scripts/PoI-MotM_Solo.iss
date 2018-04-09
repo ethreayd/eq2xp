@@ -200,7 +200,7 @@ function step004()
 	call DMove 201 -3 -67 1 ${FightDistance}
 	call WaitByPass "Security Sweeper" -30 -80
 	call 2DNav 237 -69
-	call Follow2D "Security Sweeper" 237 -13 -215 30
+	call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
 	call 2DNav 237 -219
 	call 2DNav 173 -219
 }
@@ -286,7 +286,7 @@ function step007()
 		wait 200
 		OgreBotAPI:Special["${Me.Name}"]
 	}
-	while (!${Zone.Name.Equal["Colisseum of Valor"]})
+	while (!${Zone.Name.Equal["Coliseum of Valor"]})
 }
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
