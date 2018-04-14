@@ -97,7 +97,8 @@ function step003()
 	echo zone "${Zone.Name}" Cleared !
 }
 function step004()
-{
+{	
+	call goCoV
 	call waitfor_Zone "Coliseum of Valor"
 	wait 50
 	call DMove -6 6 2 3

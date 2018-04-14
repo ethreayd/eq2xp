@@ -99,8 +99,7 @@ function step002()
 	call DMove -50 3 25 ${speed} ${FightDistance}
 	call DMove -31 3 -87 ${speed} ${FightDistance}
 	call DMove -28 3 -98 ${speed} ${FightDistance}
-	call OpenDoor "Junkyard East Door 01"
-	call DMove -29 4 -106 ${speed} ${FightDistance}
+	call AutoPassDoor "Junkyard East Door 01" -29 4 -106
 	if (!${Me.Archetype.Equal["fighter"]})
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
 	wait 20
@@ -189,8 +188,7 @@ function step004()
 	call OpenDoor "Junkyard East Door 04"
 	call DMove -149 4 -197 3 ${FightDistance}
 	call DMove -135 4 -198 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 05"
-	call DMove -130 4 -199 3 ${FightDistance}
+	call AutoPassDoor "Junkyard East Door 05" -130 4 -199
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -63 5 -200 3 ${FightDistance}
 	
@@ -255,7 +253,7 @@ function step006()
 	call DMove 26 4 -180 2 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	
-	oc !c -Campspot
+	oc !c -CampSpot ${Me.Name}
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -60
 	
 	Ob_AutoTarget:AddActor["prodding gearlet",0,FALSE,FALSE]

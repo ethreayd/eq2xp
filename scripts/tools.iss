@@ -11,10 +11,10 @@
 #define PAGEUP "Page Up"
 #define PAGEDOWN "Page Down"
 #define WALK shift+r
-#define ZOOMIN MouseWheelUp
-#define ZOOMOUT MouseWheelDown
+#define ZOOMIN "Num +"
+#define ZOOMOUT "Num -"
 
-function 2DNav(float X, float Z)
+function 2DNav(float X, float Z, bool IgnoreFight)
 {
 	variable float loc0 
 	variable int Stucky=0
@@ -39,7 +39,8 @@ function 2DNav(float X, float Z)
 			{
 				Stucky:Inc
 			}
-			call CheckCombat
+			if (!${IgnoreFight})
+				call CheckCombat
 		}
 		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
@@ -61,7 +62,8 @@ function 2DNav(float X, float Z)
 			{
 				Stucky:Inc
 			}
-			call CheckCombat
+			if (!${IgnoreFight})
+				call CheckCombat
 		}
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
@@ -238,9 +240,9 @@ function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, 
 	call TestArrivalCoord  ${X} ${Y} ${Z}
 	if (!${Return})
 		call Move "${ActorName}" ${X} ${Y} ${Z} ${is2D}
+	echo "${Me.Name}" "${verb}" "${ActorName}" now
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
-	call CheckCombat
 }
 
 function Ascend(float Y)
@@ -493,9 +495,9 @@ function Converse(string NPCName, int bubbles, bool giant)
 	{
 		echo ${NPCName} is really a big fellow
 		press CENTER
-		call PKey "MOVEBACKWARD" 5
+		call PKey MOVEBACKWARD 5
 		call PKey "Page Up" 3
-		call PKey "ZOOMOUT" 20		
+		call PKey ZOOMOUT 20		
 	}
 	
 	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
@@ -569,7 +571,7 @@ function CurrentQuestStep()
     }
 }
 
-function DMove(float X, float Y, float Z, int speed, int MyDistance)
+function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight)
 {
 	eq2execute waypoint ${X}, ${Y}, ${Z}
 	call TestArrivalCoord ${X} ${Y} ${Z}
@@ -577,8 +579,11 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance)
 	{
 		do
 		{
-			call waitfor_Health 90
-			call CheckCombat ${MyDistance}
+			if (!${IgnoreFight})
+			{
+				call waitfor_Health 90
+				call CheckCombat ${MyDistance}
+			}
 			if (${speed} < 2)
 			{
 				call Get2DDirection ${X} ${Z}
@@ -587,11 +592,28 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance)
 			if (${speed} == 2)
 				call 2DWalk ${X} ${Z}
 			if (${speed} > 2)
-				call 2DNav ${X} ${Z}
+				call 2DNav ${X} ${Z} ${IgnoreFight}
 			call TestArrivalCoord ${X} ${Y} ${Z}
 		}
 		while (!${Return})
 	}
+}
+function FindLoS(string ActorName, string KeytoPress)
+{
+	do
+	{
+		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+		if (!${Actor["${ActorName}"].CheckCollision})
+		{
+			echo found LoS against ${ActorName}
+		}
+		else
+		{
+			call PKey ${KeytoPress} 5
+		}
+		wait 5
+	}
+	while (${Actor["${ActorName}"].CheckCollision})
 }
 
 function Follow2D(string ActorName,float X, float Y, float Z, float RespectDistance, bool Walk)
@@ -621,6 +643,35 @@ function Get2DDirection(float X, float Z)
 	else
 		return "STRAFELEFT"
 }		
+function GetObject(string ObjectName, string ObjectVerb)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Count=0
+	
+	ObjectName:Set[ActorIterator
+	
+	EQ2:QueryActors[Actors, Name  =- "${ObjectName}" && Distance <= 100]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Count:Inc	
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+	
+	echo "There is ${Count} ${ObjectName}"
+	if ${ActorIterator:First(exists)}
+	{
+		echo get the ${ObjectName} at ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+		call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 30 TRUE
+		face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+		call ActivateVerb "${ObjectName}" ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} "${ObjectVerb}" TRUE
+		
+	}	
+}
 	
 function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb, int quantity)
 {
@@ -634,21 +685,7 @@ function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb,
 		echo Already have ${quantity} ${ActorName} in Inventory
 	}
 }
-function GoDown()
-{
-	echo "Going Down : 5 5 5"
-	if (${Me.FlyingUsingMount})
-	{
-		do
-		{
-			press -hold FLYDOWN
-			wait 5
-		}
-		while (${Me.FlyingUsingMount})
-		press -release FLYDOWN
-	}
-	wait 10
-}
+
 function Go2D(float X, float Y, float Z, string strafe)
 {
 	variable float loc0 
@@ -689,7 +726,21 @@ function Go2D(float X, float Y, float Z, string strafe)
 	}
 	while (!${Return})
 }
-
+function GoDown()
+{
+	echo "Going Down : 5 5 5"
+	if (${Me.FlyingUsingMount})
+	{
+		do
+		{
+			press -hold FLYDOWN
+			wait 5
+		}
+		while (${Me.FlyingUsingMount})
+		press -release FLYDOWN
+	}
+	wait 10
+}
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -762,7 +813,7 @@ function HarvestItem(string ItemName, int number)
 }
 
 
-function Hunt(string ActorName, int distance, int number, bool nofly)
+function Hunt(string ActorName, int distance, int number, bool nofly, bool IgnoreFight)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
@@ -783,17 +834,19 @@ function Hunt(string ActorName, int distance, int number, bool nofly)
 	Ob_AutoTarget:AddActor["${ActorName}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
+	if (!${IgnoreFight})
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	if ${ActorIterator:First(exists)}
 	{
 		do
 		{
-			call waitfor_Health 90
+			if (!${IgnoreFight})
+				call waitfor_Health 90
 			echo ${ActorIterator.Value.Name} found at ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 			if (!${nofly})
 				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 			else
-				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z} ${IgnoreFight}
 		}	
 		while ${ActorIterator:Next(exists)}
 	}

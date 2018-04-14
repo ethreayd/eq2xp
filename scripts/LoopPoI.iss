@@ -3,7 +3,8 @@
 function main(string qn, int stepstart, int stepstop)
 {
 	variable string sQN
-	variable int myTime
+	variable int MyTime
+	
 	variable string ToonName
 	call goCoV
 	do
@@ -11,7 +12,6 @@ function main(string qn, int stepstart, int stepstop)
 		call waitfor_Zone "Coliseum of Valor"
 		call DMove -2 5 4 3
 		call DMove -94 3 163 3
-		myTime:Set[${Time.Timestamp}]
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
 		wait 50		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
@@ -19,7 +19,6 @@ function main(string qn, int stepstart, int stepstop)
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 		call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
-	
 		sQN:Set["PoI-MotM_Solo"]
 		echo will clear zone "${Zone.Name}" Now !
 		runscript ${sQN} 
@@ -36,7 +35,9 @@ function main(string qn, int stepstart, int stepstop)
 		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
+	
 		call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
+		MyTime:Set[${Time.Timestamp}]
 		sQN:Set["PoI-GitM_Solo"]
 		echo will clear zone "${Zone.Name}" Now !
 		runscript ${sQN} 
@@ -46,9 +47,10 @@ function main(string qn, int stepstart, int stepstop)
 		echo GitM terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		ToonName:Set["${Me.Name}"]
-		echo will now quit and reconnect ${ToonName} in ${Math.Calc[(5400+${MyTime}-${Time.Timestamp})]} seconds
+		echo will now quit and reconnect ${ToonName} in ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))]} seconds
 		eq2execute quit login
-		wait ${Math.Calc[(5400+${MyTime}-${Time.Timestamp})*10]}
+		wait ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))*10]}
+		wait 600
 		ogre ${ToonName}
 		wait 600
 	}
