@@ -220,10 +220,8 @@ function step005()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	call DMove -130 4 -197 2 ${FightDistance}
-	call OpenDoor "Junkyard East Door 05"
-	call DMove -155 4 -196 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 04"
-	call DMove -166 4 -196 3 ${FightDistance}
+	call AutoPassDoor "Junkyard East Door 05" -155 4 -196
+	call AutoPassDoor "Junkyard East Door 04" -166 4 -196
 	call DMove -188 4 -107 3 ${FightDistance}
 	call DMove -153 3 -72 3 ${FightDistance}
 	call DMove -74 3 -111 3 ${FightDistance}
@@ -286,7 +284,7 @@ function step006()
 	
 	while (${Return})
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	oc !c ${Me.Name} -letsgo
+	oc !c -letsgo ${Me.Name}
 	
 }	
 	

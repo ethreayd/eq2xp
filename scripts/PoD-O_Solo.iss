@@ -107,6 +107,7 @@ function step001()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	call DMove 508 83 65 ${speed}
 	call ActivateVerb "crypt_6" 508 83 65 "Reach for the crypt" TRUE
 	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -158,7 +159,9 @@ function step003()
 	call DMove 570 72 -62 ${speed} ${FightDistance}
 	call DMove 524 67 -113 ${speed} ${FightDistance}
 	call DMove 495 63 -152 ${speed} ${FightDistance}
-	call DMove 495 63 -152 ${speed} ${FightDistance}
+	call DMove 500 66 -110 ${speed} ${FightDistance}
+	call DMove 509 69 -71 ${speed} ${FightDistance}
+	
 	call DMove 487 63 -187 ${speed} ${FightDistance}
 	call DMove 437 63 -235 ${speed} ${FightDistance}
 	call DMove 366 65 -263 ${speed} ${FightDistance}
@@ -211,7 +214,8 @@ function step005()
 
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+   	
 	call DMove 296 71 -323 3
 	call DMove 308 97 -243 3 
 	call DMove 276 113 -217 3
@@ -238,28 +242,21 @@ function step006()
 	
 	Me.Inventory["Hirudin Extract"]:Use
 	wait 20
-	Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
+	;Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
    
 	call DMove 227 392 10 2
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-   	
-	echo must kill "${Named}"
+   	echo must kill "${Named}"
 	do
 	{
 		wait 10
-		call DMove 216 392 28 3
+		call DMove 185 393 -4 3
 		call IsPresent "${Named}"
 	}
 	while (${Return})
-	do
-	{
-		wait 10
-		call DMove 216 392 28 3
-	}
-	while (${Me.InCombatMode})
-	
+	call StopHunt
 	eq2execute summon
 	wait 300
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -315,23 +312,29 @@ function step008()
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:CastAbility["${Me.Name}","Singular Focus"]
-	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-  
-	call DMove -92 126 -241 ${speed}
 	
+  
+	call DMove -86 127 -285 3
+	oc !c -CampSpot ${Me.Name}
+	
+	oc !c -joustin ${Me.Name}
+	target ${Me.Name}
+	call DMove -101 126 -247 3
+	target ${Named}
+	wait 50
+	oc !c -joustout ${Me.Name}
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	echo must kill "${Named}"
 	do
 	{
-		wait 10
-		call DMove -92 126 -241 3
+		wait 150
 		call IsPresent "${Named}"
 	}
 	while (${Return})
 	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
+	oc !c -letsgo ${Me.Name}
 	eq2execute summon
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -351,13 +354,13 @@ function step009()
 	Me.Inventory["foul-smelling rune"]:Use
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call CheckQuestStep 3
+	call CheckQuestStep 2
 	if (!${Return})
 	{
 		do
 		{
 			call ActivateVerb "foul-smelling rune" -119 129 -256 "Gather"
-			call CheckQuestStep 3
+			call CheckQuestStep 2
 		}
 		while (!${Return})
 	}

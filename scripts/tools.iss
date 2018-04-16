@@ -395,6 +395,26 @@ function check_quest(string questname)
 	return FALSE
 }    
 
+
+
+function CheckCombat(int MyDistance)
+{
+	if (${MyDistance}<1)
+		MyDistance:Set[30]
+	OgreBotAPI:NoTarget[${Me.Name}]
+	if (${Me.InCombatMode})
+	{
+		do
+		{	
+			wait 5
+			if (${Target.Distance} > ${MyDistance})
+				press -hold MOVEFORWARD
+			else
+				press -release MOVEFORWARD
+		}
+		while (${Me.InCombatMode})
+	}
+}
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
@@ -426,26 +446,6 @@ function CheckQuestStep(int step)
 		return FALSE
     }
 }
-
-function CheckCombat(int MyDistance)
-{
-	if (${MyDistance}<1)
-		MyDistance:Set[30]
-	OgreBotAPI:NoTarget[${Me.Name}]
-	if (${Me.InCombatMode})
-	{
-		do
-		{	
-			wait 5
-			if (${Target.Distance} > ${MyDistance})
-				press -hold MOVEFORWARD
-			else
-				press -release MOVEFORWARD
-		}
-		while (${Me.InCombatMode})
-	}
-}
-
 function CheckSwimming()
 {
 	echo trying to not swim anymore
@@ -573,8 +573,16 @@ function CurrentQuestStep()
 
 function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight)
 {
+	variable float loc0
+	variable int Stucky
+	variable bool LR
 	eq2execute waypoint ${X}, ${Y}, ${Z}
-	call TestArrivalCoord ${X} ${Y} ${Z}
+	
+	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+	call TestNullCoord ${X} ${Y} ${Z}
+	if (!${Return})
+		call TestArrivalCoord ${X} ${Y} ${Z}
+	
 	if (!${Return})
 	{
 		do
@@ -593,7 +601,20 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				call 2DWalk ${X} ${Z}
 			if (${speed} > 2)
 				call 2DNav ${X} ${Z} ${IgnoreFight}
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+				echo Stucky=${Stucky}
+			}
+			if (${Stucky}>2)
+			{
+				call Unstuck ${LR}
+				LR:Set[${Return}]
+				Stucky:Set[0]
+			}
 			call TestArrivalCoord ${X} ${Y} ${Z}
+			
 		}
 		while (!${Return})
 	}
@@ -846,7 +867,7 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 			if (!${nofly})
 				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 			else
-				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z} ${IgnoreFight}
+				call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
@@ -1112,6 +1133,32 @@ function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
 		return FALSE
 	}
 }
+
+function TestNullCoord(float X, float Y, float Z)
+{
+	if (${X}==0 && ${Y}==0 && ${Z}==0)
+		return TRUE
+	else
+		return FALSE
+}	
+		
+function Unstuck(bool LR)
+{
+	press -release MOVEFORWARD
+	
+	if (${LR})
+	{
+		echo trying to go left
+		call PKey STRAFELEFT 20
+	}
+	else
+	{
+		echo trying to go right
+		call PKey STRAFERIGHT 20
+	}
+	return !${LR}
+}
+
 
 function WaitByPass(string ActorName, float GLeft, float GRight)
 {

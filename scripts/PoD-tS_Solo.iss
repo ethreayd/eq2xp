@@ -360,10 +360,10 @@ function step007()
 	Named:Set["Bhaly Adan"]
 	eq2execute merc resume
 	call StopHunt
-	;call DMove -2 -517 122 3 30
-	;call DMove 222 -492 125 3 30
-	;call DMove 220 -475 -89 3 30
-	;call DMove 124 -482 -89 ${speed} ${FightDistance}
+	call DMove -2 -517 122 3 30
+	call DMove 222 -492 125 3 30
+	call DMove 220 -475 -89 3 30
+	call DMove 124 -482 -89 ${speed} ${FightDistance}
 	call DMove -5 -473 -89 3 30 TRUE
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	target "${Named}"
