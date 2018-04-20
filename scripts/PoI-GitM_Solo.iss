@@ -99,7 +99,10 @@ function step002()
 	call DMove -50 3 25 ${speed} ${FightDistance}
 	call DMove -31 3 -87 ${speed} ${FightDistance}
 	call DMove -28 3 -98 ${speed} ${FightDistance}
-	call AutoPassDoor "Junkyard East Door 01" -29 4 -106
+	wait 30
+	call DMove -28 3 -98 ${speed} ${FightDistance}
+	
+	call AutoPassDoor "Junkyard East Door 01" -27 3 -112
 	if (!${Me.Archetype.Equal["fighter"]})
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
 	wait 20
@@ -226,8 +229,7 @@ function step005()
 	call DMove -153 3 -72 3 ${FightDistance}
 	call DMove -74 3 -111 3 ${FightDistance}
 	call DMove -47 4 -111 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 03"
-	call DMove -18 4 -110 3 ${FightDistance}
+	call AutoPassDoor "Junkyard East Door 03" -18 4 -110
 	call DMove -17 4 -121 3 ${FightDistance}
 	call DMove -15 4 -126 3 ${FightDistance}
 	call Converse "Meldrath the Marvelous" 12
@@ -243,10 +245,9 @@ function step006()
 	Avoid:Set["Manaetic Missile"]
 	call StopHunt
 	eq2execute merc resume
-	
-	call DMove 5 4 -120 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 02"
-	call DMove 25 4 -122 1 ${FightDistance}
+	call DMove -16 4 -117 3 ${FightDistance}
+	call DMove 5 4 -122 3 ${FightDistance}
+	call AutoPassDoor "Junkyard East Door 02" 25 4 -122
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 26 4 -180 2 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]

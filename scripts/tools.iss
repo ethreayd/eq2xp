@@ -358,6 +358,7 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z)
 		press -release MOVEFORWARD
 		call OpenDoor "${DoorName}"
 		wait 10
+		call 2DNav ${X} ${Z}
 		call TestArrivalCoord ${X} ${Y} ${Z} 8 TRUE
 	}
 	while (!${Return})
@@ -575,10 +576,10 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 {
 	variable float loc0
 	variable int Stucky
+	variable int SuperStucky=0
 	variable bool LR
 	eq2execute waypoint ${X}, ${Y}, ${Z}
 	
-	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 	call TestNullCoord ${X} ${Y} ${Z}
 	if (!${Return})
 		call TestArrivalCoord ${X} ${Y} ${Z}
@@ -587,6 +588,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	{
 		do
 		{
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			if (!${IgnoreFight})
 			{
 				call waitfor_Health 90
@@ -605,7 +607,8 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			if (${Return})
 			{
 				Stucky:Inc
-				echo Stucky=${Stucky}
+				SuperStucky:Inc
+				echo Stucky=${Stucky} / ${SuperStucky}
 			}
 			if (${Stucky}>2)
 			{
@@ -616,7 +619,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			call TestArrivalCoord ${X} ${Y} ${Z}
 			
 		}
-		while (!${Return})
+		while (!${Return} && ${SuperStucky}<100)
 	}
 }
 function FindLoS(string ActorName, string KeytoPress)

@@ -1,6 +1,8 @@
 #include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
+variable(script) bool Detected
+
 
 function main(int stepstart, int stepstop, int setspeed)
 {
@@ -90,16 +92,17 @@ function step002()
 	call DMove 78 3 -42 ${speed} ${FightDistance}
 	call DMove 43 3 -63 ${speed} ${FightDistance}
 	wait 100
-	call Hunt "Clockwork Scrounger XVII" 50 1 TRUE
+	call DMove 33 4 -27 3
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 	wait 100
 	call CheckCombat ${FightDistance}
 	do
 	{
-		eq2execute summon
 		wait 10
 		call IsPresent "Clockwork Scrounger XVII"
 	}
 	while (${Return})
+	eq2execute summon
 }
 
 function step003()
@@ -198,17 +201,60 @@ function step004()
 	call DMove 153 3 -62 3 ${FightDistance}
 	call DMove 177 4 -66 2 ${FightDistance}
 	call DMove 201 -3 -67 1 ${FightDistance}
+	Detected:Set[FALSE]
 	call WaitByPass "Security Sweeper" -30 -80
 	call 2DNav 237 -69
 	call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
-	call 2DNav 237 -219
-	call 2DNav 173 -219
+	if (!${Detected})
+	{
+		call DMove 237 -13 -219 2
+	}
+	if (!${Detected})
+	{
+		call DMove 220 -8 -218 2
+	}
+	if (!${Detected})
+	{
+		call DMove 173 10 -219 3
+	}
 }
 	
 function step005()
 {	
 	eq2execute merc resume
-		
+	if (${Detected})
+	{
+		do
+		{
+			wait 300
+			call DMove 10 -10 151 3
+			call DMove 103 -7 148 3
+			call DMove 128 -5 74 3
+			call DMove 96 4 24 3
+			call DMove 132 3 -40 3
+			call DMove 153 3 -62 3 ${FightDistance}
+			call DMove 177 4 -66 2 ${FightDistance}
+			call DMove 201 -3 -67 1 ${FightDistance}
+			Detected:Set[FALSE]
+			call WaitByPass "Security Sweeper" -30 -80
+			call 2DNav 237 -69
+			call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
+			if (!${Detected})
+			{
+				call DMove 237 -13 -219 2
+			}
+			if (!${Detected})
+			{
+				call DMove 220 -8 -218 2
+			}
+			if (!${Detected})
+			{
+				call DMove 173 10 -219 3
+			}
+		}
+		while (${Detected})
+	}
+	
 	oc !c -Campspot ${Me.Name} 
 	eq2execute gsay Set up for Glitched Cell Keeper
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
@@ -228,8 +274,6 @@ function step005()
 function step006()
 {	
 	eq2execute merc resume	
-	
-	
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 125 10 -219 ${speed} ${FightDistance}
@@ -301,6 +345,12 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 40 0 0
 	}
+	if (${Message.Find["SECURITY BREACH!!!"]} > 0)
+	{
+		Detected:Set[TRUE]
+		echo "Detected in tunnel - restarting"
+	}
+	
 	if (${Message.Find["need to turn his key"]} > 0)
 	{
 		press MOVEFORWARD
