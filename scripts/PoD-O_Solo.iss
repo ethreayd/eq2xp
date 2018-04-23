@@ -6,7 +6,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=9
-	
+	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
 		if (${Me.Archetype.Equal["fighter"]})
@@ -40,6 +40,9 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
 
+	call IsPresent "Felkruk" 500
+	if  (!${Return})
+		stepstart:Set[3]
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -150,6 +153,8 @@ function step003()
 	variable string Named
 	Named:Set["Primordial Malice"]
 	eq2execute merc resume
+	Me.Inventory["Springview Healer Mask"]:Use
+	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
@@ -160,13 +165,12 @@ function step003()
 	call DMove 524 67 -113 ${speed} ${FightDistance}
 	call DMove 495 63 -152 ${speed} ${FightDistance}
 	call DMove 500 66 -110 ${speed} ${FightDistance}
-	call DMove 509 69 -71 ${speed} ${FightDistance}
-	
-	call DMove 487 63 -187 ${speed} ${FightDistance}
-	call DMove 437 63 -235 ${speed} ${FightDistance}
-	call DMove 366 65 -263 ${speed} ${FightDistance}
-	call DMove 328 63 -330 ${speed} ${FightDistance}
-	call DMove 293 71 -323 ${speed} ${FightDistance}
+	call DMove 509 69 -71 ${speed} ${FightDistance} 
+	call DMove 487 63 -187 ${speed} ${FightDistance} 
+	call DMove 437 63 -235 ${speed} ${FightDistance} 
+	call DMove 366 65 -263 ${speed} ${FightDistance} 
+	call DMove 328 63 -330 ${speed} ${FightDistance} 
+	call DMove 293 71 -323 ${speed} ${FightDistance} 
 }
 
 
@@ -210,23 +214,22 @@ function step005()
 	Named:Set["pusling leakers"]
 	eq2execute merc resume
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-
+	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	
-	call DMove 296 71 -323 3
-	call DMove 308 97 -243 3 
-	call DMove 276 113 -217 3
-	call DMove 196 159 -219 3
-	call DMove 147 188 -235 3
-	call DMove 113 218 -199 3
-	call DMove 120 246 -141 3
-	call DMove 257 321 -111 3
-	call DMove 283 338 -84 3
-	call DMove 285 371 -24 3
-	call DMove 250 392 4 3
+	call DMove 296 71 -323 3 ${FightDistance} TRUE
+	call DMove 308 97 -243 3 ${FightDistance} TRUE
+	call DMove 276 113 -217 3 ${FightDistance} TRUE
+	call DMove 196 159 -219 3 ${FightDistance} TRUE
+	call DMove 147 188 -235 3 ${FightDistance} TRUE
+	call DMove 113 218 -199 3 ${FightDistance} TRUE
+	call DMove 120 246 -141 3 ${FightDistance} TRUE
+	call DMove 257 321 -111 3 ${FightDistance} TRUE
+	call DMove 283 338 -84 3 ${FightDistance} TRUE
+	call DMove 285 371 -24 3 ${FightDistance} TRUE
+	call DMove 250 392 4 3 ${FightDistance} TRUE
 
 	eq2execute summon
 	wait 600

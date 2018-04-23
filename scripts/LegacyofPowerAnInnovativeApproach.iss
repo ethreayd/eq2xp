@@ -106,12 +106,3 @@ function step004()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 			
 }
-function goCoV()
-{	
-	if (${Zone.Name.Equal["Plane of Magic"]})
-		{
-			call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
-			call waitfor_Zone "Coliseum of Valor"
-			call DMove -2 5 4 3
-		}
-}

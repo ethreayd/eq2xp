@@ -6,7 +6,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=9
-	
+	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
 		if (${Me.Archetype.Equal["fighter"]})

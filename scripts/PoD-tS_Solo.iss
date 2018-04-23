@@ -7,7 +7,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=7
-	
+	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
 		if (${Me.Archetype.Equal["fighter"]})
@@ -138,6 +138,7 @@ function step002()
 		call IsPresent "${Named}" 500
 		if (!${Return})
 			call step001
+		call IsPresent "${Named}" 500	
 	}
 	while (!${Return})
 	Ob_AutoTarget:Clear
@@ -288,6 +289,7 @@ function step006()
 {
 	variable string Named
 	variable string Nest
+	variable int Counter=0
 	
 	Named:Set["Wavadozzik Adan"]
 	Nest:Set["an arachnae nest"]
@@ -301,39 +303,85 @@ function step006()
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 		target ${Me.Name}
-		call PKey "Page Up" 3
+		call PKey "Page Up" 5
 		call PKey ZOOMOUT 20	
-		call DMove -122 -517 79 3 30 TRUE
+		call DMove -84 -520 163 3 30 TRUE
+		target "${Named}"
+		wait 20
+		do
+		{	
+			target "${Named}"
+			wait 5
+		}
+		while (!${Me.InCombatMode})
+	
+		Counter:Set[0]
 		do
 		{
-			call FindLoS "${Nest}" STRAFELEFT
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			
+			if (${Counter}>5)
+			{
+				call PKey STRAFELEFT 5
+				call PKey MOVEFORWARD 10
+				call DMove -84 -520 163 3 30 TRUE
+				Counter:Set[0]
+			}
 			call IsPresent "${Nest}" 40
 			wait 20
 		}
 		while (${Return})
 		target ${Me.Name}
-		call DMove -119 -517 138 3 30 TRUE
+		call DMove -58 -521 113 3 30 TRUE
+		Counter:Set[0]
 		do
 		{
-			call FindLoS "${Nest}" STRAFELEFT
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			if (${Counter}>5)
+			{
+				call PKey STRAFELEFT 5
+				call PKey MOVEFORWARD 10
+				call DMove -58 -521 113 3 30 TRUE
+				Counter:Set[0]
+			}
 			call IsPresent "${Nest}" 40
 			wait 20
 		}
 		while (${Return})
 		target ${Me.Name}
-		call DMove -36 -517 162 3 30 TRUE
+		call DMove -80 -521 162 3 30 TRUE
+		Counter:Set[0]
 		do
 		{
-			call FindLoS "${Nest}" STRAFELEFT
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			if (${Counter}>5)
+			{
+				call PKey STRAFELEFT 5
+				call PKey MOVEFORWARD 10
+				call DMove -80 -521 162 3 30 TRUE
+				Counter:Set[0]
+			}
 			call IsPresent "${Nest}" 40
 			wait 20
 		}
 		while (${Return})
 		target ${Me.Name}
-		call DMove -34 -517 93 3 30 TRUE
+		call DMove -55 -521 110 3 30 TRUE
+		Counter:Set[0]
 		do
 		{
-			call FindLoS "${Nest}" STRAFELEFT
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			if (${Counter}>5)
+			{
+				call PKey STRAFELEFT 5
+				call PKey MOVEFORWARD 10
+				call DMove -55 -521 110 3 30 TRUE
+				Counter:Set[0]
+			}
 			call IsPresent "${Nest}" 40
 			wait 20
 		}
@@ -364,11 +412,19 @@ function step007()
 	call DMove 222 -492 125 3 30
 	call DMove 220 -475 -89 3 30
 	call DMove 124 -482 -89 ${speed} ${FightDistance}
+	call PKey ZOOMOUT 20	
 	call DMove -5 -473 -89 3 30 TRUE
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	target "${Named}"
 	Ob_AutoTarget:AddActor["Primordial",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	target "${Named}"
+	wait 20
+	do
+	{	
+		target "${Named}"
+		wait 5
+	}
+	while (!${Me.InCombatMode})
 	call AlterGenes
 	echo must kill "${Named}"
 	do
@@ -419,7 +475,10 @@ function FightDarwol()
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	if (!${Return})
+	{
+		call PKey MOVEFORWARD 20
 		QueueCommand call FightDarwol
+	}
 }
 
 function AlterGenes()

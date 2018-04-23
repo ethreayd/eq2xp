@@ -20,40 +20,39 @@ function main()
 		echo Quests recovered
 		
 		call DMove -2 5 4 3
-		call DMove -94 3 163 3
+		call DMove -193 3 0 3
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
 		wait 50		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
-		call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
-		sQN:Set["PoI-MotM_Solo"]
+		call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
+		sQN:Set["PoD-O_Solo"]
 		echo will clear zone "${Zone.Name}" Now !
 		runscript ${sQN} 
 		wait 5
 		while ${Script[${sQN}](exists)}
 			wait 5
-		echo MotM terminated
+		echo Outbreak terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
 		call DMove -2 5 4 3
-		call DMove -94 3 163 3
+		call DMove -193 3 0 3
 		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
-		wait 50
-	
-		call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+		wait 50	
+		call waitfor_Zone "Plane of Disease: the Source [Solo]"
 		MyTime:Set[${Time.Timestamp}]
-		sQN:Set["PoI-GitM_Solo"]
+		sQN:Set["PoD-tS_Solo"]
 		echo will clear zone "${Zone.Name}" Now !
 		runscript ${sQN} 
 		wait 5
 		while ${Script[${sQN}](exists)}
 			wait 5
-		echo GitM terminated 
+		echo the Source terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		ToonName:Set["${Me.Name}"]
 		echo will now quit and reconnect ${ToonName} in ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))]} seconds

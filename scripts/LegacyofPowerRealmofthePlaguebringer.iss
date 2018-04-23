@@ -59,10 +59,6 @@ function step001()
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
-		wait 50
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
-		wait 20
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
 	}
@@ -107,7 +103,7 @@ function step004()
 	call DMove -193 3 0 3
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 	wait 20
-	OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+	OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 	wait 50	
 	call waitfor_Zone "Plane of Disease: the Source [Solo]"
 	
@@ -146,14 +142,4 @@ function step008()
 	call DMove -2 5 4 3
 	call Converse "${NPCName}" 10 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-
-function goCoV()
-{	
-	if (${Zone.Name.Equal["Plane of Magic"]})
-		{
-			call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
-			call waitfor_Zone "Coliseum of Valor"
-			call DMove -2 5 4 3
-		}
 }

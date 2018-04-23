@@ -2,6 +2,7 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	ScriptsToRun:Insert["loopPoD"]
 	ScriptsToRun:Insert["PoD-tS_Solo"]
 	ScriptsToRun:Insert["loopPoI"]
 	ScriptsToRun:Insert["PoD-O_Solo"]

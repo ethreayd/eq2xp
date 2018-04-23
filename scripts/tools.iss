@@ -622,8 +622,10 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 		while (!${Return} && ${SuperStucky}<100)
 	}
 }
-function FindLoS(string ActorName, string KeytoPress)
+function FindLoS(string ActorName, string KeytoPress, int PressTime)
 {
+	if (${PressTime}<5)
+		PressTime:Set[5]
 	do
 	{
 		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
@@ -633,7 +635,7 @@ function FindLoS(string ActorName, string KeytoPress)
 		}
 		else
 		{
-			call PKey ${KeytoPress} 5
+			call PKey ${KeytoPress} ${PressTime}
 		}
 		wait 5
 	}
@@ -715,7 +717,7 @@ function Go2D(float X, float Y, float Z, string strafe)
 	variable float loc0 
 	variable int Stucky
 	variable bool There
-	
+	echo enter function Go2D
 	do
 	{
 		Stucky:Set[0]
@@ -742,13 +744,24 @@ function Go2D(float X, float Y, float Z, string strafe)
 		while (${Stucky}<10 && !${There})
 		if (!${There})
 		{
+			face ${X} ${Z}
 			press -hold ${strafe}
 			wait 5
 			press -release ${strafe}
 		}		
-		call TestArrivalCoord ${X} ${Y} ${Z} 5
+		call TestArrivalCoord ${X} ${Y} ${Z} 10
 	}
 	while (!${Return})
+	echo exit function go2D
+}
+function goCoV()
+{	
+	if (${Zone.Name.Equal["Plane of Magic"]})
+		{
+			call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+			call waitfor_Zone "Coliseum of Valor"
+			call DMove -2 5 4 3
+		}
 }
 function GoDown()
 {

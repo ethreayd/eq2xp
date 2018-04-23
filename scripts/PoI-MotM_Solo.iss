@@ -8,7 +8,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=7
-	
+	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
 		if (${Me.Archetype.Equal["fighter"]})
@@ -69,7 +69,7 @@ function step001()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	
 	call DMove -52 3 6 ${speed} ${FightDistance}
-	call DMove -35 3 -88 ${speed} ${FightDistance}
+	call DMove -36 3 -65 ${speed} ${FightDistance}
 	do
 	{
 		eq2execute summon
@@ -107,6 +107,7 @@ function step002()
 
 function step003()
 {
+	variable int Counter=0
 	eq2execute merc resume
 	
 	call StopHunt
@@ -137,20 +138,23 @@ function step003()
 		call IsPresent "The Glitched Guardian 10101"
 	}
 	while (${Return})
-	oc !c ${Me.Name} -letsgo
+	oc !c -letsgo ${Me.Name}
 	do
 	{
 		eq2execute summon
 		call CountItem "Electro-Charged Clockwork Hand"
 		wait 10
+		Counter:Inc
 	}
-	while (${Return}<1)
+	while (${Return}<1 && ${Counter}<5)
 }
 
 function step004()
 {
-	variable string PrimaryWeapon
 	variable int Counter=0
+	variable float loc0 
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	
 	eq2execute merc resume
 	
 	call StopHunt
@@ -169,22 +173,19 @@ function step004()
 	call DMove 111 3 -30 ${speed} ${FightDistance}
 	call DMove 135 3 -44 ${speed} ${FightDistance}
 		
-
-	PrimaryWeapon:Set["${Me.Equipment[Primary]}"]
-	Me.Inventory["Electro-Charged Clockwork Hand"]:Equip
-	wait 20
-	call OpenDoor "door_hand_lock"
-	wait 20
-	call CheckCombat ${FightDistance}
-	Me.Inventory["${PrimaryWeapon}"]:Equip
+	call OpenChargedDoor
+	ExecuteQueued
 	target "an erratic clockwork"
 	wait 50
+	ExecuteQueued
 	call CheckCombat ${FightDistance}
 	call IsPresent "an erratic clockwork"
+	ExecuteQueued
 	if (${Return})
 	{
 		do
 		{
+		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 		call MoveCloseTo "an erratic clockwork"
 		wait 20
 		ogre qh
@@ -192,6 +193,9 @@ function step004()
 		Actor[name,"an erratic clockwork"]:DoubleClick
 		wait 300
 		ogre end qh
+		call CheckStuck ${loc0}
+		if (${Return})
+			call OpenChargedDoor
 		call IsPresent "an erratic clockwork"
 		Counter:Inc
 		}
@@ -333,9 +337,22 @@ function step007()
 	while (!${Zone.Name.Equal["Coliseum of Valor"]})
 }
 
+function OpenChargedDoor()
+{
+	variable string PrimaryWeapon
+	echo open door with charged hand
+	PrimaryWeapon:Set["${Me.Equipment[Primary]}"]
+	Me.Inventory["Electro-Charged Clockwork Hand"]:Equip
+	wait 20
+	call OpenDoor "door_hand_lock"
+	wait 20
+	call CheckCombat ${FightDistance}
+	Me.Inventory["${PrimaryWeapon}"]:Equip
+}	
+	
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
- {
-	echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
+{
+	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
     if (${Message.Find["begins to overheat"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
@@ -362,5 +379,14 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
 		press MOVEFORWARD
+	}
+}
+ 
+atom HandleAllEvents(string Message)
+ {
+	;echo Catch Event ${Message}
+    if (${Message.Find["must have the Electro-Charged"]} > 0)
+	{
+		QueueCommand call OpenChargedDoor
 	}
  }
