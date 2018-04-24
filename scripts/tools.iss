@@ -31,6 +31,7 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 		
 		do
 		{	
+			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
 			
@@ -41,6 +42,7 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 			}
 			if (!${IgnoreFight})
 				call CheckCombat
+				
 		}
 		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
@@ -53,7 +55,8 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 	
 		press -hold MOVEFORWARD
 		do
-		{	
+		{
+			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
 			
@@ -88,6 +91,7 @@ function 2DWalk(float X, float Z)
 		
 		do
 		{	
+			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 3
 			call CheckWalking
@@ -115,6 +119,7 @@ function 2DWalk(float X, float Z)
 		press -hold MOVEFORWARD
 		do
 		{	
+			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 3
 			call CheckWalking
@@ -146,6 +151,7 @@ function 2DWalk(float X, float Z)
 			press -hold MOVEFORWARD
 			do
 			{	
+				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
 				call CheckStuck ${loc0}
@@ -167,6 +173,7 @@ function 2DWalk(float X, float Z)
 			press -hold MOVEFORWARD
 			do
 			{	
+				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
 				call CheckStuck ${loc0}
@@ -234,7 +241,7 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	wait 50
 }
 
-function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D)
+function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
 	call TestArrivalCoord  ${X} ${Y} ${Z}
@@ -243,6 +250,55 @@ function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, 
 	echo "${Me.Name}" "${verb}" "${ActorName}" now
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
+	if (${triggerFight} && ${is2D})
+	{
+		wait 50
+		call waitfor_Combat
+		call DMove ${X} ${Y} ${Z} 3
+	}
+}
+
+function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Precision)
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+    variable bool Found
+	variable bool Hit
+    EQ2:QueryActors[Actors]
+    Actors:GetIterator[ActorIterator]
+	if (${Precision}<1)
+		Precision:Set[10]
+    if ${ActorIterator:First(exists)}
+    {       
+		do
+		{
+			if (${ActorIterator.Value.Name.Equal[""]})
+				{
+					echo Found an empty Actor (ID:${ActorIterator.Value.ID}) at ${ActorIterator.Value.Distance} m
+					Found:Set[TRUE]
+				}
+		}
+        while (${ActorIterator:Next(exists)} && !${Found})
+	}	
+	echo Looking to ${verb} on Phantom Actor at ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
+	call TestArrivalCoord  ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+	if (!${Return})
+	{       
+		do
+		{
+			face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+			if  (${ActorIterator.Value.Distance}> ${RespectDistance})
+				call PKey MOVEFORWARD 1
+			call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+			if (${ActorIterator.Value.X}==0 && ${ActorIterator.Value.Y}==0 && ${ActorIterator.Value.Z}==0)
+				Hit:Set[TRUE]
+		}	
+		while (!${Return} && !${Hit})
+	}
+	face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+	echo "${Me.Name}" "${verb}" on ID ${ActorIterator.Value.ID} now
+	eq2execute apply_verb ${ActorIterator.Value.ID} "${verb}"
+	wait 20
 }
 
 function Ascend(float Y)
@@ -911,6 +967,35 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
 	call StopHunt
 }
+function isGroupAlive()
+{
+	variable int Counter=0
+
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].IsDead})
+			Counter:Inc
+	}	
+	if (${Counter}>0)
+		return FALSE
+	else
+		return TRUE
+}
+function isGroupDead()
+{
+	variable int Counter=0
+
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].IsDead})
+			Counter:Inc
+	}	
+	if (${Me.GroupCount}==${Counter})
+		return TRUE
+	else
+		return FALSE
+}
+
 function IsPresent(string ActorName, int Distance)
 {
 	variable index:actor Actors
@@ -940,7 +1025,7 @@ function IsPresent(string ActorName, int Distance)
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
-	if (${Actor["${ActorName}"].Distance} < 20 && ${Actor["${ActorName}"].Distance(exists)})
+	if (${Actor["${ActorName}"].Distance} < 20 && ${Actor["${ActorName}"].Distance(exists)} && !${Actor["${ActorName}"].CheckCollision})
 		call MoveCloseTo "${ActorName}"
 	else
 	{
@@ -955,14 +1040,23 @@ function Move(string ActorName, float X, float Y, float Z, bool is2D)
 
 function MoveCloseTo(string ActorName)
 {
+	variable float loc0=0
+	variable int Stucky=0
+	
 	echo Moving closer to ${Actor["${ActorName}"].Name}
 	face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 	press -hold MOVEFORWARD
 	do
 	{
 		wait 1
+		call CheckStuck ${loc0}
+		if (${Return})
+			Stucky:Inc
+		else
+			Stucky:Set[0]
 	}
-	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)})
+	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
 	press -release MOVEFORWARD
 	wait 10
 }
@@ -1067,6 +1161,19 @@ function PKey(string KName, int ntime)
 	press -release "${KName}"
 }
 
+function RunZone()
+{
+	variable string sQN
+	call strip_QN "${Zone.Name}"
+	sQN:Set[${Return}]
+	echo will clear zone "${Zone.Name}" Now !
+    runscript ${sQN}
+    wait 5
+    while ${Script[${sQN}](exists)}
+		wait 5
+	echo zone "${Zone.Name}" Cleared !
+}
+
 function StartQuest(int stepstart, int stepstop, bool noquest)
 {
 	variable string n
@@ -1096,12 +1203,15 @@ function StopHunt()
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
+	oc !c -letsgo ${Me.Name}
 }
 function strip_QN(string questname)
 {
 	variable string sQN
 	echo IN:${questname}
-	sQN:Set[${questname.Replace[",",""]}]
+	sQN:Set[${questname.Replace["\]","_"]}]
+	sQN:Set[${sQN.Replace["\[","_"]}]
+	sQN:Set[${sQN.Replace[",",""]}]
 	sQN:Set[${sQN.Replace[":",""]}]
 	sQN:Set[${sQN.Replace["'",""]}]
 	sQN:Set[${sQN.Replace[" ",""]}]
@@ -1165,12 +1275,12 @@ function Unstuck(bool LR)
 	if (${LR})
 	{
 		echo trying to go left
-		call PKey STRAFELEFT 20
+		call PKey STRAFELEFT 5
 	}
 	else
 	{
 		echo trying to go right
-		call PKey STRAFERIGHT 20
+		call PKey STRAFERIGHT 5
 	}
 	return !${LR}
 }
@@ -1202,7 +1312,15 @@ function WaitByPass(string ActorName, float GLeft, float GRight)
 	}		
 }
 
-
+function waitfor_Combat()
+{
+	wait 50
+	do
+	{
+		wait 5
+	} 
+	while (${Me.InCombatMode})
+}
 
 function waitfor_Health(int health)
 {

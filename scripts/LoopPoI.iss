@@ -28,12 +28,7 @@ function main()
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 		call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
-		sQN:Set["PoI-MotM_Solo"]
-		echo will clear zone "${Zone.Name}" Now !
-		runscript ${sQN} 
-		wait 5
-		while ${Script[${sQN}](exists)}
-			wait 5
+		call RunZone
 		echo MotM terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -47,12 +42,7 @@ function main()
 	
 		call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
 		MyTime:Set[${Time.Timestamp}]
-		sQN:Set["PoI-GitM_Solo"]
-		echo will clear zone "${Zone.Name}" Now !
-		runscript ${sQN} 
-		wait 5
-		while ${Script[${sQN}](exists)}
-			wait 5
+		call RunZone
 		echo GitM terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		ToonName:Set["${Me.Name}"]

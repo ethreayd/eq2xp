@@ -4,6 +4,7 @@ function main(string Loop)
 {
 	variable string ToonName
 	ToonName:Set[${Me.Name}]
+	call StopHunt
 	OgreBotAPI:Revive[${Me.Name}]
 	wait 300
 	call goto_GH

@@ -28,12 +28,7 @@ function main()
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 		call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
-		sQN:Set["PoD-O_Solo"]
-		echo will clear zone "${Zone.Name}" Now !
-		runscript ${sQN} 
-		wait 5
-		while ${Script[${sQN}](exists)}
-			wait 5
+		call RunZone
 		echo Outbreak terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -46,12 +41,7 @@ function main()
 		wait 50	
 		call waitfor_Zone "Plane of Disease: the Source [Solo]"
 		MyTime:Set[${Time.Timestamp}]
-		sQN:Set["PoD-tS_Solo"]
-		echo will clear zone "${Zone.Name}" Now !
-		runscript ${sQN} 
-		wait 5
-		while ${Script[${sQN}](exists)}
-			wait 5
+		call RunZone
 		echo the Source terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		ToonName:Set["${Me.Name}"]

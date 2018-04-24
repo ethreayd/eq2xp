@@ -1,11 +1,14 @@
 #include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+
 variable(script) int speed
 variable(script) int FightDistance
+variable(script) string ThisScript
 
 function main(int stepstart, int stepstop, int setspeed)
 {
-
 	variable int laststep=9
+	call strip_QN "${Zone.Name}"
+	ThisScript:Set[${Return}]
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
@@ -31,6 +34,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	echo zone is ${Zone.Name}
 	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -40,9 +44,34 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
 
-	call IsPresent "Felkruk" 500
-	if  (!${Return})
-		stepstart:Set[3]
+	
+	if (${stepstart}==0)
+	{
+		;Trying to auto start at the right step
+		call IsPresent "Felkruk" 500
+		if  (!${Return})
+		{
+			echo "No Felkruk detected"
+			Me.Inventory["Springview Healer Mask"]:Use
+			stepstart:Set[3]
+			call IsPresent "The Carrion Larva" 500
+			if  (!${Return})
+			{
+				echo "No Carrion detected"
+				Me.Inventory["Hirudin Extract"]:Use
+				call DMove 526 63 -92 3 ${FightDistance}
+				stepstart:Set[5]
+				call IsPresent "The Flesh Eater"
+				if  (!${Return})
+				{
+					echo "No Flesh Eater either"
+					call DMove 304 71 -330 3 ${FightDistance}
+					stepstart:Set[7]	
+				}
+			}
+		}
+	}
+	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -55,11 +84,13 @@ function step000()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	wait 20
 	eq2execute merc resume
-	call DMove 568 82 27 ${speed}
+	call DMove 545 83 43 3
+	call DMove 568 82 27 3
 	call StopHunt
 	call Converse "Velya" 9
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 532 82 35 ${speed}
+	call DMove 562 83 39 3
+	call DMove 532 82 35 3
 	call StopHunt
 	call Converse "Felkruk" 16
 }
@@ -71,47 +102,37 @@ function step001()
 	eq2execute merc resume
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call ActivateVerb "crypt_1" 553 83 65 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_2" 573 83 52 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_3" 573 83 37 "Reach for the crypt" TRUE
-	call DMove 566 83 46 ${speed}
-	call ActivateVerb "crypt_4" 561 83 29 "Reach for the crypt" TRUE
-	call DMove 558 83 38 ${speed}
-	call ActivateVerb "crypt_5" 553 83 30 "Reach for the crypt" TRUE
-	call DMove 553 83 43 ${speed}
-	call DMove 527 83 40 ${speed}
-	call ActivateVerb "crypt_11" 539 77 7 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_12" 542 73 -11 "Reach for the crypt" TRUE
-	call DMove 533 72 -17 ${speed}
-	call ActivateVerb "crypt_13" 543 70 -32 "Reach for the crypt" TRUE
-	call DMove 529 71 -21 ${speed}
-	call ActivateVerb "crypt_14" 542 68 -45 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_15" 537 68 -49 "Reach for the crypt" TRUE
-	call DMove 541 68 -44 ${speed}
-	call DMove 532 68 -47 ${speed}
-	call ActivateVerb "crypt_20" 520 68 -49 "Reach for the crypt" TRUE
-	call DMove 527 68 -36 ${speed}
-	call ActivateVerb "crypt_19" 514 68 -44 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_18" 516 70 -31 "Reach for the crypt" TRUE
-	call DMove 524 70 -34 ${speed}
-	call ActivateVerb "crypt_17" 519 73 -14 "Reach for the crypt" TRUE
-	call ActivateVerb "crypt_16" 521 77 5 "Reach for the crypt" TRUE
-	call DMove 523 83 41 ${speed}
-	call ActivateVerb "crypt_10" 510 83 32 "Reach for the crypt" TRUE
-	call DMove 510 83 41 ${speed}
-	call ActivateVerb "crypt_9" 500 83 32 "Reach for the crypt" TRUE
-	call DMove 508 83 39 ${speed}
-	call ActivateVerb "crypt_8" 486 83 39 "Reach for the crypt" TRUE
-	call DMove 495 83 44 ${speed}
-	call ActivateVerb "crypt_7" 486 83 49 "Reach for the crypt" TRUE
-	call DMove 491 83 43 ${speed}
-	
+	call ActivateVerb "crypt_1" 548 83 61 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_2" 569 83 55 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_3" 571 83 37 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_4" 564 83 34 "Reach for the crypt" TRUE TRUE
+	call DMove 564 83 37 1
+	call ActivateVerb "crypt_5" 552 83 34 "Reach for the crypt" TRUE TRUE
+	call DMove 535 83 40 3
+	call ActivateVerb "crypt_11" 535 76 7 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_16" 524 77 6 "Reach for the crypt" TRUE TRUE
+	call DMove 530 75 1 3
+	call ActivateVerb "crypt_12" 538 73 -11 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_17" 524 73 -13 "Reach for the crypt" TRUE TRUE
+	call DMove 530 70 -24 3
+	call ActivateVerb "crypt_13" 539 70 -30 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_18" 521 70 -30 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_15" 537 68 -46 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_19" 518 68 -47 "Reach for the crypt" TRUE TRUE
+	call DMove 530 67 -50 3
+	call DMove 530 83 44 3
+	call ActivateVerb "crypt_10" 508 83 36 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_9" 499 83 34 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_8" 489 83 41 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_7" 487 83 48 "Reach for the crypt" TRUE TRUE
+		
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	call DMove 508 83 65 ${speed}
-	call ActivateVerb "crypt_6" 508 83 65 "Reach for the crypt" TRUE
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	call ActivateVerb "crypt_6" 510 83 63 "Reach for the crypt" TRUE TRUE
 	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -131,7 +152,7 @@ function step002()
 	call DMove 533 82 34 ${speed} ${FightDistance}
 	call DMove 534 68 -43 ${speed} ${FightDistance}
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	echo must kill "${Named}"
 	do
 	{
@@ -157,7 +178,7 @@ function step003()
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	
 	call DMove 531 83 53 ${speed} ${FightDistance}
 	call DMove 524 67 -113 ${speed} ${FightDistance}
@@ -190,7 +211,7 @@ function step004()
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["Malarian Larva",0,TRUE,FALSE]
 	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	call DMove 125 72 -363 ${speed} ${FightDistance}
 	
 	echo must kill "${Named}"
@@ -206,6 +227,7 @@ function step004()
 	Me.Inventory["Hirudin Extract"]:Use
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call DMove 296 71 -323 3 ${FightDistance} TRUE
 }
 
 function step005()
@@ -215,11 +237,11 @@ function step005()
 	eq2execute merc resume
 	call StopHunt
 	
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	
-	call DMove 296 71 -323 3 ${FightDistance} TRUE
+	
 	call DMove 308 97 -243 3 ${FightDistance} TRUE
 	call DMove 276 113 -217 3 ${FightDistance} TRUE
 	call DMove 196 159 -219 3 ${FightDistance} TRUE
@@ -252,13 +274,16 @@ function step006()
 	call DMove 227 392 10 2
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	echo must kill "${Named}"
+	call DMove 193 394 -4 3
+	oc !c -CampSpot ${Me.Name}
+	oc !c -joustin ${Me.Name}
 	do
 	{
 		wait 10
-		call DMove 185 393 -4 3
 		call IsPresent "${Named}"
 	}
 	while (${Return})
+	oc !c -letsgo ${Me.Name}
 	call StopHunt
 	eq2execute summon
 	wait 300
@@ -266,6 +291,14 @@ function step006()
 	eq2execute summon
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	call DMove 291 360 -41 3 ${FightDistance}
+	call DMove 276 333 -102 3 ${FightDistance}
+	call DMove 131 252 -131 3 ${FightDistance}
+	call DMove 107 226 -190 3 ${FightDistance}
+	call DMove 165 181 -238 3 ${FightDistance}
+	call DMove 271 118 -205 3 ${FightDistance}
+	call DMove 304 71 -330 3 ${FightDistance}
 }
 	
 function step007()
@@ -275,24 +308,20 @@ function step007()
 	eq2execute merc resume	
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 291 360 -41 3 ${FightDistance}
-	call DMove 276 333 -102 3 ${FightDistance}
-	call DMove 131 252 -131 3 ${FightDistance}
-	call DMove 107 226 -190 3 ${FightDistance}
-	call DMove 165 181 -238 3 ${FightDistance}
-	call DMove 271 118 -205 3 ${FightDistance}
-	call DMove 304 71 -330 3 ${FightDistance}
+	
 	call DMove 130 73 -354 3 ${FightDistance}
 	call DMove 65 75 -307 3 ${FightDistance}
 	
 	Ob_AutoTarget:AddActor["squire",5,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    		
 	call DMove 35 94 -228 ${speed} ${FightDistance}
 	call DMove 12 97 -191 ${speed} ${FightDistance}
+	oc !c -CampSpot ${Me.Name}
+	oc !c -joustin ${Me.Name}
 	echo must kill "${Named}"
 	do
 	{
@@ -300,6 +329,7 @@ function step007()
 		call IsPresent "${Named}"
 	}
 	while (${Return})
+	oc !c -letsgo ${Me.Name}
 	eq2execute summon
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -316,19 +346,75 @@ function step008()
 	call StopHunt
 	OgreBotAPI:CastAbility["${Me.Name}","Singular Focus"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	
-	
-  
 	call DMove -86 127 -285 3
-	oc !c -CampSpot ${Me.Name}
+	call DMove -52 126 -279 3
 	
+	do
+	{
+		call ActivateVerbOnPhantomActor Grab 1 5
+		call ActivateVerbOnPhantomActor Grab 1 5
+		call DMove -52 126 -279 3
+		call CountItem "Bileburn Spore"
+	}
+	while (${Return}<6)
+	echo got all spores
+	call DMove -92 126 -293 3
+	oc !c -CampSpot ${Me.Name}
 	oc !c -joustin ${Me.Name}
+	OgreBotAPI:Pause["${Me.Name}"]
 	target ${Me.Name}
-	call DMove -101 126 -247 3
-	target ${Named}
-	wait 50
+	face "${Named}"
+	echo cooling plagues
+	if (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
+	{
+		do
+		{
+			call PKey MOVEFORWARD 1
+		}
+	
+	while (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
+	} 
+	target "a patron of plagues"
+	wait 20
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	press Tab
+	wait 20
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	press Tab
+	wait 20
+	call PKey MOVEFORWARD 2
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	press Tab
+	wait 20
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	press Tab
+	wait 20
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	target "${Named}"
+	OgreBotAPI:Resume["${Me.Name}"]
+	wait 20
 	oc !c -joustout ${Me.Name}
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	echo must kill "${Named}"
 	do
 	{
@@ -357,27 +443,73 @@ function step009()
 	Me.Inventory["foul-smelling rune"]:Use
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call CheckQuestStep 2
-	if (!${Return})
+	call check_quest "Legacy of Power: Realm of the Plaguebringer"
+	if (${Return})
 	{
-		do
+		call CheckQuestStep 2
+		if (!${Return})
 		{
-			call ActivateVerb "foul-smelling rune" -119 129 -256 "Gather"
-			call CheckQuestStep 2
+			do
+			{
+				call ActivateVerb "foul-smelling rune" -119 129 -256 "Gather"
+				call CheckQuestStep 2
+			}
+			while (!${Return})
 		}
-		while (!${Return})
 	}
-		
-		call ActivateVerb "zone_to_valor" -176 129 -270 "Coliseum of Valor" TRUE
-		OgreBotAPI:Special["${Me.Name}"]
+	call ActivateVerb "zone_to_valor" -176 129 -270 "Coliseum of Valor" TRUE
+	OgreBotAPI:Special["${Me.Name}"]
 }
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
- {
-	echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
+{
+	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
     if (${Message.Find["begins to overheat"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
-	
 	}
- }
+	if (${Message.Find["begins to overheat"]} > 0)
+	{
+		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
+	}
+	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+	{
+		echo "I am dead"
+		run livedierepeat ${ThisScript}
+	}
+}
+
+atom HandleAllEvents(string Message)
+{
+	;echo Catch Event ${Message}
+	if (${Message.Find["stumbled into a giant latcher"]} > 0)
+	{
+		echo "Shit!"
+		tsrget "pusling leakers"
+	}
+	if (${Message.Find["Puslings leak out from the giant"]} > 0)
+	{
+		echo "Shit!!"
+		oc !c -CampSpot ${Me.Name}
+		oc !c -joustin ${Me.Name}
+		tsrget "pusling leakers"
+	}
+	if (${Message.Find["a giant latcher latches onto you"]} > 0)
+	{
+		echo "Shit!!!"
+		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -100 0 0
+	}
+	if (${Message.Find["The giant latcher recedes back into"]} > 0)
+	{
+		echo "Pfew!!!!"
+		oc !c -letsgo ${Me.Name}
+	}
+	if (${Message.Find["Planar static increases"]} > 0)
+	{
+		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -40
+	}
+	if (${Message.Find["power is even more potent"]} > 0)
+	{
+		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 40
+	}
+}

@@ -188,6 +188,9 @@ function step004()
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 		call MoveCloseTo "an erratic clockwork"
 		wait 20
+		call IsPresent "door_hand_lock" 5
+		if (${Return})
+			call OpenChargedDoor
 		ogre qh
 		wait 50
 		Actor[name,"an erratic clockwork"]:DoubleClick
@@ -344,7 +347,7 @@ function OpenChargedDoor()
 	PrimaryWeapon:Set["${Me.Equipment[Primary]}"]
 	Me.Inventory["Electro-Charged Clockwork Hand"]:Equip
 	wait 20
-	call OpenDoor "door_hand_lock"
+	call AutoPassDoor "door_hand_lock" 145 3 -55
 	wait 20
 	call CheckCombat ${FightDistance}
 	Me.Inventory["${PrimaryWeapon}"]:Equip
@@ -356,11 +359,14 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
     if (${Message.Find["begins to overheat"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
+		eq2execute merc backoff
 	
 	}
 	if (${Message.Find["engaging hostile entities"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 40 0 0
+		target "The Glitched Guardian 10101"
+		eq2execute merc ranged
 	}
 	if (${Message.Find["SECURITY BREACH!!!"]} > 0)
 	{
@@ -379,6 +385,14 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		press MOVEFORWARD
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
 		press MOVEFORWARD
+	}
+	if (${Message.Find["has killed you"]} > 0)
+	{
+		echo "I am dead"
+	}
+	if (${Message.Find["you have died"]} > 0)
+	{
+		echo "I am so dead"
 	}
 }
  

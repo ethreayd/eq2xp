@@ -52,19 +52,12 @@ function step000()
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
 		wait 50
 	}
-	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
 } 
 	
 function step001()
 {	
-	variable string sQN="PoI-MotM_Solo"
-	
-	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN}
-    wait 5
-    while ${Script[${sQN}](exists)}
-		wait 5
-	echo zone "${Zone.Name}" Cleared !
+	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
+	call RunZone
 }
 function step002()
 {
@@ -87,14 +80,7 @@ function step003()
 		wait 50
 	}
 	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
-		
-	variable string sQN="PoI-GitM_Solo"
-	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN} 
-    wait 5
-    while ${Script[${sQN}](exists)}
-		wait 5
-	echo zone "${Zone.Name}" Cleared !
+	call RunZone	
 }
 function step004()
 {	
