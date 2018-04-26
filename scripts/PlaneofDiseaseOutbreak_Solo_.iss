@@ -2,13 +2,11 @@
 
 variable(script) int speed
 variable(script) int FightDistance
-variable(script) string ThisScript
 
 function main(int stepstart, int stepstop, int setspeed)
 {
 	variable int laststep=9
-	call strip_QN "${Zone.Name}"
-	ThisScript:Set[${Return}]
+	
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
@@ -61,13 +59,6 @@ function main(int stepstart, int stepstop, int setspeed)
 				Me.Inventory["Hirudin Extract"]:Use
 				call DMove 526 63 -92 3 ${FightDistance}
 				stepstart:Set[5]
-				call IsPresent "The Flesh Eater"
-				if  (!${Return})
-				{
-					echo "No Flesh Eater either"
-					call DMove 304 71 -330 3 ${FightDistance}
-					stepstart:Set[7]	
-				}
 			}
 		}
 	}
@@ -233,7 +224,7 @@ function step004()
 function step005()
 {
 	variable string Named
-	Named:Set["pusling leakers"]
+	Named:Set["pusling leaker"]
 	eq2execute merc resume
 	call StopHunt
 	
@@ -244,6 +235,9 @@ function step005()
 	
 	call DMove 308 97 -243 3 ${FightDistance} TRUE
 	call DMove 276 113 -217 3 ${FightDistance} TRUE
+	call DMove 271 176 -146 3 ${FightDistance} TRUE
+	wait 100
+	call CheckCombat
 	call DMove 196 159 -219 3 ${FightDistance} TRUE
 	call DMove 147 188 -235 3 ${FightDistance} TRUE
 	call DMove 113 218 -199 3 ${FightDistance} TRUE
@@ -371,9 +365,9 @@ function step008()
 		{
 			call PKey MOVEFORWARD 1
 		}
-	
-	while (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
+		while (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
 	} 
+	face "${Named}"
 	target "a patron of plagues"
 	wait 20
 	if (${Target.IsAggro})
@@ -381,6 +375,7 @@ function step008()
 		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
 		wait 20
 	}
+	face "${Named}"
 	press Tab
 	wait 20
 	if (${Target.IsAggro})
@@ -390,12 +385,14 @@ function step008()
 	}
 	press Tab
 	wait 20
+	face "${Named}"
 	call PKey MOVEFORWARD 2
 	if (${Target.IsAggro})
 	{
 		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
 		wait 20
 	}
+	face "${Named}"
 	press Tab
 	wait 20
 	if (${Target.IsAggro})
@@ -404,18 +401,24 @@ function step008()
 		wait 20
 	}
 	press Tab
+	face "${Named}"
+	call PKey MOVEFORWARD 2
 	wait 20
 	if (${Target.IsAggro})
 	{
 		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
 		wait 20
 	}
+	face "${Named}"
 	target "${Named}"
 	OgreBotAPI:Resume["${Me.Name}"]
-	wait 20
+	wait 40
 	oc !c -joustout ${Me.Name}
+	eq2execute merc backoff
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	echo must kill "${Named}"
+	wait 150
+	eq2execute merc ranged
 	do
 	{
 		wait 150
@@ -472,11 +475,6 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
 	}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
-	{
-		echo "I am dead"
-		run livedierepeat ${ThisScript}
-	}
 }
 
 atom HandleAllEvents(string Message)
@@ -485,14 +483,14 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["stumbled into a giant latcher"]} > 0)
 	{
 		echo "Shit!"
-		tsrget "pusling leakers"
+		target "pusling leaker"
 	}
 	if (${Message.Find["Puslings leak out from the giant"]} > 0)
 	{
 		echo "Shit!!"
 		oc !c -CampSpot ${Me.Name}
 		oc !c -joustin ${Me.Name}
-		tsrget "pusling leakers"
+		target "pusling leaker"
 	}
 	if (${Message.Find["a giant latcher latches onto you"]} > 0)
 	{
@@ -511,5 +509,12 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["power is even more potent"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 40
+	}
+	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+	{
+		echo "I am dead"
+		if ${Script["livedierepeat"](exists)}
+			endscript livedierepeat
+		run livedierepeat
 	}
 }

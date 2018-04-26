@@ -7,6 +7,7 @@ function main(string qn, int stepstart, int stepstop)
 	variable int laststep=8
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
+	wait 20
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -26,6 +27,13 @@ function step000()
 	echo QUESTGIVER : ${NPCName}
 	
 	call goCoV
+	echo mending gear if necessary
+	call ReturnEquipmentSlotHealth Primary
+	if (${Return}<100)
+	{
+		call CoVMender
+	}
+	
 	call check_quest "${questname}"
 	if (!${Return})
 	{
@@ -47,7 +55,6 @@ function step000()
 	
 function step001()
 {	
-	variable string sQN="PoD-O_Solo"
 	call goCoV
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	
@@ -64,10 +71,7 @@ function step001()
 	}
 	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN}
-    wait 5
-    while ${Script[${sQN}](exists)}
-		wait 5
+    call RunZone
 	echo zone "${Zone.Name}" Cleared !
 }
 function step002()
@@ -110,18 +114,13 @@ function step004()
 }
 function step005()
 {
-	variable string sQN="PoD-tS_Solo"
-	
 	if (!${Zone.Name.Equal["Plane of Disease: the Source [Solo]"]})
 	{	
 		call step004
 	}
 		
 	echo will clear zone "${Zone.Name}" Now !
-	runscript ${sQN}
-	wait 5
-	while ${Script[${sQN}](exists)}
-	wait 5
+	call RunZone
 	echo zone "${Zone.Name}" Cleared !
 }
 

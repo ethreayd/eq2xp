@@ -6,6 +6,7 @@ function main()
 	variable int MyTime
 	
 	variable string ToonName
+		
 	call goCoV
 	do
 	{	
@@ -19,6 +20,13 @@ function main()
 			wait 5
 		echo Quests recovered
 		
+		echo mending gear if necessary
+		call ReturnEquipmentSlotHealth Primary
+		if (${Return}<100)
+		{
+			call CoVMender
+		}
+		
 		call DMove -2 5 4 3
 		call DMove -193 3 0 3
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
@@ -28,6 +36,7 @@ function main()
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 		call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
+		wait 50
 		call RunZone
 		echo Outbreak terminated
 		call waitfor_Zone "Coliseum of Valor"
@@ -41,6 +50,7 @@ function main()
 		wait 50	
 		call waitfor_Zone "Plane of Disease: the Source [Solo]"
 		MyTime:Set[${Time.Timestamp}]
+		wait 50
 		call RunZone
 		echo the Source terminated 
 		call waitfor_Zone "Coliseum of Valor"

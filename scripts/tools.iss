@@ -210,6 +210,21 @@ function Abs(float A)
 		absv:Set[${A}]
 	return ${absv}
 }
+function AcceptReward(bool AcceptAll)
+{
+	do
+	{
+		waitframe
+	}
+	while ${Me.CastingSpell}
+	wait 750 ${RewardWindow(exists)}
+	do
+	{
+		RewardWindow:Receive
+		wait 10
+	}
+	while (${RewardWindow(exists)} && ${AcceptAll})
+}
 
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
@@ -627,7 +642,14 @@ function CurrentQuestStep()
         while ${DetailsIterator:Next(exists)}
     }
 }
-
+function DepositAll(string DepotName)
+{
+	Actor[Name,"${DepotName}"]:DoubleClick
+	wait 10
+	EQ2UIPage[Inventory,Container].Child[button,Container.TabPages.Items.CommandDepositAll]:LeftClick
+	wait 10
+	EQ2UIPage[Inventory,Container].Child[button,Container.WindowFrame.Close]:LeftClick
+}
 function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight)
 {
 	variable float loc0
@@ -677,11 +699,15 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 		}
 		while (!${Return} && ${SuperStucky}<100)
 	}
+	return ${SuperStucky}
 }
-function FindLoS(string ActorName, string KeytoPress, int PressTime)
+
+function FindLoS(string ActorName, string KeytoPress, float Distance, int PressTime)
 {
 	if (${PressTime}<5)
 		PressTime:Set[5]
+	if (${Distance}<1)
+		Distance:Set[20]
 	do
 	{
 		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
@@ -695,13 +721,14 @@ function FindLoS(string ActorName, string KeytoPress, int PressTime)
 		}
 		wait 5
 	}
-	while (${Actor["${ActorName}"].CheckCollision})
+	while (${Actor["${ActorName}"].CheckCollision} && ${Actor["${ActorName}"].Distance} < ${Distance})
 }
 
 function Follow2D(string ActorName,float X, float Y, float Z, float RespectDistance, bool Walk)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
+	variable bool Vanished
 	
 	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 50]
 	Actors:GetIterator[ActorIterator]
@@ -712,9 +739,11 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 			if  (${ActorIterator.Value.Distance}> ${RespectDistance})
 				call 2DNav ${ActorIterator.Value.X} ${ActorIterator.Value.Z} ${Walk}
 			wait 5
+			call IsPresent "${ActorName}" 50
+			Vanished:Set[!${Return}]
 			call TestArrivalCoord ${X} ${Y} ${Z}
 		}	
-		while (!${Return})
+		while (!${Return} && !${Vanished} )
 	}
 }
 
@@ -970,7 +999,7 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 function isGroupAlive()
 {
 	variable int Counter=0
-
+	variable int i
 	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
 	{
 		if (${Me.Group[${i}].IsDead})
@@ -984,7 +1013,7 @@ function isGroupAlive()
 function isGroupDead()
 {
 	variable int Counter=0
-
+	variable int i
 	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
 	{
 		if (${Me.Group[${i}].IsDead})
@@ -1021,6 +1050,21 @@ function IsPresent(string ActorName, int Distance)
 		return FALSE
 }
 
+function CoVMender()
+{
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+	{
+		call DMove -2 5 4 3
+		call DMove 107 0 2 3
+		call DMove 158 0 64 3
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		call DMove 107 0 2 3
+		call DMove -2 5 4 3
+	}
+}
 	
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
@@ -1161,13 +1205,24 @@ function PKey(string KName, int ntime)
 	press -release "${KName}"
 }
 
-function RunZone()
+function ReturnEquipmentSlotHealth(string ItemSlot)
+{
+	variable int ItemHealth=0
+	
+	ItemHealth:Set[{Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	wait 10
+	ItemHealth:Set[{Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	return ${ItemHealth}
+}
+
+
+function RunZone(int qstart, int qstop)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}"
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN}
+    runscript ${sQN} ${qstart} ${qstop}
     wait 5
     while ${Script[${sQN}](exists)}
 		wait 5
@@ -1267,6 +1322,15 @@ function TestNullCoord(float X, float Y, float Z)
 	else
 		return FALSE
 }	
+
+function Transmute(string ItemName)
+{
+	call UseAbility Transmute
+	wait 5
+	Me.Inventory[Query, Name =- "${ItemName}"]:Transmute
+	wait 5
+	call AcceptReward TRUE
+}
 		
 function Unstuck(bool LR)
 {
@@ -1285,6 +1349,10 @@ function Unstuck(bool LR)
 	return !${LR}
 }
 
+function UseAbility(string MyAbilityName)
+{
+Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
+}
 
 function WaitByPass(string ActorName, float GLeft, float GRight)
 {

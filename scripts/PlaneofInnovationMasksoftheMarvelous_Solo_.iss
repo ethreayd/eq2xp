@@ -33,6 +33,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	echo zone is ${Zone.Name}
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -86,6 +87,7 @@ function step002()
 	Ob_AutoTarget:AddActor["Clockwork Scrounger XVII",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	call DMove -58 3 11 ${speed} ${FightDistance}
 	call DMove -41 -10 137 ${speed} ${FightDistance}
 	call DMove 109 -10 142 ${speed} ${FightDistance}
 	call DMove 116 3 3 ${speed} ${FightDistance}
@@ -402,5 +404,12 @@ atom HandleAllEvents(string Message)
     if (${Message.Find["must have the Electro-Charged"]} > 0)
 	{
 		QueueCommand call OpenChargedDoor
+	}
+ 	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+	{
+		echo "I am dead"
+		if ${Script["livedierepeat"](exists)}
+			endscript livedierepeat
+		run livedierepeat
 	}
  }

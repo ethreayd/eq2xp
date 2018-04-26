@@ -32,6 +32,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
 	
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -364,10 +365,21 @@ function step009()
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
  {
-	echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
+	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
     if (${Message.Find["gains an electric charge"]} > 0)
 	{
 		target ${Me.Name}
 		QueueCommand call TargetAfterTime "${Speaker}" 200
+	}
+ }
+ atom HandleAllEvents(string Message)
+ {
+	;echo Catch Event ${Message}
+    if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+	{
+		echo "I am dead"
+		if ${Script["livedierepeat"](exists)}
+			endscript livedierepeat
+		run livedierepeat
 	}
  }

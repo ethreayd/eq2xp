@@ -7,6 +7,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=7
+	
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
@@ -42,6 +43,18 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
 
+	if (${stepstart}==0)
+	{
+		if (${Me.Loc.Y}<-400)
+		{
+			echo I am in Crypt of Decay, starting from there
+			stepstart:Set[5]
+			call IsPresent "Darwol Adan" 1000
+			if  (!${Return})
+				stepstart:Set[7]
+		}
+	}
+	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -296,100 +309,72 @@ function step006()
 	eq2execute merc resume
 	call StopHunt
 	
-	
-		OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",40]
-		Ob_AutoTarget:AddActor["${Nest}",0,TRUE,FALSE]
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_meleeattack","FALSE"]
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-		target ${Me.Name}
-		call PKey "Page Up" 5
-		call PKey ZOOMOUT 20	
-		call DMove -84 -520 163 3 30 TRUE
+	OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",40]
+	Ob_AutoTarget:AddActor["${Nest}",0,FALSE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_meleeattack","FALSE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	target ${Me.Name}
+	call PKey "Page Up" 5
+	call PKey ZOOMOUT 20	
+	call DMove -84 -520 163 3 30 TRUE
+	target "${Named}"
+	wait 20
+	do
+	{	
 		target "${Named}"
-		wait 20
-		do
-		{	
-			target "${Named}"
-			wait 5
-		}
-		while (!${Me.InCombatMode})
+		wait 5
+	}
+	while (!${Me.InCombatMode})
 	
-		Counter:Set[0]
-		do
-		{
-			call FindLoS "${Nest}" STRAFELEFT 10
-			Counter:Inc
-			
-			if (${Counter}>5)
-			{
-				call PKey STRAFELEFT 5
-				call PKey MOVEFORWARD 10
-				call DMove -84 -520 163 3 30 TRUE
-				Counter:Set[0]
-			}
-			call IsPresent "${Nest}" 40
-			wait 20
-		}
-		while (${Return})
-		target ${Me.Name}
-		call DMove -58 -521 113 3 30 TRUE
-		Counter:Set[0]
-		do
-		{
-			call FindLoS "${Nest}" STRAFELEFT 10
-			Counter:Inc
-			if (${Counter}>5)
-			{
-				call PKey STRAFELEFT 5
-				call PKey MOVEFORWARD 10
-				call DMove -58 -521 113 3 30 TRUE
-				Counter:Set[0]
-			}
-			call IsPresent "${Nest}" 40
-			wait 20
-		}
-		while (${Return})
-		target ${Me.Name}
-		call DMove -80 -521 162 3 30 TRUE
-		Counter:Set[0]
-		do
-		{
-			call FindLoS "${Nest}" STRAFELEFT 10
-			Counter:Inc
-			if (${Counter}>5)
-			{
-				call PKey STRAFELEFT 5
-				call PKey MOVEFORWARD 10
-				call DMove -80 -521 162 3 30 TRUE
-				Counter:Set[0]
-			}
-			call IsPresent "${Nest}" 40
-			wait 20
-		}
-		while (${Return})
-		target ${Me.Name}
-		call DMove -55 -521 110 3 30 TRUE
-		Counter:Set[0]
-		do
-		{
-			call FindLoS "${Nest}" STRAFELEFT 10
-			Counter:Inc
-			if (${Counter}>5)
-			{
-				call PKey STRAFELEFT 5
-				call PKey MOVEFORWARD 10
-				call DMove -55 -521 110 3 30 TRUE
-				Counter:Set[0]
-			}
-			call IsPresent "${Nest}" 40
-			wait 20
-		}
-		while (${Return})
-		call PKey CENTER 5
+	Counter:Set[0]
+	do
+	{
+		call FindLoS "${Nest}" STRAFELEFT 10
+		Counter:Inc
+		wait 20
+		call IsPresent "${Nest}" 40
+	}
+	while (${Return} && ${Counter}<6)
+	
+	call DMove -58 -521 113 3 30 TRUE
+	Counter:Set[0]
+	do
+	{
+		call FindLoS "${Nest}" STRAFELEFT 10
+		Counter:Inc
+		wait 20
+		call IsPresent "${Nest}" 40
+	}
+	while (${Return} && ${Counter}<6)
+	
+	call DMove -80 -521 162 3 30 TRUE
+	Counter:Set[0]
+	do
+	{
+		call FindLoS "${Nest}" STRAFELEFT 10
+		Counter:Inc
+		wait 20
+		call IsPresent "${Nest}" 40
+	}
+	while (${Return} && ${Counter}<6)
 
+	call DMove -55 -521 110 3 30 TRUE
+	Counter:Set[0]
+	do
+	{
+		call FindLoS "${Nest}" STRAFELEFT 10
+		Counter:Inc
+		wait 20
+		call IsPresent "${Nest}" 40
+	}
+	while (${Return} && ${Counter}<6)
+		
+	call PKey CENTER 5
+	call PKey "Page Down" 3
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	echo must kill "${Named}"
+	call MoveCloseTo "${Named}"
 	do
 	{
 		wait 10
@@ -399,6 +384,12 @@ function step006()
 	eq2execute summon
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call StopHunt
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+	call DMove -2 -517 122 ${speed} ${FightDistance}
+	call DMove 222 -492 125 ${speed} ${FightDistance}
+	call DMove 220 -475 -89 ${speed} ${FightDistance}
 }
 	
 function step007()
@@ -407,10 +398,7 @@ function step007()
 	
 	Named:Set["Bhaly Adan"]
 	eq2execute merc resume
-	call StopHunt
-	call DMove -2 -517 122 3 30
-	call DMove 222 -492 125 3 30
-	call DMove 220 -475 -89 3 30
+	
 	call DMove 124 -482 -89 ${speed} ${FightDistance}
 	call PKey ZOOMOUT 20	
 	call DMove -5 -473 -89 3 30 TRUE
@@ -518,7 +506,7 @@ function AlterGenes()
 }
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
- {
+{
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
 	if (${Message.Find["prepares to devour"]} > 0)
 	{
@@ -530,7 +518,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo Catch Event Microbes in HandleEvents
 		QueueCommand call AlterGenes
 	}
- }
+}
  
 atom HandleAllEvents(string Message)
  {
@@ -539,5 +527,12 @@ atom HandleAllEvents(string Message)
 	{
 		FestrusLord:Set[TRUE]
 		echo Lord of the Festrus detected
+	}
+	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+	{
+		echo "I am dead"
+		if ${Script["livedierepeat"](exists)}
+			endscript livedierepeat
+		run livedierepeat
 	}
  }

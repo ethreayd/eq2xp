@@ -26,6 +26,14 @@ function step000()
 	echo QUESTGIVER : ${NPCName}
 	
 	call goCoV
+	
+	echo mending gear if necessary
+	call ReturnEquipmentSlotHealth Primary
+	if (${Return}<100)
+	{
+		call CoVMender
+	}
+	
 	call check_quest "${questname}"
 	if (!${Return})
 	{
