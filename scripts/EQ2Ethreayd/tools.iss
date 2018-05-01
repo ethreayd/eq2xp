@@ -421,6 +421,7 @@ function AutoHunt(int distance)
 
 function AutoPassDoor(string DoorName, float X, float Y, float Z)
 {
+	echo autopassing "${DoorName}"
 	do
 	{
 		face ${Actor["${DoorName}"].X} ${Actor["${DoorName}"].Z}
@@ -435,6 +436,42 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z)
 	while (!${Return})
 }
 
+function AvoidRedCircles(float Distance)
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+    variable float AvoidDistance
+	if (${Distance}<0)
+		AvoidDistance:Set[30]
+	else
+		AvoidDistance:Set[${Distance}]
+		
+	EQ2:QueryActors[Actors, Distance <=${AvoidDistance} && Aura =- "design_circle_warning_zone"]
+	
+    Actors:GetIterator[ActorIterator]
+	
+    if ${ActorIterator:First(exists)}
+    {       
+		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance}
+	}
+}
+
+
+	
+		
+
+function CastAbility(string AbilityName, bool NoWait)
+{
+	if (!${NoWait})
+	{
+		do
+		{
+			wait 20
+		}
+		while (!${Me.Ability["${AbilityName}"].IsReady})
+	}
+	OgreBotAPI:CastAbility[${Me.Name},"${AbilityName}"]
+}
 	
 function check_quest(string questname)
 {
@@ -596,6 +633,22 @@ function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, b
 	press CENTER
 }
 
+function CoVMender()
+{
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+	{
+		call DMove -2 5 4 3
+		call DMove 107 0 2 3
+		call DMove 158 0 64 3
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		call DMove 107 0 2 3
+		call DMove -2 5 4 3
+	}
+}
+
 function CountItem(string ItemName)
 {
 	variable index:item Items
@@ -642,6 +695,7 @@ function CurrentQuestStep()
         while ${DetailsIterator:Next(exists)}
     }
 }
+
 function DepositAll(string DepotName)
 {
 	Actor[Name,"${DepotName}"]:DoubleClick
@@ -701,6 +755,66 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	}
 	return ${SuperStucky}
 }
+
+function DescribeActor(int ActorID)
+{
+	echo ID:				${ActorID}
+	echo Name:				${Actor[${ActorID}].Name}
+	echo LastName:			${Actor[${ActorID}].LastName}
+	echo Health:			${Actor[${ActorID}].Health}
+	echo Power:				${Actor[${ActorID}].Power}
+	echo Level:				${Actor[${ActorID}].Level}
+	echo EffectiveLevel:	${Actor[${ActorID}].EffectiveLevel}
+	echo TintFlags:			${Actor[${ActorID}].TintFlags}
+	echo VisualVariant:		${Actor[${ActorID}].VisualVariant}
+	echo Mood:				${Actor[${ActorID}].Mood}
+	echo CurrentAnimation:	${Actor[${ActorID}].CurrentAnimation}
+	echo Overlay:			${Actor[${ActorID}].Overlay}
+	echo Aura:				${Actor[${ActorID}].Aura}
+	echo Gender:			${Actor[${ActorID}].Gender}
+	echo Race:				${Actor[${ActorID}].Race}
+	echo Class:				${Actor[${ActorID}].Class}
+	echo Guild:				${Actor[${ActorID}].Guild}
+	echo Type:				${Actor[${ActorID}].Type}
+	echo SuffixTitle:		${Actor[${ActorID}].SuffixTitle}
+	echo ConColor:			${Actor[${ActorID}].ConColor}
+}
+
+function Evac()
+{
+	echo not implemented yet
+	switch ${Me.Class}
+	{
+		case scout
+			echo evac of scout
+		break
+		case warrior
+			echo evac
+		break
+		case cleric
+			echo evac
+		break
+		case brawler
+			echo evac
+		break
+		case druid
+			echo evac
+		break
+		case sorcerer
+			echo evac
+		break
+		case enchanter
+			echo evac
+		break
+		case summoner
+			echo evac
+		break
+		default
+			echo evac
+		break
+	}
+}
+
 
 function FindLoS(string ActorName, string KeytoPress, float Distance, int PressTime)
 {
@@ -1049,22 +1163,52 @@ function IsPresent(string ActorName, int Distance)
 	else
 		return FALSE
 }
-
-function CoVMender()
+function JoustOut(int ActorID, float Distance)
 {
-	if (${Zone.Name.Equal["Coliseum of Valor"]})
+	variable float AvoidDistance
+	variable float X0
+	variable float Z0
+	variable float X1
+	variable float Z1
+	variable float X2
+	variable float Z2
+	variable float Slope
+	variable float JoustDistance
+	
+	if (${Distance}<1)
+		AvoidDistance:Set[30]
+	else
+		AvoidDistance:Set[${Distance}]
+	
+	JoustDistance:Set[${Math.Calc64[${AvoidDistance}-${Actor[${ActorID}].Distance}]}]
+	if (${JoustDistance}<0)
+		Return
+	
+	X0:Set[${Me.Loc.X}]
+	Z0:Set[${Me.Loc.Z}]
+	X1:Set[${Math.Calc64[${Actor[${ActorID}].X}-${X0}]}]
+	Z1:Set[${Math.Calc64[${Actor[${ActorID}].Z}-${Z0}]}]
+	if (!${Z1}==0) 
 	{
-		call DMove -2 5 4 3
-		call DMove 107 0 2 3
-		call DMove 158 0 64 3
-		OgreBotAPI:RepairGear[${Me.Name}]
-		wait 20
-		OgreBotAPI:RepairGear[${Me.Name}]
-		wait 20
-		call DMove 107 0 2 3
-		call DMove -2 5 4 3
+		Slope:Set[${Math.Calc64[${X1}/${Z1}]}]
+		Z2:Set[${Math.Calc64[(${JoustDistance}/(${Slope}+1))]}]
+		X2:Set[${Math.Calc64[${Slope}*${Z2}]}]
 	}
+	else 
+	{
+		X2:Set[0]
+		Z2:Set[${JoustDistance}]
+	}
+	if (${X1}>0)
+		X2:Set[${Math.Calc64[(-1)*${X2}]}]
+	if (${Y1}>0)
+		Z2:Set[${Math.Calc64[(-1)*${Z2}]}]
+		
+	echo ${X0} ${Z0} ${X1} ${Z1} ${X2} ${Z2} ${Slope} ${JoustDistance}
+	
+	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}]
 }
+
 	
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
@@ -1209,9 +1353,9 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 {
 	variable int ItemHealth=0
 	
-	ItemHealth:Set[{Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	wait 10
-	ItemHealth:Set[{Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
 
@@ -1222,7 +1366,7 @@ function RunZone(int qstart, int qstop)
 	call strip_QN "${Zone.Name}"
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" Now !
-    runscript ${sQN} ${qstart} ${qstop}
+    runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop}
     wait 5
     while ${Script[${sQN}](exists)}
 		wait 5
@@ -1263,15 +1407,15 @@ function StopHunt()
 function strip_QN(string questname)
 {
 	variable string sQN
-	echo IN:${questname}
-	sQN:Set[${questname.Replace["\]","_"]}]
-	sQN:Set[${sQN.Replace["\[","_"]}]
-	sQN:Set[${sQN.Replace[",",""]}]
-	sQN:Set[${sQN.Replace[":",""]}]
-	sQN:Set[${sQN.Replace["'",""]}]
-	sQN:Set[${sQN.Replace[" ",""]}]
-	echo OUT:${sQN}
-	return ${sQN}
+	echo IN:"${questname}"
+	sQN:Set["${questname.Replace["\]","_"]}"]
+	sQN:Set["${sQN.Replace["\[","_"]}"]
+	sQN:Set["${sQN.Replace[",",""]}"]
+	sQN:Set["${sQN.Replace[":",""]}"]
+	sQN:Set["${sQN.Replace["'",""]}"]
+	sQN:Set["${sQN.Replace[" ",""]}"]
+	echo OUT:"${sQN}"
+	return "${sQN}"
 }
 
 

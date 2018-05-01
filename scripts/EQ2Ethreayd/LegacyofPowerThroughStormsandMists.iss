@@ -1,10 +1,10 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) string questname
 variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=8
+	variable int laststep=1
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	wait 20
@@ -59,17 +59,14 @@ function step001()
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	
 		call DMove -2 5 4 3
-		call DMove -167 3 7 3
-		OgreBotAPI:Special["${Me.Name}"]
-		wait 50
-		call DMove -193 3 0 3
+		call DMove -92 3 -158 3
 		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
-	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
+	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
     call RunZone
 	echo zone "${Zone.Name}" Cleared !

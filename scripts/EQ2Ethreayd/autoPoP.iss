@@ -1,5 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreCommon/EQ2OgreObjects/Object_Get_SpewStats.iss"
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(global) Object_Get_SpewStats MyFaction_Get_SpewStats
 variable(script) int64 iFaction
 ;You need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
@@ -12,6 +12,7 @@ function main(int stepstart, int stepstop)
 	ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
 	ScriptsToRun:Insert["Legacy of Power: An Innovative Approach"]
 	ScriptsToRun:Insert["Legacy of Power: Realm of the Plaguebringer"]
+	ScriptsToRun:Insert["Legacy of Power: Through Storms and Mists"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
 	
@@ -30,7 +31,7 @@ function main(int stepstart, int stepstop)
 			call strip_QN "${ScriptsToRun[${x}]}"
 			sQN:Set[${Return}]
 			echo will run "${ScriptsToRun[${x}]}" step ${stepstart} Now !
-    			runscript ${sQN} "${ScriptsToRun[${x}]}" ${stepstart} ${stepstop}
+    			runscript EQ2Ethreayd/${sQN} "${ScriptsToRun[${x}]}" ${stepstart} ${stepstop}
         		wait 5
         		while ${Script[${sQN}](exists)}
             		wait 5

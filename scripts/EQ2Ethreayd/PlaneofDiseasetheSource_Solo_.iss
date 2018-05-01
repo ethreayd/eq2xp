@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool FestrusLord
@@ -372,9 +372,10 @@ function step006()
 		
 	call PKey CENTER 5
 	call PKey "Page Down" 3
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	Ob_AutoTarget:Clear
+	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	echo must kill "${Named}"
-	call MoveCloseTo "${Named}"
+	call DMove ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
 	do
 	{
 		wait 10
@@ -533,6 +534,6 @@ atom HandleAllEvents(string Message)
 		echo "I am dead"
 		if ${Script["livedierepeat"](exists)}
 			endscript livedierepeat
-		run livedierepeat
+		run EQ2Ethreayd/livedierepeat
 	}
  }

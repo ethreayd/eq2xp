@@ -2,14 +2,17 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
-	ScriptsToRun:Insert["loopPoD"]
-	ScriptsToRun:Insert["PoD-tS_Solo"]
+	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
+	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["loopPoID"]
+	ScriptsToRun:Insert["loopPoD"]	
+	ScriptsToRun:Insert["PlaneofDiseasetheSource_Solo_"]
 	ScriptsToRun:Insert["loopPoI"]
-	ScriptsToRun:Insert["PoD-O_Solo"]
+	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerRealmofthePlaguebringer"]
-	ScriptsToRun:Insert["PoI-GitM_Solo"]
+	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerAnInnovativeApproach"]
-	ScriptsToRun:Insert["PoI-MotM_Solo"]
+	ScriptsToRun:Insert["PlaneofInnovationGearsintheMachine_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerHerosDevotion"]
 	ScriptsToRun:Insert["LegacyofPowerSecretsinanArcaneLand"]
 	ScriptsToRun:Insert["autopop"]

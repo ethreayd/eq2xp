@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
 variable(script) int speed
 variable(script) int FightDistance
@@ -409,6 +409,7 @@ function step008()
 		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
 		wait 20
 	}
+	call PKey MOVEFORWARD 2
 	face "${Named}"
 	target "${Named}"
 	OgreBotAPI:Resume["${Me.Name}"]
@@ -515,6 +516,6 @@ atom HandleAllEvents(string Message)
 		echo "I am dead"
 		if ${Script["livedierepeat"](exists)}
 			endscript livedierepeat
-		run livedierepeat
+		run EQ2Ethreayd/livedierepeat
 	}
 }

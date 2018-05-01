@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
 
@@ -41,6 +41,43 @@ function main(int stepstart, int stepstop, int setspeed)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	
+	call check_quest "Legacy of Power: An Innovative Approach"
+	
+	if (${stepstart}==0 && !${Return})
+	{
+		call IsPresent "Repair Bot 5000" 1000
+		if (!${Return})
+		{
+			stepstart:Set[2]
+			call IsPresent "Powered Mechanization" 1000
+			if  (!${Return})
+			{
+				call IsPresent "Toa the Shiny" 1000
+				if  (!${Return})
+				{
+					call IsPresent "The Junk Beast" 1000
+					if  (!${Return})
+					{
+						call IsPresent "The Manaetic Behemoth" 1000
+						if  (!${Return})
+						{
+							echo zone empty :( EXITING
+							OgreBotAPI:Special["${Me.Name}"]
+							stepstart:Set[99]
+							return
+						}
+						else
+						{
+							stepstart:Set[5]
+							call step002
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	
 	echo doing step ${stepstart} to ${stepstop}
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
@@ -80,22 +117,22 @@ function step001()
 	while (${Return})
 	eq2execute summon
 	wait 20
-}
-function step002()
-{
-	variable string Named
-	
-	Named:Set["Power Mechanization"]
-	
-	eq2execute merc resume
-	if (!${Me.Archetype.Equal["fighter"]})
-	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
-		
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 113 3 -29 ${speed} ${FightDistance}
 	call DMove 111 -10 131 ${speed} ${FightDistance}
 	call DMove -9 -10 144 ${speed} ${FightDistance}
+}
+function step002()
+{
+	variable string Named
+	
+	Named:Set["Powered Mechanization"]
+	
+	eq2execute merc resume
+	if (!${Me.Archetype.Equal["fighter"]})
+	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
+	
 	call DMove -66 -10 99 ${speed} ${FightDistance}
 	call DMove -50 3 25 ${speed} ${FightDistance}
 	call DMove -31 3 -87 ${speed} ${FightDistance}
@@ -192,6 +229,9 @@ function step004()
 	call OpenDoor "Junkyard East Door 04"
 	call DMove -149 4 -197 3 ${FightDistance}
 	call DMove -135 4 -198 3 ${FightDistance}
+	call OpenDoor "Junkyard East Door 05"
+	wait 10
+	call DMove -130 4 -199 3 ${FightDistance}
 	call AutoPassDoor "Junkyard East Door 05" -130 4 -199
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -63 5 -200 3 ${FightDistance}
@@ -216,11 +256,6 @@ function step004()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-	
-function step005()
-{		
-	eq2execute merc resume
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	call DMove -130 4 -197 2 ${FightDistance}
@@ -231,6 +266,12 @@ function step005()
 	call DMove -74 3 -111 3 ${FightDistance}
 	call DMove -47 4 -111 3 ${FightDistance}
 	call AutoPassDoor "Junkyard East Door 03" -18 4 -110
+}
+	
+function step005()
+{		
+	eq2execute merc resume
+
 	call DMove -17 4 -121 3 ${FightDistance}
 	call DMove -15 4 -126 3 ${FightDistance}
 	call Converse "Meldrath the Marvelous" 12
@@ -265,6 +306,7 @@ function step006()
 	do
 	{
 		wait 10
+		call AvoidRedCircles 30
 		call IsPresent "${Named}"
 	}
 	while (!${Return})
@@ -380,6 +422,6 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo "I am dead"
 		if ${Script["livedierepeat"](exists)}
 			endscript livedierepeat
-		run livedierepeat
+		run EQ2Ethreayd/livedierepeat
 	}
  }

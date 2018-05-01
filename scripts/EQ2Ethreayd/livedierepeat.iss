@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
 function main()
 {
@@ -35,9 +35,9 @@ function main()
 		echo waiting 1 min to recover
 		wait 600
 		if (${Zone.Name.Find["Innovation"]} > 0)
-			run oopsimdead loopPoI
+			run EQ2Ethreayd/oopsimdead loopPoI
 		else
-			run oopsimdead loopPoD
+			run EQ2Ethreayd/oopsimdead loopPoD
 		call RunZone
 		
 	}

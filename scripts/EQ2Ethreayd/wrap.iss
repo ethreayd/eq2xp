@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
 #define AUTORUN "num lock"
 #define MOVEFORWARD w

@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Detected
@@ -181,13 +181,17 @@ function step004()
 	wait 50
 	ExecuteQueued
 	call CheckCombat ${FightDistance}
-	call IsPresent "an erratic clockwork"
 	ExecuteQueued
+	call IsPresent "an erratic clockwork"
 	if (${Return})
 	{
 		do
 		{
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+		call DMove 135 3 -44 ${speed} ${FightDistance}
+		call IsPresent "door_hand_lock" 5
+		if (${Return})
+			call OpenChargedDoor
 		call MoveCloseTo "an erratic clockwork"
 		wait 20
 		call IsPresent "door_hand_lock" 5
@@ -403,6 +407,7 @@ atom HandleAllEvents(string Message)
 	;echo Catch Event ${Message}
     if (${Message.Find["must have the Electro-Charged"]} > 0)
 	{
+		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor
 	}
  	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
@@ -410,6 +415,6 @@ atom HandleAllEvents(string Message)
 		echo "I am dead"
 		if ${Script["livedierepeat"](exists)}
 			endscript livedierepeat
-		run livedierepeat
+		run EQ2Ethreayd/livedierepeat
 	}
  }

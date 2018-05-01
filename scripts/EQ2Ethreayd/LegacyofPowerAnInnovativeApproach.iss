@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) string questname
 variable(script) string NPCName
 
@@ -97,6 +97,6 @@ function step004()
 	wait 50
 	call DMove -6 6 2 3
 	call Converse "${NPCName}" 10 TRUE
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-			
+	OgreBotAPI:AcceptReward["${Me.Name}"]			
 }
+

@@ -1,4 +1,4 @@
-#include "${LavishScript.HomeDirectory}/Scripts/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
 function main(string Loop)
 {
@@ -47,7 +47,7 @@ function main(string Loop)
 		{
 			echo rebooting session
 			call StopHunt
-			run killall
+			run EQ2Ethreayd/killall
 			call PKey MOVEFORWARD 1
 			OgreBotAPI:Revive[${Me.Name}]
 			wait 300
@@ -67,7 +67,7 @@ function main(string Loop)
 			OgreBotAPI:RepairGear[${Me.Name}]
 			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
 			call waitfor_Zone "Plane of Magic"
-			run ${Loop}
+			run EQ2Ethreayd/${Loop}
 		}
 	}
 	while (1==1)
@@ -82,6 +82,6 @@ atom HandleAllEvents(string Message)
 		if ${Script["livedierepeat"](exists)}
 			endscript livedierepeat
 		if (!${Script["killall"](exists)})
-			run killall
+			run EQ2Ethreayd/killall
 	}
  }
