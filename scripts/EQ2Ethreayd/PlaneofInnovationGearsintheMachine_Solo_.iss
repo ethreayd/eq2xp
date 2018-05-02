@@ -9,14 +9,14 @@ function main(int stepstart, int stepstop, int setspeed)
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]})
+		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
 		{
 			speed:Set[3]
 			FightDistance:Set[15]
 		}
 		else
-			speed:Set[1]
 		{
+			speed:Set[1]
 			FightDistance:Set[30]
 		}
 	}
@@ -226,12 +226,9 @@ function step004()
 	call StopHunt
 	
 	call DMove -158 4 -198 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 04"
-	call DMove -149 4 -197 3 ${FightDistance}
-	call DMove -135 4 -198 3 ${FightDistance}
-	call OpenDoor "Junkyard East Door 05"
-	wait 10
-	call DMove -130 4 -199 3 ${FightDistance}
+	call DMove -159 7 -197 1
+	call AutoPassDoor "Junkyard East Door 04" -137 4 -197
+	call DMove -137 4 -197 3 ${FightDistance}
 	call AutoPassDoor "Junkyard East Door 05" -130 4 -199
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -63 5 -200 3 ${FightDistance}

@@ -11,14 +11,14 @@ function main(int stepstart, int stepstop, int setspeed)
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]})
+		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
 		{
 			speed:Set[3]
 			FightDistance:Set[15]
 		}
 		else
-			speed:Set[1]
 		{
+			speed:Set[1]
 			FightDistance:Set[30]
 		}
 	}

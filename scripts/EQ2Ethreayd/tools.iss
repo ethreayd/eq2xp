@@ -13,6 +13,7 @@
 #define WALK shift+r
 #define ZOOMIN "Num +"
 #define ZOOMOUT "Num -"
+#define JUMP Space
 
 function 2DNav(float X, float Z, bool IgnoreFight)
 {
@@ -451,14 +452,11 @@ function AvoidRedCircles(float Distance)
     Actors:GetIterator[ActorIterator]
 	
     if ${ActorIterator:First(exists)}
-    {       
+    {
+		echo Red Circle (${ActorIterator.Value.ID}) detected at ${ActorIterator.Value.Distance}m
 		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance}
 	}
 }
-
-
-	
-		
 
 function CastAbility(string AbilityName, bool NoWait)
 {
@@ -470,7 +468,7 @@ function CastAbility(string AbilityName, bool NoWait)
 		}
 		while (!${Me.Ability["${AbilityName}"].IsReady})
 	}
-	OgreBotAPI:CastAbility[${Me.Name},"${AbilityName}"]
+	call UseAbility "${AbilityName}"
 }
 	
 function check_quest(string questname)
@@ -617,6 +615,10 @@ function Converse(string NPCName, int bubbles, bool giant)
 		OgreBotAPI:ConversationBubble["${Me.Name}",1]
 		wait 15
 	}
+	if (${giant})
+	{
+		call PKey "Page Down" 3		
+	}
 }
 
 function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, bool giant)
@@ -704,7 +706,7 @@ function DepositAll(string DepotName)
 	wait 10
 	EQ2UIPage[Inventory,Container].Child[button,Container.WindowFrame.Close]:LeftClick
 }
-function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight)
+function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone)
 {
 	variable float loc0
 	variable int Stucky
@@ -751,7 +753,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			call TestArrivalCoord ${X} ${Y} ${Z}
 			
 		}
-		while (!${Return} && ${SuperStucky}<100)
+		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
 	}
 	return ${SuperStucky}
 }
@@ -977,16 +979,12 @@ function GoDown()
 	}
 	wait 10
 }
+
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
-		do
-		{
-			wait 20
-		}
-		while (!${Me.Ability[Call to Guild Hall].IsReady})
-		OgreBotAPI:CastAbility[${Me.Name},"Call to Guild Hall"]
+		call CastAbility "Call to Guild Hall"
 		do
 		{
 			wait 5
@@ -1175,6 +1173,7 @@ function JoustOut(int ActorID, float Distance)
 	variable float Slope
 	variable float JoustDistance
 	
+	echo calling function JoustOut with ActorID:${Actor[${ActorID}]} and Distance ${Distance} m
 	if (${Distance}<1)
 		AvoidDistance:Set[30]
 	else
@@ -1204,7 +1203,7 @@ function JoustOut(int ActorID, float Distance)
 	if (${Y1}>0)
 		Z2:Set[${Math.Calc64[(-1)*${Z2}]}]
 		
-	echo ${X0} ${Z0} ${X1} ${Z1} ${X2} ${Z2} ${Slope} ${JoustDistance}
+	echo JoustOut function called : ${X0} ${Z0} ${X1} ${Z1} ${X2} ${Z2} ${Slope} ${JoustDistance}
 	
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}]
 }

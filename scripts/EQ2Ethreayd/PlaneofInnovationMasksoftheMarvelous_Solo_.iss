@@ -11,14 +11,14 @@ function main(int stepstart, int stepstop, int setspeed)
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]})
+		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
 		{
 			speed:Set[3]
 			FightDistance:Set[15]
 		}
 		else
-			speed:Set[1]
 		{
+			speed:Set[1]
 			FightDistance:Set[30]
 		}
 	}
@@ -188,7 +188,9 @@ function step004()
 		do
 		{
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-		call DMove 135 3 -44 ${speed} ${FightDistance}
+		call DMove 128 3 -38 ${speed} ${FightDistance} TRUE TRUE
+		call DMove 134 3 -43 1
+		call PKey MOVEFORWARD 1
 		call IsPresent "door_hand_lock" 5
 		if (${Return})
 			call OpenChargedDoor
@@ -405,7 +407,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 atom HandleAllEvents(string Message)
  {
 	;echo Catch Event ${Message}
-    if (${Message.Find["must have the Electro-Charged"]} > 0)
+    if (${Message.Find["have the Electro-Charged"]} > 0)
 	{
 		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor

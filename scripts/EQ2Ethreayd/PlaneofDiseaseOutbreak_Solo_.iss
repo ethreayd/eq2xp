@@ -10,14 +10,14 @@ function main(int stepstart, int stepstop, int setspeed)
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]})
+		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
 		{
 			speed:Set[3]
 			FightDistance:Set[15]
 		}
 		else
-			speed:Set[1]
 		{
+			speed:Set[1]
 			FightDistance:Set[30]
 		}
 	}
@@ -286,13 +286,13 @@ function step006()
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 291 360 -41 3 ${FightDistance}
-	call DMove 276 333 -102 3 ${FightDistance}
-	call DMove 131 252 -131 3 ${FightDistance}
-	call DMove 107 226 -190 3 ${FightDistance}
-	call DMove 165 181 -238 3 ${FightDistance}
-	call DMove 271 118 -205 3 ${FightDistance}
-	call DMove 304 71 -330 3 ${FightDistance}
+	call DMove 291 360 -41 3 ${FightDistance} TRUE
+	call DMove 276 333 -102 3 ${FightDistance} TRUE
+	call DMove 131 252 -131 3 ${FightDistance} TRUE
+	call DMove 107 226 -190 3 ${FightDistance} TRUE
+	call DMove 165 181 -238 3 ${FightDistance} TRUE
+	call DMove 271 118 -205 3 ${FightDistance} TRUE
+	call DMove 304 71 -330 3 ${FightDistance} TRUE
 }
 	
 function step007()

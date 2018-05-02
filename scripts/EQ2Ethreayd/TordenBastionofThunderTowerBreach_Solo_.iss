@@ -6,25 +6,28 @@ variable(script) bool InRing
 function main(int stepstart, int stepstop, int setspeed)
 {
 
-	variable int laststep=4
+	variable int laststep=12
 	
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]})
+		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
 		{
+			echo I am a fighter
 			speed:Set[3]
 			FightDistance:Set[15]
 		}
 		else
-			speed:Set[1]
 		{
+			echo I am a healer
+			speed:Set[1]
 			FightDistance:Set[30]
 		}
 	}
 	else
 		speed:Set[${setspeed}]
 		
+	echo speed set to ${speed}
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -48,14 +51,37 @@ function main(int stepstart, int stepstop, int setspeed)
 
 	if (${stepstart}==0)
 	{
-		;if (${Me.Loc.Y}<-400)
-		;{
-		;	echo I am in Crypt of Decay, starting from there
-		;	stepstart:Set[5]
-		;	call IsPresent "Darwol Adan" 1000
-		;	if  (!${Return})
-		;		stepstart:Set[7]
-		;}
+		call IsPresent "Auliffe Chaoswind" 1000
+		if (!${Return})
+		{
+			call IsPresent "Gaukr Sandstorm" 1000
+			if (!${Return})
+			{
+				echo zone empty
+				call step012
+				return
+			}
+		
+			call check_quest "Legacy of Power: Through Storms and Mists"
+			if (${Return})
+			{
+				call CountItem "frostbite crystal"
+				if (${Return}>0)
+				{
+					call DMove 0 10 -502 3
+					call DMove 15 11 -515 3
+					call DMove 10 10 -540 3
+					stepstart:Set[4]
+				}
+			}
+			else
+			{
+				call DMove 0 10 -502 3
+				call DMove 15 11 -515 3
+				call DMove 10 10 -540 3
+				stepstart:Set[4]
+			}
+		}
 	}
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
@@ -72,6 +98,8 @@ function step000()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	Ob_AutoTarget:AddActor["Primordial Malice",0,TRUE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 	call DMove -58 -16 -21 3
 	call Converse "Klodsag" 10 TRUE
@@ -81,10 +109,10 @@ function step000()
 	call DMove -1 -4 -172 3
 	call DMove -1 5 -214 3
 	call DMove 1 12 -346 3
-	call DMove 3 10 -458 3
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-	call DMove 0 10 -502 3
+	call DMove 3 10 -458 ${speed} ${FightDistance}
+	call DMove -2 10 -488 ${speed} ${FightDistance}
+	wait 100
+	call DMove 0 10 -502 ${speed} ${FightDistance}
 	wait 100
 	echo must kill "${Named}"
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
@@ -100,10 +128,10 @@ function step000()
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
-	call DMove 14 11 -515 3
-	call DMove 14 12 -523 3
-	call DMove 14 11 -537 3
-	call DMove 50 10 -637 3
+	call DMove 14 11 -515 ${speed} ${FightDistance}
+	call DMove 14 12 -523 ${speed} ${FightDistance}
+	call DMove 14 11 -537 ${speed} ${FightDistance}
+	call DMove 50 10 -637 ${speed} ${FightDistance}
 }	
 
 function step001()
@@ -116,8 +144,11 @@ function step001()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 
-	call DMove 231 11 -637 3
-	call DMove 538 -17 -635 3
+	call DMove 231 11 -637 ${speed} ${FightDistance}
+	call DMove 288 2 -631  ${speed} ${FightDistance}
+	wait 100
+	call DMove 296 0 -637 ${speed} ${FightDistance}
+	call DMove 538 -17 -635 ${speed} ${FightDistance}
 	call DMove 529 -14 -633 1
 	call DMove 571 -17 -575 1
 	call DMove 593 -17 -554 1
@@ -129,9 +160,9 @@ function step001()
 	call DMove 760 -17 -689 1
 	call DMove 736 -17 -723 1
 	
-	call DMove 704 3 -748 3
-	call DMove 625 37 -748 3
-	call DMove 593 38 -720 3
+	call DMove 704 3 -748 ${speed} ${FightDistance}
+	call DMove 625 37 -748 ${speed} ${FightDistance}
+	call DMove 593 38 -720 ${speed} ${FightDistance}
 	
 	wait 100
 	echo must kill "${Named}"
@@ -160,38 +191,40 @@ function step002()
 	
 	Ob_AutoTarget:Clear
 	
-	call DMove 574 38 -712 3
-	call DMove 540 56 -673 3
-	call DMove 531 73 -634 3
-	call DMove 537 86 -587 3
-	call DMove 562 90 -556 3
-	call DMove 600 90 -516 3
-	call DMove 647 114 -492 3
-	call DMove 719 144 -520 3
+	call DMove 574 38 -712 ${speed} ${FightDistance}
+	call DMove 540 56 -673 ${speed} ${FightDistance}
+	call DMove 531 73 -634 ${speed} ${FightDistance}
+	call DMove 537 86 -587 ${speed} ${FightDistance}
+	call DMove 562 90 -556 ${speed} ${FightDistance}
+	call DMove 600 90 -516 ${speed} ${FightDistance}
+	call DMove 647 114 -492 ${speed} ${FightDistance}
+	call DMove 719 144 -520 ${speed} ${FightDistance}
 	
 	call DMove 769 145 -564 1
 	
-	call DMove 794 169 -612 3
-	call DMove 789 193 -668 3
-	call DMove 767 198 -690 3
+	call DMove 794 169 -612 ${speed} ${FightDistance}
+	call DMove 789 193 -668 ${speed} ${FightDistance}
+	call DMove 767 198 -690 ${speed} ${FightDistance}
 	call DMove 725 198 -717 1
 	wait 100
 	if (${Me.Loc.X}<800)
 	do
 	{
-		call DMove 726 198 -719 1
-		press MOVEFORWARD
+		call MoveCloseTo "floor_diode_any_enchanter"
+		call PKey MOVEFORWARD 1
 		wait 50
 	}
 	while (${Me.Loc.X}<800)
-	call DMove 783 341 -751 3
-	call DMove 726 311 -692 3
-	call DMove 657 309 -635 3
+	call DMove 783 341 -751 ${speed} ${FightDistance}
+	call DMove 726 311 -692 ${speed} ${FightDistance}
+	call DMove 657 309 -635 ${speed} ${FightDistance}
 	oc !c -CampSpot ${Me.Name}
 	oc !c -joustout ${Me.Name}
 	InRing:Set[TRUE]
 	echo must kill "${Named}"
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 	do
@@ -208,7 +241,6 @@ function step002()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 }
 
 function step003()
@@ -217,72 +249,59 @@ function step003()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove 721 310 -688 3
-	call DMove 778 341 -746 3
-	call DMove 853 341 -821 3
+	call DMove 642 309 -615 3
+	call ActivateVerb "Zone to Bottom" 642 309 -615 "Return to Bottom of Tower" TRUE
 	wait 50
-	if (!${Me.Loc.X}<800)
-	do
-	{
-		
-		if (!${Me.Loc.X}<800)
-		{
-			call DMove 845 341 -809 1
-			wait 50
-		}
-		if (!${Me.Loc.X}<800)
-		{
-			call DMove 858 341 -825 1
-			wait 50
-		}
-		face 853 -821
-		if (!${Me.Loc.X}<800)
-			press MOVEFORWARD
-		wait 50
-	}
-	while (!${Me.Loc.X}<800)
-	
-	call DMove 770 198 -693 3
-	call DMove 801 181 -638 3
-	call DMove 773 147 -574 3
-	call DMove 719 145 -525 1
-	
-	call DMove 687 132 -495 3
-	call DMove 613 97 -502 3
-	call DMove 557 90 -562 1
-	call DMove 528 82 -602 3
-	call DMove 537 56 -675 3
-	call DMove 566 38 -702 3
-	call DMove 617 38 -744 1
-	call DMove 688 12 -755 3
-	call DMove 766 -17 -691 1
-	call DMove 774 -17 -597 1
-	call DMove 755 -17 -549 1
-	call DMove 712 -17 -524 1
-	call DMove 624 -17 -518 1
-	call DMove 535 -17 -640 1
-	call DMove 583 -17 -734 1
+	face 701 31 -565
+	press -hold MOVEFORWARD
+	wait 20
+	press JUMP
+	wait 10
+	press JUMP
+	press -release MOVEFORWARD
+	call DMove 768 -17 -610 1
 	wait 100
 	call CountItem "frostbite crystal"
 	if (${Return}<1)
 	{
 		do
 		{
-			call DMove 535 -17 -640 1
-			call DMove 624 -17 -518 1
-			call DMove 712 -17 -524 1
-			call DMove 755 -17 -549 1
-			wait 100
-			call DMove 712 -17 -524 1
-			call DMove 583 -17 -734 1
-			call DMove 624 -17 -518 1
-			call DMove 535 -17 -640 1
-			call DMove 583 -17 -734 1
+			call DMove 782 -17 -600 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 757 -17 -551 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 717 -17 -519 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 662 -17 -504 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 582 -17 -533 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 541 -17 -593 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 540 -17 -676 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 575 -17 -726 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 618 -17 -757 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 677 -17 -758 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 711 -17 -705 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 763 -17 -711 1
+			call getChest "Auliffe Chaoswind's Treasure"
+			call DMove 785 -17 -652 1
+			call getChest "Auliffe Chaoswind's Treasure"
 			call CountItem "frostbite crystal"
 		}
 		while (${Return}<1)
 	}
-	call DMove 551 -17 -649 1
+	call DMove 782 -17 -600 1
+	call DMove 757 -17 -551 1
+	call DMove 717 -17 -519 1
+	call DMove 662 -17 -504 1
+	call DMove 582 -17 -533 1
+	call DMove 538 -17 -630 1
 	call DMove 520 -11 -635 1
 	call DMove 262 5 -636 1
 	call DMove 230 11 -636 3
@@ -293,301 +312,179 @@ function step003()
 function step004()
 {
 	eq2execute merc resume
-		
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove -19 10 -543 3
-	call DMove -59 10 -639 3
-	call DMove -239 12 -634 3
-	call DMove -541 -17 -635 3
-	call DMove -578 -17 -565 3
-	call DMove -641 -17 -519 3
-	call DMove -178 -17 -529 3
-	call DMove -781 -17 -623 3
-	call DMove -766 -17 -672 3
-	call DMove -745 -17 -712 3
-	call DMove -706 12 -752 3
-	call DMove -653 34 -758 3
-	call DMove -588 38 -723 3
-	call DMove -537 61 -683 3
-	call DMove -525 84 -615 3
-	call DMove -560 90 -554 3
-	call DMove -577 90 -529 3
-	call DMove -626 114 -489 3
-	call DMove -718 145 -517 3
-	call DMove -736 145 -539 3
-	call DMove -755 145 -551 3
-	call DMove -800 174 -604 3
-	call DMove -763 198 -703 3
-	call DMove -781 199 -723 3
-	call DMove -881 213 -795 3
-	call DMove -1023 255 -896 3
-	call DMove -1045 256 -905 3
-	call DMove -1118 255 -955 3
-	call DMove -1162 256 -1018 3
-	call DMove -1188 256 -1039 3
-	call DMove -1275 295 -1235 3
-	call DMove -1352 290 -1288 3
+	call DMove -19 10 -543 ${speed} ${FightDistance}
+	call DMove -59 10 -639 ${speed} ${FightDistance}
+}
+	
+function step005()
+{
+	eq2execute merc resume
+	call StopHunt
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+	call DMove -239 12 -634 ${speed} ${FightDistance}
+	call DMove -541 -17 -635 ${speed} ${FightDistance}
+	call DMove -578 -17 -565 ${speed} ${FightDistance}
+	call DMove -641 -17 -519 ${speed} ${FightDistance}
+	call DMove -738 -17 -542 ${speed} ${FightDistance}
+	call DMove -781 -17 -623 ${speed} ${FightDistance}
+	call DMove -766 -17 -672 ${speed} ${FightDistance}
+	call DMove -745 -17 -712 ${speed} ${FightDistance}
+	call DMove -706 12 -752 ${speed} ${FightDistance}
+	call DMove -653 34 -758 ${speed} ${FightDistance}
+	call DMove -588 38 -723 ${speed} ${FightDistance}
+	call DMove -537 61 -683 ${speed} ${FightDistance}
+	call DMove -525 84 -615 ${speed} ${FightDistance}
+	call DMove -560 90 -554 ${speed} ${FightDistance}
+	call DMove -577 90 -529 ${speed} ${FightDistance}
+	call DMove -626 114 -489 ${speed} ${FightDistance}
+	call DMove -718 145 -517 ${speed} ${FightDistance}
+	call DMove -736 145 -539 ${speed} ${FightDistance}
+	call DMove -755 145 -551 ${speed} ${FightDistance}
+	call DMove -800 174 -604 ${speed} ${FightDistance}
+	call DMove -763 198 -703 ${speed} ${FightDistance}
+	call DMove -781 199 -723 ${speed} ${FightDistance}
+	call DMove -881 213 -795 ${speed} ${FightDistance}
+	call DMove -1023 255 -896 ${speed} ${FightDistance}
+	call DMove -1045 256 -905 ${speed} ${FightDistance}
+	call DMove -1118 255 -955 ${speed} ${FightDistance}
+	call DMove -1162 256 -1018 ${speed} ${FightDistance}
+	call DMove -1188 256 -1039 ${speed} ${FightDistance}
+	call DMove -1275 295 -1235 ${speed} ${FightDistance}
+	call DMove -1352 290 -1288 ${speed} ${FightDistance}
 }
 
-function step005()
+function step006()
 {
 	variable string Named
 	Named:Set["Keeper of Past Lore"]
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	call DMove 366 -474 -89 ${speed} ${FightDistance}
-	call DMove 331 -474 -89 ${speed} ${FightDistance}
-	call DMove 286 -474 -91 ${speed} ${FightDistance}
-	call DMove 226 -475 -90 ${speed} ${FightDistance}
-	call DMove 222 -474 -142 ${speed} ${FightDistance}
-	call DMove 222 -487 -237 ${speed} ${FightDistance}
-	call DMove 223 -492 -293 ${speed} ${FightDistance}
-	call DMove 173 -494 -298 ${speed} ${FightDistance}
-	call DMove 123 -502 -299 ${speed} ${FightDistance}
-	call DMove 73 -510 -299 ${speed} ${FightDistance}
-	call DMove -4 -517 -305 ${speed} ${FightDistance}
 	
-	call StopHunt
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	
-	call DMove -28 -517 -244 ${speed} ${FightDistance}
-	
-	do
-	{
-		face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
-		if (!${Actor["${Named}"].CheckCollision})
-		{
-			echo must kill "${Named}"
-			call DMove ${Actor["${Named}"].X}  ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
-		}
-		wait 10
-	}
-	while (!${Me.InCombatMode})
-	oc !c -CampSpot ${Me.Name}
-	do
-	{
-		wait 10
-		ExecuteQueued
-		call IsPresent "${Named}" 80
-	}
-	while (${Return})
-	oc !c -letsgo ${Me.Name}
-	call PKey ZOOMOUT 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-
-function step006()
-{
-	variable string Named
-	variable string Nest
-	variable int Counter=0
-	
-	Named:Set["Wavadozzik Adan"]
-	Nest:Set["an arachnae nest"]
-	eq2execute merc resume
-	call StopHunt
-	
-	OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",40]
-	Ob_AutoTarget:AddActor["${Nest}",0,FALSE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_meleeattack","FALSE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	target ${Me.Name}
-	call PKey "Page Up" 5
-	call PKey ZOOMOUT 20	
-	call DMove -84 -520 163 3 30 TRUE
-	target "${Named}"
-	wait 20
-	do
-	{	
-		target "${Named}"
-		wait 5
-	}
-	while (!${Me.InCombatMode})
-	
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
-	
-	call DMove -58 -521 113 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
-	
-	call DMove -80 -521 162 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
-
-	call DMove -55 -521 110 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
-		
-	call PKey CENTER 5
-	call PKey "Page Down" 3
-	Ob_AutoTarget:Clear
-	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	call DMove -1417 289 -1297 3
 	echo must kill "${Named}"
-	call DMove ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
 	do
 	{
 		wait 10
-		call IsPresent "${Named}"
+		call IsPresent "${Named}" 500
 	}
 	while (${Return})
-	eq2execute summon
-	wait 20
+	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
-	call DMove -2 -517 122 ${speed} ${FightDistance}
-	call DMove 222 -492 125 ${speed} ${FightDistance}
-	call DMove 220 -475 -89 ${speed} ${FightDistance}
+	eq2execute summon
+	wait 50
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
-	
+
 function step007()
 {
-	variable string Named
+	call DMove -1508 289 -1242 ${speed} ${FightDistance}
+	call DMove -1524 295 -1125 ${speed} ${FightDistance}
+	call DMove -1476 307 -1071 ${speed} ${FightDistance}
+	call DMove -1449 309 -1071 ${speed} ${FightDistance}
+	call DMove -1370 315 -1037 ${speed} ${FightDistance}
+	call DMove -1291 321 -999 ${speed} ${FightDistance}
+	call DMove -1178 346 -977 ${speed} ${FightDistance}
+	call DMove -1082 366 -935 ${speed} ${FightDistance}
+	call DMove -1064 367 -931 ${speed} ${FightDistance}
+	call DMove -1033 366 -903 ${speed} ${FightDistance}
+	call DMove -917 347 -820 ${speed} ${FightDistance}
+}
 	
-	Named:Set["Bhaly Adan"]
-	eq2execute merc resume
-	
-	call DMove 124 -482 -89 ${speed} ${FightDistance}
-	call PKey ZOOMOUT 20	
-	call DMove -5 -473 -89 3 30 TRUE
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	Ob_AutoTarget:AddActor["Primordial",0,TRUE,FALSE]
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	target "${Named}"
-	wait 20
-	do
-	{	
-		target "${Named}"
-		wait 5
-	}
-	while (!${Me.InCombatMode})
-	call AlterGenes
-	echo must kill "${Named}"
+function step008()
+{
+	echo "waiting for best moment to move on"
 	do
 	{
-		ExecuteQueued
+		wait 10
+	}
+	while (${Actor["a virulent sandstorm"].X} > -870 || ${Actor["a virulent sandstorm"].Z}<-800)
+	echo "GO GO GO"
+	call DMove -813 345 -740 3 5 TRUE TRUE 
+}
+
+function step009()
+{
+	variable string Named
+	Named:Set["Gaukr Sandstorm"]
+	call DMove -652 309 -626 ${speed} ${FightDistance}
+	
+	oc !c -CampSpot ${Me.Name}
+	oc !c -joustout ${Me.Name}
+	
+	Ob_AutoTarget:Clear
+	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	
+	echo must kill "${Named}"
+	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 20 0 20
+	do
+	{
 		wait 10
 		call IsPresent "${Named}"
 	}
 	while (${Return})
+	
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
-	wait 20
+	wait 50
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	oc !c -letsgo ${Me.Name}
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	wait 20
-	call DMove 452 -474 -90 3 30
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 20
-	call DMove -82 65 164 3 30
-	call DMove -406 49 138 3 30
-	call DMove -443	28 225 3 30
-	call DMove -462 28 236 3 30
-	OgreBotAPI:Special["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	oc !c -letsgo ${Me.Name}
 }
-
-function FightDarwol()
+function step010()
 {
-	variable string Named
-	Named:Set["Darwol Adan"]	
-	oc !c -joustin ${Me.Name}
-	Ob_AutoTarget:Clear
-	target ${Me.Name}
-	call PKey CENTER 1
-	call PKey ZOOMIN 20
-	call GetObject "Pus Barrel" "Pick up"
-	face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
-	oc !c -joustout ${Me.Name}
-	wait 10
-	face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
-	wait 10
-	MouseTo 960,700
-	face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
-	wait 20
-	
-	press Mouse1
-	wait 20
-	call IsPresent "barrel of volatile pus"
-	Ob_AutoTarget:AddActor["Pus Barrel",0,TRUE,FALSE]
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	
-	if (!${Return})
+	call DMove -617 309 -600 3
+	call ActivateVerb "Zone to Bottom" -617 309 -600 "Return to Bottom of Tower" TRUE
+	wait 50
+	do
 	{
-		call PKey MOVEFORWARD 20
-		QueueCommand call FightDarwol
+		call DMove -618 -17 -709 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call CountItem "bead of polished krendicite"
 	}
+	while (${Return}<1)
 }
-
-function AlterGenes()
+function step011()
 {
-	variable string Named
-	Named:Set["Bhaly Adan"]
-	Ob_AutoTarget:Clear
-	target ${Me.Name}
-	call DMove 71 -483 -92 3 30 TRUE
-	call DMove -5 -483 -29 3 30 TRUE
-	{
-		call ActivateVerb "Infected Microbe" -5 -483 -29 "Alter genes" TRUE
-		wait 10
-		call IsPresent "Infected Microbe" 20
-	} 
-	
-	call DMove -84 -483 -90 3 30 TRUE
-	{
-		call ActivateVerb "Infected Microbe" -84 -483 -90 "Alter genes" TRUE
-		wait 10
-		call IsPresent "Infected Microbe" 20
-	}
-	call DMove -10 -483 -147 3 30 TRUE
-	{
-		call ActivateVerb "Infected Microbe" -10 -483 -147 "Alter genes" TRUE
-		wait 10
-		call IsPresent "Infected Microbe" 20
-	}
-	call DMove 71 -483 -92 3 30 TRUE
-	{
-		call ActivateVerb "Infected Microbe" 71 -483 -92 "Alter genes" TRUE
-		wait 10
-		call IsPresent "Infected Microbe" 20
-	} 
-	call DMove -6 -473 -90 3 30 TRUE
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	call DMove -566 -17 -697 ${speed} ${FightDistance}
+	call DMove -540 -17 -637 ${speed} ${FightDistance}
+	call DMove -386 2 -632 3
+	call DMove -269 5 -638 3
+	call DMove -230 12 -645 3
+	call DMove -47 10 -647 3
+	call DMove -16 10 -555 3
+	call DMove 5 11 -537 3
+	call DMove -3 10 -380 3
+	call DMove -2 5 -302 3
+	call DMove 0 -2 -13 3
+}
+function step012()
+{
+	call DMove 0 0 -3 
+	call ActivateVerb "Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
+	wait 50
 }
 
+function getChest(string ChestName)
+{
+	call IsPresent "${ChestName}" 30
+	if (${Return}<1)
+	{
+		call MoveCloseTo "${ChestName}"
+	}
+}
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
@@ -611,11 +508,6 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 atom HandleAllEvents(string Message)
  {
 	;echo Catch Event ${Message}
-    if (${Message.Find["lord of the festrus returns"]} > 0)
-	{
-		FestrusLord:Set[TRUE]
-		echo Lord of the Festrus detected
-	}
 	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
 	{
 		echo "I am dead"

@@ -4,7 +4,7 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=1
+	variable int laststep=2
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	wait 20
@@ -74,12 +74,20 @@ function step001()
 function step002()
 {
 	call goCoV
-	call waitfor_Zone "Coliseum of Valor"
-	call DMove -2 5 4 3
-	call DMove -167 3 7 3
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 50
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+	{	
+		call DMove -2 5 4 3
+		call DMove -92 3 -158 3
 		
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
+		wait 20
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+		wait 50
+	}
+	call waitfor_Zone "Torden, Bastion of Thunder: Winds of Change [Solo]"
+	echo will clear zone "${Zone.Name}" Now !
+    call RunZone
+	echo zone "${Zone.Name}" Cleared !	
 }
 function step003()
 {	
