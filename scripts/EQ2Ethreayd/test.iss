@@ -12,22 +12,30 @@
 #define WALK shift+r
 #define ZOOMIN "Num +"
 #define ZOOMOUT "Num -"
+variable(script) bool Windy
 
 function main()
 {
-	echo 1
-	return
-	echo 4
+	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+		call DMove -502 341 482 3
+	call DMove -552 341 521 3
+	call DMove -662 310 634 3
+
 }
 
-
-
 atom HandleAllEvents(string Message)
- {
+{
 	;echo Catch Event ${Message}
-    if (${Message.Find["lord of the festrus returns"]} > 0)
+	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
 	{
-		FestrusLord:Set[TRUE]
-		echo Lord of the Festrus detected
+		echo "I am dead"
+		if ${Script["livedierepeat"](exists)}
+			endscript livedierepeat
+		run EQ2Ethreayd/livedierepeat
 	}
- }
+	if (${Message.Find["feel unsteady on your feet"]} > 0)
+	{
+		Windy:Set[TRUE]
+	}
+}

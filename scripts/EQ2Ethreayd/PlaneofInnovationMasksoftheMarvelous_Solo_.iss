@@ -376,7 +376,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		target "The Glitched Guardian 10101"
 		eq2execute merc ranged
 	}
-	if (${Message.Find["SECURITY BREACH!!!"]} > 0)
+	if (${Message.Find["BREACH!!! ALERT"]} > 0)
 	{
 		Detected:Set[TRUE]
 		echo "Detected in tunnel - restarting"

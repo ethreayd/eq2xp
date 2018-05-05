@@ -257,6 +257,7 @@ function step004()
 	
 	call DMove -130 4 -197 2 ${FightDistance}
 	call AutoPassDoor "Junkyard East Door 05" -155 4 -196
+	wait 50
 	call AutoPassDoor "Junkyard East Door 04" -166 4 -196
 	call DMove -188 4 -107 3 ${FightDistance}
 	call DMove -153 3 -72 3 ${FightDistance}

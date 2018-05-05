@@ -144,11 +144,15 @@ function step001()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 
-	call DMove 231 11 -637 ${speed} ${FightDistance}
-	call DMove 288 2 -631  ${speed} ${FightDistance}
+	call DMove 231 11 -637 1
+	call DMove 288 2 -631  1
 	wait 100
-	call DMove 296 0 -637 ${speed} ${FightDistance}
-	call DMove 538 -17 -635 ${speed} ${FightDistance}
+	call DMove 296 0 -637 1
+	call DMove 307 -2 -636 1
+	call DMove 339 5 -637 1
+	call DMove 402 -1 -636 1
+	call DMove 468 -4 -636 1
+	call DMove 538 -17 -635 1
 	call DMove 529 -14 -633 1
 	call DMove 571 -17 -575 1
 	call DMove 593 -17 -554 1
@@ -191,20 +195,18 @@ function step002()
 	
 	Ob_AutoTarget:Clear
 	
-	call DMove 574 38 -712 ${speed} ${FightDistance}
+	call DMove 574 38 -712 1
 	call DMove 540 56 -673 ${speed} ${FightDistance}
 	call DMove 531 73 -634 ${speed} ${FightDistance}
 	call DMove 537 86 -587 ${speed} ${FightDistance}
-	call DMove 562 90 -556 ${speed} ${FightDistance}
-	call DMove 600 90 -516 ${speed} ${FightDistance}
-	call DMove 647 114 -492 ${speed} ${FightDistance}
-	call DMove 719 144 -520 ${speed} ${FightDistance}
-	
+	call DMove 562 90 -556 1
+	call DMove 600 90 -516 1
+	call DMove 647 114 -492 ${speed} ${FightDistance} 
+	call DMove 719 144 -520 ${speed} ${FightDistance} 
 	call DMove 769 145 -564 1
-	
 	call DMove 794 169 -612 ${speed} ${FightDistance}
 	call DMove 789 193 -668 ${speed} ${FightDistance}
-	call DMove 767 198 -690 ${speed} ${FightDistance}
+	call DMove 767 198 -690 1
 	call DMove 725 198 -717 1
 	wait 100
 	if (${Me.Loc.X}<800)
@@ -245,6 +247,7 @@ function step002()
 
 function step003()
 {
+	variable bool Loop=FALSE
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
@@ -252,7 +255,7 @@ function step003()
 	call DMove 642 309 -615 3
 	call ActivateVerb "Zone to Bottom" 642 309 -615 "Return to Bottom of Tower" TRUE
 	wait 50
-	face 701 31 -565
+	face 701 -565
 	press -hold MOVEFORWARD
 	wait 20
 	press JUMP
@@ -261,41 +264,45 @@ function step003()
 	press -release MOVEFORWARD
 	call DMove 768 -17 -610 1
 	wait 100
-	call CountItem "frostbite crystal"
-	if (${Return}<1)
+	do
 	{
-		do
+		call DMove 782 -17 -600 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 757 -17 -551 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 717 -17 -519 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 662 -17 -504 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 582 -17 -533 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 541 -17 -593 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 540 -17 -676 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 575 -17 -726 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 618 -17 -757 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 677 -17 -758 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 711 -17 -705 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 763 -17 -711 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call DMove 785 -17 -652 1
+		call getChest "Auliffe Chaoswind's Treasure"
+		call check_quest "Legacy of Power: Through Storms and Mists"
+		if (${Return})
 		{
-			call DMove 782 -17 -600 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 757 -17 -551 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 717 -17 -519 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 662 -17 -504 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 582 -17 -533 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 541 -17 -593 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 540 -17 -676 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 575 -17 -726 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 618 -17 -757 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 677 -17 -758 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 711 -17 -705 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 763 -17 -711 1
-			call getChest "Auliffe Chaoswind's Treasure"
-			call DMove 785 -17 -652 1
-			call getChest "Auliffe Chaoswind's Treasure"
 			call CountItem "frostbite crystal"
+			if (${Return}<1)
+				Loop:Set[TRUE]
+			else
+				Loop:Set[FALSE]
 		}
-		while (${Return}<1)
 	}
+	while (${Loop})
 	call DMove 782 -17 -600 1
 	call DMove 757 -17 -551 1
 	call DMove 717 -17 -519 1
@@ -445,6 +452,7 @@ function step009()
 }
 function step010()
 {
+	variable bool Loop=FALSE
 	call DMove -617 309 -600 3
 	call ActivateVerb "Zone to Bottom" -617 309 -600 "Return to Bottom of Tower" TRUE
 	wait 50
@@ -452,9 +460,17 @@ function step010()
 	{
 		call DMove -618 -17 -709 ${speed} ${FightDistance}
 		call getChest "Gaukr Sandstorm's Treasure"
-		call CountItem "bead of polished krendicite"
+		call check_quest "Legacy of Power: Through Storms and Mists"
+		if (${Return})
+		{
+			call CountItem "bead of polished krendicite"
+			if (${Return}<1)
+				Loop:Set[TRUE]
+			else
+				Loop:Set[FALSE]
+		}
 	}
-	while (${Return}<1)
+	while (${Loop})
 }
 function step011()
 {
@@ -477,14 +493,7 @@ function step012()
 	wait 50
 }
 
-function getChest(string ChestName)
-{
-	call IsPresent "${ChestName}" 30
-	if (${Return}<1)
-	{
-		call MoveCloseTo "${ChestName}"
-	}
-}
+
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 

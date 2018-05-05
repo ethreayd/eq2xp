@@ -781,7 +781,69 @@ function DescribeActor(int ActorID)
 	echo SuffixTitle:		${Actor[${ActorID}].SuffixTitle}
 	echo ConColor:			${Actor[${ActorID}].ConColor}
 }
-
+function DescribeItemInventory(string ItemName)
+{
+	variable index:item Items
+    variable iterator ItemIterator
+    variable int Counter = 1
+    
+    Me:QueryInventory[Items, Location == "Inventory" && Name == "${ItemName}"]
+    Items:GetIterator[ItemIterator]
+ 
+ 
+    if ${ItemIterator:First(exists)}
+    {
+        do
+        {
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;; This routine is echoing the item "Description", so we must ensure that the iteminfo 
+            ;; datatype is available.
+            if (!${ItemIterator.Value.IsItemInfoAvailable})
+            {
+                ;; When you check to see if "IsItemInfoAvailable", ISXEQ2 checks to see if it's already
+                ;; cached (and immediately returns true if so).  Otherwise, it spawns a new thread 
+                ;; to request the details from the server.   
+                do
+                {
+                    waitframe
+                    ;; It is OK to use waitframe here because the "IsItemInfoAvailable" will simply return
+                    ;; FALSE while the details acquisition thread is still running.   In other words, it 
+                    ;; will not spam the server, or anything like that.
+                }
+                while (!${ItemIterator.Value.IsItemInfoAvailable})
+            }
+            ;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;; At this point, the "ToItemInfo" MEMBER of this object will be immediately available.  It should
+            ;; remain available until the cache is cleared/reset (which is not very often.)
+            echo "${Counter}. ${ItemIterator.Value.Name} : Index : '${ItemIterator.Value.ToItemInfo.Index}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : ID : '${ItemIterator.Value.ToItemInfo.ID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : SerialNumber : '${ItemIterator.Value.ToItemInfo.SerialNumber}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Name : '${ItemIterator.Value.ToItemInfo.Name}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Location : '${ItemIterator.Value.ToItemInfo.Location}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : ToLink : '${ItemIterator.Value.ToItemInfo.ToLink}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : LinkID : '${ItemIterator.Value.ToItemInfo.LinkID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IconID : '${ItemIterator.Value.ToItemInfo.IcondID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Quantity : '${ItemIterator.Value.ToItemInfo.Quantity}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : EffectiveLevel : '${ItemIterator.Value.ToItemInfo.EffectiveLevel}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Slot : '${ItemIterator.Value.ToItemInfo.Slot}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsReady : '${ItemIterator.Value.ToItemInfo.IsReady}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : TimeUntilReady : '${ItemIterator.Value.ToItemInfo.TimeUntilReady}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : InInventorySlot : '${ItemIterator.Value.ToItemInfo.InInventorySlot}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsInventoryContainer : '${ItemIterator.Value.ToItemInfo.IsInventoryContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsBankConatainer : '${ItemIterator.Value.ToItemInfo.IsBankContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsSharedBankContainer : '${ItemIterator.Value.ToItemInfo.IsSharedBankContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsAutoConsumeable : '${ItemIterator.Value.ToItemInfo.IsAutoConsumeable}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : AutoConsumeOn : '${ItemIterator.Value.ToItemInfo.AutoConsumeOn}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : CanBeRedeemed : '${ItemIterator.Value.ToItemInfo.CanBeRedeemed}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsFoodOrDrink : '${ItemIterator.Value.ToItemInfo.IsFoodOrDrink}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.ToItemInfo.IsScribeable}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.ToItemInfo.IsUsable}'"
+            Counter:Inc
+        }
+        while ${ItemIterator:Next(exists)}
+    }
+}
 function Evac()
 {
 	echo not implemented yet
@@ -869,7 +931,15 @@ function Get2DDirection(float X, float Z)
 		return "STRAFERIGHT"
 	else
 		return "STRAFELEFT"
-}		
+}	
+function getChest(string ChestName)
+{
+	call IsPresent "${ChestName}" 30
+	if (${Return})
+	{
+		call MoveCloseTo "${ChestName}"
+	}
+}
 function GetObject(string ObjectName, string ObjectVerb)
 {
 	variable index:actor Actors
@@ -1137,7 +1207,7 @@ function isGroupDead()
 		return FALSE
 }
 
-function IsPresent(string ActorName, int Distance)
+function IsPresent(string ActorName, int Distance, bool Exact)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
@@ -1146,7 +1216,10 @@ function IsPresent(string ActorName, int Distance)
 	if (${Distance}<1)
 		Distance:Set[200]
 	
-	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
+	if (${Exact})
+		EQ2:QueryActors[Actors, Name  == "${ActorName}" && Distance <= ${Distance}]
+	else
+		EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -1161,6 +1234,8 @@ function IsPresent(string ActorName, int Distance)
 	else
 		return FALSE
 }
+
+
 function JoustOut(int ActorID, float Distance)
 {
 	variable float AvoidDistance
@@ -1246,6 +1321,7 @@ function MoveCloseTo(string ActorName)
 	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
 	press -release MOVEFORWARD
 	wait 10
+	echo quitting MoveCloseTo function
 }
 					
 function MoveTo(string ActorName, float X, float Y, float Z, bool is2D)
@@ -1563,6 +1639,29 @@ function waitfor_Zone(string ZoneName)
 	while (!${Zone.Name.Equal["${ZoneName}"]})
 	wait 100
 	echo I am in ${ZoneName}
+}
+function WalkWithTheWind(float X, float Y, float Z)
+{
+	Windy:Set[FALSE]
+	do
+	{
+		face ${X} ${Z}
+		if (!${Windy})
+		{
+			press -hold MOVEFORWARD
+			wait 5
+			press -release MOVEFORWARD
+		}
+		else
+		{
+			press -release MOVEFORWARD
+			wait 100
+			Windy:Set[FALSE]
+		}
+		
+		call TestArrivalCoord ${X} ${Y} ${Z} 10 TRUE
+	}
+	while (!${Return})
 }
 
 

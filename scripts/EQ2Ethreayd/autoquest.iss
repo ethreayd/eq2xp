@@ -10,6 +10,7 @@ function main(string Loop)
 	OgreBotAPI:Revive[${Me.Name}]
 	wait 300
 	call goto_GH
+	wait 600
 	echo Repair
 	OgreBotAPI:RepairGear[${Me.Name}]
 	wait 300
