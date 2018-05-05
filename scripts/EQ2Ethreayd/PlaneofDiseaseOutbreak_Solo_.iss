@@ -107,10 +107,10 @@ function step001()
 	call ActivateVerb "crypt_17" 524 73 -13 "Reach for the crypt" TRUE TRUE
 	call DMove 530 70 -24 3
 	call ActivateVerb "crypt_13" 539 70 -30 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_18" 521 70 -30 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_15" 530 68 -49 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_18" 521 70 -30 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_15" 530 68 -49 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
 	;call ActivateVerb "crypt_19" 518 68 -47 "Reach for the crypt" TRUE TRUE
 	;call DMove 530 67 -50 3
 	;call DMove 530 83 44 3
