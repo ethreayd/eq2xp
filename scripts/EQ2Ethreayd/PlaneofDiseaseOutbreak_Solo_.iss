@@ -144,6 +144,8 @@ function step002()
 	call DMove 534 68 -43 ${speed} ${FightDistance}
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+
 	echo must kill "${Named}"
 	do
 	{
@@ -240,7 +242,7 @@ function step005()
 	call CheckCombat
 	call DMove 196 159 -219 3 ${FightDistance} TRUE
 	call DMove 147 188 -235 3 ${FightDistance} TRUE
-	call DMove 113 218 -199 3 ${FightDistance} TRUE
+	call DMove 113 218 -199 3 ${FightDistance} TRUE TRUE
 	call DMove 120 246 -141 3 ${FightDistance} TRUE
 	call DMove 257 321 -111 3 ${FightDistance} TRUE
 	call DMove 283 338 -84 3 ${FightDistance} TRUE
@@ -486,19 +488,19 @@ atom HandleAllEvents(string Message)
 		echo "Shit!"
 		target "pusling leaker"
 	}
-	if (${Message.Find["Puslings leak out from the giant"]} > 0)
+	if (${Message.Find["uslings leak out from the giant"]} > 0)
 	{
 		echo "Shit!!"
 		oc !c -CampSpot ${Me.Name}
 		oc !c -joustout ${Me.Name}
 		target "pusling leaker"
 	}
-	if (${Message.Find["a giant latcher latches onto you"]} > 0)
+	if (${Message.Find["latches onto you"]} > 0)
 	{
 		echo "Shit!!!"
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -100 0 0
 	}
-	if (${Message.Find["The giant latcher recedes back into"]} > 0)
+	if (${Message.Find["giant latcher recedes back into"]} > 0)
 	{
 		echo "Pfew!!!!"
 		oc !c -letsgo ${Me.Name}

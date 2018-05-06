@@ -2,6 +2,7 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
 	ScriptsToRun:Insert["loopPoID"]

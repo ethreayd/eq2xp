@@ -279,10 +279,8 @@ function step005()
 function step006()
 {	
 	variable string Named
-	variable string Avoid
 	variable float nb=-1
-	Named:Set["The Manaetic Behemoth"]
-	Avoid:Set["Manaetic Missile"]
+	Named:Set["Manaetic Behemoth"]
 	call StopHunt
 	eq2execute merc resume
 	call DMove -16 4 -117 3 ${FightDistance}
@@ -304,27 +302,14 @@ function step006()
 	do
 	{
 		wait 10
+		echo Avoid Red Circles function launched
 		call AvoidRedCircles 30
-		call IsPresent "${Named}"
+		call IsPresent "${Named}" 200
 	}
-	while (!${Return})
+	while (${Return})
 	
 	call PKey "ZOOMOUT" 20	
 	
-	do
-	{
-		wait 10
-		if (${Actor["${Avoid}"].Distance(exists)} && ${Actor["${Avoid}"].Distance} < 30)
-			{
-				echo  ${Actor["${ActorName}"].Distance}
-				;oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0  ${Math.Calc64[${nb}*30]}
-				wait 10
-				nb:Set[${Math.Calc64[${nb}* -1]]
-			}
-		call IsPresent "${Named}"
-	}
-	
-	while (${Return})
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
 	

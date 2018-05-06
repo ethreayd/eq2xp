@@ -448,6 +448,7 @@ function AvoidRedCircles(float Distance)
 		AvoidDistance:Set[${Distance}]
 		
 	EQ2:QueryActors[Actors, Distance <=${AvoidDistance} && Aura =- "design_circle_warning_zone"]
+	EQ2:QueryActors[Actors, Distance <=${AvoidDistance} && Aura =- "design_circle_warning_zone"]
 	
     Actors:GetIterator[ActorIterator]
 	
@@ -484,7 +485,7 @@ function check_quest(string questname)
 		echo "No active quests found."
 		return
 	}
-    
+	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	QuestJournalWindow:GetActiveQuests[Quests]
 	Quests:GetIterator[It]
 	if ${It:First(exists)}

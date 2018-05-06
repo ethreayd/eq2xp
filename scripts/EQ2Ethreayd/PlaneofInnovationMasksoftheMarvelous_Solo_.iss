@@ -222,15 +222,15 @@ function step004()
 	call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
 	if (!${Detected})
 	{
-		call DMove 237 -13 -219 2
+		call DMove 237 -13 -219 2 30 TRUE TRUE
 	}
 	if (!${Detected})
 	{
-		call DMove 220 -8 -218 2
+		call DMove 220 -8 -218 2 30 TRUE TRUE
 	}
 	if (!${Detected})
 	{
-		call DMove 173 10 -219 3
+		call DMove 173 10 -219 3 30 TRUE TRUE
 	}
 }
 	
@@ -256,15 +256,15 @@ function step005()
 			call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
 			if (!${Detected})
 			{
-				call DMove 237 -13 -219 2
+				call DMove 237 -13 -219 2 TRUE TRUE
 			}
 			if (!${Detected})
 			{
-				call DMove 220 -8 -218 2
+				call DMove 220 -8 -218 2 TRUE TRUE
 			}
 			if (!${Detected})
 			{
-				call DMove 173 10 -219 3
+				call DMove 173 10 -219 3 TRUE TRUE
 			}
 		}
 		while (${Detected})

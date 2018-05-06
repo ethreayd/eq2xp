@@ -18,9 +18,10 @@ function main()
 {
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-		call DMove -502 341 482 3
-	call DMove -552 341 521 3
-	call DMove -662 310 634 3
+	call ActivateVerb "crypt_18" 521 70 -30 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_15" 530 68 -49 "Reach for the crypt" TRUE TRUE
+	call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
 
 }
 

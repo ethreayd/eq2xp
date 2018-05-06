@@ -4,7 +4,7 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=2
+	variable int laststep=6
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	wait 20
@@ -91,59 +91,32 @@ function step002()
 }
 function step003()
 {	
-	call step002
-	call DMove -6 6 2 3
-	call Converse "${NPCName}" 10 TRUE
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call DMove -167 3 7 3
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 50
-		
+	call CurrentQuestStep
+	echo I am at step ${Return}
+	if (${Return}< 6
+		call step002
 }
 function step004()
 {
-	call goCoV
-	call waitfor_Zone "Coliseum of Valor"
-	wait 50
-	call DMove -6 6 2 3
-	call DMove -167 3 7 3
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 50
-	call DMove -193 3 0 3
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
-	wait 20
-	OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
-	wait 50	
-	call waitfor_Zone "Plane of Disease: the Source [Solo]"
+	call CurrentQuestStep
+	echo I am at step ${Return}
+	if (${Return}< 6
+		call step002
 	
 }
 function step005()
 {
-	if (!${Zone.Name.Equal["Plane of Disease: the Source [Solo]"]})
-	{	
-		call step004
-	}
-		
-	echo will clear zone "${Zone.Name}" Now !
-	call RunZone
-	echo zone "${Zone.Name}" Cleared !
+	call CurrentQuestStep
+	echo I am at step ${Return}
+	if (${Return}< 6
+		call step002
 }
 
 function step006()
 {
-	call step005
-}
-
-function step007()
-{
-	call step005
-}
-
-function step008()
-{
 	call goCoV
 	call waitfor_Zone "Coliseum of Valor"
 	call DMove -2 5 4 3
-	call Converse "${NPCName}" 10 TRUE
+	call Converse "Karana" 10 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
