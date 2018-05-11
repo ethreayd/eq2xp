@@ -298,7 +298,12 @@ function step006()
 	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
-
+	do
+	{
+		wait 10
+	}
+	while (!${Me.InCombatMode})
+	oc !c -letsgo
 	do
 	{
 		wait 10

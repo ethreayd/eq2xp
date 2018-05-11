@@ -2,6 +2,7 @@
 
 variable(script) int speed
 variable(script) int FightDistance
+variable(script) bool Fight
 
 function main(int stepstart, int stepstop, int setspeed)
 {
@@ -111,19 +112,12 @@ function step001()
 	call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
 	call ActivateVerb "crypt_15" 530 68 -49 "Reach for the crypt" TRUE TRUE
 	call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_19" 518 68 -47 "Reach for the crypt" TRUE TRUE
-	;call DMove 530 67 -50 3
-	;call DMove 530 83 44 3
-	;call ActivateVerb "crypt_10" 508 83 36 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_9" 499 83 34 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_8" 489 83 41 "Reach for the crypt" TRUE TRUE
-	;call ActivateVerb "crypt_7" 487 83 48 "Reach for the crypt" TRUE TRUE
+	
 		
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	;call ActivateVerb "crypt_6" 510 83 63 "Reach for the crypt" TRUE TRUE
 	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -140,7 +134,6 @@ function step002()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	;call DMove 533 82 34 ${speed} ${FightDistance}
 	call DMove 534 68 -43 ${speed} ${FightDistance}
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -234,21 +227,15 @@ function step005()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	
+	call ClimbingFMountain
 	
-	call DMove 308 97 -243 3 ${FightDistance} TRUE
-	call DMove 276 113 -217 3 ${FightDistance} TRUE
-	call DMove 271 176 -146 3 ${FightDistance} TRUE
-	wait 100
-	call CheckCombat
-	call DMove 196 159 -219 3 ${FightDistance} TRUE
-	call DMove 147 188 -235 3 ${FightDistance} TRUE
-	call DMove 113 218 -199 3 ${FightDistance} TRUE TRUE
-	call DMove 120 246 -141 3 ${FightDistance} TRUE
-	call DMove 257 321 -111 3 ${FightDistance} TRUE
-	call DMove 283 338 -84 3 ${FightDistance} TRUE
-	call DMove 285 371 -24 3 ${FightDistance} TRUE
-	call DMove 250 392 4 3 ${FightDistance} TRUE
-
+	do
+	{
+		wait 10
+		ExecuteQueued
+	}
+	while (${Me.Loc.Z}<0)
+	
 	eq2execute summon
 	wait 600
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -467,6 +454,32 @@ function step009()
 	OgreBotAPI:Special["${Me.Name}"]
 }
 
+function ClimbingFMountain()
+{
+	if (!${Fight})
+		call DMove 308 97 -243 3 ${FightDistance} TRUE
+	if (!${Fight})
+	call DMove 276 113 -217 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 196 159 -219 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 147 188 -235 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 113 218 -199 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 120 246 -141 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 257 321 -111 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 283 338 -84 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 285 371 -24 3 ${FightDistance} TRUE
+	if (!${Fight})
+		call DMove 250 392 4 3 ${FightDistance} TRUE
+	if (!${Fight})
+		OgreBotAPI:NoTarget[${Me.Name}]
+}
+
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
@@ -485,27 +498,26 @@ atom HandleAllEvents(string Message)
 	;echo Catch Event ${Message}
 	if (${Message.Find["stumbled into a giant latcher"]} > 0)
 	{
-		echo "Shit!"
-		target "pusling leaker"
+		Fight:Set[TRUE]
+		target ${Me.Name}
+		ogre navtest hide1
 	}
 	if (${Message.Find["uslings leak out from the giant"]} > 0)
 	{
-		echo "Shit!!"
-		oc !c -CampSpot ${Me.Name}
-		oc !c -joustout ${Me.Name}
 		target "pusling leaker"
 	}
 	if (${Message.Find["latches onto you"]} > 0)
 	{
-		echo "Shit!!!"
-		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -100 0 0
+		target "pusling leaker"
 	}
 	if (${Message.Find["giant latcher recedes back into"]} > 0)
 	{
-		echo "Pfew!!!!"
-		oc !c -letsgo ${Me.Name}
+		target ${Me.Name}
+		ogre navtest node1
+		Fight:Set[FALSE]
+		QueueCommand call ClimbingFMountain
 	}
-	if (${Message.Find["Planar static increases"]} > 0)
+	if (${Message.Find["lanar static increases"]} > 0)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -40
 	}

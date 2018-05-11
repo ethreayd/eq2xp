@@ -1,12 +1,13 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main(string ZoneName)
+function main()
 {
 	variable int Counter
 	variable bool LR
+	variable string ZoneName
 			echo rebooting session
 			call StopHunt
-			;run EQ2Ethreayd/killall
+			ZoneName:Set["${Zone.Name}"]
 			call PKey MOVEFORWARD 1
 			OgreBotAPI:Revive[${Me.Name}]
 			wait 300
@@ -25,11 +26,15 @@ function main(string ZoneName)
 			OgreBotAPI:RepairGear[${Me.Name}]
 			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
 			call waitfor_Zone "Plane of Magic"
-			call goCov
+			call goCoV
 			call DMove -2 5 4 3
 			switch ${Zone.Name}
-			run EQ2Ethreayd/${Loop}
-		}
-	}
-	while (1==1)
+			{
+				case "Plane of Magic"
+					call goCoV
+				break
+				default
+					run loopPoI
+				break
+			}
 }
