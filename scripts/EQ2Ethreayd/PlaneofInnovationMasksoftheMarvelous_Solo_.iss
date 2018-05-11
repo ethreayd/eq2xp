@@ -355,7 +355,7 @@ function OpenChargedDoor()
 	PrimaryWeapon:Set["${Me.Equipment[Primary]}"]
 	Me.Inventory["Electro-Charged Clockwork Hand"]:Equip
 	wait 20
-	call AutoPassDoor "door_hand_lock" 145 3 -55
+	call AutoPassDoor "door_hand_lock" 145 3 -55 TRUE
 	wait 20
 	call CheckCombat ${FightDistance}
 	Me.Inventory["${PrimaryWeapon}"]:Equip

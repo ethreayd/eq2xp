@@ -111,8 +111,8 @@ function step000()
 	call DMove 1 12 -346 3
 	call DMove 3 10 -458 ${speed} ${FightDistance}
 	call DMove -2 10 -488 ${speed} ${FightDistance}
-	wait 100
-	call DMove 0 10 -502 ${speed} ${FightDistance}
+	call DMove 13 11 -477 ${speed} ${FightDistance}
+	call DMove -5 10 -504 ${speed} ${FightDistance}
 	wait 100
 	echo must kill "${Named}"
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]

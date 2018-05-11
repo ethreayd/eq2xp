@@ -2,6 +2,11 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	
+	ScriptsToRun:Insert["LegacyofPowerDeepTrouble"]
+	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Solo_"]
+	ScriptsToRun:Insert["LegacyofPowerDrawntotheFire"]
+	ScriptsToRun:Insert["LegacyofPowerGlimpseoftheHereother"]
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]

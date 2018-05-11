@@ -420,7 +420,7 @@ function AutoHunt(int distance)
 	}
 }
 
-function AutoPassDoor(string DoorName, float X, float Y, float Z)
+function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQueue)
 {
 	echo autopassing "${DoorName}"
 	do
@@ -432,6 +432,8 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z)
 		call OpenDoor "${DoorName}"
 		wait 10
 		call 2DNav ${X} ${Z}
+		if (${ExecuteQueue})
+			ExecuteQueued
 		call TestArrivalCoord ${X} ${Y} ${Z} 8 TRUE
 	}
 	while (!${Return})
@@ -596,7 +598,7 @@ function CheckWalking()
 				return TRUE
 }				
 
-function Converse(string NPCName, int bubbles, bool giant)
+function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
 	if (${giant})
@@ -613,7 +615,8 @@ function Converse(string NPCName, int bubbles, bool giant)
 	variable int x
    	for ( x:Set[0] ; ${x} <= ${bubbles} ; x:Inc )
 	{
-		OgreBotAPI:ConversationBubble["${Me.Name}",1]
+		if (!${OgreQH})
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
 		wait 15
 	}
 	if (${giant})
@@ -1089,17 +1092,20 @@ function Harvest(string ItemName)
 		{
 			do
 			{
-				eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-				echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-				call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}
-				wait 10
-				call GoDown
-				eq2execute loc
-				wait 20
-				ogre harvestlite
-				wait 10
-				echo trying to harvest ${ItemName}
-				wait 200
+				if (${ActorIterator.Value.X(exists)})
+				{
+					eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+					echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+					call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}	
+					wait 10
+					call GoDown
+					eq2execute loc
+					wait 20
+					ogre harvestlite
+					wait 10
+					echo trying to harvest ${ItemName}
+					wait 200
+				}
 			}
 			while ${ActorIterator:Next(exists)}
 		}		
@@ -1166,6 +1172,7 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 	{
 	    echo looting ${number} ${ItemName} from "${ActorName}" in progress
 		call navwrap ${X} ${Y} ${Z}
+		
 		do
 		{
 			Counter:Set[0]
@@ -1176,7 +1183,7 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 		}	
 		while (${Counter}<${number})
 	}
-	echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Hunting
+	echo Found ${Counter}/${number} ${ItemName} in Inventory - Stop Hunting
 	call StopHunt
 }
 function isGroupAlive()
@@ -1324,7 +1331,26 @@ function MoveCloseTo(string ActorName)
 	wait 10
 	echo quitting MoveCloseTo function
 }
-					
+function MoveJump(float X, float Y, float Z, float X0, float X1, float X2)
+{
+	variable bool jumped
+	face ${X} ${Z}
+	press -hold MOVEFORWARD
+	do
+	{
+		if (${X0}<${X} && ${Me.Loc.X}>${X0})
+			call PKey JUMP 1
+		if (${X0}>${X} && ${Me.Loc.X}<${X0})
+			call PKey JUMP 1
+		if (${Z0}>${Z} && ${Me.Loc.Z}<${Z0})
+			call PKey JUMP 1
+		if (${Z0}<${Z} && ${Me.Loc.Z}>${Z0})
+			call PKey JUMP 1
+		call TestArrivalCoord ${X} ${Y} ${Z}
+	}
+	while (!${Return})
+}
+
 function MoveTo(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	target ${Me.Name}
@@ -1371,6 +1397,7 @@ function navwrap(float X, float Y, float Z)
 	eq2execute waypoint ${X} ${Y} ${Z}
 	do
 	{
+		call CheckCombat
 		Stucky:Inc
 		echo "launching ogre navtest (${Stucky}/3)"
 		call CheckCombat
@@ -1392,6 +1419,7 @@ function navwrap(float X, float Y, float Z)
 		echo "Seems stuck - Trying to get there anyway"
 		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call GoDown
+		call TestArrivalCoord ${X} ${Y} ${Z}
 	}
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc

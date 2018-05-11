@@ -6,6 +6,7 @@ function main()
 	variable bool GroupAlive
 	variable int Counter
 	variable string sQN
+	wait 300
 	do
 	{
 		wait 50
@@ -18,7 +19,7 @@ function main()
 		else
 			Counter:Set[0]
 	}
-	while (!${GroupAlive} && !${GroupDead} &&  ${Counter}<30)
+	while (${GroupAlive} && !${GroupDead} &&  ${Counter}<30)
 	
 	
 	if (${Me.IsDead} && ${Me.InventorySlotsFree}>0)
@@ -33,12 +34,21 @@ function main()
 			endscript ${sQN}
 		OgreBotAPI:Revive[${Me.Name}]
 		echo waiting 1 min to recover
+		wait 10
+		press -release MOVEFORWARD
 		wait 600
-		if (${Zone.Name.Find["Innovation"]} > 0)
-			run EQ2Ethreayd/oopsimdead loopPoI
+		;if (${Zone.Name.Find["Innovation"]} > 0)
+		;	run EQ2Ethreayd/oopsimdead loopPoI
+		;else
+			;run EQ2Ethreayd/oopsimdead loopPoD
+		call ReturnEquipmentSlotHealth Primary
+		if (${Return}<20)
+		{
+			echo Gear is too damaged - Ending this RunZone to mend
+			 run RebootCoVZone ${Zone.Name}
+		}
 		else
-			run EQ2Ethreayd/oopsimdead loopPoD
-		call RunZone
+			call RunZone
 		
 	}
 }

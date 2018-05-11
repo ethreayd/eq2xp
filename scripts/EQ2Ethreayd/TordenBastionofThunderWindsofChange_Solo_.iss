@@ -7,6 +7,7 @@ function main(int stepstart, int stepstop, int setspeed)
 {
 
 	variable int laststep=14
+	variable bool Branch
 	
 	oc !c -letsgo ${Me.Name}
 	if (${setspeed}==0)
@@ -51,37 +52,62 @@ function main(int stepstart, int stepstop, int setspeed)
 
 	if (${stepstart}==0)
 	{
-		;call IsPresent "Auliffe Chaoswind" 1000
-		;if (!${Return})
-		;{
-	;		call IsPresent "Gaukr Sandstorm" 1000
-	;		if (!${Return})
-	;		{
-	;			echo zone empty
-	;			call step012
-	;			return
-	;		}
-		
-	;		call check_quest "Legacy of Power: Through Storms and Mists"
-	;		if (${Return})
-	;		{
-	;			call CountItem "frostbite crystal"
-	;			if (${Return}>0)
-	;			{
-	;				call DMove 0 10 -502 3
-	;				call DMove 15 11 -515 3
-	;				call DMove 10 10 -540 3
-	;				stepstart:Set[4]
-	;			}
-	;		}
-	;		else
-	;		{
-	;			call DMove 0 10 -502 3
-	;			call DMove 15 11 -515 3
-	;			call DMove 10 10 -540 3
-	;			stepstart:Set[4]
-	;		}
-	;	}
+		call IsPresent "The Hurricane" 1000
+		if (!${Return})
+		{
+			call IsPresent "Yveti Stormbrood" 1000
+			if (!${Return})
+			{
+				call check_quest "Legacy of Power: Through Storms and Mists"
+				if (${Return})
+				{
+					call CountItem "funnel iron shavings"
+					if (${Return}<1)
+					{
+						Branch:Set[TRUE]
+					}
+				}
+				if (!${Branch})
+				{
+					echo setting start to step 9
+					call DMove -20 10 557 3
+					stepstart:Set[9]
+					Branch:Set[TRUE]
+				}
+			}
+			else
+			{
+				Branch:Set[TRUE]
+			}
+			if (!${Branch})			
+			{
+				echo setting start to step 4
+				call DMove -20 10 557 3
+				call DMove -49 10 639 3
+				call DMove -210 11 644 3
+				stepstart:Set[4]
+			}
+		}
+		call IsPresent "Torstien Stoneskin" 1000
+		if (!${Return})
+		{
+			Branch:Set[FALSE]
+			call check_quest "Legacy of Power: Through Storms and Mists"
+			if (${Return})
+			{
+				call CountItem "Shard of Glowing Arcglass"
+				if (${Return}<1)
+				{
+					Branch:Set[TRUE]
+				}
+			}
+			if (!${Branch})
+			{
+				echo setting start to step 14
+				call DMove -20 10 557 3
+				stepstart:Set[14]
+			}
+		}
 	}
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
@@ -181,9 +207,14 @@ function step004()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	call DMove -280 5 665 ${speed} ${FightDistance}
-	call DMove -271 9 683 ${speed} ${FightDistance}
-	call Converse "Wind Spirit" 2
-	wait 200
+	call DMove -272 9 688 ${speed} ${FightDistance}
+	do
+	{
+		call MoveCloseTo "a Wind Spirit"
+		call Converse "a Wind Spirit" 2
+		wait 200
+	}
+	while (${Me.Loc.Y}<30)
 }
 	
 function step005()
@@ -222,7 +253,9 @@ function step005()
 	call Converse "Wind Spirit" 2
 	wait 200
 	
+	
 	call DMove -729 145 534 ${speed} ${FightDistance}
+	
 	do
 	{
 		wait 10
@@ -232,7 +265,7 @@ function step005()
 	
 	call Converse "Wind Spirit" 2
 	wait 200
-	
+	call DMove -757 198 726 ${speed} ${FightDistance}
 	call DMove -755 198 709 ${speed} ${FightDistance}
 	do
 	{
@@ -242,7 +275,7 @@ function step005()
 	while (${Return})
 	
 	call Converse "Wind Spirit" 2
-	wait 1000
+	wait 800
 	
 	
 }
@@ -256,30 +289,37 @@ function step006()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",30]
 
-	call DMove -662 310 634 3
-	call DMove -552 341 521 3
-	call DMove -502 341 482 3
-	call DMove -527 341 488 3
-		
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-	echo must kill "${Named}"
-	do
-	{
-		wait 10
-		call IsPresent "${Named}" 500 TRUE
-		if (${Actor["${ActorName}"].Distance}<50)
-			call MoveCloseTo "${ActorName}"
-		wait 50
-		call DMove -527 341 488 3
-	}
-	while (${Return})
+	call DMove -649 309 647 3
 	
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	eq2execute summon
-	wait 50
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call IsPresent "${Named}" 1000 TRUE
+	if (${Return})
+	{
+		call DMove -629 309 604 3
+		call DMove -552 341 521 3
+		call WalkWithTheWind -502 341 482
+		call WalkWithTheWind  -527 341 488
+		
+		Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+		echo must kill "${Named}"
+		do
+		{
+			wait 10
+			call IsPresent "${Named}" 500 TRUE
+			if (${Actor["${ActorName}"].Distance}<50)
+				call MoveCloseTo "${ActorName}"
+			wait 50
+			call DMove -527 341 488 3
+		}
+		while (${Return})
+	
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		eq2execute summon
+		wait 50
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		call WalkWithTheWind -552 341 521
+	}
 }
 
 function step007()
@@ -287,7 +327,7 @@ function step007()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
-	call DMove -552 341 521 3
+	
 	call DMove -662 310 634 3
 
 	if (${Me.Loc.X}>-680)
@@ -326,7 +366,7 @@ function step007()
 function step008()
 {
 	call WalkWithTheWind -273 5 637
-	call DMove -64 11 -657 3
+	call DMove -64 11 657 3
 	call DMove -23 10 555 3
 }
 
@@ -485,22 +525,66 @@ function step012()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-function step013()
-{
 	call StopHunt
 	
 	call DMove 634 309 609 3
 	call ActivateVerb "Zone to Bottom" 634 309 609 "Return to Bottom of Tower" TRUE
 	wait 50
-	call DMove 618 -17 708 3
-	wait 50
-	call DMove 563 -17 695 3
+}
+function step013()
+{
+	variable bool ExitLoop
+	
+	do
+	{
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 618 -17 708 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 563 -17 695 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 540 -17 640 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 578 -17 550 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 663 -17 510 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 706 -17 554 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 761 -17 565 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 780 -17 669 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 747 -17 701 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 692 -17 718 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 665 -17 761 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 605 -17 734 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 559 -17 690 3
+		call getChest "Hreidar Lynhillig's Treasure"
+		call check_quest "Legacy of Power: Through Storms and Mists"
+		if (${Return})
+		{
+			call CountItem "Shard of Glowing Arcglass"
+			if (${Return}>0)
+			{
+				ExitLoop:Set[TRUE]
+			}
+		}
+		else
+		{
+			ExitLoop:Set[TRUE]
+		}
+	}
+	while (!${ExitLoop})	
+	
 	call DMove 540 -17 640 3
 	call DMove 511 -10 634 3
 	call DMove 268 5 638 3
 	call DMove 46 10 645 3
-	call DMove 5 10 545 3
+	call DMove 5 10 545 3	
 }
 function step014()
 {
@@ -520,8 +604,9 @@ function step014()
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 		wait 50
 		call DMove -60 -16 0 3
-		call DMove -157 -19 -1 3
-		call ActivateVerb "teleporter to Tower of the Rainkeeper" -157 -19 -1 "Teleport" TRUE
+		call DMove -155 -19 -2 3
+		call MoveCloseTo "teleporter to Tower of the Rainkeeper"
+		OgreBotAPI:Special["${Me.Name}"]
 		wait 100
 		Named:Set["Primordial Malice"]
 		eq2execute merc resume
@@ -548,7 +633,7 @@ function step014()
 	}
 	else
 	{
-		call ActivateVerb Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
+		call ActivateVerb "Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
 		wait 300
 	}
 }

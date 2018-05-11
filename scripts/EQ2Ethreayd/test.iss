@@ -16,12 +16,8 @@ variable(script) bool Windy
 
 function main()
 {
-	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
-	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-	call ActivateVerb "crypt_18" 521 70 -30 "Reach for the crypt" TRUE TRUE
-	call ActivateVerb "crypt_14" 537 68 -46 "Reach for the crypt" TRUE TRUE
-	call ActivateVerb "crypt_15" 530 68 -49 "Reach for the crypt" TRUE TRUE
-	call ActivateVerb "crypt_20" 518 68 -47 "Reach for the crypt" TRUE TRUE
+	call DMove -5 -137 -84 1
+	call MoveJump 25 -136 -54 5 -136 -74
 
 }
 
