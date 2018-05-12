@@ -4,6 +4,7 @@ function main()
 	variable string sQN
 	
 	ScriptsToRun:Insert["LegacyofPowerDeepTrouble"]
+	ScriptsToRun:Insert["SolusekRosTowerMonolithofFire_Solo_"]
 	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerDrawntotheFire"]
 	ScriptsToRun:Insert["LegacyofPowerGlimpseoftheHereother"]

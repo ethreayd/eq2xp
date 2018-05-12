@@ -261,6 +261,10 @@ function step002()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
+	target "${Named}"
+	wait 20
+	target "${Named}"
+	
 	do
 	{
 		wait 10

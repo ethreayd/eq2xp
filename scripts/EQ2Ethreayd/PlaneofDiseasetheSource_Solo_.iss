@@ -75,6 +75,17 @@ function main(int stepstart, int stepstop, int setspeed)
 
 	if (${stepstart}==0)
 	{
+		call IsPresent "festrus" 2000
+		if (!${Return})
+		{
+			wait 600
+			call IsPresent "festrus" 2000
+			if (!${Return})
+			{
+				stepstart:Set[1]
+			}
+		}
+		
 		if (${Me.Loc.Y}<-400)
 		{
 			echo I am in Crypt of Decay, starting from there

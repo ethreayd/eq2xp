@@ -266,7 +266,7 @@ function step005()
 	}
 	while (${Return})
 	
-	call DMove -614 38 737 ${speed} ${FightDistance}
+	call DMove -614 38 737 1
 	call Converse "Wind Spirit" 2
 	wait 200
 	
@@ -278,12 +278,12 @@ function step005()
 	}
 	while (${Return})
 	
-	call DMove -565 90 550 ${speed} ${FightDistance}
+	call DMove -565 90 550 1
 	call Converse "Wind Spirit" 2
 	wait 200
 	
 	
-	call DMove -729 145 534 ${speed} ${FightDistance}
+	call DMove -729 145 534 1
 	
 	do
 	{
@@ -296,7 +296,7 @@ function step005()
 	wait 200
 	call DMove -757 198 726 ${speed} ${FightDistance}
 	call DMove -741 198 702 ${speed} ${FightDistance}
-	call DMove -755 198 709 ${speed} ${FightDistance}
+	call DMove -755 198 709 1
 	do
 	{
 		wait 10

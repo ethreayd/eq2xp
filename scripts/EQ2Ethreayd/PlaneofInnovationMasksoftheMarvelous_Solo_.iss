@@ -381,7 +381,7 @@ function step007()
 	do
 	{
 		wait 200
-		if (!${Zone.Name.Equal["Coliseum of Valor"])
+		if (!${Zone.Name.Equal["Coliseum of Valor"]})
 		{
 			call DMove -145 10 -251 1
 			OgreBotAPI:Special["${Me.Name}"]
