@@ -10,6 +10,8 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["loopBoT"]
+	ScriptsToRun:Insert["loopPIDT"]
 	ScriptsToRun:Insert["loopPoID"]
 	ScriptsToRun:Insert["loopPoD"]	
 	ScriptsToRun:Insert["PlaneofDiseasetheSource_Solo_"]

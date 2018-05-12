@@ -9,22 +9,52 @@ function main(int stepstart, int stepstop, int setspeed)
 	variable int laststep=7
 	
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
-		
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -528,12 +558,5 @@ atom HandleAllEvents(string Message)
 	{
 		FestrusLord:Set[TRUE]
 		echo Lord of the Festrus detected
-	}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
-	{
-		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
 	}
  }

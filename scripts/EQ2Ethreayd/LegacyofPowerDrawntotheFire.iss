@@ -50,6 +50,19 @@ function step000()
 		}
 		while (!${Return})
 	}
+		
+	call DMove -2 5 4 3
+	call DMove 95 3 -164 3
+		
+	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_ro_tower","Enter Solusek Ro's Tower"]
+	wait 20
+	OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
+	wait 50
+	
+	call waitfor_Zone "Solusek Ro's Tower: The Obsidian Core [Solo]"
+	echo will clear zone "${Zone.Name}" Now !
+    call RunZone
+	echo zone "${Zone.Name}" Cleared !
 } 
 	
 function step001()
@@ -65,7 +78,7 @@ function step001()
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
-	call waitfor_Zone "Solusek Ro's Tower: The Obsidian Core [Solo]"
+	call waitfor_Zone "Solusek Ro's Tower: Monolith of Fire [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
     call RunZone
 	echo zone "${Zone.Name}" Cleared !

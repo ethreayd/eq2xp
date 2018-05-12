@@ -7,23 +7,53 @@ function main(int stepstart, int stepstop, int setspeed)
 
 	variable int laststep=9
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
-	
-	
+		
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -33,6 +63,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
+
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -303,7 +335,7 @@ function step006()
 		wait 10
 	}
 	while (!${Me.InCombatMode})
-	oc !c -letsgo
+
 	do
 	{
 		wait 10
@@ -402,14 +434,10 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		QueueCommand call TargetAfterTime "${Speaker}" 200
 	}
  }
- atom HandleAllEvents(string Message)
- {
-	;echo Catch Event ${Message}
-    if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
+{
+    if (${NewStance.Equal["DEAD"]})
 	{
 		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
 	}
- }
+}

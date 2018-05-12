@@ -9,22 +9,54 @@ function main(int stepstart, int stepstop, int setspeed)
 	variable int laststep=9
 	
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
+	echo "Archetype (${Me.Archetype}) is :"
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
-		
+	
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -34,6 +66,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
+
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -58,12 +92,13 @@ function main(int stepstart, int stepstop, int setspeed)
 			{
 				echo "No Carrion detected"
 				Me.Inventory["Hirudin Extract"]:Use
-				call DMove 526 63 -92 3 ${FightDistance}
+				target ${Me.Name}
+				ogre navtest node1
 				stepstart:Set[5]
 			}
 		}
 	}
-	
+	echo setting speed at ${speed}/3 and Fight Distance at ${FightDistance}m
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -252,12 +287,13 @@ function step006()
 	wait 20
 	Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
    
 	call DMove 227 392 10 2
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	echo must kill "${Named}"
-	call DMove 193 394 -4 3
+	call DMove 193 394 0 3
 	oc !c -CampSpot ${Me.Name}
 	oc !c -joustout ${Me.Name}
 	do
@@ -329,157 +365,167 @@ function step008()
 	call StopHunt
 	OgreBotAPI:CastAbility["${Me.Name}","Singular Focus"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	call DMove -86 127 -285 3
-	call DMove -52 126 -279 3
-	
-	do
+	call DMove -86 127 -285 3 30 TRUE TRUE
+	if (${Me.Loc.Y}<170)
 	{
-		call ActivateVerbOnPhantomActor Grab 1 5
-		call ActivateVerbOnPhantomActor Grab 1 5
 		call DMove -52 126 -279 3
-		call CountItem "Bileburn Spore"
+	
+		do
+		{
+			call ActivateVerbOnPhantomActor Grab 1 5
+			call ActivateVerbOnPhantomActor Grab 1 5
+			call DMove -52 126 -279 3
+			call CountItem "Bileburn Spore"
+		}
+		while (${Return}<6)
+		echo got all spores
+		call DMove -92 126 -293 3
+		oc !c -CampSpot ${Me.Name}
+		oc !c -joustin ${Me.Name}
+		OgreBotAPI:Pause["${Me.Name}"]
+		target ${Me.Name}
+		face "${Named}"
+		echo cooling plagues
+		call CoolingPlagues
+		do
+		{
+			call PKey MOVEFORWARD 2
+			face "${Named}"
+			target "${Named}"
+			OgreBotAPI:Resume["${Me.Name}"]
+			wait 30
+		}
+		while (!${Me.InCombatMode})
+		oc !c -joustout ${Me.Name}
+		eq2execute merc backoff
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		echo must kill "${Named}"
+		wait 150
+		eq2execute merc ranged
+		do
+		{
+			wait 150
+			call IsPresent "${Named}"
+		}
+		while (${Return})
+		OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
+		oc !c -letsgo ${Me.Name}
+		eq2execute summon
+		wait 50
+		OgreBotAPI:AcceptReward["${Me.Name}"]
 	}
-	while (${Return}<6)
-	echo got all spores
-	call DMove -92 126 -293 3
-	oc !c -CampSpot ${Me.Name}
-	oc !c -joustin ${Me.Name}
-	OgreBotAPI:Pause["${Me.Name}"]
-	target ${Me.Name}
-	face "${Named}"
-	echo cooling plagues
-	if (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
+}
+function step009()
+{
+	if (${Me.Loc.Y}<170)
+	{
+		eq2execute merc resume
+		call StopHunt
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+		call DMove -119 129 -256 ${speed}
+	
+		OgreBotAPI:Special["${Me.Name}"]
+		wait 50
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		Me.Inventory["foul-smelling rune"]:Use
+		wait 20
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		call check_quest "Legacy of Power: Realm of the Plaguebringer"
+		if (${Return})
+		{
+			call CheckQuestStep 2
+			if (!${Return})
+			{
+				do
+				{
+					call ActivateVerb "foul-smelling rune" -119 129 -256 "Gather"
+					call CheckQuestStep 2
+				}
+				while (!${Return})
+			}
+		}
+		call ActivateVerb "zone_to_valor" -176 129 -270 "Coliseum of Valor" TRUE
+		OgreBotAPI:Special["${Me.Name}"]
+	}
+	else
+	{
+		echo "Instance is bugged - Exiting"
+		target ${Me.Name}
+		ogre navtest Entrance
+		wait 600
+		OgreBotAPI:Special["${Me.Name}"]
+	}
+}
+function ClimbingFMountain()
+{
+	wait 100
+	if (!${Fight})
+		call DMove 308 97 -243 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 276 113 -217 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 196 159 -219 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 147 188 -235 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 113 218 -199 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 120 246 -141 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 257 321 -111 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 283 338 -84 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 285 371 -24 3 ${FightDistance}
+	if (!${Fight})
+		call DMove 250 392 4 3 ${FightDistance}
+	if (!${Fight})
+		OgreBotAPI:NoTarget[${Me.Name}]
+}
+function CoolingPlagues()
+{
+	variable string Named
+	variable string mob
+	Named:Set["Rallius Rattican"]
+	mob:Set["a patron of plagues"]
+	if (${Actor["${mob}"].Distance} > 15 && ${Actor["${Named}"].Distance} > 20)
 	{
 		do
 		{
 			call PKey MOVEFORWARD 1
 		}
-		while (${Actor["a patron of plagues"].Distance} > 20 && ${Actor["${Named}"].Distance} > 20)
+		while (${Actor["${mob}"].Distance} > 15 && ${Actor["${Named}"].Distance} > 20)
 	} 
 	face "${Named}"
-	target "a patron of plagues"
-	wait 20
-	if (${Target.IsAggro})
-	{
-		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
-		wait 20
-	}
-	face "${Named}"
-	press Tab
-	wait 20
-	if (${Target.IsAggro})
-	{
-		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
-		wait 20
-	}
-	press Tab
-	wait 20
+	target "${mob}"
+	wait 10
+	call UseSpore
+	call UseSpore
 	face "${Named}"
 	call PKey MOVEFORWARD 2
-	if (${Target.IsAggro})
-	{
-		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
-		wait 20
-	}
-	face "${Named}"
-	press Tab
-	wait 20
-	if (${Target.IsAggro})
-	{
-		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
-		wait 20
-	}
-	press Tab
+	call UseSpore
+	call UseSpore
 	face "${Named}"
 	call PKey MOVEFORWARD 2
-	wait 20
-	if (${Target.IsAggro})
-	{
-		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
-		wait 20
-	}
-	call PKey MOVEFORWARD 2
-	face "${Named}"
-	target "${Named}"
-	OgreBotAPI:Resume["${Me.Name}"]
-	wait 40
-	oc !c -joustout ${Me.Name}
-	eq2execute merc backoff
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	echo must kill "${Named}"
-	wait 150
-	eq2execute merc ranged
-	do
-	{
-		wait 150
-		call IsPresent "${Named}"
-	}
-	while (${Return})
-	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
-	oc !c -letsgo ${Me.Name}
-	eq2execute summon
-	wait 50
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-
-function step009()
-{	
-	eq2execute merc resume
-	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	call UseSpore
 	
-	call DMove -119 129 -256 ${speed}
-	
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 50
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	Me.Inventory["foul-smelling rune"]:Use
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call check_quest "Legacy of Power: Realm of the Plaguebringer"
-	if (${Return})
-	{
-		call CheckQuestStep 2
-		if (!${Return})
-		{
-			do
-			{
-				call ActivateVerb "foul-smelling rune" -119 129 -256 "Gather"
-				call CheckQuestStep 2
-			}
-			while (!${Return})
-		}
-	}
-	call ActivateVerb "zone_to_valor" -176 129 -270 "Coliseum of Valor" TRUE
-	OgreBotAPI:Special["${Me.Name}"]
 }
-
-function ClimbingFMountain()
+function UseSpore()
 {
-	if (!${Fight})
-		call DMove 308 97 -243 3 ${FightDistance} TRUE
-	if (!${Fight})
-	call DMove 276 113 -217 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 196 159 -219 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 147 188 -235 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 113 218 -199 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 120 246 -141 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 257 321 -111 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 283 338 -84 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 285 371 -24 3 ${FightDistance} TRUE
-	if (!${Fight})
-		call DMove 250 392 4 3 ${FightDistance} TRUE
-	if (!${Fight})
-		OgreBotAPI:NoTarget[${Me.Name}]
-}
-
+	variable string Named
+	Named:Set["Rallius Rattican"]
+	
+	if ${Target.Name.Equal["${Named}"]}
+		press Tab
+	if (${Target.IsAggro})
+	{
+		OgreBotAPI:UseItem["${Me.Name}","BileBurn Spore"]
+		wait 20
+	}
+	press Tab
+	wait 10
+}	
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
@@ -501,20 +547,26 @@ atom HandleAllEvents(string Message)
 		Fight:Set[TRUE]
 		target ${Me.Name}
 		ogre navtest hide1
+		eq2execute merc backoff
 	}
 	if (${Message.Find["uslings leak out from the giant"]} > 0)
 	{
 		target "pusling leaker"
+		eq2execute merc backoff
+
 	}
 	if (${Message.Find["latches onto you"]} > 0)
 	{
 		target "pusling leaker"
+		eq2execute merc backoff
+
 	}
 	if (${Message.Find["giant latcher recedes back into"]} > 0)
 	{
 		target ${Me.Name}
 		ogre navtest node1
 		Fight:Set[FALSE]
+		eq2execute merc ranged
 		QueueCommand call ClimbingFMountain
 	}
 	if (${Message.Find["lanar static increases"]} > 0)
@@ -525,11 +577,12 @@ atom HandleAllEvents(string Message)
 	{
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 40
 	}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+}
+atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
+{
+	echo ${ActorID} ${ActorName} ${ActorType} ${OldStance} ${NewStance} ${TargetID} ${Distance} ${IsInGroup} ${IsInRaid}
+    if (${NewStance.Equal["DEAD"]} && ${ActorID}==${Me.ID})
 	{
 		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
 	}
 }

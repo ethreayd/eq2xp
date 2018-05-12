@@ -7,6 +7,7 @@ function main()
 	variable string ZoneName
 			echo rebooting session
 			call StopHunt
+			run killall
 			ZoneName:Set["${Zone.Name}"]
 			call PKey MOVEFORWARD 1
 			OgreBotAPI:Revive[${Me.Name}]
@@ -33,8 +34,20 @@ function main()
 				case "Plane of Magic"
 					call goCoV
 				break
-				default
+				case "Plane of Innovation: Masks of the Marvelous [Solo]"
 					run loopPoI
+				case "Plane of Innovation: Gears in the Machine [Solo]"
+					run loopPoI
+				case "Plane of Disease: Outbreak [Solo]"
+					run loopPoD
+				case "Plane of Disease: the Source [Solo]"
+					run loopPoD
+				case "Torden, Bastion of Thunder: Tower Breach [Solo]"
+					run loopBoT
+				case "Torden, Bastion of Thunder: Winds of Change [Solo]"
+					run loopBoT
+				default
+					run loopPIDT
 				break
 			}
 }

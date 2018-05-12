@@ -10,24 +10,53 @@ function main(int stepstart, int stepstop, int setspeed)
 	variable bool Branch
 	
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			echo I am a fighter
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			echo I am a healer
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
-		
+			
 	echo speed set to ${speed}
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -266,6 +295,7 @@ function step005()
 	call Converse "Wind Spirit" 2
 	wait 200
 	call DMove -757 198 726 ${speed} ${FightDistance}
+	call DMove -741 198 702 ${speed} ${FightDistance}
 	call DMove -755 198 709 ${speed} ${FightDistance}
 	do
 	{
@@ -306,11 +336,11 @@ function step006()
 		do
 		{
 			wait 10
-			call IsPresent "${Named}" 500 TRUE
 			if (${Actor["${ActorName}"].Distance}<50)
 				call MoveCloseTo "${ActorName}"
 			wait 50
 			call DMove -527 341 488 3
+			call IsPresent "${Named}" 1000 TRUE
 		}
 		while (${Return})
 	
@@ -319,6 +349,8 @@ function step006()
 		wait 50
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 		call WalkWithTheWind -552 341 521
+		call WalkWithTheWind -580 334 550 3
+		call WalkWithTheWind -605 311 575 3
 	}
 }
 
@@ -328,7 +360,7 @@ function step007()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	
-	call DMove -662 310 634 3
+	call WalkWithTheWind -662 310 634 3
 
 	if (${Me.Loc.X}>-680)
 	{
@@ -596,12 +628,17 @@ function step014()
 	call check_quest "Legacy of Power: Through Storms and Mists"
 	if (${Return})
 	{
-		call DMove -63 -16 -7 3
-		call DMove -65 -16 -20 3
-		wait 50
-		call Converse "Klodsag" 10 TRUE
-		OgreBotAPI:AcceptReward["${Me.Name}"]
-		OgreBotAPI:AcceptReward["${Me.Name}"]
+		do
+		{
+			call DMove -63 -16 -7 3
+			call DMove -65 -16 -20 1
+			wait 50
+			call Converse "Klodsag" 10 TRUE
+			OgreBotAPI:AcceptReward["${Me.Name}"]
+			OgreBotAPI:AcceptReward["${Me.Name}"]
+			call IsPresent "teleporter to Tower of the Rainkeeper" 500
+		}
+		while (!${Return})
 		wait 50
 		call DMove -60 -16 0 3
 		call DMove -155 -19 -2 3
@@ -641,13 +678,6 @@ function step014()
 atom HandleAllEvents(string Message)
  {
 	;echo Catch Event ${Message}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
-	{
-		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
-	}
 	if (${Message.Find["feel unsteady on your feet"]} > 0)
 	{
 		Windy:Set[TRUE]

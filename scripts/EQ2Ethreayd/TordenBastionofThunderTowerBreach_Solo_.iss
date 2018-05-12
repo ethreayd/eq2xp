@@ -9,19 +9,48 @@ function main(int stepstart, int stepstop, int setspeed)
 	variable int laststep=12
 	
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			echo I am a fighter
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			echo I am a healer
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
@@ -37,6 +66,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Solo]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
+
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -164,7 +195,8 @@ function step001()
 	call DMove 760 -17 -689 1
 	call DMove 736 -17 -723 1
 	
-	call DMove 704 3 -748 ${speed} ${FightDistance}
+	call DMove 704 3 -748 1
+	call DMove 694 9 -749 1
 	call DMove 625 37 -748 ${speed} ${FightDistance}
 	call DMove 593 38 -720 ${speed} ${FightDistance}
 	
@@ -196,7 +228,7 @@ function step002()
 	Ob_AutoTarget:Clear
 	
 	call DMove 574 38 -712 1
-	call DMove 540 56 -673 ${speed} ${FightDistance}
+	call DMove 540 56 -673 1
 	call DMove 531 73 -634 ${speed} ${FightDistance}
 	call DMove 537 86 -587 ${speed} ${FightDistance}
 	call DMove 562 90 -556 1
@@ -499,7 +531,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
 	if (${Message.Find["see how well you scramble"]} > 0)
 	{
-		oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 30 0 -30
+		oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 35 0 -35
 		InRing:Set[FALSE]
 
 		
@@ -508,20 +540,13 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		if (!${InRing})
 		{
-			oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} -30 0 30
+			oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} -35 0 35
 			InRing:Set[TRUE]
 		}
 	}
 }
  
-atom HandleAllEvents(string Message)
- {
-	;echo Catch Event ${Message}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
-	{
-		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
-	}
- }
+atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
+{
+	echo ${ActorID} ${ActorName} ${ActorType} ${OldStance} ${NewStance} ${TargetID} ${Distance} ${IsInGroup} ${IsInRaid}
+}

@@ -4,6 +4,7 @@
 function main(string Loop)
 {
 	variable string ToonName
+	wait 600
 	echo I am in ${Zone.Name}
 	ToonName:Set[${Me.Name}]
 	call StopHunt

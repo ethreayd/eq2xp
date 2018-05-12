@@ -710,57 +710,6 @@ function DepositAll(string DepotName)
 	wait 10
 	EQ2UIPage[Inventory,Container].Child[button,Container.WindowFrame.Close]:LeftClick
 }
-function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone)
-{
-	variable float loc0
-	variable int Stucky
-	variable int SuperStucky=0
-	variable bool LR
-	eq2execute waypoint ${X}, ${Y}, ${Z}
-	
-	call TestNullCoord ${X} ${Y} ${Z}
-	if (!${Return})
-		call TestArrivalCoord ${X} ${Y} ${Z}
-	
-	if (!${Return})
-	{
-		do
-		{
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			if (!${IgnoreFight})
-			{
-				call waitfor_Health 90
-				call CheckCombat ${MyDistance}
-			}
-			if (${speed} < 2)
-			{
-				call Get2DDirection ${X} ${Z}
-				call Go2D ${X} ${Y} ${Z} ${Return}
-			}
-			if (${speed} == 2)
-				call 2DWalk ${X} ${Z}
-			if (${speed} > 2)
-				call 2DNav ${X} ${Z} ${IgnoreFight}
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				Stucky:Inc
-				SuperStucky:Inc
-				echo Stucky=${Stucky} / ${SuperStucky}
-			}
-			if (${Stucky}>2)
-			{
-				call Unstuck ${LR}
-				LR:Set[${Return}]
-				Stucky:Set[0]
-			}
-			call TestArrivalCoord ${X} ${Y} ${Z}
-			
-		}
-		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
-	}
-	return ${SuperStucky}
-}
 
 function DescribeActor(int ActorID)
 {
@@ -848,6 +797,58 @@ function DescribeItemInventory(string ItemName)
         while ${ItemIterator:Next(exists)}
     }
 }
+function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone)
+{
+	variable float loc0
+	variable int Stucky
+	variable int SuperStucky=0
+	variable bool LR
+	eq2execute waypoint ${X}, ${Y}, ${Z}
+	
+	call TestNullCoord ${X} ${Y} ${Z}
+	if (!${Return})
+		call TestArrivalCoord ${X} ${Y} ${Z}
+	
+	if (!${Return})
+	{
+		do
+		{
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			if (!${IgnoreFight})
+			{
+				call waitfor_Health 90
+				call CheckCombat ${MyDistance}
+			}
+			if (${speed} < 2)
+			{
+				call Get2DDirection ${X} ${Z}
+				call Go2D ${X} ${Y} ${Z} ${Return}
+			}
+			if (${speed} == 2)
+				call 2DWalk ${X} ${Z}
+			if (${speed} > 2)
+				call 2DNav ${X} ${Z} ${IgnoreFight}
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+				SuperStucky:Inc
+				echo Stucky=${Stucky} / ${SuperStucky}
+			}
+			if (${Stucky}>2)
+			{
+				call Unstuck ${LR}
+				LR:Set[${Return}]
+				Stucky:Set[0]
+			}
+			call TestArrivalCoord ${X} ${Y} ${Z}
+			
+		}
+		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
+	}
+	return ${SuperStucky}
+}
+
 function Evac()
 {
 	echo not implemented yet
@@ -1312,23 +1313,31 @@ function MoveCloseTo(string ActorName)
 {
 	variable float loc0=0
 	variable int Stucky=0
-	
+	variable string strafe
 	echo Moving closer to ${Actor["${ActorName}"].Name}
 	face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
-	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+	call Get2DDirection ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+	strafe:Set[${Return}]
+	
 	press -hold MOVEFORWARD
 	do
 	{
+		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 		wait 1
 		call CheckStuck ${loc0}
 		if (${Return})
+		{
 			Stucky:Inc
+			echo Stucky count: ${Stucky}/300
+		}
 		else
 			Stucky:Set[0]
 	}
 	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
 	press -release MOVEFORWARD
 	wait 10
+	if (${Stucky}>299)
+		call Unstuck ${strafe}
 	echo quitting MoveCloseTo function
 }
 function MoveJump(float X, float Y, float Z, float X0, float X1, float X2)
@@ -1582,6 +1591,7 @@ function Transmute(string ItemName)
 		
 function Unstuck(bool LR)
 {
+	press PKey JUMP 1
 	press -release MOVEFORWARD
 	
 	if (${LR})

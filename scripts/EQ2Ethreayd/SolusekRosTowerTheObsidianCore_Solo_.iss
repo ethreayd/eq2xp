@@ -9,24 +9,53 @@ function main(int stepstart, int stepstop, int setspeed)
 	variable bool Branch
 	
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			echo I am a fighter
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			echo I am a healer
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
-		
+			
 	echo speed set to ${speed}
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -86,12 +115,15 @@ function step000()
 	oc !c -CampSpot ${Me.Name}
 	oc !c -joustout ${Me.Name}
 	
-	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 -53
+	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 -49
 	
 	echo must kill "${Named}"
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	target "${Named}"
+	wait 20
+	target "${Named}"
+	
 	do
 	{
 		wait 10
@@ -265,7 +297,7 @@ function step003()
 		call DMove 9 -139 21 3
 		call DMove 14 -139 11 3
 		call DMove 35 -138 5 3
-		call DMove 48 -138 32 3
+		call DMove 46 -139 -25 3
 		call DMove 31 -136 -48 3
 		call DMove 1 -137 -77 3
 	}
@@ -386,6 +418,8 @@ function step005()
 	while (!${Return})
 	call DMove -1 -178 -109 ${speed} ${FightDistance}
 	echo must kill "${Named}"
+	wait 100
+	target "${Named}"
 	do
 	{
 		wait 10
@@ -426,13 +460,6 @@ function ResetLift()
 atom HandleAllEvents(string Message)
  {
 	;echo Catch Event ${Message}
-	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
-	{
-		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
-	}
 	if (${Message.Find["expelling molten rocks"]} > 0)
 	{
 		oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 30

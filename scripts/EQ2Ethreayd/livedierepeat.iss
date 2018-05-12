@@ -6,6 +6,8 @@ function main()
 	variable bool GroupAlive
 	variable int Counter
 	variable string sQN
+	do
+	{
 	wait 300
 	do
 	{
@@ -37,10 +39,7 @@ function main()
 		wait 10
 		press -release MOVEFORWARD
 		wait 600
-		;if (${Zone.Name.Find["Innovation"]} > 0)
-		;	run EQ2Ethreayd/oopsimdead loopPoI
-		;else
-			;run EQ2Ethreayd/oopsimdead loopPoD
+		
 		call ReturnEquipmentSlotHealth Primary
 		if (${Return}<20)
 		{
@@ -49,6 +48,7 @@ function main()
 		}
 		else
 			call RunZone
-		
 	}
+	}
+	while (1==1)
 }

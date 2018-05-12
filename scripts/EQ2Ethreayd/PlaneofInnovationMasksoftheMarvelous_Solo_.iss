@@ -9,21 +9,53 @@ function main(int stepstart, int stepstop, int setspeed)
 
 	variable int laststep=7
 	oc !c -letsgo ${Me.Name}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat
 	if (${setspeed}==0)
 	{
-		if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+		switch ${Me.Archetype}
 		{
-			speed:Set[3]
-			FightDistance:Set[15]
-		}
-		else
-		{
-			speed:Set[1]
-			FightDistance:Set[30]
+			case fighter
+			{
+				echo fighter
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case priest
+			{
+				echo priest
+				speed:Set[3]
+				FightDistance:Set[15]
+			}
+			break
+			case mage
+			{
+				echo mage
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
+			case scout
+			{
+				echo scout
+				speed:Set[1]
+				FightDistance:Set[15]
+			}
+			break
+			default
+			{
+				echo unknown
+				speed:Set[1]
+				FightDistance:Set[30]
+			}
+			break
 		}
 	}
 	else
 		speed:Set[${setspeed}]
+	
 		
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -34,6 +66,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
+
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -336,14 +370,22 @@ function step007()
 	eq2execute summon
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call DMove -145 10 -251 3
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
-	call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
+	wait 100
+	if (!${Zone.Name.Equal["Coliseum of Valor"])
+		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
+	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	do
 	{
 		wait 200
-		OgreBotAPI:Special["${Me.Name}"]
+		if (!${Zone.Name.Equal["Coliseum of Valor"])
+		{
+			call DMove -145 10 -251 1
+			OgreBotAPI:Special["${Me.Name}"]
+		}
 	}
 	while (!${Zone.Name.Equal["Coliseum of Valor"]})
 }
@@ -394,29 +436,22 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
 		press MOVEFORWARD
 	}
-	if (${Message.Find["has killed you"]} > 0)
-	{
-		echo "I am dead"
-	}
-	if (${Message.Find["you have died"]} > 0)
-	{
-		echo "I am so dead"
-	}
 }
  
 atom HandleAllEvents(string Message)
- {
+{
 	;echo Catch Event ${Message}
     if (${Message.Find["have the Electro-Charged"]} > 0)
 	{
 		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor
 	}
- 	if (${Message.Find["has killed you"]} > 0 || ${Message.Find["you have died"]} > 0)
+}
+atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
+{
+    if (${NewStance.Equal["DEAD"]})
 	{
 		echo "I am dead"
-		if ${Script["livedierepeat"](exists)}
-			endscript livedierepeat
-		run EQ2Ethreayd/livedierepeat
+		
 	}
- }
+}

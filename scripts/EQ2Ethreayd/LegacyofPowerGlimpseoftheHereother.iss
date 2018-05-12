@@ -69,6 +69,8 @@ function step001()
 	{
 		call DMove 92 3 163 3
 		OgreBotAPI:Special["${Me.Name}"]
+		wait 20
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
 	}
 	call waitfor_Zone "Plane of Magic"
 	do
