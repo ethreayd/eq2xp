@@ -1454,7 +1454,29 @@ function OpenDoor(string ActorName)
 	}
 }
 
+function PetitPas(float X, float Y, float Z, float Precision)
+{
+	variable float Ax
+	variable float Az
+	echo "Enter PetitPas"
+	call Abs ${Math.Calc64[${Me.Loc.X}-${X}]}
+	Ax:Set[${Return}]
+	
+	call Abs ${Math.Calc64[${Me.Loc.Z}-${Z}]}
+	Az:Set[${Return}]
 
+	if ((${X}!=0 || ${Y}!=0 || ${Z}!=0) && (${Ax}<20 && ${Az}<20))
+	{
+		do
+		{
+			face ${X} ${Z}
+			press MOVEFORWARD
+			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
+		}
+		while (!${Return})
+	}
+	echo Exit PetitPas
+}
 function PKey(string KName, int ntime)
 {
 	press -hold "${KName}"

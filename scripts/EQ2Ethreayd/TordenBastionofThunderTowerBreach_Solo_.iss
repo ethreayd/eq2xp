@@ -485,16 +485,47 @@ function step009()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
+	call DMove -617 309 -600 3
+	call ActivateVerb "Zone to Bottom" -617 309 -600 "Return to Bottom of Tower" TRUE
+	wait 50
 }
 function step010()
 {
 	variable bool Loop=FALSE
-	call DMove -617 309 -600 3
-	call ActivateVerb "Zone to Bottom" -617 309 -600 "Return to Bottom of Tower" TRUE
-	wait 50
+	
 	do
 	{
 		call DMove -618 -17 -709 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -648 -17 -754 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -685 -17 -738 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -720 -17 -709 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -757 -17 -683 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -779 -17 -643 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -773 -17 -595 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -728 -17 -558 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -706 -17 -562 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -669 -17 -523 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -633 -17 -527 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -594 -17 -563 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -566 -17 -588 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -545 -17 -627 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -553 -17 -664 ${speed} ${FightDistance}
+		call getChest "Gaukr Sandstorm's Treasure"
+		call DMove -576 -17 -701 ${speed} ${FightDistance}
 		call getChest "Gaukr Sandstorm's Treasure"
 		call check_quest "Legacy of Power: Through Storms and Mists"
 		if (${Return})

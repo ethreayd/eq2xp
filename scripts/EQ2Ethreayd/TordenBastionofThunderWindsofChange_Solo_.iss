@@ -259,6 +259,7 @@ function step005()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 	call DMove -600 38 731 ${speed} ${FightDistance}
+	call DMove -602 38 745 ${speed} ${FightDistance}
 	do
 	{
 		wait 10
@@ -578,6 +579,8 @@ function step013()
 		call getChest "Hreidar Lynhillig's Treasure"
 		call DMove 578 -17 550 3
 		call getChest "Hreidar Lynhillig's Treasure"
+		call DMove 619 -17 562 3
+		call getChest "Hreidar Lynhillig's Treasure"
 		call DMove 663 -17 510 3
 		call getChest "Hreidar Lynhillig's Treasure"
 		call DMove 706 -17 554 3
@@ -599,7 +602,7 @@ function step013()
 		call check_quest "Legacy of Power: Through Storms and Mists"
 		if (${Return})
 		{
-			call CountItem "Shard of Glowing Arcglass"
+			call CountItem "shard of glowing arcglass"
 			if (${Return}>0)
 			{
 				ExitLoop:Set[TRUE]

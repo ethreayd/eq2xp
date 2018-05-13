@@ -15,7 +15,7 @@ function main()
 	ScriptsToRun:Insert["loopPIDT"]
 	ScriptsToRun:Insert["loopPoID"]
 	ScriptsToRun:Insert["loopPoD"]	
-	ScriptsToRun:Insert["PlaneofDiseasetheSource_Solo_"]
+	ScriptsToRun:Insert["PlaneofDiseaseTheSource_Solo_"]
 	ScriptsToRun:Insert["loopPoI"]
 	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerRealmofthePlaguebringer"]

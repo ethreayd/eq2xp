@@ -160,7 +160,7 @@ function step003()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
-	oc !c -Campspot ${Me.Name}
+	oc !c -CampSpot ${Me.Name}
 	Ob_AutoTarget:AddActor["prodding gearlet",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["The Glitched Guardian 10101",0,TRUE,FALSE]
 	
@@ -304,7 +304,7 @@ function step005()
 		while (${Detected})
 	}
 	
-	oc !c -Campspot ${Me.Name} 
+	oc !c -CampSpot ${Me.Name} 
 	eq2execute gsay Set up for Glitched Cell Keeper
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
 	Ob_AutoTarget:AddActor["Glitched Cell Keeper",0,TRUE,FALSE]
@@ -373,7 +373,7 @@ function step007()
 	call DMove -145 10 -251 3
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
 	wait 100
-	if (!${Zone.Name.Equal["Coliseum of Valor"])
+	if (!${Zone.Name.Equal["Coliseum of Valor"]})
 		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]

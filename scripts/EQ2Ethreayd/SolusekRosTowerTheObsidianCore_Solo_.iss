@@ -317,12 +317,8 @@ function step004()
 	call IsPresent "${Named}"
 	if (${Return})
 	{
-		do
-		{
-			face 4 -81
-			press MOVEFORWARD
-			call TestArrivalCoord 4 -156 -81 3
-		}
+		call PetitPas 4 -156 -81 3
+		
 		while (!${Return})
 		echo Prepare to Run and Jump
 

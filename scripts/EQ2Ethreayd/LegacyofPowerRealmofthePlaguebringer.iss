@@ -49,8 +49,6 @@ function step000()
 		}
 		while (!${Return})	
 	}
-	
-	
 } 
 	
 function step001()
@@ -109,12 +107,12 @@ function step004()
 	wait 20
 	OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 	wait 50	
-	call waitfor_Zone "Plane of Disease: the Source [Solo]"
+	call waitfor_Zone "Plane of Disease: The Source [Solo]"
 	
 }
 function step005()
 {
-	if (!${Zone.Name.Equal["Plane of Disease: the Source [Solo]"]})
+	if (!${Zone.Name.Equal["Plane of Disease: The Source [Solo]"]})
 	{	
 		call step004
 	}

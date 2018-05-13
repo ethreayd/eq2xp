@@ -94,6 +94,7 @@ function main(int stepstart, int stepstop, int setspeed)
 				Me.Inventory["Hirudin Extract"]:Use
 				target ${Me.Name}
 				ogre navtest node1
+				wait 600
 				stepstart:Set[5]
 			}
 		}
@@ -285,7 +286,7 @@ function step006()
 	
 	Me.Inventory["Hirudin Extract"]:Use
 	wait 20
-	Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
+	;Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -463,11 +464,11 @@ function ClimbingFMountain()
 	if (!${Fight})
 		call DMove 308 97 -243 3 ${FightDistance}
 	if (!${Fight})
-		call DMove 276 113 -217 3 ${FightDistance}
+		call DMove 276 113 -217 3 ${FightDistance} 
 	if (!${Fight})
 		call DMove 196 159 -219 3 ${FightDistance}
 	if (!${Fight})
-		call DMove 147 188 -235 3 ${FightDistance}
+		call DMove 147 188 -235 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
 		call DMove 113 218 -199 3 ${FightDistance}
 	if (!${Fight})

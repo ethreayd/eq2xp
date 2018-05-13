@@ -2,6 +2,7 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool FestrusLord
+variable(script) bool InDecay
 
 function main(int stepstart, int stepstop, int setspeed)
 {
@@ -76,14 +77,25 @@ function main(int stepstart, int stepstop, int setspeed)
 	if (${stepstart}==0)
 	{
 		call IsPresent "festrus" 2000
-		if (!${Return})
+		if (!${Return} && ${Me.Loc.Y}>-400)
 		{
 			wait 600
 			call IsPresent "festrus" 2000
 			if (!${Return})
 			{
+				call DMove -402 28 260 3
 				stepstart:Set[1]
 			}
+		}
+		if (${InDecay} && ${Me.Loc.Y}>-400)
+		{
+			call DMove -188 75 146 3
+			call DMove -85 88 88 3
+			call DMove -45 97 -55 3
+			call DMove -56 100 -65 3
+			OgreBotAPI:Special["${Me.Name}"]
+			wait 50
+			stepstart:Set[5]
 		}
 		
 		if (${Me.Loc.Y}<-400)
@@ -287,7 +299,7 @@ function step004()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call DMove -57 99 -64 ${speed} ${FightDistance}
 	OgreBotAPI:Special["${Me.Name}"]
-	
+	InDecay:Set[TRUE]
 }
 
 function step005()
