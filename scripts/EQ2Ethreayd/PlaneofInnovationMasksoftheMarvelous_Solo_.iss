@@ -12,6 +12,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
 	run EQ2Ethreayd/livedierepeat
+	 
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -56,7 +57,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	else
 		speed:Set[${setspeed}]
 	
-		
+	run EQ2Ethreayd/autoshinies 100 ${speed} 	
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{

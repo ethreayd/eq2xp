@@ -596,7 +596,20 @@ function CheckWalking()
 				return FALSE
 			else
 				return TRUE
-}				
+}	
+function ClickOn(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= 10]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		echo click on ${ActorIterator.Value.Name}
+		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
+	}
+}			
 
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
@@ -1069,13 +1082,20 @@ function goto_GH()
 }
 
 
-function Harvest(string ItemName)
+function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoBack)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
-	
-	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= 100]
+	variable float X0
+	variable float Y0
+	variable float Z0
+	variable bool HasMoved
+	if (${Distance}<1)
+		Distance:Set[100]
+	if (${speed}<1)
+		speed:Set[1]
+	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -1093,19 +1113,57 @@ function Harvest(string ItemName)
 		{
 			do
 			{
+				HasMoved:Set[FALSE]
 				if (${ActorIterator.Value.X(exists)})
 				{
 					eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 					echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-					call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}	
-					wait 10
-					call GoDown
+					if (${GoBack})
+					{
+						X0:Set[${Me.Loc.X}]
+						Y0:Set[${Me.Loc.Y}]
+						Z0:Set[${Me.Loc.Z}]
+					}
+					if (!${is2D})
+					{
+						echo moving in 3D
+						call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}
+						wait 10
+						call GoDown
+					}
+					else
+					{
+						echo moving in 2D
+						if (!${Actor["${ActorIterator.Value.Name}"].CheckCollision})
+						{
+							HasMoved:Set[TRUE]
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed} 
+							wait 10
+						}
+					}	
 					eq2execute loc
-					wait 20
-					ogre harvestlite
-					wait 10
-					echo trying to harvest ${ItemName}
-					wait 200
+					if (${HasMoved} || !${is2D})
+					{
+						wait 20
+						ogre harvestlite
+						echo trying to harvest ${ItemName}
+						wait 50
+					}	
+					if (${GoBack} && ${HasMoved} )
+					{
+						echo going back
+						if (!${is2D})
+						{
+							call 3DNav ${X0} ${Math.Calc64[${Y0}+200]} ${Z0}
+							wait 10
+							call GoDown
+						}
+						else
+						{
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed}
+							wait 10
+						}
+					}
 				}
 			}
 			while ${ActorIterator:Next(exists)}
@@ -1323,6 +1381,7 @@ function MoveCloseTo(string ActorName)
 	do
 	{
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
 		wait 1
 		call CheckStuck ${loc0}
 		if (${Return})
@@ -1553,8 +1612,29 @@ function strip_QN(string questname)
 	return "${sQN}"
 }
 
-
-
+function TanknSpank(string Named, float Distance, bool Queue)
+{
+	if (${Distance}<1)
+		Distance:Set[50]
+	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	echo "must kill ${Named}"
+	call IsPresent "${Named}"
+	if (${Return})
+	{
+		target "${Named}"
+		do
+		{
+			wait 10
+			if (${Queue})
+				ExecuteQueued
+			call IsPresent "${Named}" ${Distance} TRUE
+		}
+		while (${Return} || ${Me.InCombatMode})
+	}
+}
 function TargetAfterTime(string mytarget, int ntime)
 {
 	wait ${ntime}

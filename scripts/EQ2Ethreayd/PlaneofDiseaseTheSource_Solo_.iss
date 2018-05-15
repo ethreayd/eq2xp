@@ -56,7 +56,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-	
+	run EQ2Ethreayd/autoshinies 100 ${speed} 
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -80,6 +80,7 @@ function main(int stepstart, int stepstop, int setspeed)
 		if (!${Return} && ${Me.Loc.Y}>-400)
 		{
 			wait 600
+			echo waiting for a min (I don't remember why)
 			call IsPresent "festrus" 2000
 			if (!${Return})
 			{
@@ -108,6 +109,7 @@ function main(int stepstart, int stepstop, int setspeed)
 		}
 	}
 	
+	echo "stepstart set to ${stepstart} - Launching StartQuest"
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -166,47 +168,56 @@ function step001()
 
 	Ob_AutoTarget:Clear
 	Ob_AutoTarget:AddActor["pusling",0,TRUE,FALSE]
-	
-	call DMove -202 47 254 ${speed}
-	call DMove -183 23 340 ${speed}
-	call DMove -168 21 390 ${speed}
-	call DMove -184 23 439 ${speed}
-	call DMove -207 21 443 ${speed}
-	call DMove -233	20 448 ${speed}
-	call DMove -255	22 437 ${speed}
-	call DMove -263	21 451 ${speed}
-	call DMove -325	21 482 3
-	call DMove -333	22 488 ${speed}
-	call DMove -312	21 518 ${speed}
-	call DMove -269	21 519 ${speed}
-	call DMove -254	20 539 ${speed}
-	call DMove -197	22 541 3
-	call DMove -56 21 549 ${speed}
-	call DMove -6 21 545 3
-	call DMove 49 21 550 3
-	call DMove 98 21 517 3
-	call DMove 74 22 468 ${speed}
-	call DMove 26 24 408 ${speed}
-	call DMove -3 20 396 ${speed}
-	call DMove -34 22 373 3
-	call DMove -58 21 360 ${speed}
-	call DMove -56 26 314 ${speed}
-	call DMove -198 46 261 3
+	call IsPresent "pusling" 500
+	if (${Return})
+	{
+		call DMove -202 47 254 ${speed}
+		call DMove -183 23 340 ${speed}
+		call DMove -168 21 390 ${speed}
+		call DMove -184 23 439 ${speed}
+		call DMove -207 21 443 ${speed}
+		call DMove -233	20 448 ${speed}
+		call DMove -255	22 437 ${speed}
+		call DMove -263	21 451 ${speed}
+		call DMove -325	21 482 3
+		call DMove -333	22 488 ${speed}
+		call DMove -312	21 518 ${speed}
+		call DMove -269	21 519 ${speed}
+		call DMove -254	20 539 ${speed}
+		call DMove -197	22 541 3
+		call DMove -56 21 549 ${speed}
+		call DMove -6 21 545 3
+		call DMove 49 21 550 3
+		call DMove 98 21 517 3
+		call DMove 74 22 468 ${speed}
+		call DMove 26 24 408 ${speed}
+		call DMove -3 20 396 ${speed}
+		call DMove -34 22 373 3
+		call DMove -58 21 360 ${speed}
+		call DMove -56 26 314 ${speed}
+		call DMove -198 46 261 3
+	}
 }	
 	
 function step002()
 {
 	variable string Named
+	variable bool IsPusling
 	Named:Set["Rancine"]
-	
-	do
+	call IsPresent "pusling" 500
+	IsPusling:Set[${Return}]
+	call IsPresent "${Named}" 500
+	if (!${Return} & ${IsPusling})
 	{
-		call IsPresent "${Named}" 500
-		if (!${Return})
+		do
+		{
 			call step001
-		call IsPresent "${Named}" 500	
+			call IsPresent "pusling" 500
+			IsPusling:Set[${Return}]
+			call IsPresent "${Named}" 500	
+		}
+		while (!${Return} & ${IsPusling})
 	}
-	while (!${Return})
 	Ob_AutoTarget:Clear
 	Ob_AutoTarget:AddActor["lesion of doom",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]

@@ -57,7 +57,7 @@ function main(int stepstart, int stepstop, int setspeed)
 		speed:Set[${setspeed}]
 		
 	echo speed set to ${speed}
-	
+	run EQ2Ethreayd/autoshinies 100 ${speed} 
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]

@@ -8,10 +8,10 @@ function main()
 	variable string sQN
 	do
 	{
-		wait 300
+		
 		do
 		{
-			wait 50
+			wait 100
 			call isGroupDead
 			GroupDead:Set[${Return}]
 			call isGroupAlive
@@ -25,28 +25,32 @@ function main()
 	
 		if (${Me.IsDead} && ${Me.InventorySlotsFree}>0)
 		{
-			echo I am Dead - Rebooting Instance
-			if ${Script["oopsimdead"](exists)}
-				endscript oopsimdead
-			call StopHunt
-			call strip_QN "${Zone.Name}"
-			sQN:Set[${Return}]
-			if ${Script[${sQN}](exists)}
-				endscript ${sQN}
-			OgreBotAPI:Revive[${Me.Name}]
-			echo waiting 1 min to recover
-			wait 10
-			press -release MOVEFORWARD
-			wait 600
-		
-			call ReturnEquipmentSlotHealth Primary
-			if (${Return}<20)
+			wait 300
+			if (${Me.IsDead})
 			{
-				echo Gear is too damaged - Ending this RunZone to mend
-				run RebootCoVZone ${Zone.Name}
+				echo I am Dead - Rebooting Instance
+				if ${Script["oopsimdead"](exists)}
+					endscript oopsimdead
+				call StopHunt
+				call strip_QN "${Zone.Name}"
+				sQN:Set[${Return}]
+				if ${Script[${sQN}](exists)}
+					endscript ${sQN}
+				OgreBotAPI:Revive[${Me.Name}]
+				echo waiting 1 min to recover
+				wait 10
+				press -release MOVEFORWARD
+				wait 600
+		
+				call ReturnEquipmentSlotHealth Primary
+				if (${Return}<20)
+				{
+					echo Gear is too damaged - Ending this RunZone to mend
+					run RebootCoVZone ${Zone.Name}
+				}
+				else
+					call RunZone
 			}
-			else
-				call RunZone
 		}
 	}
 	while (1==1)

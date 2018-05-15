@@ -55,7 +55,7 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-			
+		run EQ2Ethreayd/autoshinies 100 ${speed}
 	echo speed set to ${speed}
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -116,20 +116,8 @@ function step000()
 	oc !c -joustout ${Me.Name}
 	
 	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 -49
-	
-	echo must kill "${Named}"
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	
-	target "${Named}"
 	wait 20
-	target "${Named}"
-	
-	do
-	{
-		wait 10
-		call IsPresent "${Named}"
-	}
-	while (${Return})
+	call TanknSpank "${Named}"
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon

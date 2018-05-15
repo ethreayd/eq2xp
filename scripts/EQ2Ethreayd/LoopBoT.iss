@@ -1,6 +1,6 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main()
+function main(int speed)
 {
 	variable string sQN
 	variable int MyTime
@@ -14,7 +14,7 @@ function main()
 		
 		sQN:Set["GetPoPQuests"]
 		echo will get POP Quests Now !
-		runscript EQ2Ethreayd/${sQN} 
+		runscript EQ2Ethreayd/${sQN} 0 0 ${speed}
 		wait 5
 		while ${Script[${sQN}](exists)}
 			wait 5
