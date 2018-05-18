@@ -68,7 +68,7 @@ function step001()
 	}
 	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone
+    call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !
 }
 function step002()
@@ -86,7 +86,7 @@ function step002()
 	}
 	call waitfor_Zone "Torden, Bastion of Thunder: Winds of Change [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone
+    call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !	
 }
 function step003()

@@ -27,12 +27,12 @@ function main(float Distance, int speed)
 				wait 10 
 			}
 			while (!${Me.IsIdle})
-			call Harvest ? 100 ${speed} TRUE TRUE
+			call Harvest ? ${Distance} ${speed} TRUE TRUE
 			wait 10
 			Script[${sQN}]:Resume
 			echo Resumed
 		}
 	}
-	while ${Script[${sQN}](exists)}
+	while (${Script[${sQN}](exists)} && !${Me.IsDead})
 	echo End of auto shiny harvesting
 }

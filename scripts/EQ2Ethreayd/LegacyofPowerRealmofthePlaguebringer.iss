@@ -69,7 +69,7 @@ function step001()
 	}
 	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone
+    call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !
 }
 function step002()
@@ -118,7 +118,7 @@ function step005()
 	}
 		
 	echo will clear zone "${Zone.Name}" Now !
-	call RunZone
+	call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !
 }
 

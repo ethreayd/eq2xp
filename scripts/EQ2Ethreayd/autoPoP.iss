@@ -3,7 +3,7 @@
 variable(global) Object_Get_SpewStats MyFaction_Get_SpewStats
 variable(script) int64 iFaction
 ;You need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
-function main(int stepstart, int stepstop)
+function main(int stepstart, int stepstop, int speed)
 {
 	; thanks to Kannkor for the index usage example
 	variable index:string ScriptsToRun
@@ -34,7 +34,7 @@ function main(int stepstart, int stepstop)
 			call strip_QN "${ScriptsToRun[${x}]}"
 			sQN:Set[${Return}]
 			echo will run "${ScriptsToRun[${x}]}" step ${stepstart} Now !
-    			runscript EQ2Ethreayd/${sQN} "${ScriptsToRun[${x}]}" ${stepstart} ${stepstop}
+    			runscript EQ2Ethreayd/${sQN} "${ScriptsToRun[${x}]}" ${stepstart} ${stepstop} ${speed}
         		wait 5
         		while ${Script[${sQN}](exists)}
             		wait 5

@@ -4,7 +4,7 @@ variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Fight
 
-function main(int stepstart, int stepstop, int setspeed)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 	variable int laststep=9
 	
@@ -56,7 +56,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-	run EQ2Ethreayd/autoshinies 100 ${speed} 
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 100 ${speed} 
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -273,7 +274,7 @@ function step005()
 	while (${Me.Loc.Z}<0)
 	
 	eq2execute summon
-	wait 600
+	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 	
@@ -283,20 +284,23 @@ function step006()
 	Named:Set["The Flesh Eater"]
 	eq2execute merc resume
 	call StopHunt
-	
-	Me.Inventory["Hirudin Extract"]:Use
+	call CountItem "Hirudin Extract"
+	if (${Return}<1)
+		echo without Hirudin Extract in you inventory, the next fight will be very difficult
+	else
+		Me.Inventory["Hirudin Extract"]:Use
 	wait 20
-	;Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
+	Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-   
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",50]
 	call DMove 227 392 10 2
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	echo must kill "${Named}"
-	call DMove 193 394 0 3
+	call DMove 193 394 0 3 TRUE
 	oc !c -CampSpot ${Me.Name}
 	oc !c -joustout ${Me.Name}
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	do
 	{
 		wait 10

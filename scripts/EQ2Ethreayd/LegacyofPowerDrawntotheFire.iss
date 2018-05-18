@@ -61,7 +61,7 @@ function step000()
 	
 	call waitfor_Zone "Solusek Ro's Tower: The Obsidian Core [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone
+    call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !
 } 
 	
@@ -80,7 +80,7 @@ function step001()
 	}
 	call waitfor_Zone "Solusek Ro's Tower: Monolith of Fire [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone
+    call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !
 }
 

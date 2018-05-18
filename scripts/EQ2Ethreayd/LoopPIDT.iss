@@ -1,6 +1,6 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main(int speed)
+function main(int speed, bool NoShiny)
 {
 	variable string sQN
 	variable int MyTime
@@ -36,7 +36,7 @@ function main(int speed)
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 		call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
-		call RunZone
+		call RunZone 0 0 ${speed} ${NoShiny}
 		echo MotM terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -57,7 +57,7 @@ function main(int speed)
 	
 		call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
 		MyTime:Set[${Time.Timestamp}]
-		call RunZone
+		call RunZone 0 0 ${speed} ${NoShiny}
 		echo GitM terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -77,7 +77,7 @@ function main(int speed)
 		wait 50
 		call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 		wait 50
-		call RunZone
+		call RunZone 0 0 ${speed} ${NoShiny}
 		echo Outbreak terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -98,7 +98,7 @@ function main(int speed)
 		call waitfor_Zone "Plane of Disease: the Source [Solo]"
 		MyTime:Set[${Time.Timestamp}]
 		wait 50
-		call RunZone
+		call RunZone 0 0 0 ${NoShiny}
 		echo the Source terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -118,7 +118,7 @@ function main(int speed)
 		wait 50
 		call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Solo]"
 		wait 50
-		call RunZone
+		call RunZone 0 0 ${speed} ${NoShiny}
 		echo BoTTB terminated
 		call waitfor_Zone "Coliseum of Valor"
 		
@@ -139,7 +139,7 @@ function main(int speed)
 		call waitfor_Zone "Torden, Bastion of Thunder: Winds of Change [Solo]"
 		MyTime:Set[${Time.Timestamp}]
 		wait 50
-		call RunZone
+		call RunZone 0 0 ${speed} ${NoShiny}
 		echo BoTWoC terminated 
 		call waitfor_Zone "Coliseum of Valor"
 		

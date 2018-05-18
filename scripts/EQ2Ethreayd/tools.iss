@@ -1137,7 +1137,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						if (!${Actor["${ActorIterator.Value.Name}"].CheckCollision})
 						{
 							HasMoved:Set[TRUE]
-							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed} 
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed} 15 FALSE TRUE
 							wait 10
 						}
 					}	
@@ -1160,7 +1160,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						}
 						else
 						{
-							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed}
+							call DMove ${X0} ${Y0} ${Z0} ${speed}
 							wait 10
 						}
 					}
@@ -1693,7 +1693,7 @@ function Transmute(string ItemName)
 		
 function Unstuck(bool LR)
 {
-	press PKey JUMP 1
+	call PKey JUMP 1
 	press -release MOVEFORWARD
 	
 	if (${LR})

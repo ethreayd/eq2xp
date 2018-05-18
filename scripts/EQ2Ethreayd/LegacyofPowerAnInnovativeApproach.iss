@@ -65,7 +65,7 @@ function step000()
 function step001()
 {	
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
-	call RunZone
+	call RunZone 0 0 0 TRUE
 }
 function step002()
 {
@@ -88,7 +88,7 @@ function step003()
 		wait 50
 	}
 	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
-	call RunZone	
+	call RunZone 0 0 0 TRUE
 }
 function step004()
 {	
