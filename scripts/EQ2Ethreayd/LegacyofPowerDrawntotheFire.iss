@@ -74,10 +74,11 @@ function step001()
 		call DMove 95 3 -164 3
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_ro_tower","Enter Solusek Ro's Tower"]
-		wait 20
+		wait 50
 		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
+	
 	call waitfor_Zone "Solusek Ro's Tower: Monolith of Fire [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
     call RunZone 0 0 0 TRUE

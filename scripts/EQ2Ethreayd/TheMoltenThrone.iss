@@ -151,6 +151,8 @@ function step001()
 				oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -30
 			else
 				oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 30
+			if (${Me.Health} > 99 && ${Me.Power} > 99)
+				target "${Named}"
 			call IsPresent "${Named}"
 		}
 		while (${Return} || ${Me.InCombatMode})
