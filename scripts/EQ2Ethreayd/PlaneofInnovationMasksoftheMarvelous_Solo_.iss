@@ -4,7 +4,7 @@ variable(script) int FightDistance
 variable(script) bool Detected
 
 
-function main(int stepstart, int stepstop, int setspeed)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=7
@@ -56,8 +56,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-	
-	run EQ2Ethreayd/autoshinies 100 ${speed} 	
+		if (!${NoShiny})
+			run EQ2Ethreayd/autoshinies 50 ${speed} 	
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -291,15 +291,15 @@ function step005()
 			call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
 			if (!${Detected})
 			{
-				call DMove 237 -13 -219 2 TRUE TRUE
+				call DMove 237 -13 -219 2 30 TRUE TRUE
 			}
 			if (!${Detected})
 			{
-				call DMove 220 -8 -218 2 TRUE TRUE
+				call DMove 220 -8 -218 2 30 TRUE TRUE
 			}
 			if (!${Detected})
 			{
-				call DMove 173 10 -219 3 TRUE TRUE
+				call DMove 173 10 -219 3 30 TRUE TRUE
 			}
 		}
 		while (${Detected})

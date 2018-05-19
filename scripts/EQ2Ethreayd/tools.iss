@@ -1095,6 +1095,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 		Distance:Set[100]
 	if (${speed}<1)
 		speed:Set[1]
+	echo entering Harvest function
 	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
@@ -1137,7 +1138,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						if (!${Actor["${ActorIterator.Value.Name}"].CheckCollision})
 						{
 							HasMoved:Set[TRUE]
-							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed} 15 FALSE TRUE
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 15 FALSE TRUE
 							wait 10
 						}
 					}	
@@ -1145,6 +1146,8 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 					if (${HasMoved} || !${is2D})
 					{
 						wait 20
+						if (${ActorIterator.Value.Distance}<15 && !${Actor["${ActorIterator.Value.Name}"].CheckCollision})
+							call PetitPas ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}  3
 						ogre harvestlite
 						echo trying to harvest ${ItemName}
 						wait 50
@@ -1160,7 +1163,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						}
 						else
 						{
-							call DMove ${X0} ${Y0} ${Z0} ${speed}
+							call DMove ${X0} ${Y0} ${Z0} ${speed} 15 FALSE TRUE
 							wait 10
 						}
 					}
@@ -1169,6 +1172,8 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 			while ${ActorIterator:Next(exists)}
 		}		
 	}
+	echo exiting Harvest function
+
 }
 
 function HarvestItem(string ItemName, int number)
@@ -1612,11 +1617,11 @@ function strip_QN(string questname)
 	return "${sQN}"
 }
 
-function TanknSpank(string Named, float Distance, bool Queue)
+function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 {
 	if (${Distance}<1)
 		Distance:Set[50]
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	Ob_AutoTarget:AddActor["${Named}",0,!${NoCC},FALSE]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]

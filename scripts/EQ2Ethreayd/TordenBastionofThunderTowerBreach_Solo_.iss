@@ -3,7 +3,7 @@ variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool InRing
 
-function main(int stepstart, int stepstop, int setspeed)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=12
@@ -57,7 +57,8 @@ function main(int stepstart, int stepstop, int setspeed)
 		speed:Set[${setspeed}]
 		
 	echo speed set to ${speed}
-	run EQ2Ethreayd/autoshinies 100 ${speed} 
+	if (!${NoShiny})
+			run EQ2Ethreayd/autoshinies 50 ${speed} 
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -197,6 +198,8 @@ function step001()
 	
 	call DMove 704 3 -748 1
 	call DMove 694 9 -749 1
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	call DMove 625 37 -748 ${speed} ${FightDistance}
 	call DMove 593 38 -720 ${speed} ${FightDistance}
 	
@@ -215,6 +218,7 @@ function step001()
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
+	
 }	
 	
 function step002()
@@ -279,6 +283,8 @@ function step002()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 }
 
 function step003()

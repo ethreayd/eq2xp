@@ -2,7 +2,7 @@
 variable(script) int speed
 variable(script) int FightDistance
 
-function main(int stepstart, int stepstop, int setspeed)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=9
@@ -53,7 +53,9 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-		run EQ2Ethreayd/autoshinies 100 ${speed} 
+		if (!${NoShiny})
+			run EQ2Ethreayd/autoshinies 50 ${speed} 
+		
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]

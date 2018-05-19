@@ -2,7 +2,7 @@
 variable(script) int speed
 variable(script) int FightDistance
 
-function main(int stepstart, int stepstop, int setspeed)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=6
@@ -55,7 +55,8 @@ function main(int stepstart, int stepstop, int setspeed)
 	}
 	else
 		speed:Set[${setspeed}]
-		run EQ2Ethreayd/autoshinies 100 ${speed}
+		if (!${NoShiny})
+			run EQ2Ethreayd/autoshinies 50 ${speed}
 	echo speed set to ${speed}
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -103,7 +104,7 @@ function step000()
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",50]
 	call DMove 0 -6 -51 ${speed} ${FightDistance}
 	Ob_AutoTarget:AddActor["construct of flames",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["Solitude",0,TRUE,FALSE]
@@ -119,6 +120,7 @@ function step000()
 	wait 20
 	call TanknSpank "${Named}"
 	wait 20
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
@@ -149,9 +151,9 @@ function step001()
 	call DMove 0 -6 -55 2
 	call DMove 0 -7 -77 1
 	call Converse "Operator of Fire" 2
+	if (!${NoShiny})
+		Script[autoshinies]:Pause
 	wait 250
-	
-	
 }	
 	
 function step002()
@@ -225,6 +227,7 @@ function step003()
 	call IsPresent "${Named}"
 	isNamed:Set[${Return}]
 	call IsPresent "${mob}" 500
+	
 	if (${Return} || ${isNamed})
 	{
 		call DMove -5 -137 -84 1
@@ -281,10 +284,13 @@ function step003()
 		eq2execute merc resume
 		call StopHunt
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
+		if (!${NoShiny})
+			Script[autoshinies]:Resume
 		call DMove 9 -139 21 3
 		call DMove 14 -139 11 3
 		call DMove 35 -138 5 3
+		if (!${NoShiny})
+			Script[autoshinies]:Pause
 		call DMove 46 -139 -25 3
 		call DMove 31 -136 -48 3
 		call DMove 1 -137 -77 3
@@ -307,7 +313,6 @@ function step004()
 	{
 		call PetitPas 4 -156 -81 3
 		
-		while (!${Return})
 		echo Prepare to Run and Jump
 
 		wait 20
@@ -360,12 +365,15 @@ function step004()
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 		wait 20
 		oc !c -letsgo ${Me.Name}	
-	
+		if (!${NoShiny})
+			Script[autoshinies]:Resume
 		call StopHunt
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 		call DMove -125 -156 -40 3
 		call DMove -105 -158 -60 3
+		if (!${NoShiny})
+			Script[autoshinies]:Pause
 		call DMove -67 -157 -32 3
 		call DMove -39 -157 -40 3
 		call DMove 0 -156 -77 3
@@ -417,6 +425,8 @@ function step005()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	if (!${NoShiny})
+		Script[autoshinies]:Resume
 }
 
 function step006()

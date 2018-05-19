@@ -7,7 +7,7 @@ function main()
 	variable string ZoneName
 			echo rebooting session
 			call StopHunt
-			run killall
+			run EQ2Ethreayd/killall
 			ZoneName:Set["${Zone.Name}"]
 			call PKey MOVEFORWARD 1
 			OgreBotAPI:Revive[${Me.Name}]

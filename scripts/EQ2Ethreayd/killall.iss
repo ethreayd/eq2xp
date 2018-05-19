@@ -3,6 +3,7 @@ function main()
 	variable index:string ScriptsToRun
 	variable string sQN
 	
+	ScriptsToRun:Insert["autoshinies"]
 	ScriptsToRun:Insert["LegacyofPowerDeepTrouble"]
 	ScriptsToRun:Insert["SolusekRosTowerMonolithofFire_Solo_"]
 	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Solo_"]

@@ -3,12 +3,55 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Fight
+variable(script) int CounterM
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 	variable int laststep=9
+	variable int count
 	
 	oc !c -letsgo ${Me.Name}
+	
+	call IsPresent "The Carrion Larva" 500
+	if (!${Return})
+	{
+		call CountItem "Hirudin Extract"
+		count:Set[${Return}]
+		call IsPresent "The Flesh Eater" 500
+		if (${Return} && ${count}==0)
+		{
+			
+			call ActivateVerb "Zone Exit" 529 84 60 "Leave"
+			call waitfor_Zone "Coliseum of Valor"
+			call DMove -2 5 4 3
+			call DMove -167 3 7 3
+			call DMove -193 3 0 3
+		
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
+			wait 20
+			call check_quest "Legacy of Power: Realm of the Plaguebringer"
+			if (${Return})
+				OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+			else
+				OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
+			wait 50
+			call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
+		
+			call IsPresent "The Carrion Larva" 500
+			if (!${Return})
+			{
+				call CountItem "Hirudin Extract"
+				count:Set[${Return}]
+				call IsPresent "The Flesh Eater" 500
+				if (${Return} && ${count}==0)
+				{
+					echo you need to reset the zone manually and relaunch the script
+					return
+				}
+			}
+		}
+	}
+	
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
 	run EQ2Ethreayd/livedierepeat
@@ -250,6 +293,7 @@ function step004()
 	Me.Inventory["Hirudin Extract"]:Use
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call DMove 137 74 -344 3 ${FightDistance}
 	call DMove 296 71 -323 3 ${FightDistance} TRUE
 }
 
@@ -265,14 +309,17 @@ function step005()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    	
 	call ClimbingFMountain
-	
+	CounterM:Set[0]
 	do
 	{
 		wait 10
 		ExecuteQueued
+		CounterM:Inc
+		
 	}
-	while (${Me.Loc.Z}<0)
-	
+	while (${Me.Loc.Z}<0 && ${CounterM}<60)
+	if (${Me.Loc.Z}<0)
+		call step005
 	eq2execute summon
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -464,27 +511,32 @@ function step009()
 }
 function ClimbingFMountain()
 {
-	wait 100
+	CounterM:Set[0]
+	wait 300
+	ogre navtest node1
 	if (!${Fight})
-		call DMove 308 97 -243 3 ${FightDistance}
+		call DMove 308 97 -243 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 276 113 -217 3 ${FightDistance} 
+		call DMove 276 113 -217 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 196 159 -219 3 ${FightDistance}
+		call DMove 196 159 -219 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
 		call DMove 147 188 -235 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 113 218 -199 3 ${FightDistance}
+		call DMove 113 218 -199 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 120 246 -141 3 ${FightDistance}
+		call DMove 120 246 -141 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 257 321 -111 3 ${FightDistance}
+		call DMove 257 321 -111 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 283 338 -84 3 ${FightDistance}
+		call DMove 283 338 -84 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 285 371 -24 3 ${FightDistance}
+		call DMove 285 371 -24 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 250 392 4 3 ${FightDistance}
+		call DMove 250 392 4 3 ${FightDistance} FALSE TRUE
+	if (!${Fight})
+		call DMove 239 396 22 3 ${FightDistance} FALSE TRUE
+		
 	if (!${Fight})
 		OgreBotAPI:NoTarget[${Me.Name}]
 }
@@ -550,8 +602,11 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["stumbled into a giant latcher"]} > 0)
 	{
 		Fight:Set[TRUE]
+		CounterM:Set[0]
 		target ${Me.Name}
+		press -release MOVEFORWARD
 		ogre navtest hide1
+		press -release MOVEFORWARD
 		eq2execute merc backoff
 	}
 	if (${Message.Find["uslings leak out from the giant"]} > 0)
@@ -569,9 +624,12 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["giant latcher recedes back into"]} > 0)
 	{
 		target ${Me.Name}
+		CounterM:Set[0]
+		press -release MOVEFORWARD
 		ogre navtest node1
-		Fight:Set[FALSE]
+		press -release MOVEFORWARD
 		eq2execute merc ranged
+		Fight:Set[FALSE]
 		QueueCommand call ClimbingFMountain
 	}
 	if (${Message.Find["lanar static increases"]} > 0)
