@@ -16,6 +16,7 @@ function main(int stepstart, int stepstop, int speed)
 	ScriptsToRun:Insert["Legacy of Power: Glimpse of the Hereother"]
 	ScriptsToRun:Insert["Legacy of Power: Drawn to the Fire"]
 	ScriptsToRun:Insert["Legacy of Power: Deep Trouble"]
+	ScriptsToRun:Insert["Legacy of Power: Tyrant's Throne"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
 	

@@ -4,7 +4,7 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=1
+	variable int laststep=0
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	wait 20
@@ -42,7 +42,7 @@ function step000()
 			ogre qh
 			call DMove -2 5 4 3
 			call Converse "${NPCName}" 30 TRUE TRUE
-			wait 100
+			wait 50
 			ogre end qh
 			wait 20
 			call check_quest "${questname}"
@@ -52,14 +52,15 @@ function step000()
 	}
 		
 	call DMove -2 5 4 3
-	call DMove 186 3 0 3
-		
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_vasty_dome","Enter the Brackish Vaults"]
-	wait 20
-	OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+	call DMove 78 0 -130 3
+	call DMove 100 4 -152 3
+	call DMove 92 3 -141 2
+	call ActivateVerbOnPhantomActor "Activate E-POD"	
 	wait 50
-	
-	call waitfor_Zone "Brackish Vaults [Solo]"
+	call DMove 95 3 -149 3
+	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_molten_throne","Enter the Molten Throne"]
+	wait 20
+	call waitfor_Zone "The Molten Throne"
 	echo will clear zone "${Zone.Name}" Now !
     call RunZone 0 0 0 TRUE
 	echo zone "${Zone.Name}" Cleared !

@@ -292,29 +292,29 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 				{
 					echo Found an empty Actor (ID:${ActorIterator.Value.ID}) at ${ActorIterator.Value.Distance} m
 					Found:Set[TRUE]
+					echo Looking to ${verb} on Phantom Actor at ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
+					call TestArrivalCoord  ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+					if (!${Return})
+					{       
+						do
+						{
+							face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+							if  (${ActorIterator.Value.Distance}> ${RespectDistance})
+								call PKey MOVEFORWARD 1
+							call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+							if (${ActorIterator.Value.X}==0 && ${ActorIterator.Value.Y}==0 && ${ActorIterator.Value.Z}==0)
+								Hit:Set[TRUE]
+						}	
+						while (!${Return} && !${Hit})
+					}
+					face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+					echo "${Me.Name}" "${verb}" on ID ${ActorIterator.Value.ID} now
+					eq2execute apply_verb ${ActorIterator.Value.ID} "${verb}"
+					wait 20
 				}
 		}
         while (${ActorIterator:Next(exists)} && !${Found})
 	}	
-	echo Looking to ${verb} on Phantom Actor at ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
-	call TestArrivalCoord  ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
-	if (!${Return})
-	{       
-		do
-		{
-			face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
-			if  (${ActorIterator.Value.Distance}> ${RespectDistance})
-				call PKey MOVEFORWARD 1
-			call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
-			if (${ActorIterator.Value.X}==0 && ${ActorIterator.Value.Y}==0 && ${ActorIterator.Value.Z}==0)
-				Hit:Set[TRUE]
-		}	
-		while (!${Return} && !${Hit})
-	}
-	face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
-	echo "${Me.Name}" "${verb}" on ID ${ActorIterator.Value.ID} now
-	eq2execute apply_verb ${ActorIterator.Value.ID} "${verb}"
-	wait 20
 }
 
 function Ascend(float Y)

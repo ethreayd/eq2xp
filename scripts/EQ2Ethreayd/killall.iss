@@ -2,7 +2,9 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
-	
+	ScriptsToRun:Insert["TheMoltenThrone"]
+	ScriptsToRun:Insert["LegacyofPowerTyrantsThrone"]
+	ScriptsToRun:Insert["BrackishVaults_Solo_"]
 	ScriptsToRun:Insert["autoshinies"]
 	ScriptsToRun:Insert["LegacyofPowerDeepTrouble"]
 	ScriptsToRun:Insert["SolusekRosTowerMonolithofFire_Solo_"]
