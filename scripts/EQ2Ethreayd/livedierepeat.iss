@@ -49,7 +49,7 @@ function main(bool NoShiny)
 					run RebootCoVZone ${Zone.Name}
 				}
 				else
-					call RunZone 0 0 ${NoShiny}
+					call RunZone 0 0 0 ${NoShiny}
 			}
 		}
 	}
