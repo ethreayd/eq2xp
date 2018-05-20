@@ -89,6 +89,15 @@ function step002()
 {
 	call waitfor_Zone "Coliseum of Valor"
 	call DMove -2 5 4 3
-	call Converse "${NPCName}" 10 TRUE
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call DMove 9 6 17 2
+	do 
+	{
+		call DMove 9 6 17 2
+		ogre qh
+		call Converse "${NPCName}" 30 TRUE TRUE
+		ogre end qh
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		call check_quest "${questname}"
+	}
+	while (${Return})
 }

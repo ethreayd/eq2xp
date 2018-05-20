@@ -444,7 +444,7 @@ function step006()
 function ReturnToPosition()
 {
 	wait 300
-	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 30
+	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 -30
 }
 function ResetLift()
 {
@@ -459,8 +459,11 @@ atom HandleAllEvents(string Message)
 	;echo Catch Event ${Message}
 	if (${Message.Find["expelling molten rocks"]} > 0)
 	{
-		oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 30
-		QueueCommand call ReturnToPosition
+		if (${Me.Loc$.Z}<-180)
+		{
+			oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 30
+			QueueCommand call ReturnToPosition
+		}
 	}
  }
  
