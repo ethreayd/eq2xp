@@ -132,14 +132,8 @@ function step000()
 	call DMove 8 224 17 ${speed} ${FightDistance}
 	call DMove -11 224 -10 ${speed} ${FightDistance}
 	call DMove 12 224 -17 ${speed} ${FightDistance}
-	wait 20
-	do
-	{
-		wait 10
-		call IsPresent "brine wyvern"
-	}
-	while (!${Return})
-	
+	wait 200
+		
 	call TanknSpank "brine wyvern"
 	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
