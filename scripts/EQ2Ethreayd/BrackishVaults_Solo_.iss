@@ -98,7 +98,9 @@ function step000()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call DMove 37 35 28 ${speed} ${FightDistance}
+	wait 50
 	call DMove 36 35 13 ${speed} ${FightDistance}
+	wait 50
 	call DMove 30 35 22 3
 	
 	do
@@ -109,9 +111,10 @@ function step000()
 	while (${Me.Loc.Z}>0)
 	
 	call DMove 10 84 -48 ${speed} ${FightDistance}
+	wait 50
 	call DMove -28 84 -37 ${speed} ${FightDistance}
+	wait 50
 	call DMove 9 84 -23 3
-	
 	do
 	{
 		call ActivateVerbOnPhantomActor "Ice"
@@ -120,8 +123,11 @@ function step000()
 	while (${Me.Loc.X}>0)
 	
 	call DMove -55 143 38 ${speed} ${FightDistance}
+	wait 50
 	call DMove -41 143 79 ${speed} ${FightDistance}
+	wait 50
 	call DMove -59 143 68 3
+	wait 50
 	call DMove -20 143 31 3
 	
 	do
@@ -132,7 +138,9 @@ function step000()
 	while (${Me.Loc.Y}<200)
 		
 	call DMove 8 224 17 ${speed} ${FightDistance}
+	wait 50
 	call DMove -11 224 -10 ${speed} ${FightDistance}
+	wait 50
 	call DMove 12 224 -17 ${speed} ${FightDistance}
 	wait 200
 		
@@ -146,12 +154,12 @@ function step000()
 	call DMove 5 224 -27 3
 	do
 	{
-		call PetitPas 5 224 -27 3
-		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Release the Sphere"
+		call MoveCloseTo "Sphere of Coalesced Water"
+		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Release the Sphere" TRUE
 		wait 20
-		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Gather"
+		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Gather" TRUE
 		wait 20
-		call IsPresent "Sphere of Coalesced Water" 20
+		call IsPresent "Sphere of Coalesced Water" 50
 	}
 	while (${Return})
 	

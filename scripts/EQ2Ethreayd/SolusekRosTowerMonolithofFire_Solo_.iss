@@ -1,6 +1,7 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
+variable(script) int NextStep
 variable(script) bool ShardOn
 variable(script) bool BrazierOn
 variable(script) bool Firelord
@@ -11,8 +12,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=9
-	variable bool Branch
-	
+		
 	oc !c -letsgo ${Me.Name}
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
@@ -88,7 +88,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
 	
-	
+	OgreBotAPI:Resume["${Me.Name}"]
 	if (${stepstart}==0)
 	{
 		call IsPresent "Jiva" 500
@@ -96,8 +96,20 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		{
 			stepstart:Set[1]
 		}
+		call IsPresent "Xulz" 500
+		if (${Return})
+		{
+			call gotoXulz
+			stepstart:Set[6]
+		}
+		call IsPresent "Solusek Ro" 500
+		if (${Return})
+		{
+			call gotoRo
+			stepstart:Set[8]
+		}
 	}
-	OgreBotAPI:Resume["${Me.Name}"]
+	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -318,8 +330,16 @@ function step002()
 	call OpenDoor "Door - Floor 1 Left 1"
 	call AutoPassDoor "Door - Floor 1 Right 1" 110 -6 -101
 	call DMove 135 -8 -102 3
-	call ActivateVerb "Brazier Floor 1 West" 135 -8 -102 "Touch"
-	wait 50
+	do
+	{
+		call PetitPas 138 -8 -102 3
+		call ActivateVerb "Brazier Floor 1 West" 135 -8 -102 "Touch"
+		wait 50
+		ReplyDialog:Choose[1]
+		wait 50
+	}
+	while (${Me.Loc.Y}<0)
+	
 	call DMove 224 103 -108 ${speed} ${FightDistance}
 	call DMove 224 103 -125 ${speed} ${FightDistance}
 	call DMove 244 103 -125 ${speed} ${FightDistance}
@@ -354,6 +374,7 @@ function step003()
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 		Ob_AutoTarget:AddActor["${mob}",0,TRUE,FALSE]
+		eq2execute merc backoff
 		call DMove 151 102 -151 3
 		call DMove 116 102 -170 3
 		wait 20
@@ -372,9 +393,12 @@ function step003()
 		call DMove 158 102 -10 3
 		call DMove 153 102 -123 3
 		call DMove 132 102 -114 3
+		eq2execute merc backoff
 		oc !c -CampSpot ${Me.Name}
 		oc !c -joustout ${Me.Name}
 		eq2execute merc resume
+		eq2execute merc backoff
+
 		wait 10
 		call TanknSpank "${Named}"
 		wait 20
@@ -384,6 +408,7 @@ function step003()
 		wait 20
 		call TanknSpank "${Named}"
 		wait 20
+		eq2execute merc ranged
 	
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 		eq2execute summon
@@ -689,7 +714,7 @@ function step008()
 	wait 20
 	eq2execute gsay "Set up for"
 	wait 50
-	call Converse "${Named}" 10
+	call Converse "${Named}" 10 TRUE
 	do
 	{
 		wait 10
@@ -822,7 +847,73 @@ function GotoRedGargoyle()
 		MirageQueued:Set[FALSE]
 	}
 }
-
+function gotoXulz()
+{
+	echo goint to Xulz
+	call DMove 0 -6 -30 3
+	call DMove 0 -6 -54 2
+	call DMove 20 -6 -54 3
+	call DMove 20 -6 -97 3
+	call DMove 27 -6 -102 3
+	call DMove 78 -5 -102 3
+	call DMove 97 -6 -101 3
+	wait 20
+	call OpenDoor "Door - Floor 1 Left 1"
+	call AutoPassDoor "Door - Floor 1 Right 1" 110 -6 -101
+	call DMove 135 -8 -102 3
+	do
+	{
+		call PetitPas 138 -8 -102 3
+		call ActivateVerb "Brazier Floor 1 West" 135 -8 -102 "Touch"
+		wait 20
+		ReplyDialog:Choose[1]
+		wait 50
+	}
+	while (${Me.Loc.Y}<0)
+	wait 20
+	call DMove 224 103 -104 3
+	call DMove 224 103 -200 3
+	call DMove 149 103 -200 3
+	call DMove 152 102 -96 3
+	call DMove 198 104 -95 3
+	call ActivateVerb "Brazier Floor 2 West 2" 197 103 -94 "Touch"
+	wait 20
+	ReplyDialog:Choose[2]
+	wait 50
+}
+function gotoRo()
+{
+	echo going to Solusek Ro
+	call DMove 0 -6 -30 3
+	call DMove 0 -6 -54 2
+	call DMove 20 -6 -54 3
+	call DMove 20 -6 -97 3
+	call DMove 27 -6 -102 3
+	call DMove 78 -5 -102 3
+	call DMove 97 -6 -101 3
+	wait 20
+	call OpenDoor "Door - Floor 1 Left 1"
+	call AutoPassDoor "Door - Floor 1 Right 1" 110 -6 -101
+	call DMove 135 -8 -102 3
+	do
+	{
+		call PetitPas 138 -8 -102 3
+		call ActivateVerb "Brazier Floor 1 West" 135 -8 -102 "Touch"
+		wait 20
+		ReplyDialog:Choose[2]
+		wait 50
+	}
+	while (${Me.Loc.Y}<0)
+	wait 20
+	call DMove 0 224 26 3
+	call DMove -108 224 26 3
+	call DMove -107 224 -80 3
+	call DMove -79 225 -80 3
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
+	call ActivateVerb "Brazier Floor 3 East" -80 225 -80 "Touch"
+	wait 20
+}
 atom HandleAllEvents(string Message)
 {
 	;echo Catch Event ${Message}

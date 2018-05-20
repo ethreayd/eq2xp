@@ -4,7 +4,7 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=0
+	variable int laststep=3
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
 	wait 20
@@ -72,4 +72,12 @@ function step001()
 	call DMove -2 5 4 3
 	call Converse "${NPCName}" 10 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+}
+function step002()
+{	
+	call step001
+}
+function step003()
+{	
+	call step001
 }

@@ -117,8 +117,11 @@ function step000()
 	wait 20
 	call DMove 8 2 96 ${speed} ${FightDistance}
 	wait 20
+	target Sullonite
+	eq2execute merc backoff
+	wait 20
 	call DMove 6 3 106 3
-	
+	eq2execute merc ranged	
 }
 
 function step001()
