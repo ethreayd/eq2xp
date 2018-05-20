@@ -54,7 +54,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat
+	run EQ2Ethreayd/livedierepeat ${NoShiny}
 	echo "Archetype (${Me.Archetype}) is :"
 	if (${setspeed}==0)
 	{

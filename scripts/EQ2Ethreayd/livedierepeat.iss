@@ -1,6 +1,6 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main()
+function main(bool NoShiny)
 {
 	variable bool GroupDead
 	variable bool GroupAlive
@@ -49,7 +49,7 @@ function main()
 					run RebootCoVZone ${Zone.Name}
 				}
 				else
-					call RunZone
+					call RunZone 0 0 ${NoShiny}
 			}
 		}
 	}

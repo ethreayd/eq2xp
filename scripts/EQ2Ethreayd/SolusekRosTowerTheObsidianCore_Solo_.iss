@@ -11,7 +11,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	oc !c -letsgo ${Me.Name}
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat
+	run EQ2Ethreayd/livedierepeat ${NoShiny}
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
