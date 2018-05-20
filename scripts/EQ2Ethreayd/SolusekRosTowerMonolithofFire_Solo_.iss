@@ -277,7 +277,7 @@ function step001()
 	variable string Named
 	Named:Set["Jiva"]
 	eq2execute merc resume
-		
+	call DMove 0 -6 -54 3	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	echo must kill "${Named}"
 	
