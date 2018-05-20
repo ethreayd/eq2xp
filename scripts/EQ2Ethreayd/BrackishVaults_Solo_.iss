@@ -56,6 +56,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		speed:Set[${setspeed}]
 			
 	echo speed set to ${speed}
+	if ${Script["autoshinies"](exists)}
+		endscript autoshinies
 	if (!${NoShiny})
 		run EQ2Ethreayd/autoshinies 50 ${speed} 
 	
@@ -144,6 +146,7 @@ function step000()
 	call DMove 5 224 -27 3
 	do
 	{
+		call PetitPas 5 224 -27 3
 		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Release the Sphere"
 		wait 20
 		call ActivateVerb "Sphere of Coalesced Water" 5 224 -27 "Gather"
@@ -168,6 +171,7 @@ function step000()
 	call DMove 30 35 22 3
 	do
 	{
+		call PetitPas 28 35 22 3
 		call ActivateVerbOnPhantomActor "Return to Coliseum of Valor"
 		wait 50
 	}

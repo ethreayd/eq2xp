@@ -62,8 +62,11 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		speed:Set[${setspeed}]
 			
 	echo speed set to ${speed}
+	if ${Script["autoshinies"](exists)}
+		endscript autoshinies
 	if (!${NoShiny})
 		run EQ2Ethreayd/autoshinies 50 ${speed} 
+
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
