@@ -117,7 +117,10 @@ function step000()
 	oc !c -joustout ${Me.Name}
 	
 	oc !c -CS_Set_ChangeRelativeCampSpotBy ${Me.Name} 0 0 -49
+	eq2execute merc backoff
 	wait 20
+	eq2execute merc ranged
+	wait 100
 	call TanknSpank "${Named}"
 	wait 20
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]

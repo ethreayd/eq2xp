@@ -1559,13 +1559,13 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 }
 
 
-function RunZone(int qstart, int qstop)
+function RunZone(int qstart, int qstop, int speed, bool NoShiny)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}"
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" Now !
-    runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop}
+    runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
     wait 5
     while ${Script[${sQN}](exists)}
 		wait 5

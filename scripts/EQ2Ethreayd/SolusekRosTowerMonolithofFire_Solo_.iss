@@ -94,6 +94,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 			stepstart:Set[1]
 		}
 	}
+	OgreBotAPI:Resume["${Me.Name}"]
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -104,6 +105,7 @@ function step000()
 	variable string Named
 	Named:Set["Shard of Obsidian"]
 	eq2execute merc resume
+	
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
@@ -277,7 +279,7 @@ function step001()
 	variable string Named
 	Named:Set["Jiva"]
 	eq2execute merc resume
-	call DMove 0 -6 -54 3	
+	call DMove 0 -6 -54 2	
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	echo must kill "${Named}"
 	
@@ -308,6 +310,10 @@ function step002()
 	call DMove 20 -6 -97 3
 	call DMove 27 -6 -102 3
 	call DMove 78 -5 -102 3
+	call DMove 97 -6 -101 3
+	wait 20
+	call OpenDoor "Door - Floor 1 Left 1"
+	call AutoPassDoor "Door - Floor 1 Right 1" 110 -6 -101
 	call DMove 135 -8 -102 3
 	call ActivateVerb "Brazier Floor 1 West" 135 -8 -102 "Touch"
 	wait 50
@@ -586,7 +592,7 @@ function step006()
 		while (${Return} || ${Me.InCombatMode})
 		echo exiting loop
 	}
-	oc !c -letsgo
+	oc !c -letsgo ${Me.Name}
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
@@ -687,7 +693,7 @@ function step008()
 		call IsPresent "Avatar of the Sun"
 	}
 	while (!${Return})
-	oc !c -letsgo
+	oc !c -letsgo ${Me.Name}
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
@@ -776,6 +782,7 @@ function GotoRedGargoyle()
 						{
 							do
 							{
+								OgreBotAPI:Pause["${Me.Name}"]
 								Counter:Set[0]
 								call PetitPas ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 5
 								face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
@@ -790,8 +797,11 @@ function GotoRedGargoyle()
 								call PKey MOVEFORWARD 1
 								wait 10
 								Counter:Inc
+								OgreBotAPI:Resume["${Me.Name}"]
+								echo destination is at ${ActorIterator.Value.Distance} m
+								echo this is the ${Counter} try
 							}
-							while (!${ShieldOff} && ${Counter}<6)
+							while (!${ShieldOff} && ${Counter}<4)
 						}
 					}
 				}
@@ -829,7 +839,7 @@ atom HandleAllEvents(string Message)
 	{
 		ShieldOff:Set[TRUE]
 	}
-	if (${Message.Find["is seared into your mind"]} > 0)
+	if (${Message.Find["is seared into your mind"]} > 0 || ${Message.Find["most distinct memory"]} > 0)
 	{
 		if (!${MirageQueued})
 		{
