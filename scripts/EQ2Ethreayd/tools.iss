@@ -15,7 +15,7 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function 2DNav(float X, float Z, bool IgnoreFight)
+function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk)
 {
 	variable float loc0 
 	variable int Stucky=0
@@ -35,7 +35,15 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
-			
+			if (${ForceWalk})
+			{
+				call CheckWalking
+				if (!${Return})
+				{
+					WasRunning:Set[TRUE]
+					press WALK
+				}
+			}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -60,7 +68,15 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
-			
+			if (${ForceWalk})
+			{
+				call CheckWalking
+				if (!${Return})
+				{
+					WasRunning:Set[TRUE]
+					press WALK
+				}
+			}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -68,73 +84,6 @@ function 2DNav(float X, float Z, bool IgnoreFight)
 			}
 			if (!${IgnoreFight})
 				call CheckCombat
-		}
-		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
-		press -release MOVEFORWARD
-		eq2execute loc
-	}
-	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
-}
-function 2DWalk(float X, float Z)
-{
-	variable float loc0 
-	variable int Stucky=0
-	variable bool WasRunning
-	
-	echo Moving on my own to ${X} ${Z}
-	face ${X} ${Z}
-
-	if (${Me.Loc.X}>${X})
-	{
-		Stucky:Set[0]
-		echo "doing X>"
-		press -hold MOVEFORWARD
-		
-		do
-		{	
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 3
-			call CheckWalking
-			if (!${Return})
-			{
-				WasRunning:Set[TRUE]
-				press WALK
-			}
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				Stucky:Inc
-			}
-			call CheckCombat
-		}
-		while (${Me.Loc.X}>${X} && ${Stucky}<10)
-		press -release MOVEFORWARD
-		eq2execute loc
-	}
-	else
-	{
-		Stucky:Set[0]
-		echo "doing X<"
-	
-		press -hold MOVEFORWARD
-		do
-		{	
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 3
-			call CheckWalking
-			if (!${Return})
-			{
-				WasRunning:Set[TRUE]
-				press WALK
-			}
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				Stucky:Inc
-			}
-			call CheckCombat
 		}
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
@@ -155,6 +104,15 @@ function 2DWalk(float X, float Z)
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
+				if (${ForceWalk})
+				{	
+					call CheckWalking
+					if (!${Return})
+					{
+						WasRunning:Set[TRUE]
+						press WALK
+					}
+				}
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -177,6 +135,15 @@ function 2DWalk(float X, float Z)
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
+				if (${ForceWalk})
+				{
+					call CheckWalking
+					if (!${Return})
+					{
+						WasRunning:Set[TRUE]
+						press WALK
+					}
+				}
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -194,7 +161,11 @@ function 2DWalk(float X, float Z)
 	if (${WasRunning})
 		press WALK
 }
-
+function 2DWalk(float X, float Z)
+{
+	echo DEPRECATED use 2DNav with ForceWalk option
+	call 2DNav ${X} ${Z} FALSE TRUE
+}
 function 3DNav(float X, float Y, float Z)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
@@ -621,12 +592,6 @@ function ClickOn(string ActorName)
 		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
 	}
 }
-function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
-{
-	return ${Math.Distance[${X1},${Y1},${Z1},${X2},${Y2},${Z2}]}
-}
-
-	
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
@@ -821,6 +786,10 @@ function DescribeItemInventory(string ItemName)
         while ${ItemIterator:Next(exists)}
     }
 }
+function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
+{
+	return ${Math.Distance[${X1},${Y1},${Z1},${X2},${Y2},${Z2}]}
+}
 function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone)
 {
 	variable float loc0
@@ -849,7 +818,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				call Go2D ${X} ${Y} ${Z} ${Return}
 			}
 			if (${speed} == 2)
-				call 2DWalk ${X} ${Z}
+				call 2DNav ${X} ${Z} ${IgnoreFight} TRUE
 			if (${speed} > 2)
 				call 2DNav ${X} ${Z} ${IgnoreFight}
 			call CheckStuck ${loc0}
