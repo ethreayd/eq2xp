@@ -248,6 +248,7 @@ function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffect
 		Me.Inventory["${ItemSwap}"]:Equip
 	}
 }
+
 function ActivateSpecial(string ActorName, float X, float Y, float Z)
 {
 	call TestArrivalCoord  ${X} ${Y} ${Z}
@@ -473,7 +474,6 @@ function CastAbility(string AbilityName, bool NoWait)
 	}
 	call UseAbility "${AbilityName}"
 }
-	
 function check_quest(string questname)
 {
 	variable index:quest Quests
@@ -504,9 +504,6 @@ function check_quest(string questname)
 	}
 	return FALSE
 }    
-
-
-
 function CheckCombat(int MyDistance)
 {
 	if (${MyDistance}<1)
@@ -525,6 +522,21 @@ function CheckCombat(int MyDistance)
 		while (${Me.InCombatMode})
 	}
 }
+function CheckItem(string ItemName, int Quantity)
+{
+	call CountItem "${ItemName}"
+	if (${Return}<${Quantity})
+	{
+		echo "There is not enough ${ItemName} in inventory (${Return}/${Quantity})"
+		echo "You need ${Math.Calc64[${Quantity}-${Return}]} ${ItemName} more to continue"
+		return 1
+	}
+	else
+	{
+		return 0
+	}
+}
+	
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
@@ -541,7 +553,6 @@ function CheckQuestStep(int step)
             {
                 do
                 {
-					echo ${DetailsCounter}==${step} && ${DetailsIterator.Value.CurrentKey.Equal["Check"]} && ${DetailsIterator.Value.CurrentValue.Equal["true"]}
 					if (${DetailsCounter}==${step} && ${DetailsIterator.Value.CurrentKey.Equal["Check"]} && ${DetailsIterator.Value.CurrentValue.Equal["true"]})
                     {
 						echo step ${step} is done
@@ -609,8 +620,13 @@ function ClickOn(string ActorName)
 		echo click on ${ActorIterator.Value.Name}
 		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
 	}
-}			
+}
+function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
+{
+	return ${Math.Distance[${X1},${Y1},${Z1},${X2},${Y2},${Z2}]}
+}
 
+	
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
@@ -622,7 +638,6 @@ function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 		call PKey "Page Up" 3
 		call PKey ZOOMOUT 20		
 	}
-	
 	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
 	wait 10
 	variable int x
@@ -637,7 +652,6 @@ function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 		call PKey "Page Down" 3		
 	}
 }
-
 function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, bool giant)
 {
 	target ${Me.Name}
@@ -651,23 +665,6 @@ function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, b
 	OgreBotAPI:NoTarget[${Me.Name}]
 	press CENTER
 }
-
-function CoVMender()
-{
-	if (${Zone.Name.Equal["Coliseum of Valor"]})
-	{
-		call DMove -2 5 4 3
-		call DMove 107 0 2 3
-		call DMove 158 0 64 3
-		OgreBotAPI:RepairGear[${Me.Name}]
-		wait 20
-		OgreBotAPI:RepairGear[${Me.Name}]
-		wait 20
-		call DMove 107 0 2 3
-		call DMove -2 5 4 3
-	}
-}
-
 function CountItem(string ItemName)
 {
 	variable index:item Items
@@ -687,7 +684,21 @@ function CountItem(string ItemName)
 	echo found ${Counter} ${ItemName} in Inventory
 	return ${Counter}
 }
-
+function CoVMender()
+{
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+	{
+		call DMove -2 5 4 3
+		call DMove 107 0 2 3
+		call DMove 158 0 64 3
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		OgreBotAPI:RepairGear[${Me.Name}]
+		wait 20
+		call DMove 107 0 2 3
+		call DMove -2 5 4 3
+	}
+}
 function CurrentQuestStep()
 {
     variable index:collection:string Details    
@@ -861,7 +872,16 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	}
 	return ${SuperStucky}
 }
-
+function ExitCoV()
+{	
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+		{
+			call DMove -2 5 4 3
+			call DMove 94 3 162 3
+			call ActivateVerb "zone_to_pom" 94 3 162 "Enter the Plane of Magic"
+		}
+	call waitfor_Zone "Plane of Magic"
+}
 function Evac()
 {
 	echo not implemented yet
@@ -1176,11 +1196,11 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 
 }
 
-function HarvestItem(string ItemName, int number)
+function HarvestItem(string ItemName, int number, int speed, bool is2D)
 {
     variable int Counter=0
 	
-	call Harvest "${ItemName}" ${number}
+	call Harvest "${ItemName}" ${number} ${speed} ${is2D}
 	call CountItem "${ItemName}"
 	Counter:Set[${Return}]
 	if (${Counter}>=${number})
@@ -1594,6 +1614,85 @@ function StartQuest(int stepstart, int stepstop, bool noquest)
 		}
 	}
 }
+
+function StealthMove(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable index:actor Mobs
+	variable iterator MobIterator
+	variable float totaldistance
+	variable bool Found
+	variable bool Found2
+	variable float loc0
+	variable int Stucky
+	
+	if (${Precision}<1)
+		Precision:Set[10]
+	totaldistance:Set[${Math.Calc64[${Distance}+${RespectDistance}]}]
+	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Found:Set[FALSE]
+			Found2:Set[FALSE]
+			Stucky:Set[0]
+			
+			EQ2:QueryActors[Mobs, Type  =- "NPC" && Distance <= ${totaldistance}]
+			Mobs:GetIterator[MobIterator]
+			if ${MobIterator:First(exists)}
+			{
+				do
+				{
+					call Dist ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${MobIterator.Value.X} ${MobIterator.Value.Y} ${MobIterator.Value.Z} 
+					if (${Return}<${RespectDistance} && ${MobIterator.Value.IsAggro})
+					{
+						echo Found ${MobIterator.Value.Name} at ${Return}m of ${ActorIterator.Value.Name} - min is ${RespectDistance}
+						echo Aggro of Actor is ${MobIterator.Value.IsAggro} - target is too dangerous to go to, checking next one
+						Found:Set[TRUE]
+					}	
+				}	
+				while (${MobIterator:Next(exists)} && !${Found})
+				if (!${Found})
+				{
+					echo seems that target ${ActorIterator.Value.Name} at ${ActorIterator.Value.Distance}m is safe
+					if (!${ActorIterator.Value.CheckCollision} || !${CheckCollision})
+					{
+						press -hold MOVEFORWARD
+						do
+						{
+							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
+							face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+							wait 1
+							call CheckStuck ${loc0}
+							if (${Return})
+							{
+								Stucky:Inc
+								echo Stucky count: ${Stucky}/20
+							}
+							else
+								Stucky:Set[0]
+							call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+						}
+						while (!${Return} && ${Stucky}<20 && ${MobIterator.Value.Distance} < ${RespectDistance})
+						press -release MOVEFORWARD
+						if (${Stucky}<20)
+							Found2:Set[TRUE]
+					}
+					else
+					{
+						echo aborted - collision detected
+					}
+				}
+			}
+		}	
+		while (${ActorIterator:Next(exists)} && !${Found2})
+	}
+	return ${Found2}
+}
+
 function StopHunt()
 {
 	Ob_AutoTarget:Clear
@@ -1713,7 +1812,18 @@ function Unstuck(bool LR)
 	}
 	return !${LR}
 }
-
+function UnstuckR(int randomize)
+{
+	press -hold MOVEBACKWARD
+	wait ${Math.Rand[${randomize}]}
+	press -release MOVEBACKWARD
+	press -hold STRAFELEFT
+	wait ${Math.Rand[${randomize}]}
+	press -release STRAFELEFT
+	press -hold STRAFERIGHT
+	wait ${Math.Rand[${randomize}]}
+	press -release STRAFERIGHT
+}
 function UseAbility(string MyAbilityName)
 {
 Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
