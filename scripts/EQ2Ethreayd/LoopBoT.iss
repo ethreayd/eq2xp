@@ -3,7 +3,6 @@
 
 function main(int speed, bool NoShiny)
 {
-	variable string sQN
 	variable int MyTime
 			
 	call goCoV

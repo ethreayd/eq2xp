@@ -136,6 +136,7 @@ function GoBoT(string ZoneName, string version)
 }
 function PrepareToon()
 {
+	variable string sQN
 	call waitfor_Zone "Coliseum of Valor"
 	sQN:Set["GetPoPQuests"]
 	echo will get POP Quests Now !
