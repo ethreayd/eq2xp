@@ -1506,7 +1506,16 @@ function OpenDoor(string ActorName)
 		while ${ActorIterator:Next(exists)}
 	}
 }
-
+function PauseZone()
+{
+	variable string sQN
+	call strip_QN "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+		Script[${sQN}]:Pause
+	press -release MOVEFORWARD
+	echo Clearing of zone "${Zone.Name}" is paused
+}
 function PetitPas(float X, float Y, float Z, float Precision)
 {
 	variable float Ax
@@ -1536,7 +1545,15 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
-
+function ResumeZone()
+{
+	variable string sQN
+	call strip_QN "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+		Script[${sQN}]:Resume
+	echo Resuming clearing of zone "${Zone.Name}"
+}
 function ReturnEquipmentSlotHealth(string ItemSlot)
 {
 	variable int ItemHealth=0
@@ -1669,7 +1686,6 @@ function StopHunt()
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
-	oc !c -letsgo ${Me.Name}
 }
 function strip_QN(string questname)
 {
@@ -1703,10 +1719,13 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 			wait 10
 			if (${Queue})
 				ExecuteQueued
+			
 			call IsPresent "${Named}" ${Distance} TRUE
 		}
-		while (${Return} || ${Me.InCombatMode})
+		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
 	}
+	echo "TanknSpank Debug Return : ${Return}"
+	echo "TanknSpank Debug InCombatMode : ${Me.InCombatMode}"
 }
 function TargetAfterTime(string mytarget, int ntime)
 {
@@ -1853,7 +1872,26 @@ function waitfor_NPC(string NPCName)
 	while (${Actor["${NPCName}"].Distance} > 20 || !${Actor["${NPCName}"].Distance(exists)})
 	echo Debug: I have reach ${NPCName} 
 }
-
+function logout_login(int secs)
+{
+	variable string ToonName
+	ToonName:Set["${Me.Name}"]
+	echo will now quit and reconnect ${ToonName} in ${secs} seconds
+	eq2execute quit login
+	wait ${Math.Calc[${secs}*10]}
+	wait 600
+	ogre ${ToonName}
+	wait 600
+}
+function waitfor_RunZone()
+{
+	wait 5
+	call strip_QN "${Zone.Name}"
+	sQN:Set[${Return}]
+	while ${Script[${sQN}](exists)}
+		wait 5
+	echo zone "${Zone.Name}" Cleared !
+}	
 function waitfor_Zone(string ZoneName)
 {
 	echo Zoning to ${ZoneName}, please be patient

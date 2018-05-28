@@ -5,7 +5,7 @@ function main(int speed, bool NoShiny)
 {
 	variable string sQN
 	variable int MyTime
-
+	
 	call goCoV
 	do
 	{	
@@ -21,6 +21,36 @@ function main(int speed, bool NoShiny)
 		call MendToon
 		
 		call GoPoI "Gears in the Machine" Solo]
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoPoI "Outbreak" Solo
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoPoI "the Source" Solo
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoBoT "Tower Breach" Solo
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoBoT "Winds of Change" Solo
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoSRT "The Obsidian Core" Solo
+		call RunZone 0 0 ${speed} ${NoShiny}
+		call waitfor_RunZone
+		call MendToon
+		
+		call GoSRT "Monolith of Fire" Solo
 		call RunZone 0 0 ${speed} ${NoShiny}
 		call waitfor_RunZone
 		

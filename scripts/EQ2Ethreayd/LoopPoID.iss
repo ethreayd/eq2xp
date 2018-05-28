@@ -1,94 +1,41 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 
 function main(int speed, bool NoShiny)
 {
 	variable string sQN
 	variable int MyTime
 	
-	variable string ToonName
 	call goCoV
 	do
 	{	
 		call waitfor_Zone "Coliseum of Valor"
-		
-		sQN:Set["GetPoPQuests"]
-		echo will get POP Quests Now !
-		runscript EQ2Ethreayd/${sQN} 0 0 ${speed}
-		wait 5
-		while ${Script[${sQN}](exists)}
-			wait 5
-		echo Quests recovered
-		
-		echo mending gear if necessary
-		call ReturnEquipmentSlotHealth Primary
-		if (${Return}<100)
-		{
-			call CoVMender
-		}
-		
-		
-		call DMove -2 5 4 3
-		call DMove -94 3 163 3
+		call PrepareToon
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
-		wait 50		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
-		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
-		wait 50
-		call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Solo]"
+		
+		call GoPoI "Masks of the Marvelous" Solo
 		call RunZone 0 0 ${speed} ${NoShiny}
-		echo MotM terminated
-		call waitfor_Zone "Coliseum of Valor"
+		call waitfor_RunZone
 		
-		call DMove -2 5 4 3
-		call DMove -94 3 163 3
+		MyTime:Set[${Time.Timestamp}]		
+		call MendToon
 		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
-		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
-		wait 50
-	
-		call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"
-		MyTime:Set[${Time.Timestamp}]
+		call GoPoI "Gears in the Machine" Solo]
 		call RunZone 0 0 ${speed} ${NoShiny}
-		echo GitM terminated 
-		call waitfor_Zone "Coliseum of Valor"
+		call waitfor_RunZone
+		call MendToon
 		
-		call DMove -2 5 4 3
-		call DMove -193 3 0 3
-		OgreBotAPI:ZoneResetAll["${Me.Name}"]
-		wait 50		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
-		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
-		wait 50
-		call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
-		wait 50
+		call GoPoI "Outbreak" Solo
 		call RunZone 0 0 ${speed} ${NoShiny}
-		echo Outbreak terminated
-		call waitfor_Zone "Coliseum of Valor"
+		call waitfor_RunZone
+		call MendToon
 		
-		call DMove -2 5 4 3
-		call DMove -193 3 0 3
-		
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
-		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
-		wait 50	
-		call waitfor_Zone "Plane of Disease: the Source [Solo]"
-		MyTime:Set[${Time.Timestamp}]
-		wait 50
+		call GoPoI "the Source" Solo
 		call RunZone 0 0 ${speed} ${NoShiny}
-		echo the Source terminated 
-		call waitfor_Zone "Coliseum of Valor"
+		call waitfor_RunZone
 		
-		ToonName:Set["${Me.Name}"]
-		echo will now quit and reconnect ${ToonName} in ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))]} seconds
-		eq2execute quit login
-		wait ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))*10]}
-		wait 600
-		ogre ${ToonName}
-		wait 600
+		call waitfor_Zone "Coliseum of Valor"
+		call logout_login ${Math.Calc[(6000-(${Time.Timestamp}-${MyTime}))]}
 	}
 	while (1==1)
 }

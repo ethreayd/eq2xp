@@ -3,6 +3,7 @@ function main()
 	variable index:string ScriptsToRun
 	variable string sQN
 	
+	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Heroic_"]
 	ScriptsToRun:Insert["PlaneofInnovationSecurityMeasures_tradeskill_"]
 	ScriptsToRun:Insert["AStitchinTimePartISecurityMeasures"]
 	ScriptsToRun:Insert["ConservationofPlanarEnergy"]
@@ -18,6 +19,8 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["loopSolo"]
+	ScriptsToRun:Insert["loopSRT"]
 	ScriptsToRun:Insert["loopBoT"]
 	ScriptsToRun:Insert["loopPIDT"]
 	ScriptsToRun:Insert["loopPoID"]
