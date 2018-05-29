@@ -8,10 +8,17 @@ function main(int speed, bool NoShiny)
 	call goCoV
 	do
 	{	
-		call waitfor_Zone "Coliseum of Valor"
-		call PrepareToon
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
+		if (${Zone.Name.Equal["Coliseum of Valor"]})
+			call PrepareToon
 		
+		call check_quest "The Tyrant's Throne [Solo]"
+		if (${Return})
+		{
+			call GoThrone
+			call RunZone 0 0 ${speed} ${NoShiny}
+			call waitfor_RunZone
+		}
 		call GoPoI "Masks of the Marvelous" Solo
 		call RunZone 0 0 ${speed} ${NoShiny}
 		call waitfor_RunZone

@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 
 #define AUTORUN "num lock"
 #define MOVEFORWARD w

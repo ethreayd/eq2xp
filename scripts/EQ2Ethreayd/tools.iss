@@ -306,6 +306,7 @@ function Ascend(float Y)
 			Stucky:Inc
 		if (${Stucky}>5)
 			{	
+				ExecuteQueued
 				echo stucked when ascending
 				press -hold STRAFELEFT
 				wait 5
@@ -1034,12 +1035,36 @@ function Go2D(float X, float Y, float Z, string strafe)
 }
 function goCoV()
 {	
-	if (${Zone.Name.Equal["Plane of Magic"]})
+	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	{
+		call IsPresent "Mechanical Travel Gear"
+		if (${Return})
 		{
-			call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+			call MoveCloseTo "Mechanical Travel Gear"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Mechanical Travel Gear","Travel to the Planes"]
+			wait 20
+			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
 			call waitfor_Zone "Coliseum of Valor"
-			call DMove -2 5 4 3
 		}
+		call IsPresent "Large Ulteran Spire"
+		if (${Return})
+		{
+			call MoveCloseTo "Large Ulteran Spire"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
+			wait 50
+			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
+			wait 600
+		}
+	}
+	
+	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
+	{
+		call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+		call DMove -2 5 4 3
+	}
+	call waitfor_Zone "Coliseum of Valor"
 }
 function GoDown()
 {
@@ -1479,6 +1504,7 @@ function navwrap(float X, float Y, float Z)
 	if (${Stucky} > 2)
 	{
 		echo "Seems stuck - Trying to get there anyway"
+		ExecuteQueued
 		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call GoDown
 		call TestArrivalCoord ${X} ${Y} ${Z}
@@ -1785,6 +1811,7 @@ function Transmute(string ItemName)
 		
 function Unstuck(bool LR)
 {
+	ExecuteQueued
 	call PKey JUMP 1
 	press -release MOVEFORWARD
 	

@@ -1,3 +1,25 @@
+function GetCoVQuests(string ZoneName, string version)
+{
+	call DMove -2 5 4 3
+	call DMove -109 0 1 3
+	call DMove -145 0 -93 3
+	call Converse "Rynzon, of The Spurned" 10
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call MoveCloseTo "a Planar Chronicler"
+	call Converse "a Planar Chronicler" 3
+	call Converse "a Planar Chronicler" 3
+	call Converse "a Planar Chronicler" 3
+	call Converse "a Planar Chronicler" 3
+	call DMove -109 0 1 3
+}	
+		
 function GoPoI(string ZoneName, string version)
 {
 	if (!${Zone.Name.Equal["Plane of Innovation: ${zone} [${version}]"]})
@@ -100,6 +122,20 @@ function GoSRT(string ZoneName, string version)
 	wait 50
 	call waitfor_Zone "Plane of Disease: ${ZoneName} [${version}]"
 }
+
+function GoThrone()
+{
+	if (!${Zone.Name.Equal["The Molten Throne"]})
+	{
+		call waitfor_Zone "Coliseum of Valor"
+		call DMove -2 5 4 3
+		call DMove 95 3 -149 3
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_molten_throne","Enter the Molten Throne"]
+		wait 20
+		call waitfor_Zone "The Molten Throne"
+	}
+}	
+	
 function GoBoT(string ZoneName, string version)
 {
 	if (!${Zone.Name.Equal["Torden, Bastion of Thunder: ${ZoneName} [${version}]"]})
@@ -138,14 +174,8 @@ function PrepareToon()
 {
 	variable string sQN
 	call waitfor_Zone "Coliseum of Valor"
-	sQN:Set["GetPoPQuests"]
-	echo will get POP Quests Now !
-	runscript EQ2Ethreayd/${sQN} 0 0 ${speed}
-	wait 5
-	while ${Script[${sQN}](exists)}
-		wait 5
+	call GetCoVQuests
 	call MendToon
-	
 }
 function MendToon()
 {

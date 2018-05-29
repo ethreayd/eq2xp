@@ -2,6 +2,7 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Detected
+variable(script) bool Opened
 
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
@@ -101,7 +102,8 @@ function step001()
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	Ob_AutoTarget:AddActor["Clockwork Prototype XXIV",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["Clockwork Prototype XXVII",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["Ancient Clockwork Prototype",0,TRUE,FALSE]
@@ -115,6 +117,8 @@ function step001()
 		call CountItem "Ancient Clockwork Hand"
 	}
 	while (${Return}<1)
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 }	
 
 function step002()
@@ -133,6 +137,8 @@ function step002()
 	call DMove 43 3 -63 ${speed} ${FightDistance}
 	wait 100
 	call DMove 33 4 -27 3
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 	wait 100
 	call CheckCombat ${FightDistance}
@@ -143,6 +149,8 @@ function step002()
 	}
 	while (${Return})
 	eq2execute summon
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 }
 
 function step003()
@@ -161,6 +169,8 @@ function step003()
 	call DMove 95 3 -164 ${speed} ${FightDistance}
 	
 	eq2execute merc resume
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
@@ -187,15 +197,9 @@ function step003()
 		Counter:Inc
 	}
 	while (${Return}<1 && ${Counter}<5)
-}
-
-function step004()
-{
-	variable int Counter=0
-	variable float loc0 
-	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-	
 	eq2execute merc resume
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 	
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
@@ -212,51 +216,55 @@ function step004()
 	wait 20
 	call DMove 111 3 -30 ${speed} ${FightDistance}
 	call DMove 135 3 -44 ${speed} ${FightDistance}
-		
-	call OpenChargedDoor
-	ExecuteQueued
-	target "an erratic clockwork"
+}
+
+function step004()
+{
+	eq2execute merc resume
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	wait 50
-	ExecuteQueued
 	call CheckCombat ${FightDistance}
-	ExecuteQueued
+	
+	do
+	{
+		call PetitPas 135 3 -44 3
+		call OpenChargedDoor
+		call PetitPas 153 3 -62 3
+	}	
+	while (${Me.Loc.X}<140)
+	
 	call IsPresent "an erratic clockwork"
-	if (${Return})
+	if (${Return} && !${Opened})
 	{
 		do
 		{
-		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-		call DMove 128 3 -38 ${speed} ${FightDistance} TRUE TRUE
-		call DMove 134 3 -43 1
-		call PKey MOVEFORWARD 1
-		call IsPresent "door_hand_lock" 5
-		if (${Return})
-			call OpenChargedDoor
-		call MoveCloseTo "an erratic clockwork"
-		wait 20
-		call IsPresent "door_hand_lock" 5
-		if (${Return})
-			call OpenChargedDoor
-		ogre qh
-		wait 50
-		Actor[name,"an erratic clockwork"]:DoubleClick
-		wait 300
-		ogre end qh
-		call CheckStuck ${loc0}
-		if (${Return})
-			call OpenChargedDoor
-		call IsPresent "an erratic clockwork"
-		Counter:Inc
+			target "an erratic clockwork"
+			ExecuteQueued
+			call MoveCloseTo "an erratic clockwork"
+			wait 20
+			ogre qh
+			wait 50
+			Actor[name,"an erratic clockwork"]:DoubleClick
+			wait 300
+			ogre end qh
+			call IsPresent "an erratic clockwork"
 		}
-		while (${Return} && ${Counter}<3)
+		while (${Return} && !${Opened})
 	}
 	call StopHunt
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
+	wait 100
 	call DMove 153 3 -62 3 ${FightDistance}
 	call DMove 177 4 -66 2 ${FightDistance}
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	call DMove 201 -3 -67 1 ${FightDistance}
 	Detected:Set[FALSE]
 	call WaitByPass "Security Sweeper" -30 -80
 	call 2DNav 237 -69
+	
 	call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
 	if (!${Detected})
 	{
@@ -275,6 +283,7 @@ function step004()
 function step005()
 {	
 	eq2execute merc resume
+	
 	if (${Detected})
 	{
 		do
@@ -322,6 +331,8 @@ function step005()
 	while (${Return})
 	oc !c -letsgo ${Me.Name}
 	eq2execute summon
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 }
 	
 function step006()
@@ -356,7 +367,8 @@ function step007()
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	call DMove -112 11 -278 1
 	Ob_AutoTarget:AddActor["Gearclaw the Collector",0,TRUE,FALSE]
 	call DMove -135 8 -278 1
@@ -372,6 +384,8 @@ function step007()
 	}
 	while (${Return})
 	eq2execute summon
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Resume
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call DMove -145 10 -251 3
@@ -401,7 +415,7 @@ function OpenChargedDoor()
 	PrimaryWeapon:Set["${Me.Equipment[Primary]}"]
 	Me.Inventory["Electro-Charged Clockwork Hand"]:Equip
 	wait 20
-	call AutoPassDoor "door_hand_lock" 145 3 -55 TRUE
+	call OpenDoor "door_hand_lock"
 	wait 20
 	call CheckCombat ${FightDistance}
 	Me.Inventory["${PrimaryWeapon}"]:Equip
@@ -426,6 +440,11 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		Detected:Set[TRUE]
 		echo "Detected in tunnel - restarting"
+	}
+	if (${Message.Find["Access granted"]} > 0 || ${Message.Find["Tracking Meldrath"]} > 0 )
+	{
+		Opened:Set[TRUE]
+		echo "Tunnel is now open"
 	}
 	
 	if (${Message.Find["need to turn his key"]} > 0)
