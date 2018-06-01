@@ -12,13 +12,7 @@ function main(string Loop)
 	wait 300
 	call goto_GH
 	wait 600
-	echo Repair
-	OgreBotAPI:RepairGear[${Me.Name}]
-	wait 300
-	echo Depot
-	ogre depot -allh -hda -llda -cda
-	call DepositAll "Scroll Depot"
-	wait 300
+	call GuildH
 	echo Shinies
 	runscript EQ2Ethreayd/gardener
 	wait 1500
@@ -40,14 +34,9 @@ function main(string Loop)
 		call CountItem "Planar Transmutation Stone"
 	}
 	while (${Return}>0)
-	
-	
 	ogre depot -allh -hda -llda -cda
-	wait 300
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
 	wait 100
-	OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
-	call waitfor_Zone "Plane of Magic"
+	call goCoV
+	wait 100
 	run EQ2Ethreayd/${Loop}
-	run EQ2Ethreayd/oopsimdead ${Loop}
 }

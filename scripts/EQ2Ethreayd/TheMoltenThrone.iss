@@ -159,9 +159,9 @@ function step001()
 				oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 30
 			if (${Me.Health} > 99 && ${Me.Power} > 99)
 				target "${Named}"
-			call IsPresent "${Named}"
+			call IsPresent "${Named}" 200
 		}
-		while (${Return} || ${Me.InCombatMode})
+		while ((${Return} || ${Me.InCombatMode}) && !${Me.IsDead})
 	}
 	oc !c -letsgo ${Me.Name} 
 	OgreBotAPI:AcceptReward["${Me.Name}"]

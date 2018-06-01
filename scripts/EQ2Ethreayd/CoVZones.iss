@@ -22,13 +22,14 @@ function GetCoVQuests(string ZoneName, string version)
 		
 function GoPoI(string ZoneName, string version)
 {
-	if (!${Zone.Name.Equal["Plane of Innovation: ${zone} [${version}]"]})
+	echo Debug going to "Plane of Innovation: ${ZoneName} [${version}]"
+	if (!${Zone.Name.Equal["Plane of Innovation: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
 		call DMove -2 5 4 3
 		call DMove -94 3 163 3
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
-		wait 20
+		wait 100
 		switch ${ZoneName}
 		{
 			case Masks of the Marvelous
@@ -36,28 +37,64 @@ function GoPoI(string ZoneName, string version)
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 					case Heroic
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",5]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",5]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 			case Gears in the Machine
 			{
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 					case Heroic
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 		}
 	}
 	wait 50
 	call waitfor_Zone "Plane of Innovation: ${ZoneName} [${version}]"
+	echo Debug end of GoPoI ${ZoneName} [${version}]
 }
 function GoPoD(string ZoneName, string version)
 {
+	echo Debug going to "Plane of Disease: ${ZoneName} [${version}]"
 	if (!${Zone.Name.Equal["Plane of Disease: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -65,7 +102,7 @@ function GoPoD(string ZoneName, string version)
 		call DMove -193 3 0 3
 		wait 50		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
-		wait 20
+		wait 100
 		switch ${ZoneName}
 		{
 			case Outbreak
@@ -73,24 +110,44 @@ function GoPoD(string ZoneName, string version)
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 			case the Source
 			{
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",9]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 		}
 	}
 	wait 50
 	call waitfor_Zone "Plane of Disease: ${ZoneName} [${version}]"
+	echo Debug end of PoD ${ZoneName} [${version}]
 }
 function GoSRT(string ZoneName, string version)
 {
+	echo Debug going to "Solusek Ro's Tower: ${ZoneName} [${version}]"
 	if (!${Zone.Name.Equal["Solusek Ro's Tower: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -98,7 +155,7 @@ function GoSRT(string ZoneName, string version)
 		call DMove 95 3 -164 3
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_ro_tower","Enter Solusek Ro's Tower"]
-		wait 20
+		wait 100
 		switch ${ZoneName}
 		{
 			case Monolith of Fire
@@ -106,25 +163,45 @@ function GoSRT(string ZoneName, string version)
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 			case The Obsidian Core
 			{
-				switch (${version})
+				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",8]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",8]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 		}
 	}
 	wait 50
-	call waitfor_Zone "Plane of Disease: ${ZoneName} [${version}]"
+	call waitfor_Zone "Solusek Ro's Tower: ${ZoneName} [${version}]"
+	echo Debug end of SRT ${ZoneName} [${version}]
 }
 
 function GoThrone()
 {
+	echo Debug going to The Molten Throne
 	if (!${Zone.Name.Equal["The Molten Throne"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -134,10 +211,12 @@ function GoThrone()
 		wait 20
 		call waitfor_Zone "The Molten Throne"
 	}
+	echo Debug end of The Molten Throne
 }	
 	
 function GoBoT(string ZoneName, string version)
 {
+	echo Debug going to Torden, Bastion of Thunder: ${ZoneName} [${version}]
 	if (!${Zone.Name.Equal["Torden, Bastion of Thunder: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -145,7 +224,7 @@ function GoBoT(string ZoneName, string version)
 		call DMove -92 3 -158 3
 		wait 50		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
-		wait 20
+		wait 100
 		
 		switch ${ZoneName}
 		{
@@ -154,21 +233,40 @@ function GoBoT(string ZoneName, string version)
 				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 			case Winds of Change
 			{
-				switch (${version})
+				switch ${version}
 				{
 					case Solo
-						OgreBotAPI:ZoneDoorForWho["${Me.Name}",10]
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",10]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
 				}
+				break
 			}
 		}
 	}
 	wait 50
 	call waitfor_Zone "Torden, Bastion of Thunder: ${ZoneName} [${version}]"
+	echo Debug end of BoT ${ZoneName} [${version}]
 }
 function PrepareToon()
 {

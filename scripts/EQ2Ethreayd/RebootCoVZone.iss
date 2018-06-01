@@ -20,13 +20,5 @@ function main()
 	wait 100
 	OgreBotAPI:RepairGear[${Me.Name}]
 	wait 100
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
-	wait 100
-	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
-	OgreBotAPI:RepairGear[${Me.Name}]
-	OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
-	call waitfor_Zone "Plane of Magic"
-	call goCoV
-	call DMove -2 5 4 3
-	run EQ2Ethreayd/autopop
+	run EQ2Ethreayd/LoopSolo
 }

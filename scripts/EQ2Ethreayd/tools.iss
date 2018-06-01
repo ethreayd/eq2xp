@@ -1094,7 +1094,17 @@ function goto_GH()
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	}
 }
-
+function GuildH()
+{
+	echo Repair
+	OgreBotAPI:RepairGear[${Me.Name}]
+	wait 100
+	echo First Depot
+	ogre depot -allh -hda -llda -cda
+	wait 50
+	call DepositAll "Scroll Depot"
+	wait 100
+}
 
 function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoBack)
 {
@@ -1368,7 +1378,17 @@ function JoustOut(int ActorID, float Distance)
 	
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}]
 }
-
+function logout_login(int secs)
+{
+	variable string ToonName
+	ToonName:Set["${Me.Name}"]
+	echo will now quit and reconnect ${ToonName} in ${secs} seconds
+	eq2execute quit login
+	wait ${Math.Calc[${secs}*10]}
+	wait 600
+	ogre ${ToonName}
+	wait 600
+}
 	
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
@@ -1546,6 +1566,7 @@ function PetitPas(float X, float Y, float Z, float Precision)
 {
 	variable float Ax
 	variable float Az
+	variable int Counter=0
 	echo "Enter PetitPas"
 	call Abs ${Math.Calc64[${Me.Loc.X}-${X}]}
 	Ax:Set[${Return}]
@@ -1557,11 +1578,12 @@ function PetitPas(float X, float Y, float Z, float Precision)
 	{
 		do
 		{
+			Counter:Inc
 			face ${X} ${Z}
 			press MOVEFORWARD
 			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
 		}
-		while (!${Return})
+		while (!${Return} && ${Counter}<1000)
 	}
 	echo Exit PetitPas
 }
@@ -1899,19 +1921,10 @@ function waitfor_NPC(string NPCName)
 	while (${Actor["${NPCName}"].Distance} > 20 || !${Actor["${NPCName}"].Distance(exists)})
 	echo Debug: I have reach ${NPCName} 
 }
-function logout_login(int secs)
-{
-	variable string ToonName
-	ToonName:Set["${Me.Name}"]
-	echo will now quit and reconnect ${ToonName} in ${secs} seconds
-	eq2execute quit login
-	wait ${Math.Calc[${secs}*10]}
-	wait 600
-	ogre ${ToonName}
-	wait 600
-}
+
 function waitfor_RunZone()
 {
+	echo Waiting for Zone "${Zone.Name}" to be cleared
 	wait 5
 	call strip_QN "${Zone.Name}"
 	sQN:Set[${Return}]

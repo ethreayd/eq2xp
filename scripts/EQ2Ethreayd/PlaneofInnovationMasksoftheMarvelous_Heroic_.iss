@@ -349,7 +349,7 @@ function step007()
 	
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
 	wait 100
-	if (!${Zone.Name.Equal["Coliseum of Valor"]})
+	if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
 		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -357,13 +357,13 @@ function step007()
 	do
 	{
 		wait 200
-		if (!${Zone.Name.Equal["Coliseum of Valor"]})
+		if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
 		{
 			call DMove -145 10 -251 1
 			OgreBotAPI:Special["${Me.Name}"]
 		}
 	}
-	while (!${Zone.Name.Equal["Coliseum of Valor"]})
+	while (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
 }
 
 function OpenChargedDoor()

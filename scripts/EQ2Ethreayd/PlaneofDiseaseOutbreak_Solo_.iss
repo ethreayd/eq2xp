@@ -508,7 +508,12 @@ function step009()
 		target ${Me.Name}
 		ogre navtest Entrance
 		wait 600
-		OgreBotAPI:Special["${Me.Name}"]
+		do
+		{
+			OgreBotAPI:Special["${Me.Name}"]
+			wait 100
+		}
+		while (${Zone.Name.Equal["Plane of Disease: Outbreak [Solo]"]})
 	}
 }
 function ClimbingFMountain()

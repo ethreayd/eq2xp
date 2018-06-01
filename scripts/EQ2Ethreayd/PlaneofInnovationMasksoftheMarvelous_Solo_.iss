@@ -3,6 +3,7 @@ variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Detected
 variable(script) bool Opened
+variable(script) bool KeyOn
 
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
@@ -119,6 +120,8 @@ function step001()
 	while (${Return}<1)
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }	
 
 function step002()
@@ -151,6 +154,8 @@ function step002()
 	eq2execute summon
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 function step003()
@@ -197,6 +202,7 @@ function step003()
 		Counter:Inc
 	}
 	while (${Return}<1 && ${Counter}<5)
+	eq2execute summon
 	eq2execute merc resume
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
@@ -216,6 +222,8 @@ function step003()
 	wait 20
 	call DMove 111 3 -30 ${speed} ${FightDistance}
 	call DMove 135 3 -44 ${speed} ${FightDistance}
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 function step004()
@@ -253,6 +261,7 @@ function step004()
 		while (${Return} && !${Opened})
 	}
 	call StopHunt
+	eq2execute summon
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
 	wait 100
@@ -278,6 +287,8 @@ function step004()
 	{
 		call DMove 173 10 -219 3 30 TRUE TRUE
 	}
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 	
 function step005()
@@ -316,7 +327,8 @@ function step005()
 		}
 		while (${Detected})
 	}
-	
+	eq2execute merc backoff
+	eq2execute pet backoff
 	oc !c -CampSpot ${Me.Name} 
 	eq2execute gsay Set up for Glitched Cell Keeper
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -40 0 0
@@ -325,7 +337,9 @@ function step005()
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 	do
 	{
-		wait 10
+		wait 300
+		eq2execute merc backoff
+		eq2execute pet backoff
 		call IsPresent "Glitched Cell Keeper"
 	}
 	while (${Return})
@@ -333,6 +347,9 @@ function step005()
 	eq2execute summon
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	eq2execute merc ranged
 }
 	
 function step006()
@@ -360,6 +377,8 @@ function step006()
 	call DMove -59 17 -282 1 ${FightDistance}
 	call DMove -72 12 -279 1 ${FightDistance}
 	call DMove -97 13 -279 1 ${FightDistance}
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }	
 	
 function step007()
@@ -391,7 +410,7 @@ function step007()
 	call DMove -145 10 -251 3
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
 	wait 100
-	if (!${Zone.Name.Equal["Coliseum of Valor"]})
+	if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Solo]"]})
 		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -399,13 +418,15 @@ function step007()
 	do
 	{
 		wait 200
-		if (!${Zone.Name.Equal["Coliseum of Valor"]})
+		if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Solo]"]})
 		{
 			call DMove -145 10 -251 1
 			OgreBotAPI:Special["${Me.Name}"]
 		}
 	}
-	while (!${Zone.Name.Equal["Coliseum of Valor"]})
+	while (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Solo]"]})
+	OgreBotAPI:AcceptReward["${Me.Name}"]
+	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
 function OpenChargedDoor()
@@ -449,15 +470,23 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	
 	if (${Message.Find["need to turn his key"]} > 0)
 	{
-		press MOVEFORWARD
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press MOVEFORWARD
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press MOVEFORWARD
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press MOVEFORWARD
-		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		press MOVEFORWARD
+		KeyOn:Set[TRUE]
+		do
+		{
+			press MOVEFORWARD
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
+		}
+		while (${KeyOn})
+	}
+	
+	if (${Message.Find["Collector is energized"]} > 0)
+	{
+		KeyOn:Set[FALSE]
+	}
+	if (${Message.Find["Interference of work"]} > 0)
+	{
+		eq2execute merc backoff
+		eq2execute pet backoff
 	}
 }
  
@@ -468,6 +497,10 @@ atom HandleAllEvents(string Message)
 	{
 		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor
+	}
+	if (${Message.Find["to repair himself"]} > 0)
+	{
+		eq2execute merc ranged
 	}
 }
 atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
