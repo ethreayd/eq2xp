@@ -38,7 +38,7 @@ function main(bool NoShiny)
 			wait 300
 			if (${Me.IsDead})
 			{
-				echo I am Dead - Rebooting Instance
+				echo I am Dead - Rebooting Instance (${sQN})
 				if ${Script["autoshinies"](exists)}
 					endscript autoshinies
 				call StopHunt
@@ -66,7 +66,7 @@ function main(bool NoShiny)
 		{
 			if ((${Stucky}>59 || ${Me.InventorySlotsFree}<1) && !${Me.InCombatMode})
 			{
-				echo Aborting current Zone, please wait
+				echo Aborting current Zone (${sQN}), please wait
 				if ${Script["autoshinies"](exists)}
 					endscript autoshinies
 				call StopHunt

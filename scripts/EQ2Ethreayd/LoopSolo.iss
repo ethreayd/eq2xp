@@ -5,11 +5,14 @@ function main(int speed, bool NoShiny)
 {
 	variable int Start
 	variable int Quests
+	echo Starting LoopSolo Now
 	call goCoV
 	eq2execute merc resume
 	do
-	{	
+	{
 		OgreBotAPI:ZoneResetAll["${Me.Name}"]
+		if (!${Script["ZoneUnstuck"](exists)})
+			run EQ2Ethreayd/ZoneUnstuck
 		if (${Zone.Name.Equal["Coliseum of Valor"]})
 			call PrepareToon
 		Start:Set[${Math.Rand[9]:Inc[1]}]

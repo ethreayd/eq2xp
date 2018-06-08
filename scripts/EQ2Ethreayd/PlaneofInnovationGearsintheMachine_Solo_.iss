@@ -154,6 +154,7 @@ function step001()
 	while (${Return})
 	eq2execute summon
 	wait 20
+	eq2execute summon
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 113 3 -29 ${speed} ${FightDistance}
@@ -195,6 +196,7 @@ function step002()
 	while (${Return})
 	eq2execute summon
 	wait 20
+	eq2execute summon
 }
 
 function step003()
@@ -227,6 +229,7 @@ function step003()
 		}
 		while (!${Return})
 	}
+	eq2execute summon
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call DMove -161 4 -81 2 ${FightDistance}
 	call DMove -175 4 -96 ${speed} ${FightDistance}
@@ -247,6 +250,7 @@ function step003()
 	while (${Return})
 	eq2execute summon
 	wait 20	
+	eq2execute summon
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 }
 
@@ -266,10 +270,11 @@ function step004()
 	call DMove -159 7 -197 1
 	call AutoPassDoor "Junkyard East Door 04" -137 4 -197
 	call DMove -137 4 -197 3 ${FightDistance}
+	wait 20
 	call AutoPassDoor "Junkyard East Door 05" -130 4 -199
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -63 5 -200 3 ${FightDistance}
-	
+	eq2execute summon
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
@@ -287,6 +292,7 @@ function step004()
 	
 	call ActivateVerb "Maelin's Talismanic Whirlgurt" -19 12 -170 "Gather" TRUE
 	wait 20
+	eq2execute summon
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -311,6 +317,7 @@ function step005()
 	call DMove -15 4 -126 3 ${FightDistance}
 	call Converse "Meldrath the Marvelous" 12
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	eq2execute summon
 }
 
 function step006()
@@ -326,7 +333,7 @@ function step006()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 26 4 -180 2 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
-	
+	Script["livedierepeat"]:Pause
 	oc !c -CampSpot ${Me.Name}
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -60
 	
@@ -340,7 +347,7 @@ function step006()
 		wait 10
 	}
 	while (!${Me.InCombatMode})
-
+	
 	do
 	{
 		wait 10
@@ -349,11 +356,12 @@ function step006()
 		call IsPresent "${Named}" 200
 	}
 	while (${Return})
-	
-	call PKey "ZOOMOUT" 20	
-	
+	Script["livedierepeat"]:Resume
+	call PKey ZOOMOUT 20	
+	eq2execute summon
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
+	eq2execute summon
 	
 }	
 	
@@ -395,6 +403,7 @@ function step007()
 		eq2execute summon
 		call StopHunt
 	}
+	eq2execute summon
 }
 
 function step008()
@@ -415,6 +424,7 @@ function step008()
 		call Converse "Meldrath the Marvelous" 16 
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 	}
+	eq2execute summon
 }
 function step009()
 {
@@ -426,6 +436,7 @@ function step009()
 		call DMove 25 4 -122 3 ${FightDistance}
 	}
 	call DMove 26 4 -230 3 ${FightDistance}
+	eq2execute summon
 	call ActivateVerb "zone_to_valor" 26 4 -230 "Coliseum of Valor" TRUE
 	OgreBotAPI:Special["${Me.Name}"]
 }

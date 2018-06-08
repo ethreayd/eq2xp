@@ -1,3 +1,15 @@
+function ExitCoV()
+{	
+	if (${Zone.Name.Equal["Coliseum of Valor"]})
+		{
+			call DMove -2 5 4 3
+			call DMove 94 3 162 3
+			call ActivateVerb "zone_to_pom" 94 3 162 "Enter the Plane of Magic"
+			wait 50
+			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+		}
+	call waitfor_Zone "Plane of Magic"
+}
 function GetCoVQuests(string ZoneName, string version)
 {
 	call DMove -2 5 4 3
@@ -78,6 +90,23 @@ function GoPoI(string ZoneName, string version)
 						do
 						{
 							OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
+				}
+				break
+			}
+			case Security Measures
+			{
+				switch ${version}
+				{
+					case Tradeskill
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",10]
 							wait 50
 						}
 						while (${Zone.Name.Equal["Coliseum of Valor"]})

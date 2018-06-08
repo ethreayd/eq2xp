@@ -15,12 +15,13 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk)
+function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision)
 {
 	variable float loc0 
 	variable int Stucky=0
 	variable bool WasRunning
-	
+	if ${Precision}<1
+		Precision:Set[10]
 	echo Moving on my own to ${X} ${Z}
 	face ${X} ${Z}
 
@@ -89,7 +90,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk)
 		press -release MOVEFORWARD
 		eq2execute loc
 	}
-	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
 	if (!${Return})
 	{
 		face ${X} ${Z}
@@ -156,21 +157,21 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk)
 			eq2execute loc
 		}
 	}
-	call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
 
 	if (${WasRunning})
 		press WALK
 }
-function 2DWalk(float X, float Z)
+function 2DWalk(float X, float Z, int Precision)
 {
 	echo DEPRECATED use 2DNav with ForceWalk option
-	call 2DNav ${X} ${Z} FALSE TRUE
+	call 2DNav ${X} ${Z} FALSE TRUE ${Precision}
 }
-function 3DNav(float X, float Y, float Z)
+function 3DNav(float X, float Y, float Z, int Precision)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
 	call Ascend ${Y}
-	call 2DNav ${X} ${Z}
+	call 2DNav ${X} ${Z} FALSE FALSE ${Precision}
 }
 
 function Abs(float A)
@@ -229,14 +230,17 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	wait 50
 }
 
-function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight)
+function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight, bool UseID)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
 	call TestArrivalCoord  ${X} ${Y} ${Z}
 	if (!${Return})
 		call Move "${ActorName}" ${X} ${Y} ${Z} ${is2D}
 	echo "${Me.Name}" "${verb}" "${ActorName}" now
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
+	if ${UseID}
+		eq2execute apply_verb ${Actor[Query,Name=="${ActorName}"].ID} "${verb}"
+	else
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
 	if (${triggerFight} && ${is2D})
 	{
@@ -791,17 +795,21 @@ function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
 {
 	return ${Math.Distance[${X1},${Y1},${Z1},${X2},${Y2},${Z2}]}
 }
-function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone)
+function DMove(float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone, int Precision)
 {
 	variable float loc0
 	variable int Stucky
 	variable int SuperStucky=0
 	variable bool LR
+	
+	if ${Precision}<1
+		Precision:Set[10]
+	
 	eq2execute waypoint ${X}, ${Y}, ${Z}
 	
-	call TestNullCoord ${X} ${Y} ${Z}
+	call TestNullCoord ${X} ${Y} ${Z} ${Precision}
 	if (!${Return})
-		call TestArrivalCoord ${X} ${Y} ${Z}
+		call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
 	
 	if (!${Return})
 	{
@@ -816,12 +824,12 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			if (${speed} < 2)
 			{
 				call Get2DDirection ${X} ${Z}
-				call Go2D ${X} ${Y} ${Z} ${Return}
+				call Go2D ${X} ${Y} ${Z} ${Return} ${Precision}
 			}
 			if (${speed} == 2)
-				call 2DNav ${X} ${Z} ${IgnoreFight} TRUE
+				call 2DNav ${X} ${Z} ${IgnoreFight} TRUE ${Precision}
 			if (${speed} > 2)
-				call 2DNav ${X} ${Z} ${IgnoreFight}
+				call 2DNav ${X} ${Z} ${IgnoreFight} FALSE ${Precision}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -835,23 +843,14 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				LR:Set[${Return}]
 				Stucky:Set[0]
 			}
-			call TestArrivalCoord ${X} ${Y} ${Z}
+			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
 			
 		}
 		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
 	}
 	return ${SuperStucky}
 }
-function ExitCoV()
-{	
-	if (${Zone.Name.Equal["Coliseum of Valor"]})
-		{
-			call DMove -2 5 4 3
-			call DMove 94 3 162 3
-			call ActivateVerb "zone_to_pom" 94 3 162 "Enter the Plane of Magic"
-		}
-	call waitfor_Zone "Plane of Magic"
-}
+
 function Evac()
 {
 	echo not implemented yet
@@ -1064,6 +1063,8 @@ function goCoV()
 		call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
 		call DMove -2 5 4 3
 	}
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
+		call goto_GH
 	call waitfor_Zone "Coliseum of Valor"
 }
 function GoDown()
@@ -1648,8 +1649,75 @@ function StartQuest(int stepstart, int stepstop, bool noquest)
 		}
 	}
 }
+function SMove(float X, float Y, float Z, float Distance, float RespectDistance, int Precision, bool CheckCollision)
+{
 
-function StealthMove(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
+	variable index:actor Mobs
+	variable iterator MobIterator
+	variable float totaldistance
+	variable bool Found
+	variable bool Found2
+	variable float loc0
+	variable int Stucky
+	
+	if (${Precision}<1)
+		Precision:Set[10]
+	totaldistance:Set[${Math.Calc64[${Distance}+${RespectDistance}]}]
+	
+		do
+		{
+			Found:Set[FALSE]
+			Found2:Set[FALSE]
+			Stucky:Set[0]
+			
+			EQ2:QueryActors[Mobs, Type  =- "NPC" && Distance <= ${totaldistance}]
+			Mobs:GetIterator[MobIterator]
+			if ${MobIterator:First(exists)}
+			{
+				do
+				{
+					call Dist ${X} ${Y} ${Z} ${MobIterator.Value.X} ${MobIterator.Value.Y} ${MobIterator.Value.Z} 
+					if (${Return}<${RespectDistance} && ${MobIterator.Value.IsAggro})
+					{
+						echo Found ${MobIterator.Value.Name} at ${Return}m of destination - min is ${RespectDistance}
+						echo Aggro of Actor is ${MobIterator.Value.IsAggro} - target is too dangerous to go to, checking next one
+						Found:Set[TRUE]
+					}	
+				}	
+				while (${MobIterator:Next(exists)} && !${Found})
+				if (!${Found})
+				{
+					call Dist ${X} ${Y} ${Z} ${Me.Loc.X} ${Me.Loc.Y} ${Me.Loc.Z} 
+					echo seems that target destination at ${Return}m is safe
+					
+						press -hold MOVEFORWARD
+						do
+						{
+							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
+							face ${X} ${Z}
+							wait 1
+							call CheckStuck ${loc0}
+							if (${Return})
+							{
+								Stucky:Inc
+								echo Stucky count: ${Stucky}/20
+							}
+							else
+								Stucky:Set[0]
+							call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
+						}
+						while (!${Return} && ${Stucky}<20 && ${MobIterator.Value.Distance} < ${RespectDistance})
+						press -release MOVEFORWARD
+						if (${Stucky}<20)
+							Found2:Set[TRUE]
+				}
+			}
+		}	
+		while (!${Found2})
+	return ${Found2}
+}
+
+function StealthMoveTo(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator

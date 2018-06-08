@@ -122,6 +122,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 function step000()
 {
 	variable string Named
+	variable int Counter
 	Named:Set["Blighthorn"]
 	eq2execute merc resume
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
@@ -139,8 +140,17 @@ function step000()
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	call DMove -195 32 294 ${speed}
 	call DMove -202 47 254 ${speed}
-	
-	
+	do
+	{
+		wait 10
+		call Hunt festrus 100 1 TRUE
+		call DMove -392 28 273 3
+		call Hunt festrus 100 1 TRUE
+		call DMove -202 47 254 3
+		call IsPresent "festrus" 500
+	}
+	while (${Return})
+	eq2execute summon
 	do
 	{
 		wait 10
@@ -150,8 +160,10 @@ function step000()
 		call DMove -202 47 254 3
 		call IsPresent "${Named}"
 		echo !${Return} && !${FestrusLord}
+		Counter:Inc
 	}
-	while (!${Return} && !${FestrusLord})
+	while (!${Return} && !${FestrusLord} && ${Counter}<20)
+	eq2execute summon
 	echo must kill "${Named}"
 	
 	do
