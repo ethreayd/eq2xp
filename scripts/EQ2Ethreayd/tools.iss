@@ -1563,7 +1563,7 @@ function PauseZone()
 	press -release MOVEFORWARD
 	echo Clearing of zone "${Zone.Name}" is paused
 }
-function PetitPas(float X, float Y, float Z, float Precision)
+function PetitPas(float X, float Y, float Z, float Precision, bool Modified)
 {
 	variable float Ax
 	variable float Az
@@ -1581,8 +1581,16 @@ function PetitPas(float X, float Y, float Z, float Precision)
 		{
 			Counter:Inc
 			face ${X} ${Z}
-			press MOVEFORWARD
+			if ${Modified}
+			{
+				press -hold MOVEFORWARD
+				wait 1
+				press -release MOVEFORWARD
+			}
+			else
+				press MOVEFORWARD
 			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
+			
 		}
 		while (!${Return} && ${Counter}<1000)
 	}
@@ -1682,7 +1690,8 @@ function SMove(float X, float Y, float Z, float Distance, float RespectDistance,
 						echo Found ${MobIterator.Value.Name} at ${Return}m of destination - min is ${RespectDistance}
 						echo Aggro of Actor is ${MobIterator.Value.IsAggro} - target is too dangerous to go to, checking next one
 						Found:Set[TRUE]
-					}	
+					}
+					wait 1
 				}	
 				while (${MobIterator:Next(exists)} && !${Found})
 				if (!${Found})
@@ -1934,7 +1943,7 @@ function UseAbility(string MyAbilityName)
 Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
 
-function WaitByPass(string ActorName, float GLeft, float GRight)
+function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
@@ -1944,18 +1953,41 @@ function WaitByPass(string ActorName, float GLeft, float GRight)
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
-		echo waiting for named to go left
-		do
+		if (!${XNOZ})
 		{
-			wait 10 
-		}	
-		while (${ActorIterator.Value.Z}<${GLeft})
-		echo waiting for named to go right
-		do
+			echo waiting for named to go left
+			do
+			{
+				echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+				wait 10 
+			}	
+			while (${ActorIterator.Value.Z}<${GLeft})
+			echo waiting for named to go right
+			do
+			{
+				echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+				wait 10 
+			}	
+			while (${ActorIterator.Value.Z}>${GRight})
+		}
+		else
 		{
-			wait 10 
-		}	
-		while (${ActorIterator.Value.Z}>${GRight})
+			echo waiting for named to go left
+			do
+			{
+				echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+				wait 10 
+			}	
+			while (${ActorIterator.Value.X}<${GLeft})
+			echo waiting for named to go right
+			do
+			{
+				echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+				wait 10 
+			}	
+			while (${ActorIterator.Value.X}>${GRight})
+		}
+		
 		echo "${ActorName}" has bypassed ${GLeft}) and ${GRight}
 	}		
 }

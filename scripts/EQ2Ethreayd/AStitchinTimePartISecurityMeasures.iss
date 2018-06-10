@@ -6,7 +6,7 @@ variable(script) string NPCName
 
 function main(string qn, int stepstart, int stepstop)
 {
-	variable int laststep=0
+	variable int laststep=7
 	variable int stopquest=0
 	variable int multiple=0
 	questname:Set["${qn}"]
@@ -105,45 +105,44 @@ function step000()
 	
 function step001()
 {	
-	call waitfor_Zone "Soulbound Chamber"
-	call DMove 4 103 10
-	call Converse "${NPCName}" 8
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	wait 20
+	call goCoV
+	echo Mending Toon
+	call MendToon
+	call GoPoI "Security Measures" Tradeskill
+	call RunZone 0 0 ${speed} ${NoShiny}
+	echo waiting for end of Zone
+	call waitfor_RunZone
 }
 function step002()
 {	
-	call MoveCloseTo "Solusek's Forge"
-	call ActivateVerb "Solusek's Forge" -3 103 10 "Extract Essence"
-	wait 20
-	ReplyDialog:Choose[1]
-	wait 20
-	Me.Inventory[Query, Name =- "Soulbound Slice"]:Salvage
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	call step001
 }
 function step003()
 {	
-	call MoveCloseTo "${NPCName}"
-	call Converse "${NPCName}" 6
+	call step001
 }
 function step004()
 {	
-	call ActivateVerbOnPhantomActor "Imbue Essence"
-	wait 20
-	ReplyDialog:Choose[1]
-	wait 20
-	ReplyDialog:Choose[1]
-	wait 20
-	ReplyDialog:Choose[1]
+	call step001
 }
 function step005()
 {	
-	call Converse "${NPCName}" 6
+	call step001
+}
+function step006()
+{	
+	call step001
+}
+function step007()
+{	
+	call waitfor_Zone "Coliseum of Valor"
+	call 2DNav 5 5
+	call Converse "Druzzil Ro" 5 TRUE
 	wait 20
+	call MoveCloseTo "Varig Ro"
+	call MoveCloseTo "Varig Ro"
+	call Converse "Varig Ro" 8 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
-	call DMove 0 104 -5
-	call ActivateVerb "Exit" 0 104 -5 "Return to Coliseum of Valor" 
+	OgreBotAPI:AcceptReward["${Me.Name}"]	
 }
