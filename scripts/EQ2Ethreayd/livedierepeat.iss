@@ -1,6 +1,6 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main(bool NoShiny)
+function main(bool NoShiny, bool Heroic)
 {
 	variable bool GroupDead
 	variable bool GroupAlive
@@ -46,17 +46,32 @@ function main(bool NoShiny)
 					endscript ${sQN}
 				wait 50
 				press -release MOVEFORWARD
-				OgreBotAPI:Revive[${Me.Name}]
+				if (${Heroic})
+					oc !c -revive
+				else
+					OgreBotAPI:Revive[${Me.Name}]
 				echo waiting 1 min to recover
 				wait 600
 				call ReturnEquipmentSlotHealth Primary
 				if (${Return}<20)
 				{
-					echo Gear is too damaged - Ending this RunZone to mend
-					call goto_GH
-					call GuildH
-					wait 100
-					call goCoV
+					if (${Heroic})
+					{
+						Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
+						wait 50
+						echo Repair
+						oc !c -repair
+						wait 50
+						call RunZone 0 0 0 ${NoShiny}
+					}
+					else
+					{
+						echo Gear is too damaged - Ending this RunZone to mend
+						call goto_GH
+						call GuildH
+						wait 100
+						call goCoV
+					}
 				}
 				else
 					call RunZone 0 0 0 ${NoShiny}
@@ -74,14 +89,24 @@ function main(bool NoShiny)
 					endscript ${sQN}
 				wait 50
 				press -release MOVEFORWARD
-
-				call goto_GH
-				call GuildH
-				wait 100
-				call goCoV
-				if (!${Script["LoopSolo"](exists)})
-					run EQ2Ethreayd/LoopSolo
-				
+				if (${Heroic})
+				{
+					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
+					wait 50
+					echo Repair
+					oc !c -repair
+					wait 50
+					call RunZone 0 0 0 ${NoShiny}
+				}
+				else
+				{
+					call goto_GH
+					call GuildH
+					wait 100
+					call goCoV
+					if (!${Script["LoopSolo"](exists)})
+						run EQ2Ethreayd/LoopSolo
+				}
 			}
 		}
 	}

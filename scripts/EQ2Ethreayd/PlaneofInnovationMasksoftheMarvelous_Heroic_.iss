@@ -3,6 +3,7 @@ variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool Detected
 variable(script) bool Opened
+variable(script) bool KeyOn
 
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
@@ -10,9 +11,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 
 	variable int laststep=7
 	oc !c -letsgo
-	;if ${Script["livedierepeat"](exists)}
-	;	endscript livedierepeat
-	;run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
+	run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
 	 
 	if (${setspeed}==0)
 	{
@@ -20,10 +21,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		FightDistance:Set[30]
 	}
 			
-	;if ${Script["autoshinies"](exists)}
-	;	endscript autoshinies
-	;if (!${NoShiny})
-	;	run EQ2Ethreayd/autoshinies 50 ${speed} 
+	if ${Script["autoshinies"](exists)}
+		endscript autoshinies
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 50 ${speed} 
 	
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
@@ -34,7 +35,6 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Heroic]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
 
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
@@ -112,7 +112,6 @@ function step002()
 	wait 20
 	oc !c -CS_Set_ChangeCampSpotBy All -70 0 0
 	
-	;eq2execute gsay Set up for "${Named}"
 	call TanknSpank "${Named}" 100
 	wait 100
 	oc !c -letsgo
@@ -336,16 +335,22 @@ function step007()
 	wait 20
 	oc !c -cs-jo-ji All Casters
 		
-	call DMove -139 6 -279 3
+	call DMove -136 5 -283 3 30 TRUE FALSE 5
+	wait 10
+	call DMove -151 3 -284 3 30 TRUE FALSE 5
 	oc !c -CampSpot ${Me.Name}
 	oc !c -joustout ${Me.Name}
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
 	OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
 	call TanknSpank "${Named}" 100
 	
 	eq2execute summon
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call DMove -145 10 -251 3 30 TRUE
+	call DMove -140 10 -251 3 30 TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
 	
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
 	wait 100
@@ -410,12 +415,21 @@ atom HandleAllEvents(string Message)
 	{
 		oc !c -cs-jo-ji All Casters
 	}
-}
-atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
-{
-    if (${NewStance.Equal["DEAD"]})
+	if (${Message.Find["need to turn his key"]} > 0)
 	{
-		echo "I am dead"
-		
+		KeyOn:Set[TRUE]
+		oc !c -joustin ${Me.Name}
+		do
+		{
+			press MOVEFORWARD
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
+		}
+		while (${KeyOn})
+	}
+	
+	if (${Message.Find["Collector is energized"]} > 0)
+	{
+		KeyOn:Set[FALSE]
+		oc !c -joustout ${Me.Name}
 	}
 }

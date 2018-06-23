@@ -844,7 +844,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				Stucky:Set[0]
 			}
 			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
-			
+			echo !${Return} && ${SuperStucky}<100 && !${StuckZone}
 		}
 		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
 	}
@@ -1560,6 +1560,8 @@ function PauseZone()
 	sQN:Set[${Return}]
 	if ${Script[${sQN}](exists)}
 		Script[${sQN}]:Pause
+	if ${Script[livedierepeat](exists)}
+		Script[livedierepeat]:Pause
 	press -release MOVEFORWARD
 	echo Clearing of zone "${Zone.Name}" is paused
 }
@@ -1602,6 +1604,11 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
+function RelayAll(string w0, string w1, string w2, string w3, string w4, string w5, string w6,string w7, string w8, string w9)
+{
+relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
+}
+
 function ResumeZone()
 {
 	variable string sQN
@@ -1609,6 +1616,8 @@ function ResumeZone()
 	sQN:Set[${Return}]
 	if ${Script[${sQN}](exists)}
 		Script[${sQN}]:Resume
+	if ${Script[livedierepeat](exists)}
+		Script[livedierepeat]:Resume
 	echo Resuming clearing of zone "${Zone.Name}"
 }
 function ReturnEquipmentSlotHealth(string ItemSlot)

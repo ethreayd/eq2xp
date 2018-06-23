@@ -2,7 +2,7 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
-	
+	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Heroic_"]
 	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Heroic_"]
 	ScriptsToRun:Insert["PlaneofInnovationSecurityMeasures_tradeskill_"]
 	ScriptsToRun:Insert["AStitchinTimePartISecurityMeasures"]
