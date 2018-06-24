@@ -5,15 +5,18 @@ variable(script) string NPCName
 function main(string qn, int stepstart, int stepstop)
 {
 	variable int laststep=5
+	variable bool nocheckquest
 	questname:Set["${qn}"]
 	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
+	if (!${QuestJournalWindow.ActiveQuest["${questname}"](exists)})
+		nocheckquest:Set[TRUE]
 	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
 	}
 	
-	call StartQuest ${stepstart} ${stepstop}
+	call StartQuest ${stepstart} ${stepstop} ${nocheckquest} 
 	
 	echo End of Quest reached
 }

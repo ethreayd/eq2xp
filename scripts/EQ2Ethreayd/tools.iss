@@ -169,9 +169,115 @@ function 2DWalk(float X, float Z, int Precision)
 }
 function 3DNav(float X, float Y, float Z, int Precision)
 {
+	variable float loc0 
+	variable int Stucky=0
+	variable bool WasRunning
+
 	eq2execute waypoint ${X} ${Y} ${Z}
 	call Ascend ${Y}
-	call 2DNav ${X} ${Z} FALSE FALSE ${Precision}
+
+	if ${Precision}<1
+		Precision:Set[10]
+	echo Moving on my own to ${X} ${Y} ${Z}
+	face ${X} ${Z}
+
+	if (${Me.Loc.X}>${X})
+	{
+		Stucky:Set[0]
+		echo "doing X>"
+		press -hold MOVEFORWARD
+		
+		do
+		{	
+			face ${X} ${Z}
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			wait 5
+			call Ascend ${Y}
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+			}
+		}
+		while (${Me.Loc.X}>${X} && ${Stucky}<10)
+		press -release MOVEFORWARD
+		call Ascend ${Y}
+		eq2execute loc
+	}
+	else
+	{
+		Stucky:Set[0]
+		echo "doing X<"
+	
+		press -hold MOVEFORWARD
+		do
+		{
+			face ${X} ${Z}
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			wait 5
+			call Ascend ${Y}
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				Stucky:Inc
+			}
+		}
+		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
+		press -release MOVEFORWARD
+		call Ascend ${Y}
+		eq2execute loc
+	}
+	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
+	if (!${Return})
+	{
+		face ${X} ${Z}
+		if (${Me.Loc.Z}>${Z})
+		{
+			Stucky:Set[0]
+			echo "doing Z>"
+			press -hold MOVEFORWARD
+			do
+			{	
+				face ${X} ${Z}
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				wait 2
+				call Ascend ${Y}
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
+			}
+			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+			press -release MOVEFORWARD
+			call Ascend ${Y}
+			eq2execute loc
+		}
+		else
+		{
+			Stucky:Set[0]
+			echo "doing Z<"
+	
+			press -hold MOVEFORWARD
+			do
+			{	
+				face ${X} ${Z}
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				wait 2
+				call Ascend ${Y}
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
+			}
+			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+			press -release MOVEFORWARD
+			call Ascend ${Y}
+			eq2execute loc
+		}
+	}
+	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
 }
 
 function Abs(float A)
@@ -437,7 +543,22 @@ function AvoidRedCircles(float Distance)
 		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance}
 	}
 }
-
+function BelltoZone(string ZoneName)
+{
+	; this function has to be improved to be able to travel using all devices available
+	call IsPresent "Explorer's Globe of Norrath"
+	
+	if ${Return}
+	{
+		call MoveCloseTo "Explorer's Globe of Norrath"
+		Actor[name,"Explorer's Globe of Norrath"]:DoubleClick
+		wait 20
+		oc !c -travel ${Me.Name} "${ZoneName}"
+		call waitfor_Zone "${ZoneName}"
+	}
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]})
+		call goto_GH
+}
 function CastAbility(string AbilityName, bool NoWait)
 {
 	if (!${NoWait})
@@ -583,6 +704,13 @@ function CheckWalking()
 				return FALSE
 			else
 				return TRUE
+}
+function CheckZone(string ZoneName)
+{
+	if (${Zone.Name.Equal["${ZoneName}"]})
+		return TRUE
+	else
+		return FALSE
 }	
 function ClickOn(string ActorName)
 {
@@ -2047,8 +2175,9 @@ function waitfor_Zone(string ZoneName)
 	do
 	{
 		wait 5
+		call CheckZone "${ZoneName}"
 	}
-	while (!${Zone.Name.Equal["${ZoneName}"]})
+	while (!${Return})
 	wait 100
 	echo I am in ${ZoneName}
 }
