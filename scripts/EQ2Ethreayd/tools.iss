@@ -406,15 +406,17 @@ function Ascend(float Y)
 	call CheckCombat
 	call CheckSwimming
 	echo Beginning Ascension... to ${Y}
-	do
+	if  (${Me.Loc.Y}<${Y})
 	{	
-		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-		press -hold FLYUP
-		wait 5
-		call CheckStuck ${loc0}
-		if (${Return})
-			Stucky:Inc
-		if (${Stucky}>5)
+		do
+		{	
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			press -hold FLYUP
+			wait 5
+			call CheckStuck ${loc0}
+			if (${Return})
+				Stucky:Inc
+			if (${Stucky}>5)
 			{	
 				ExecuteQueued
 				echo stucked when ascending
@@ -424,9 +426,12 @@ function Ascend(float Y)
 				press -hold STRAFERIGHT
 				wait 5
 				press -release STRAFERIGHT
-			}	
+			}
+		}
+		while (${Me.Loc.Y}<${Y})
 	}
-	while (${Me.Loc.Y}<${Y})
+	
+	
 	press -release FLYUP
  	eq2execute loc
 	return ${Me.Loc.Y}

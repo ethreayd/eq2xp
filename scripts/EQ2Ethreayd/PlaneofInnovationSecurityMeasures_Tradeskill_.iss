@@ -26,48 +26,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call check_quest "A Stitch in Time, Part I: Security Measures"
 	
 	if (${setspeed}==0)
-	{
-		switch ${Me.Archetype}
-		{
-			case fighter
-			{
-				echo fighter
-				speed:Set[3]
-				FightDistance:Set[15]
-			}
-			break
-			case priest
-			{
-				echo priest
-				speed:Set[3]
-				FightDistance:Set[15]
-			}
-			break
-			case mage
-			{
-				echo mage
-				speed:Set[1]
-				FightDistance:Set[30]
-			}
-			break
-			case scout
-			{
-				echo scout
-				speed:Set[1]
-				FightDistance:Set[15]
-			}
-			break
-			default
-			{
-				echo unknown
-				speed:Set[1]
-				FightDistance:Set[30]
-			}
-			break
-		}
-	}
+		speed:Set[3]
 	else
 		speed:Set[${setspeed}]
+	FightDistance:Set[30]
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
 	;if (!${NoShiny})
@@ -82,8 +44,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call waitfor_Zone "Plane of Innovation: Security Measures [Tradeskill]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
-
+	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
@@ -92,20 +53,6 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",0]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
-	
-	if (${stepstart}==0)
-	{
-		call CheckQuestStep 1
-		if ${Return}
-		{
-			stepstart:Set[2]
-			call CheckQuestStep 2
-			if ${Return}
-			{
-				
-			}
-		}
-	}
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
@@ -131,8 +78,14 @@ function step001()
 	
 	
 	ogre harvestlite
+	call CountItem "coiled springs"
+	springs:Set[${Return}]
+	call CountItem "conductive wire"
+	wires:Set[${Return}]
+	call CountItem "power node"
+	nodes:Set[${Return}]
 	call CheckQuestStep 1
-	if (!${Return})
+	if (!${Return} && (${nodes}<20 || ${wires}<20 || ${springs}<20))
 	{
 		NotStuck:Set[FALSE]
 		do
@@ -203,7 +156,7 @@ function step001()
 			}
 			call CheckQuestStep 1
 		}
-		while (!${Return})
+		while (!${Return} && (${nodes}<20 || ${wires}<20 || ${springs}<20))
 	}
 	ogre end harvestlite
 }	
@@ -262,8 +215,8 @@ function step003()
 		call DMove 84 3 -130 3
 		call DMove 60 3 -130 3
 		call PetitPas 65 3 -127 3
-		wait 100
-		call OpenDoor "Junkyard West Door 03"
+		wait 20
+		call AutoPassDoor "Junkyard West Door 03" 42 4 -122
 	}
 	
 	call DMove 42 4 -122 3
@@ -274,7 +227,9 @@ function step003()
 	call SMove 23 4 -123 100 12 5
 	call SMove 25 4 -161 100 15 5
 	wait 50
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 50
 	call DMove 23 4 -130 3
 	echo waiting 1.5 minutes Please be patient
@@ -291,7 +246,7 @@ function step003()
 
 function step004()
 {
-	
+	;Inside the Manaetic Factory
 	call DMove 25 7 -340 3
 	wait 10
 	call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
@@ -307,7 +262,9 @@ function step004()
 	WestPurged:Set[False]
 	call DMove 97 -7 -405 3
 	wait 50
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 100
 	call PKey STRAFERIGHT 1
 	call PKey MOVEFORWARD 1
@@ -320,7 +277,9 @@ function step004()
 	call OpenDoor "Factory Center West Hall Door 02"
 	call DMove 97 -7 -473 3
 	wait 50
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 100
 	
 	call PKey STRAFERIGHT 1
@@ -329,7 +288,9 @@ function step004()
 	call DMove 84 -7 -485 3
 	face 90 -485
 	wait 50
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 100
 	face 79 -485
 	call SMove 79 -7 -485 100 15 5
@@ -350,6 +311,8 @@ function step004()
 	wait 20
 	call MoveCloseTo "Meldrath the Marvelous" 
 	call Converse "Meldrath the Marvelous" 11
+	wait 50
+	oc !c -acceptreward ${Me.Name}
 }
 
 	
@@ -359,13 +322,20 @@ function step005()
 	call DMove 24 -7 -488 3
 	call DMove 70 -7 -484 3
 	call DMove 80 -7 -484 3
-	call ActivateVerb "Electric Manaetic Device (EMD)" 80 -7 -484 "Destroy Device"
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	call DMove 96 -7 -484 3
 	call DMove 97 -7 -437 3
 	call DMove 98 -7 -427 3
 	call DMove 107 -6 -423 3
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 40
+	do
+	{
+		OgreBotAPI:Special["${Me.Name}"]
+		wait 40
+		call CheckItem "shorted circuitry" 1
+	}
+	while (${Return}>0)
 	call DMove 98 -7 -427 3
 	call DMove 99 -7 -409 3
 	call DMove 96 6 -355 3
@@ -399,13 +369,17 @@ function step006()
 	call OpenDoor "Factory East Side Door 01"
 	call SMove -85 4 -344 100 20 5
 	call DMove -89 -3 -378 3
-	call SMove -89 3 -401 100 15 5
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call SMove -88 4 -399 100 12 5
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call DMove -89 -3 -378 3
 	call DMove -78 -3 -382 3 30 TRUE FALSE 5
 	call DMove -75 -3 -453 3
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call PetitPas -78 -3 -446 3 TRUE
 	wait 600
@@ -414,8 +388,13 @@ function step006()
 	call ActivateVerb "Electric Manaetic Device (EMD)" -76 -3 -453 "Destroy Device"
 	call DMove -73 -3 -463 3
 	call PetitPas -62 -3 -461 3 TRUE
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 20
+	do
+	{
+		OgreBotAPI:Special["${Me.Name}"]
+		wait 40
+		call CheckItem "chassis shell" 1
+	}
+	while (${Return}>0)
 	call PetitPas -73 -3 -461 3 TRUE
 	call DMove -78 -3 -439 3
 	call DMove -77 -3 -378 3
@@ -459,8 +438,13 @@ function step007()
 	call DMove 156 4 -415 3
 	call DMove 148 4 -417 3
 	call DMove 149 4 -427 3
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 40
+	do
+	{
+		OgreBotAPI:Special["${Me.Name}"]
+		wait 40
+		call CheckItem "misshapen gears" 1
+	}
+	while (${Return}>0)
 	call DMove 148 4 -416 3
 	call PetitPas 157 4 -418 3 TRUE
 }	
@@ -560,14 +544,20 @@ function step010()
 	call DMove 127 -3 -362 3
 	call DMove 128 -3 -435 3
 	call DMove 125 -3 -451 3
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	wait 40
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	call PetitPas 120 -3 -446 3 TRUE
 	call OpenDoor "Factory West Side Door 02"
 	call PetitPas 125 -3 -444 3 TRUE
 	wait 600
 	call PetitPas 124 -3 -452 3 TRUE
-	call ActivateVerb "Electric Manaetic Device (EMD)" 124 -3 -452 "Destroy Device"
+	;call ActivateVerb "Electric Manaetic Device (EMD)" 124 -3 -452 "Destroy Device"
 	call DMove 125 -3 -463 3 30 TRUE FALSE 5
 	call DMove 153 -3 -462 3
 	call OpenDoor "Factory West Side Door 03"
@@ -592,7 +582,7 @@ function step010()
 	while (!${WestPurged})
 	call DMove 40 7 -344 3
 	call DMove 26 7 -346 2
-	WestPurged:Set[False]
+	WestPurged:Set[FALSE]
 }
 function step011()
 {		
@@ -607,18 +597,24 @@ function step011()
 	}
 	while (!${EastPurged})
 	call DMove -64 7 -345 3
-	EastPurged:Set[False]
+	EastPurged:Set[FALSE]
 	
 	call OpenDoor "Factory East Side Door 01"
 	call SMove -85 4 -344 100 20 5
 	call DMove -89 -3 -378 3
-	call SMove -89 3 -401 100 15 5
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call SMove -89 3 -401 100 12 5
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
+	
 	call DMove -89 -3 -378 3
-	call DMove -78 -3 -382 3 30 TRUE FALSE 5
+	wait 600
+	call DMove -88 3 -401 3
+	call DMove -93 4 -445
+	wait 20
+	call DMove -73 -3 -445 3 30 TRUE FALSE 5
 	call DMove -75 -3 -453 3
-	call OpenDoor "Factory East Side Door 02"
 	call DMove -77 -3 -466 3
 	call DMove -102 -3 -460 3
 	call OpenDoor "Factory East Side Door 03"
@@ -643,6 +639,8 @@ function step011()
 	do
 	{
 		wait 5
+		call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
+	
 	}
 	while (!${EastPurged})
 	call DMove 10 7 -346 3
@@ -660,6 +658,7 @@ function step012()
 	do
 	{
 		wait 5
+		call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
 	}
 	while (!${WestPurged})
 	call DMove 70 7 -344 3
@@ -740,34 +739,45 @@ function step013()
 }
 function step014()
 {
-	call DMove 24 -7 -457 3
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call DMove 24 -7 -457 2
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
-	call DMove 68 -7 -455 3
-	call PetitPas 63 -7 -447 3 True
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call DMove 68 -7 -455 2
+	call DMove 63 -7 -447 2 30 FALSE FALSE 5
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call DMove 72 -7 -412 3
-	call DMove 62 -7 -401 3 
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call DMove 62 -7 -401 2 
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call DMove 70 -7 -413 3
 	call DMove 66 -7 -454 3
 	call DMove -13 -7 -458 3
-	call DMove -13 -7 -446 3
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call DMove -13 -7 -446 2
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call DMove -21 -7 -433 3
 	call DMove -17 -7 -414 3
-	call DMove -17 -7 -398 3
-	Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call DMove -17 -7 -398 2
+	call IsPresent "Electric Manaetic Device (EMD)" 15
+	if (!${Return})
+		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
 	wait 20
 	call DMove -6 -7 -380 3
 	call DMove 19 -5 -378 3
 	do
 	{
 		OgreBotAPI:Special["${Me.Name}"]
-		call CheckQuestStep 9
+		wait 20
+		call CheckQuestStep 10
 	}
 	while (!${Return})
 

@@ -1,4 +1,4 @@
-function goto_EralokRizrok(bool Direct)
+function goto_HrathEverstill(bool Direct)
 {
 	call CheckZone "Timorous Deep"
 	if (${Return})
@@ -29,7 +29,7 @@ function goto_GorowynGrotto(bool Direct)
 		call DMove 2414 22 1330 3
 	}
 }
-function goto_HrathEverstill(bool Direct)
+function goto_EralokRizrok(bool Direct)
 {
 	call CheckZone "Timorous Deep"
 	if (${Return})

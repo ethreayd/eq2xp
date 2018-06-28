@@ -51,7 +51,24 @@ function step000()
 	NPCName:Set["Eralok Riz'rok"]
 	call strip_QN "${NPCName}"
 	POI:Set[${Return}]
-	call goto_GH
+	call DMove 2634 120 1104 3
+	call DMove 2609 112 1094 3
+	call DMove 2555 113 1042 3
+	call DMove 2551 115 1065 3
+	call DMove 2595 120 1103 3
+	call DMove 2599 120 1116 3
+	call DMove 2608 120 1108 3 30 FALSE FALSE 5
+	call DMove 2606 120 1120 3 30 FALSE FALSE 5
+	call DMove 2596 120 1133 3
+	call DMove 2609 101 1228 3
+	call 3DNav 2551 66 1191
+	call GoDown
+	call DMove 2501 12 1243 3
+	call DMove 2493 12 1262 3
+	call DMove 2453 17 1264 3
+	call DMove 2381 22 1355 3
+	call DMove 2338 14 1394 3
+	
 	call BelltoZone "${ZoneName}"
 	call goto_${POI}
 	call Converse "${NPCName}" 7

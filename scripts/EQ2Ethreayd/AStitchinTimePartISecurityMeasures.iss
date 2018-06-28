@@ -80,6 +80,8 @@ function step000()
 			call CoVMender
 		}
 	}
+	else
+		call goCoV
 	call ExitCoV
 	do
 	{
