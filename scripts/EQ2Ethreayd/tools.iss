@@ -1819,7 +1819,12 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-
+function StartHunt(string ActorName)
+{
+	Ob_AutoTarget:AddActor["${ActorName}",0,FALSE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+}
 function StartQuest(int stepstart, int stepstop, bool noquest)
 {
 	variable string n
