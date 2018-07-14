@@ -4,16 +4,16 @@ variable(script) int FightDistance
 variable(script) bool Detected
 variable(script) bool Opened
 variable(script) bool KeyOn
-
+variable(script) bool AutoRez
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=7
+	oc !c -resume
 	oc !c -letsgo
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
 	 
 	if (${setspeed}==0)
 	{
@@ -38,7 +38,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
-	
+	oc !c -OgreFollow All ${Me.Name}
 	if (${stepstart}==0)
 	{
 		call IsPresent "Ancient Clockwork Prototype" 500
@@ -55,7 +55,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		}		
 	}
 	
-	oc !c -OgreFollow All ${Me.Name}
+	
 	
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
@@ -80,12 +80,18 @@ function step001()
 	
 	call DMove -52 3 6 ${speed} ${FightDistance}
 	call DMove -36 3 -65 ${speed} ${FightDistance}
+	oc !c -Come2Me ${Me.Name} All 3
+	call WaitforGroupDistance 20
+	oc !c -letsgo
 	call CheckCombat
 	oc !c -CampSpot
 	oc !c -joustout
 	call TanknSpank "${Named}"
 	oc !c -letsgo
 	eq2execute summon
+	oc !c -acceptreward
+	oc !c -acceptreward
+	
 	call DMove -58 3 11 ${speed} ${FightDistance}
 	call DMove -41 -10 137 ${speed} ${FightDistance}
 }	
@@ -104,7 +110,7 @@ function step002()
 	call DMove 117 3 -43 ${speed} ${FightDistance}
 	call CheckCombat
 	oc !c -Come2Me ${Me.Name} All 3
-	wait 20
+	call WaitforGroupDistance 20
 	oc !c -letsgo
 	call DMove 115 3 -35 3
 	oc !c -CampSpot
@@ -226,10 +232,14 @@ function step004()
 	call DMove 153 3 -62 3 ${FightDistance}
 	call DMove 177 4 -66 2 ${FightDistance}
 	call DMove 201 -3 -67 1 ${FightDistance}
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Pause
+	if ${Script["livedierepeat"](exists)}
+		Script["livedierepeat"]:Pause
 	Detected:Set[FALSE]
 	call WaitByPass "Security Sweeper" -30 -80
 	call 2DNav 237 -69
-	call Follow2D "Security Sweeper" 237 -13 -215 30 TRUE
+	call Follow2D "Security Sweeper" 237 -13 -215 30
 	if (!${Detected})
 	{
 		call DMove 237 -13 -219 2 30 TRUE TRUE
@@ -280,7 +290,8 @@ function step005()
 		}
 		while (${Detected})
 	}
-	
+	if ${Script["livedierepeat"](exists)}
+		Script["livedierepeat"]:Resume
 	oc !c -CampSpot 
 	oc !c -joustout
 	eq2execute gsay Set up for ${Named}
@@ -291,6 +302,8 @@ function step005()
 	
 	oc !c -letsgo
 	eq2execute summon
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Resume
 }
 	
 function step006()
@@ -300,6 +313,8 @@ function step006()
 	call DMove 118 10 -220 1
 	call AutoPassDoor "Junkyard West Door 04" 101 10 -219
 	call DMove 82 10 -210 3 ${FightDistance}
+	if ${Script["livedierepeat"](exists)}
+		Script["livedierepeat"]:Pause
 	call Converse "Meldrath the Marvelous" 32
 	wait 100
 	ogre qh
@@ -307,6 +322,8 @@ function step006()
 	wait 100
 	ogre end qh
 	wait 20
+	if ${Script["livedierepeat"](exists)}
+		Script["livedierepeat"]:Resume
 	call DMove 91 10 -235 1 ${FightDistance}
 	call AutoPassDoor "Junkyard West Door 05" 91 10 -247
 	
@@ -333,17 +350,56 @@ function step007()
 	wait 50
 	call DMove -155 4 -267 3
 	wait 20
-	oc !c -cs-jo-ji All Casters
+	;oc !c -cs-jo-ji All Casters
 		
 	call DMove -136 5 -283 3 30 TRUE FALSE 5
 	wait 10
 	call DMove -151 3 -284 3 30 TRUE FALSE 5
-	oc !c -CampSpot ${Me.Name}
-	oc !c -joustout ${Me.Name}
+	;wait 10
+	;call DMove -146 5 -277 3 30 TRUE FALSE 5
+	;wait 10
+	;call DMove -150 5 -266 3 30 TRUE FALSE 5
+	
+	;oc !c -CampSpot ${Me.Name}
+	;oc !c -joustout ${Me.Name}
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
 	OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
-	call TanknSpank "${Named}" 100
+	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	echo "must kill ${Named}"
+	call IsPresent "${Named}"
+	if (${Return})
+	{
+		target "${Named}"
+		do
+		{
+			wait 10
+			if (${Me.IsDead})
+				AutoRez:Set[TRUE]
+			echo ${Named} at ${Actor["${Named}"].Health}%
+			if (${AutoRez} && ${Actor["${Named}"].Health}<25)
+			{
+				eq2execute gsay Activating AutoRez
+				AutoRez:Set[FALSE]
+			}
+			if (${Actor["${Named}"].Health}<35 && ${Actor["${Named}"].Health}>33)
+				eq2execute gsay AoE Prev
+			if (${Actor["${Named}"].Health}<27 && ${Actor["${Named}"].Health}>25)
+				eq2execute gsay Prev AoE
+			if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
+				eq2execute gsay Next Prev
+			if (${Actor["${Named}"].Health}<10 && ${Actor["${Named}"].Health}>8)
+				eq2execute gsay Last Prev
+			if (${Actor["${Named}"].Health}<5 && ${Actor["${Named}"].Health}>3)
+				eq2execute gsay Ward DP
+			ExecuteQueued
+			call IsPresent "${Named}" 100 TRUE
+		}
+		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
+	}
 	
 	eq2execute summon
 	call StopHunt
@@ -383,7 +439,17 @@ function OpenChargedDoor()
 	call CheckCombat ${FightDistance}
 	Me.Inventory["${PrimaryWeapon}"]:Equip
 }
-
+;function TurnKey(string Named)
+;{
+;	echo pausing 30s for resting
+;	wait 300
+;	do
+;	{
+;		press MOVEFORWARD
+;		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Named}","Turn Key"]
+;	}
+;	while (${KeyOn})
+;}
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	if (${Message.Find["shock imminent"]} > 0)
@@ -415,21 +481,16 @@ atom HandleAllEvents(string Message)
 	{
 		oc !c -cs-jo-ji All Casters
 	}
-	if (${Message.Find["need to turn his key"]} > 0)
-	{
-		KeyOn:Set[TRUE]
-		oc !c -joustin ${Me.Name}
-		do
-		{
-			press MOVEFORWARD
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Speaker}","Turn Key"]
-		}
-		while (${KeyOn})
-	}
+	;if (${Message.Find["need to turn his key"]} > 0)
+	;{
+	;	KeyOn:Set[TRUE]
+	;	oc !c -joustin ${Me.Name}
+	;	QueueCommand call TurnKey "Gearclaw the Collector"
+	;}
 	
-	if (${Message.Find["Collector is energized"]} > 0)
-	{
-		KeyOn:Set[FALSE]
-		oc !c -joustout ${Me.Name}
-	}
+	;if (${Message.Find["Collector is energized"]} > 0)
+	;{
+	;	KeyOn:Set[FALSE]
+	;	oc !c -joustout ${Me.Name}
+	;}
 }

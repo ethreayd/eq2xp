@@ -19,6 +19,8 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["wrap"]
+	ScriptsToRun:Insert["loopHeroic"]
 	ScriptsToRun:Insert["loopSolo"]
 	ScriptsToRun:Insert["loopSRT"]
 	ScriptsToRun:Insert["loopBoT"]

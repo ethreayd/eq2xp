@@ -16,9 +16,16 @@ variable(script) bool Windy
 
 function main()
 {
-	call DMove -5 -137 -84 1
-	call MoveJump 25 -136 -54 5 -136 -74
-
+	variable string Named
+	Named:Set["Gearclaw the Collector"]
+	
+	do
+	{
+			wait 10
+			echo ${Named} at ${Actor["${Named}"].Health}%
+			call IsPresent "${Named}" 100 TRUE
+	}
+	while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
 }
 
 atom HandleAllEvents(string Message)

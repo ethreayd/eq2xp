@@ -6,6 +6,8 @@ function main(int speed, bool NoShiny)
 	variable int Start
 	variable int Quests
 	echo Starting LoopSolo Now
+	ogre
+	wait 600
 	call goCoV
 	eq2execute merc resume
 	do

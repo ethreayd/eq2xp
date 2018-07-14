@@ -8,8 +8,10 @@ function main(bool NoShiny, bool Heroic)
 	variable int Counter
 	variable int Stucky
 	variable string sQN
+	variable int Restart=0
 	do
 	{
+		echo start ldr loop
 		Stucky:Set[0]
 		do
 		{
@@ -20,75 +22,107 @@ function main(bool NoShiny, bool Heroic)
 			call isGroupAlive
 			GroupAlive:Set[${Return}]
 			if ${Me.IsDead}
+			{
 				Counter:Inc
+				echo Counter: ${Counter}
+			}
 			else
 				Counter:Set[0]
 			call CheckStuck ${loc0}
 			if (${Return})
+			{
 				Stucky:Inc
+				echo Stucky: ${Stucky}
+			}
 			else
 				Stucky:Dec
+			call GroupDistance
 		}
-		while (${GroupAlive} && !${GroupDead} && ${Counter}<30 && ${Stucky}<60)
-		echo Live and let die ! (${GroupAlive} && !${GroupDead} && ${Counter}<30 && ${Stucky}<60)
-		call strip_QN "${Zone.Name}"
-		sQN:Set[${Return}]
+		while ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
+		echo Live and let die ! ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
+		
 		if (${Me.IsDead} && ${Me.InventorySlotsFree}>0)
 		{
+			echo in loop - waiting 30s
 			wait 300
 			if (${Me.IsDead})
 			{
 				echo I am Dead - Rebooting Instance (${sQN})
+				Restart:Inc
+				echo Restart counter at ${Restart}
 				if ${Script["autoshinies"](exists)}
 					endscript autoshinies
+				if ${Script["LoopHeroic"](exists)}
+						Script["LoopHeroic"]:Pause
 				call StopHunt
-				if ${Script[${sQN}](exists)}
-					endscript ${sQN}
-				wait 50
-				press -release MOVEFORWARD
+				call EndZone
+				if ${Script["wrap"](exists)}
+					endscript wrap
 				if (${Heroic})
-					oc !c -revive
+				{
+					oc !c -letsgo 
+					oc !c -revive 
+				}
 				else
-					OgreBotAPI:Revive[${Me.Name}]
+				{
+					oc !c -letsgo ${Me.Name}
+					oc !c -revive ${Me.Name}
+				}
 				echo waiting 1 min to recover
 				wait 600
 				call ReturnEquipmentSlotHealth Primary
-				if (${Return}<20)
+				if (!${Heroic} && ${Return}<20)
 				{
-					if (${Heroic})
-					{
-						Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
-						wait 50
-						echo Repair
-						oc !c -repair
-						wait 50
-						call RunZone 0 0 0 ${NoShiny}
-					}
-					else
-					{
-						echo Gear is too damaged - Ending this RunZone to mend
-						call goto_GH
-						call GuildH
-						wait 100
-						call goCoV
-					}
+					echo LDR: if (!${Heroic} && ${Return}<20)
+					echo Gear is too damaged - Returning to GH
+					call goto_GH
+					call GuildH
+					wait 100
+					call goCoV
 				}
-				else
-					call RunZone 0 0 0 ${NoShiny}
+				if (${Heroic} && ${Return}<100 && ${Restart}<2)
+				{
+					echo LDR: if (${Heroic} && ${Return}<100 && ${Restart}<2)
+					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
+					wait 50
+					echo Repair
+					oc !c -repair
+					wait 50
+				}
+				if (${Heroic} && ${Restart}>1)
+				{
+					echo LDR: if (${Heroic} && ${Restart}>1)
+					
+					echo Zone is too hard for this team - Exiting
+					oc !c -pause
+					call ExitZone
+					
+					wait 100
+					oc !c -resume
+					oc !c -ZoneResetAll
+					if ${Script["LoopHeroic"](exists)}
+						Script["LoopHeroic"]:Resume
+					else
+						run EQ2Ethreayd/LoopHeroic
+				}
+				if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
+				{
+					echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
+					echo Restarting Zone from LDR
+					run EQ2Ethreayd/wrap RunZone 0 0 0 ${NoShiny}
+				}
 			}
+			echo end of if me is dead
 		}
 		else
-		{
+		{	
 			if ((${Stucky}>59 || ${Me.InventorySlotsFree}<1) && !${Me.InCombatMode})
 			{
 				echo Aborting current Zone (${sQN}), please wait
 				if ${Script["autoshinies"](exists)}
 					endscript autoshinies
 				call StopHunt
-				if ${Script[${sQN}](exists)}
-					endscript ${sQN}
-				wait 50
-				press -release MOVEFORWARD
+				call EndZone
 				if (${Heroic})
 				{
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
@@ -104,11 +138,14 @@ function main(bool NoShiny, bool Heroic)
 					call GuildH
 					wait 100
 					call goCoV
-					if (!${Script["LoopSolo"](exists)})
+					if (!${Script["LoopSolo"](exists)} && !${Heroic})
 						run EQ2Ethreayd/LoopSolo
+					if (!${Script["LoopHeroic"](exists)} && ${Heroic})
+						run EQ2Ethreayd/LoopHeroic
 				}
 			}
 		}
+		echo will restart a ldr loop (Restart at ${Restart})
 	}
-	while (1==1)
+	while (TRUE)
 }

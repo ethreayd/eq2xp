@@ -7,11 +7,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=12
-	
+	oc !c -resume
 	oc !c -letsgo
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
 	if (${setspeed}==0)
 		speed:Set[3]
 	FightDistance:Set[30]
@@ -124,7 +123,7 @@ function step001()
 	oc !c -UplinkOptionChange All checkbox_settings_movebehind FALSE
 	oc !c -UplinkOptionChange All checkbox_settings_moveinfront FALSE
 	call DMove 190 10 -643 3
-	call DMove 212 12 -643 3
+	call DMove 212 12 -643 1
 	call DMove 231 11 -637 1
 	call DMove 288 2 -637  1
 	wait 100
@@ -157,7 +156,10 @@ function step001()
 	oc !c -AcceptReward
 	wait 20
 	relay all ogre
-	wait 200
+	wait 300
+	oc !c -letsgo
+	oc !c -OgreFollow All ${Me.Name}
+	wait 50
 }	
 	
 function step002()
@@ -353,6 +355,8 @@ function step006()
 		while ${Script[TBoTTBH_C1](exists)}
 			wait 100
 		oc !c -resume
+		echo waiting for all toons to come to this place, I need a group distance function, I will do it later
+		wait 600
 		
 		call DMove -1261 295 -1386 3
 		oc !c -Come2Me ${Me.Name} All 3
@@ -401,7 +405,7 @@ function step008()
 	{
 		wait 10
 	}
-	while (${Actor["a virulent sandstorm"].Z} < -748)
+	while (${Actor["a virulent sandstorm"].Z} < -748 && ${Actor["a virulent sandstorm"].Z} > -790)
 	echo "GO GO GO"
 	call DMove -813 345 -740 3 5 TRUE TRUE 
 	if ${Script["livedierepeat"](exists)}
@@ -523,13 +527,17 @@ function DrainPower(string Named)
 {
 	do
 	{
-		if (${Actor[name,${Named}].Power}>20)
+		if (${Actor[name,${Named}].Power}>15)
 		{
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_namedca TRUE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_nonnamedca TRUE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_items TRUE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_ca TRUE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_combat TRUE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_heal TRUE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_nameddebuff TRUE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_buffs TRUE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_powerheal TRUE
 		}
 		else
 		{
@@ -538,9 +546,13 @@ function DrainPower(string Named)
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_items FALSE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_ca FALSE
 			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_combat FALSE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_heal FALSE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_nameddebuff FALSE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_buffs FALSE
+			oc !c -UplinkOptionChange Mages checkbox_settings_disablecaststack_powerheal FALSE
 		}
 		
-		wait 100
+		wait 30
 		call IsPresent "${Named}"
 	}
 	while (${Return})

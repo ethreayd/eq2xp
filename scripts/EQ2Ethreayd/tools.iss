@@ -51,8 +51,10 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				Stucky:Inc
 			}
 			if (!${IgnoreFight})
+			{
+				;echo Pause if fighting (in 2DNav)
 				call CheckCombat
-				
+			}	
 		}
 		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
@@ -84,7 +86,10 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				Stucky:Inc
 			}
 			if (!${IgnoreFight})
+			{
+				;echo Pause if fighting (in 2DNav)
 				call CheckCombat
+			}	
 		}
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
@@ -119,7 +124,11 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				{
 					Stucky:Inc
 				}
-				call CheckCombat
+				if (!${IgnoreFight})
+				{
+					;echo Pause if fighting (in 2DNav)
+					call CheckCombat
+				}	
 			}
 			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
@@ -150,7 +159,11 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				{
 					Stucky:Inc
 				}
-				call CheckCombat
+				if (!${IgnoreFight})
+				{
+					;echo Pause if fighting (in 2DNav)
+					call CheckCombat
+				}	
 			}
 			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
@@ -983,7 +996,16 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	}
 	return ${SuperStucky}
 }
-
+function EndZone()
+{
+	variable string sQN
+	call strip_QN "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+		endscript ${sQN}
+	press -release MOVEFORWARD
+	echo Clearing of zone "${Zone.Name}" is ended
+}
 function Evac()
 {
 	echo not implemented yet
@@ -1436,6 +1458,26 @@ function isGroupDead()
 	else
 		return FALSE
 }
+function GroupDistance()
+{
+	variable int MaxDistance=0
+	variable int i
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].Distance}>${MaxDistance})
+			MaxDistance:Set[${Me.Group[${i}].Distance}]
+	}	
+	return ${MaxDistance}
+}
+function WaitforGroupDistance(int Distance)
+{
+	do
+	{
+		wait 10
+		call GroupDistance
+	}
+	while (${Return}>${Distance})
+}
 
 function IsPresent(string ActorName, int Distance, bool Exact)
 {
@@ -1762,9 +1804,7 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
-
-
-function RunZone(int qstart, int qstop, int speed, bool NoShiny)
+function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}"
@@ -1772,9 +1812,12 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny)
 	echo will clear zone "${Zone.Name}" Now !
     runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
     wait 5
-    while ${Script[${sQN}](exists)}
-		wait 5
-	echo zone "${Zone.Name}" Cleared !
+	if (!${NoWait})
+	{
+		while ${Script[${sQN}](exists)}
+			wait 5
+		echo zone "${Zone.Name}" Cleared !
+	}
 }
 
 function StartQuest(int stepstart, int stepstop, bool noquest)

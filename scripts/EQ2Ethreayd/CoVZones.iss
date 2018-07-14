@@ -10,6 +10,21 @@ function ExitCoV()
 		}
 	call waitfor_Zone "Plane of Magic"
 }
+function ExitZone()
+{
+	string ZoneName
+	ZoneName:Set["${Zone.Name}"]
+	if (!${Zone.Name.Left[40].Equal["Torden, Bastion of Thunder: Tower Breach"]})
+	{
+		call DMove 0 0 -1 3
+	}
+	do
+	{
+		wait 50
+		oc !c -Zone
+	}
+	while (${Zone.Name.Equal["${ZoneName}"]})
+}
 function GetCoVQuests(string ZoneName, string version)
 {
 	call DMove -2 5 4 3
@@ -24,6 +39,10 @@ function GetCoVQuests(string ZoneName, string version)
 	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
 	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
 	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+	call DMove -130 0 -84 3
 	call MoveCloseTo "a Planar Chronicler"
 	call Converse "a Planar Chronicler" 3
 	call Converse "a Planar Chronicler" 3
@@ -266,6 +285,16 @@ function GoBoT(string ZoneName, string version)
 						do
 						{
 							OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+							wait 50
+						}
+						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						break
+					}
+					case Heroic
+					{
+						do
+						{
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
 							wait 50
 						}
 						while (${Zone.Name.Equal["Coliseum of Valor"]})
