@@ -2,7 +2,7 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(global) Object_Get_SpewStats MyFaction_Get_SpewStats
 variable(script) int64 iFaction
-;You need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
+;You  need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
 function main(int stepstart, int stepstop, int speed)
 {
 	; thanks to Kannkor for the index usage example
