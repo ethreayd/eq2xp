@@ -15,20 +15,37 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision)
+function CMove(float X, float Z)
+{
+	echo entering CMove ${X} ${Z} 
+	face ${X} ${Z}
+	press -hold MOVEFORWARD
+	do
+	{	
+		wait 10
+		face ${X} ${Z}
+		call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+	}
+	while (!${Return})
+	press -release MOVEFORWARD
+	echo exiting CMove ${X} ${Z} 
+}	
+
+function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
 	variable float loc0 
 	variable int Stucky=0
 	variable bool WasRunning
 	if ${Precision}<1
 		Precision:Set[10]
-	echo Moving on my own to ${X} ${Z}
+	echo Moving on my own to ${X} ${Z} (entering 2DNav)
 	face ${X} ${Z}
 
 	if (${Me.Loc.X}>${X})
 	{
 		Stucky:Set[0]
 		echo "doing X>"
+		face ${X} ${Z}
 		press -hold MOVEFORWARD
 		
 		do
@@ -36,23 +53,29 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
+			
 			if (${ForceWalk})
 			{
 				call CheckWalking
 				if (!${Return})
 				{
+					echo Force Walk
 					WasRunning:Set[TRUE]
 					press WALK
 				}
 			}
-			call CheckStuck ${loc0}
-			if (${Return})
+			if (!${IgnoreStuck})
 			{
-				Stucky:Inc
+				echo Check Stuck
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
 			}
 			if (!${IgnoreFight})
 			{
-				;echo Pause if fighting (in 2DNav)
+				echo Pause if fighting (in 2DNav)
 				call CheckCombat
 			}	
 		}
@@ -64,7 +87,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 	{
 		Stucky:Set[0]
 		echo "doing X<"
-	
+		face ${X} ${Z}
 		press -hold MOVEFORWARD
 		do
 		{
@@ -76,18 +99,23 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				call CheckWalking
 				if (!${Return})
 				{
+					echo Force Walk
 					WasRunning:Set[TRUE]
 					press WALK
 				}
 			}
-			call CheckStuck ${loc0}
-			if (${Return})
+			if (!${IgnoreStuck})
 			{
-				Stucky:Inc
+				echo Check Stuck
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					Stucky:Inc
+				}
 			}
 			if (!${IgnoreFight})
 			{
-				;echo Pause if fighting (in 2DNav)
+				echo Pause if fighting (in 2DNav)
 				call CheckCombat
 			}	
 		}
@@ -103,7 +131,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 		{
 			Stucky:Set[0]
 			echo "doing Z>"
-	
+			face ${X} ${Z}
 			press -hold MOVEFORWARD
 			do
 			{	
@@ -138,7 +166,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 		{
 			Stucky:Set[0]
 			echo "doing Z<"
-	
+			face ${X} ${Z}
 			press -hold MOVEFORWARD
 			do
 			{	
@@ -174,6 +202,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 
 	if (${WasRunning})
 		press WALK
+	echo exit from 2DNav
 }
 function 2DWalk(float X, float Z, int Precision)
 {
@@ -781,6 +810,30 @@ function ConversetoNPC(string NPCName, int bubbles, float X, float Y, float Z, b
 	OgreBotAPI:NoTarget[${Me.Name}]
 	press CENTER
 }
+function CountAdds(string ActorName, int Distance, bool Exact)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Count=0
+	
+	if (${Distance}<1)
+		Distance:Set[200]
+	
+	if (${Exact})
+		EQ2:QueryActors[Actors, Name  == "${ActorName}" && Distance <= ${Distance}]
+	else
+		EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Count:Inc	
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+	return ${Count}
+}
 function CountItem(string ItemName)
 {
 	variable index:item Items
@@ -990,7 +1043,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				Stucky:Set[0]
 			}
 			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
-			echo !${Return} && ${SuperStucky}<100 && !${StuckZone}
+			echo in DMove !${Return} && ${SuperStucky}<100 && !${StuckZone}
 		}
 		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
 	}
@@ -1100,6 +1153,55 @@ function getChest(string ChestName)
 	if (${Return})
 	{
 		call MoveCloseTo "${ChestName}"
+	}
+}
+function GetEffectIncrement(string EffectName)
+{
+   ; variable index:effect MyEffects
+   ; variable iterator MyEffectsIterator
+    variable int Counter = 1
+    variable int NumActorEffects = 0
+   
+   echo entering GetEffectIncrement
+   
+    Me:RequestEffectsInfo
+    if (${Target(exists)})
+        Target:RequestEffectsInfo
+    if (${Target(exists)})
+    {
+        NumActorEffects:Set[${Target.NumEffects}]
+        
+        if (${NumActorEffects} > 0)
+        {
+            do
+            {
+                ;if (!${Target.Effect[${Counter}].IsEffectInfoAvailable})
+                ;{
+				;	echo doing waitframe
+                 ;   do
+                  ;  {
+                   ;     waitframe
+                    ;}
+                    ;while (!${Target.Effect[${Counter}].IsEffectInfoAvailable})
+                ;}
+				if (${Target.Effect[${Counter}].ToEffectInfo.Name.Equal["${EffectName}"]})
+				{
+					echo exiting GetEffectIncrement (found ${Target.Effect[${Counter}].CurrentIncrements})
+					return ${Target.Effect[${Counter}].CurrentIncrements}
+				}
+            }
+            while (${Counter:Inc} <= ${NumActorEffects})
+        }
+        else
+        {
+			echo exiting GetEffectIncrement
+			return 0
+		}
+    }
+    else
+	{
+	   echo exiting GetEffectIncrement
+	   return 0
 	}
 }
 function GetObject(string ObjectName, string ObjectVerb)
@@ -1506,8 +1608,6 @@ function IsPresent(string ActorName, int Distance, bool Exact)
 	else
 		return FALSE
 }
-
-
 function JoustOut(int ActorID, float Distance)
 {
 	variable float AvoidDistance
@@ -1665,7 +1765,20 @@ function MoveTo(string ActorName, float X, float Y, float Z, bool is2D)
 	while (${Actor["${ActorName}"].Distance} > 10)
 	OgreBotAPI:NoTarget[${Me.Name}]
 }
-
+function MyTarget(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	Distance:Set[200]
+	echo looking for "${ActorName}" 
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		echo targetting ${ActorIterator.Value.Name} 
+		target "${ActorIterator.Value.Name}" 
+	}
+}
 function navwrap(float X, float Y, float Z)
 {
 	variable float loc0=0
@@ -1819,7 +1932,12 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-
+function StartHunt(string ActorName)
+{
+	Ob_AutoTarget:AddActor["${ActorName}",0,FALSE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+}
 function StartQuest(int stepstart, int stepstop, bool noquest)
 {
 	variable string n
@@ -2196,6 +2314,16 @@ function waitfor_Health(int health)
 	while (${Me.Health} <${Health})
 	
 }
+function waitfor_Power(int power)
+{
+	do
+	{
+		wait 5
+	} 
+	while (${Me.Power} <${power})
+	
+}
+
 
 function waitfor_NPC(string NPCName)
 {
@@ -2253,5 +2381,28 @@ function WalkWithTheWind(float X, float Y, float Z)
 	while (!${Return})
 }
 
-
+function DetectCircles(float Distance, string Color)
+{ 
+	variable index:actor Actors
+    variable iterator ActorIterator
+	variable int Counter
+	echo in DetectCircles
+    EQ2:QueryActors[Actors]
+    Actors:GetIterator[ActorIterator]
+	Distance:Set[10]
+    if ${ActorIterator:First(exists)}
+    {       
+		do
+		{
+			;qecho if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
+			if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
+			{
+				Counter:Inc
+			}
+		}
+        while (${ActorIterator:Next(exists)})
+	}
+	return ${Counter}
+	echo out DetectCircles
+}
 

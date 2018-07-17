@@ -61,10 +61,24 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 
 function step000()
 {
-	call DMove -73 -9 92 3
-	call Converse "Meldrath the Marvelous" 13
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	variable int springs
+	variable int wires
+	variable int nodes
+	
+	call CountItem "coiled spring"
+	springs:Set[${Return}]
+	call CountItem "conductive wire"
+	wires:Set[${Return}]
+	call CountItem "power node"
+	nodes:Set[${Return}]
+	
+	if (${nodes}<20 || ${wires}<20 || ${springs}<20)
+	{
+		call DMove -73 -9 92 3
+		call Converse "Meldrath the Marvelous" 13
+		wait 20
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+	}
 }
 
 function step001()
@@ -78,44 +92,41 @@ function step001()
 	
 	
 	ogre harvestlite
-	call CountItem "coiled springs"
+	call CountItem "coiled spring"
 	springs:Set[${Return}]
 	call CountItem "conductive wire"
 	wires:Set[${Return}]
 	call CountItem "power node"
 	nodes:Set[${Return}]
-	call CheckQuestStep 1
-	if (!${Return} && (${nodes}<20 || ${wires}<20 || ${springs}<20))
+	
+	if (${nodes}<20 || ${wires}<20 || ${springs}<20)
 	{
 		NotStuck:Set[FALSE]
 		do
 		{
-			call CountItem "coiled springs"
+			call CountItem "coiled spring"
 			springs:Set[${Return}]
-			call CountItem "conductive wire"
-			wires:Set[${Return}]
-			call CountItem "power node"
-			nodes:Set[${Return}]
-			call CheckQuestStep 2
-			if (!${Return} || ${springs}<20)
+			if (${springs}<20)
 			{
 				do
 				{
 					loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
 					echo getting more coiled springs
-					call StealthMoveTo "coiled springs" 100 30 5
+					call StealthMoveTo "coiled spring" 100 30 5
 					Found:Set[${Return}]
 					call CheckStuck ${loc0}
 					if (${Found} && !${Return})
 						NoStuck:Set[TRUE]
-					target "coiled springs"
+					target "coiled spring"
 					wait 200
-					call CheckQuestStep 2
+					call CountItem "coiled spring"
+					springs:Set[${Return}]
 				}
-				while (!${Return} && ${Found} && ${NoStuck})
+				while (${springs}<20 && ${Found} && ${NoStuck})
 			}
-			call CheckQuestStep 3
-			if (!${Return} || ${wires}<20)
+			call CountItem "conductive wire"
+			wires:Set[${Return}]
+			if (${wires}<20)
 			{
 				do
 				{
@@ -128,12 +139,14 @@ function step001()
 						NoStuck:Set[TRUE]
 					target "conductive wire"
 					wait 200
-					call CheckQuestStep 3
+					call CountItem "conductive wire"
+					wires:Set[${Return}]
 				}
-				while (!${Return} && ${Found} && ${NoStuck})
+				while (${wires}<20 && ${Found} && ${NoStuck})
 			}
-			call CheckQuestStep 4
-			if (!${Return} || ${nodes}<20)
+			call CountItem "power node"
+			nodes:Set[${Return}]
+			if (${nodes}<20)
 			{
 				do
 				{
@@ -146,17 +159,23 @@ function step001()
 						NoStuck:Set[TRUE]
 					target "power node"
 					wait 200
-					call CheckQuestStep 4
+					call CountItem "power node"
+					nodes:Set[${Return}]
 				}
-				while (!${Return} && ${Found} && ${NoStuck})
+				while (${nodes}<20 && ${Found} && ${NoStuck})
 			}
 			if (!${NoStuck})
 			{
 				call UnstuckR 20
 			}
-			call CheckQuestStep 1
+			call CountItem "coiled spring"
+			springs:Set[${Return}]
+			call CountItem "conductive wire"
+			wires:Set[${Return}]
+			call CountItem "power node"
+			nodes:Set[${Return}]
 		}
-		while (!${Return} && (${nodes}<20 || ${wires}<20 || ${springs}<20))
+		while (${nodes}<20 || ${wires}<20 || ${springs}<20)
 	}
 	ogre end harvestlite
 }	
@@ -216,7 +235,8 @@ function step003()
 		call DMove 60 3 -130 3
 		call PetitPas 65 3 -127 3
 		wait 20
-		call AutoPassDoor "Junkyard West Door 03" 42 4 -122
+		call OpenDoor "Junkyard West Door 03"
+		call DMove 42 4 -122 3
 	}
 	
 	call DMove 42 4 -122 3
@@ -328,7 +348,7 @@ function step005()
 	call DMove 96 -7 -484 3
 	call DMove 97 -7 -437 3
 	call DMove 98 -7 -427 3
-	call DMove 107 -6 -423 3
+	call DMove 107 -6 -423 3 30 FALSE FALSE 5
 	do
 	{
 		OgreBotAPI:Special["${Me.Name}"]
@@ -336,7 +356,7 @@ function step005()
 		call CheckItem "shorted circuitry" 1
 	}
 	while (${Return}>0)
-	call DMove 98 -7 -427 3
+	call DMove 98 -7 -427 3 30 FALSE FALSE 3
 	call DMove 99 -7 -409 3
 	call DMove 96 6 -355 3
 	call DMove 105 7 -340 3
@@ -373,14 +393,14 @@ function step006()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove -89 -3 -378 3
 	call DMove -78 -3 -382 3 30 TRUE FALSE 5
 	call DMove -75 -3 -453 3
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call PetitPas -78 -3 -446 3 TRUE
 	wait 600
 	call OpenDoor "Factory East Side Door 02"
@@ -548,10 +568,11 @@ function step010()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 40
+	wait 50
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	wait 50
 	call PetitPas 120 -3 -446 3 TRUE
 	call OpenDoor "Factory West Side Door 02"
 	call PetitPas 125 -3 -444 3 TRUE
@@ -606,7 +627,7 @@ function step011()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	
 	call DMove -89 -3 -378 3
 	wait 600
@@ -743,19 +764,19 @@ function step014()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove 68 -7 -455 2
 	call DMove 63 -7 -447 2 30 FALSE FALSE 5
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove 72 -7 -412 3
 	call DMove 62 -7 -401 2 
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove 70 -7 -413 3
 	call DMove 66 -7 -454 3
 	call DMove -13 -7 -458 3
@@ -763,14 +784,14 @@ function step014()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove -21 -7 -433 3
 	call DMove -17 -7 -414 3
 	call DMove -17 -7 -398 2
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 20
+	wait 50
 	call DMove -6 -7 -380 3
 	call DMove 19 -5 -378 3
 	do
