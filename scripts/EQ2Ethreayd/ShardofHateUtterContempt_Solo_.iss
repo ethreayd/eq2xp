@@ -84,6 +84,7 @@ function step000()
 	CurrentStep:Inc
 	call waitfor_Power 50
 	oc !c -letsgo ${Me.Name} 
+	wait 100
 	eq2execute summon
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -117,7 +118,7 @@ function step001()
 	wait 100
 	call CheckCombat
 	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",15]
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",15]
 	call DMove -149 15 22 3
 	call DMove -127 16 -4 3
 	call DMove -118 16 -5 3 30 FALSE FALSE 5
@@ -142,18 +143,22 @@ function step001()
 	call DMove -107 16 -28 3 30 FALSE FALSE 5
 	call DMove -152 15 9 3
 	call DMove -202 17 14 3
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
+	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	call TanknSpank "${Named}" 100
 	CurrentStep:Inc
 	call waitfor_Power 50
 	oc !c -letsgo ${Me.Name} 
+	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
-	
+	call DMove -210 19 -4 3
+	wait 100
+	call CheckCombat
+	call DMove -202 17 14 3
 }
 function step002()
 {
@@ -161,7 +166,6 @@ function step002()
 	Named:Set["Helestia"]
 	eq2execute merc resume
 	call StopHunt
-	;OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -180 17 12 3
 	call DMove -136 15 10 3
 	call DMove -117 16 -16 3
@@ -190,20 +194,15 @@ function step002()
 	call DMove 48 8 -29 3
 	call DMove 49 8 -40 3
 	call DMove 32 8 -66 3
-	call DMove 40 8 -64 3 30 TRUE FALSE 5
+	call DMove 41 8 -62 3 30 TRUE FALSE 2
 	OgreBotAPI:Special["${Me.Name}"]
-	do
-	{
-		wait 10
-		call IsPresent "${Named}" 100
-	}
-	while (${Return})
-	wait 50
+	wait 400
 	call TanknSpank "${Named}" 100
 	CurrentStep:Inc
 	call waitfor_Power 50
 	oc !c -letsgo ${Me.Name} 
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	wait 100
 	eq2execute summon
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -262,7 +261,8 @@ function step003()
 	call TanknSpank "${Named}" 100
 	CurrentStep:Inc
 	call waitfor_Power 50
-	oc !c -letsgo ${Me.Name} 
+	oc !c -letsgo ${Me.Name}
+	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
@@ -279,17 +279,17 @@ function step004()
 		Script["autoshinies"]:Pause
 	eq2execute merc resume
 	call StopHunt
-	;oc !c -Zone ${Me.Name} 
-	;wait 200
-	;call DMove -14 -154 -219 3
-	;call DMove -33 -154 -253 3
-	;wait 20
-	;call CheckCombat 
-	;call DMove -21 -155 -302 3
-	;wait 20
-	;call CheckCombat
-	;call DMove -22 -155 -255 3
-	;wait 100
+	oc !c -Zone ${Me.Name} 
+	wait 200
+	call DMove -14 -154 -219 3
+	call DMove -33 -154 -253 3
+	wait 20
+	call CheckCombat 
+	call DMove -21 -155 -302 3
+	wait 20
+	call CheckCombat
+	call DMove -22 -155 -255 3
+	wait 100
 	do
 	{
 		wait 10
@@ -307,12 +307,11 @@ function step004()
 		wait 10
 		call CircleFight "${Named}"
 		call IsPresent "${Named}" 100
-		echo in Loop 
+		if ((${Me.Archetype.Equal["mage"]})
+			eq2execute merc backoff
 	}
 	while (${Return})
-	
-	echo out of Loop
-	
+	wait 100
 	oc !c -letsgo ${Me.Name} 
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -321,6 +320,15 @@ function step004()
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
+	call DMove -12 -155 -312 3
+	wait 10
+	eq2execute summon
+	wait 10
+	call DMove -10 -155 -291 3
+	wait 10
+	call DMove -12 -155 -312 3
+	
+	
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Resume
 }
