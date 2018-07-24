@@ -32,7 +32,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		stepstop:Set[${laststep}]
 	}
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Heroic]"
+	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Expert]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 
@@ -406,8 +406,8 @@ function step007()
 	call StopHunt
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	call DMove -140 10 -251 3 30 TRUE
-	ogre
-	wait 200
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
 	
 	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
 	wait 100

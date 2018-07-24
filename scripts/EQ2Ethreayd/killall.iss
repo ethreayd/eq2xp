@@ -2,6 +2,7 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Expert_"]
 	ScriptsToRun:Insert["ShardofHateUtterContempt_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Heroic_"]
 	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Heroic_"]
@@ -21,6 +22,7 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
 	ScriptsToRun:Insert["wrap"]
+	ScriptsToRun:Insert["deathwatch"]
 	ScriptsToRun:Insert["loopHeroic"]
 	ScriptsToRun:Insert["loopSolo"]
 	ScriptsToRun:Insert["loopSRT"]

@@ -666,6 +666,7 @@ function CheckCombat(int MyDistance)
 		while (${Me.InCombatMode})
 	}
 }
+
 function CheckItem(string ItemName, int Quantity)
 {
 	call CountItem "${ItemName}"
@@ -1047,6 +1048,8 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 		}
 		while (!${Return} && ${SuperStucky}<100 && !${StuckZone})
 	}
+	if (!${IgnoreFight})
+		call WaitforGroupDistance 30
 	return ${SuperStucky}
 }
 function EndZone()
@@ -1321,7 +1324,11 @@ function goCoV()
 		call DMove -2 5 4 3
 	}
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
+	{
 		call goto_GH
+		wait 600
+		call goCoV
+	}
 	call waitfor_Zone "Coliseum of Valor"
 }
 function GoDown()
@@ -1339,7 +1346,51 @@ function GoDown()
 	}
 	wait 10
 }
-
+function goHate()
+{	
+	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	{
+		call IsPresent "Mechanical Travel Gear"
+		if (${Return})
+		{
+			call MoveCloseTo "Mechanical Travel Gear"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Mechanical Travel Gear","Travel to the Planes"]
+			wait 20
+			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+			call waitfor_Zone "Coliseum of Valor"
+		}
+		call IsPresent "Large Ulteran Spire"
+		if (${Return})
+		{
+			call MoveCloseTo "Large Ulteran Spire"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
+			wait 50
+			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
+			wait 600
+		}
+	}
+	
+	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
+	{
+		;call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+		;call DMove -2 5 4 3
+	}
+	if (${Zone.Name.Left[17].Equal["Coliseum of Valor"]})
+	{
+		call DMove -2 5 4 3
+		call ExitCoV
+		call goHate
+	}
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
+	{
+		call goto_GH
+		wait 600
+		call goHate
+	}
+	call waitfor_Zone "Plane of Magic"
+}
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -1351,6 +1402,17 @@ function goto_GH()
 		}
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	}
+}
+function GroupDistance()
+{
+	variable int MaxDistance=0
+	variable int i
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].Distance}>${MaxDistance})
+			MaxDistance:Set[${Me.Group[${i}].Distance}]
+	}	
+	return ${MaxDistance}
 }
 function GuildH()
 {
@@ -1455,9 +1517,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 		}		
 	}
 	echo exiting Harvest function
-
 }
-
 function HarvestItem(string ItemName, int number, int speed, bool is2D)
 {
     variable int Counter=0
@@ -1468,8 +1528,6 @@ function HarvestItem(string ItemName, int number, int speed, bool is2D)
 	if (${Counter}>=${number})
 		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
 }
-
-
 function Hunt(string ActorName, int distance, int number, bool nofly, bool IgnoreFight)
 {
 	variable index:actor Actors
@@ -1508,7 +1566,6 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 		while ${ActorIterator:Next(exists)}
 	}
 }
-
 function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, int number, int distance)
 {
     variable int Counter
@@ -1560,27 +1617,6 @@ function isGroupDead()
 	else
 		return FALSE
 }
-function GroupDistance()
-{
-	variable int MaxDistance=0
-	variable int i
-	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
-	{
-		if (${Me.Group[${i}].Distance}>${MaxDistance})
-			MaxDistance:Set[${Me.Group[${i}].Distance}]
-	}	
-	return ${MaxDistance}
-}
-function WaitforGroupDistance(int Distance)
-{
-	do
-	{
-		wait 10
-		call GroupDistance
-	}
-	while (${Return}>${Distance})
-}
-
 function IsPresent(string ActorName, int Distance, bool Exact)
 {
 	variable index:actor Actors
@@ -1917,6 +1953,7 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
+
 function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 {
 	variable string sQN
@@ -1931,6 +1968,13 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 			wait 5
 		echo zone "${Zone.Name}" Cleared !
 	}
+}
+function SmartWait(int WaitTime)
+{
+	call WaitforGroupDistance 30
+	call isMobAround 50
+	if (${Return})
+		wait ${WaitTime}
 }
 function StartHunt(string ActorName)
 {
@@ -2028,7 +2072,18 @@ function SMove(float X, float Y, float Z, float Distance, float RespectDistance,
 		while (!${Found2})
 	return ${Found2}
 }
-
+function isMobAround(float Distance)
+{
+	variable index:actor Mobs
+	variable iterator MobIterator
+	EQ2:QueryActors[Mobs, Type  =- "NPC" && Distance <= ${Distance}]
+	Mobs:GetIterator[MobIterator]
+	if ${MobIterator:First(exists)}
+		return TRUE
+	else
+		return FALSE
+}		
+	
 function StealthMoveTo(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
 {
 	variable index:actor Actors
@@ -2294,7 +2349,6 @@ function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 		echo "${ActorName}" has bypassed ${GLeft}) and ${GRight}
 	}		
 }
-
 function waitfor_Combat()
 {
 	wait 50
@@ -2304,7 +2358,15 @@ function waitfor_Combat()
 	} 
 	while (${Me.InCombatMode})
 }
-
+function WaitforGroupDistance(int Distance)
+{
+	do
+	{
+		wait 10
+		call GroupDistance
+	}
+	while (${Return}>${Distance})
+}
 function waitfor_Health(int health)
 {
 	do

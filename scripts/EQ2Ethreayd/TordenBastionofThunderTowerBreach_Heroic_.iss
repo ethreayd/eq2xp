@@ -2,24 +2,40 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool InRing
+variable(script) int MyStep
+variable(script) bool NoShinyGlobal
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=12
+	NoShinyGlobal:Set[${NoShiny}]
+	MyStep:Set[${stepstart}]
 	oc !c -resume
 	oc !c -letsgo
-	if (!${Script["livedierepeat"](exists)})
-		run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
+	if (${Script["LoopHeroic"](exists)})
+	{
+		if (!${Script["livedierepeat"](exists)})
+			run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
+	}
+	else
+	{
+		if (!${Script["deathwatch"](exists)})
+			run EQ2Ethreayd/deathwatch
+	}
+	
 	if (${setspeed}==0)
 		speed:Set[3]
+	else
+		speed:Set[${setspeed}]
+		
 	FightDistance:Set[30]
 	
 	echo speed set to ${speed}
-	;if ${Script["autoshinies"](exists)}
-	;	endscript autoshinies
-	;if (!${NoShiny})
-	;	run EQ2Ethreayd/autoshinies 50 ${speed} 
+	if ${Script["autoshinies"](exists)}
+		endscript autoshinies
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 50 ${speed} 
  
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -73,9 +89,8 @@ function step000()
 {
 	variable string Named
 	Named:Set["Gatekeeper Karatil"]
-	eq2execute merc resume
 	call StopHunt
-	
+	MyStep:Set[0]
 	Ob_AutoTarget:AddActor["Primordial Malice",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
@@ -116,8 +131,7 @@ function step001()
 {
 	variable string Named
 	Named:Set["Inquisitor Barol"]
-	eq2execute merc resume
-
+	MyStep:Set[1]
 	call StopHunt
 	oc !c -UplinkOptionChange All checkbox_settings_movemelee FALSE
 	oc !c -UplinkOptionChange All checkbox_settings_movebehind FALSE
@@ -127,6 +141,7 @@ function step001()
 	call DMove 231 11 -637 1
 	call DMove 288 2 -637  1
 	wait 100
+	
 	call DMove 296 0 -637 1
 	call DMove 398 -1 -637 1 30 TRUE
 	call DMove 550 -17 -637 1 30 TRUE
@@ -146,7 +161,6 @@ function step001()
 			Script["autoshinies"]:Pause
 	call DMove 625 37 -748 ${speed} ${FightDistance}
 	call DMove 593 38 -720 ${speed} ${FightDistance}
-	
 	wait 100
 	call TanknSpank "${Named}" 50 TRUE  
 	
@@ -166,7 +180,6 @@ function step002()
 {
 	variable string Named
 	Named:Set["Auliffe Chaoswind"]
-	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
@@ -217,7 +230,6 @@ function step002()
 function step003()
 {
 	variable bool Loop=FALSE
-	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
@@ -294,7 +306,6 @@ function step003()
 
 function step004()
 {
-	eq2execute merc resume
 	call StopHunt
 	call DMove -19 10 -543 3
 	call DMove -59 10 -639 3
@@ -304,10 +315,10 @@ function step004()
 	
 function step005()
 {
-	eq2execute merc resume
 	call StopHunt
-	
-	call DMove -239 12 -634 ${speed} ${FightDistance}
+	MyStep:Set[5]
+	call DMove -167 10 -649 ${speed} ${FightDistance}
+	call DMove -238 11 -641 ${speed} ${FightDistance}
 	call DMove -541 -17 -635 ${speed} ${FightDistance}
 	wait 100
 	call DMove -578 -17 -565 ${speed} ${FightDistance}
@@ -344,7 +355,6 @@ function step006()
 {
 	variable string Named
 	Named:Set["Keeper of Past Lore"]
-	eq2execute merc resume
 	call StopHunt
 	call IsPresent "${Named}" 200
 	if (${Return})
@@ -355,8 +365,8 @@ function step006()
 		while ${Script[TBoTTBH_C1](exists)}
 			wait 100
 		oc !c -resume
-		echo waiting for all toons to come to this place, I need a group distance function, I will do it later
-		wait 600
+		call WaitForGroupDistance 20
+		wait 100
 		
 		call DMove -1261 295 -1386 3
 		oc !c -Come2Me ${Me.Name} All 3
@@ -423,27 +433,35 @@ function step009()
 {
 	variable string Named
 	Named:Set["Gaukr Sandstorm"]
-	call DMove -652 309 -626 ${speed} ${FightDistance}
-	
-	oc !c -CampSpot 
-	oc !c -joustout 
+	call DMove -658 309 -634 ${speed} ${FightDistance} TRUE
+	oc !c -ofol---
+	oc !c -ofol---
+	oc !c -ofol---
+	wait 100
+	oc !c -CampSpot
+	oc !c -joustout
+	oc !c -joustin ${Me.Name}
+	call DMove -622 309 -600 ${speed} ${FightDistance} TRUE
+		
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
-	
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_combat TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_buffs TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_buffs TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_nonnamedca TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_debuff TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_nameddebuff TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_items TRUE
+	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_powerheal TRUE
+
 	Ob_AutoTarget:Clear
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
-	echo must kill "${Named}"
-	oc !c -CS_Set_ChangeRelativeCampSpotBy all 20 0 20
-	do
-	{
-		wait 10
-		call IsPresent "${Named}"
-	}
-	while (${Return})
-	
+	oc !c -joustout
+	call TanknSpank "${Named}"
+		
 	oc !c -AcceptReward
 	eq2execute summon
 	wait 50
@@ -453,9 +471,8 @@ function step009()
 	oc !c -AcceptReward
 	oc !c -AcceptReward
 	oc !c -letsgo
-	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
-	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
-	
+	ogre
+	wait 200
 	call DMove -617 309 -600 3
 	call RelayAll ActivateVerb "Zone to Bottom" -617 309 -600 "Return to Bottom of Tower" TRUE
 	wait 50
@@ -463,7 +480,6 @@ function step009()
 function step010()
 {
 	variable bool Loop=FALSE
-	
 	do
 	{
 		call DMove -618 -17 -709 ${speed} ${FightDistance}
@@ -503,6 +519,7 @@ function step010()
 }
 function step011()
 {
+	MyStep:Set[11]
 	call DMove -566 -17 -697 ${speed} ${FightDistance}
 	call DMove -540 -17 -637 ${speed} ${FightDistance}
 	call DMove -386 2 -632 3
@@ -517,6 +534,7 @@ function step011()
 }
 function step012()
 {
+	
 	call DMove 0 0 -3 
 	call RelayAll ActivateVerb "Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
 	wait 50
@@ -560,11 +578,9 @@ function DrainPower(string Named)
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
-	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
 	if (${Message.Find["see how well you scramble"]} > 0)
 	{
 		echo moving out of the ring (must be done by Ogre)
-		;oc !c -CS_Set_ChangeRelativeCampSpotBy all 35 0 -35
 		InRing:Set[FALSE]
 
 		
@@ -574,21 +590,22 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		if (!${InRing})
 		{
 			echo moving back in the ring (must be done by Ogre)
-			;oc !c -CS_Set_ChangeRelativeCampSpotBy all -35 0 35
 			InRing:Set[TRUE]
 		}
+	}
+	if (${Message.Find["eathMate!!!"]} > 0)
+	{
+		echo group seems dead - restarting zone
+		if ${Script["RestartZone"}](exists)}
+			endscript RestartZone
+		runscript EQ2Ethreayd/RestartZone ${MyStep} 0 ${speed} ${NoShinyGlobal}
 	}
 }
 atom HandleAllEvents(string Message)
 {
-	;echo Catch Event ${Message}
-    if (${Message.Find["keep his power drained"]} > 0)
+	if (${Message.Find["keep his power drained"]} > 0)
 	{
 		echo "Launching massive drain power sequence"
 		QueueCommand call DrainPower "Inquisitor Barol"
 	}
-}
-atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
-{
-	echo ${ActorID} ${ActorName} ${ActorType} ${OldStance} ${NewStance} ${TargetID} ${Distance} ${IsInGroup} ${IsInRaid}
 }

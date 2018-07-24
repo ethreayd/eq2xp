@@ -2,12 +2,15 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) int CurrentStep=0
+variable(script) int EInc=0
+variable(script) bool CallHelestia
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
 	variable int laststep=4
-	
+	oc !c -LoadProfile Solo ${Me.Name}
+	wait 300
 	oc !c -letsgo ${Me.Name}
 	;if ${Script["livedierepeat"](exists)}
 	;	endscript livedierepeat
@@ -121,6 +124,8 @@ function step001()
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",15]
 	call DMove -149 15 22 3
 	call DMove -127 16 -4 3
+	call DMove -121 16 -16 3 FALSE FALSE 5
+	call DMove -127 16 -4 3 FALSE FALSE 5
 	call DMove -118 16 -5 3 30 FALSE FALSE 5
 	wait 100
 	call CheckCombat
@@ -193,11 +198,15 @@ function step002()
 	call DMove 48 9 -10 3
 	call DMove 48 8 -29 3
 	call DMove 49 8 -40 3
-	call DMove 32 8 -66 3
-	call DMove 41 8 -62 3 30 TRUE FALSE 2
-	OgreBotAPI:Special["${Me.Name}"]
-	wait 400
-	call TanknSpank "${Named}" 100
+	do
+	{
+		call DMove 32 8 -66 3 30 TRUE FALSE 2
+		call DMove 41 8 -62 3 30 TRUE FALSE 2
+		OgreBotAPI:Special["${Me.Name}"]
+		wait 400
+		call TanknSpank "${Named}" 100
+	}
+	while (!${CallHelestia})
 	CurrentStep:Inc
 	call waitfor_Power 50
 	oc !c -letsgo ${Me.Name} 
@@ -289,14 +298,17 @@ function step004()
 	wait 20
 	call CheckCombat
 	call DMove -22 -155 -255 3
-	wait 100
+	wait 300
+	call waitfor_Power 50
+	
 	do
 	{
 		wait 10
 		call IsPresent "${Named}" 100
 	}
 	while (!${Return})
-	
+	wait 300
+
 	call MoveCloseTo "${Named}"
 	OgreBotAPI:CastAbility["${Me.Name}","Singular Focus"]
 	call Converse "${Named}" 2
@@ -306,9 +318,12 @@ function step004()
 	{
 		wait 10
 		call CircleFight "${Named}"
-		call IsPresent "${Named}" 100
-		if ((${Me.Archetype.Equal["mage"]})
+		call CountAdds "${Named}" 20
+		if (${Return}<1)
 			eq2execute merc backoff
+		else
+			eq2execute merc ranged
+		call IsPresent "${Named}" 100
 	}
 	while (${Return})
 	wait 100
@@ -320,6 +335,7 @@ function step004()
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
+	eq2execute summon
 	call DMove -12 -155 -312 3
 	wait 10
 	eq2execute summon
@@ -327,6 +343,7 @@ function step004()
 	call DMove -10 -155 -291 3
 	wait 10
 	call DMove -12 -155 -312 3
+	eq2execute summon
 	
 	
 	if ${Script["autoshinies"](exists)}
@@ -336,7 +353,6 @@ function step004()
 function CircleFight(string Named)
 { 
 	variable float Distance
-	variable int EInc
 	variable int nbAdds
 	
 	Distance:Set[10]
@@ -348,6 +364,7 @@ function CircleFight(string Named)
 		{
 			echo moving out of circle
 			target ${Me.Name}
+			call PKey STRAFERIGHT 1
 			echo if ${Me.Loc.X}<5
 			if (${Me.Loc.X}<5)
 			{
@@ -369,14 +386,15 @@ function CircleFight(string Named)
 		}
 		while (${Return}>0)
 	}
-	
-	
-	target "${Named}"
-	call GetEffectIncrement "Blood of My Blood"
-	wait 5
-	call GetEffectIncrement "Blood of My Blood"
-	EInc:Set[${Return}]
-	call CountAdds "of spite" 30
+	if (${EInc}<1)
+	{
+		target "${Named}"
+		call GetEffectIncrement "Blood of My Blood"
+		wait 5
+		call GetEffectIncrement "Blood of My Blood"
+		EInc:Set[${Return}]
+	}	
+	call CountAdds "of spite" 200
 	nbAdds:Set[${Return}]
 	echo ${EInc} / ${nbAdds}
 	if (${EInc}<${nbAdds} || ${EInc}>${nbAdds})
@@ -385,6 +403,20 @@ function CircleFight(string Named)
 		eq2execute target a lady of spite
 		eq2execute target a lord of spite
 	}
-	wait 50
-	target "${Named}"
+	else
+	{
+		target "${Named}"
+	}
+}
+
+atom HandleAllEvents(string Message)
+{
+	if (${Message.Find["summons vampires of spite"]} > 0)
+	{
+		EInc:Set[0]
+	}
+	if (${Message.Find["chained for all eternity"]} > 0)
+	{
+		CallHelestia:Set[TRUE]
+	}
 }
