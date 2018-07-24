@@ -19,6 +19,7 @@ function main(int stepstart, int stepstop, int speed)
 	ScriptsToRun:Insert["Legacy of Power: Tyrant's Throne"]
 	ScriptsToRun:Insert["Conservation of Planar Energy"]
 	ScriptsToRun:Insert["A Stitch in Time, Part I: Security Measures"]
+	ScriptsToRun:Insert["A Stitch in Time, Part II: Lightning Strikes"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
 	

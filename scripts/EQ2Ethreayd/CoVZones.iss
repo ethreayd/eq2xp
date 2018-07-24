@@ -50,9 +50,16 @@ function GetCoVQuests(string ZoneName, string version)
 	call Converse "a Planar Chronicler" 3
 	call DMove -109 0 1 3
 }	
-	function GoBoT(string ZoneName, string version)
+function GoBoT(string ZoneName, string version)
 {
+	variable int offset=0
+	variable string offsetQN
+	offsetQN:Set["A Stitch in Time, Part II: Lightning Strikes"]
 	echo Debug going to Torden, Bastion of Thunder: ${ZoneName} [${version}]
+	call check_quest "${offsetQN}"
+	if (${Return})
+		offset:Inc
+	
 	if (!${Zone.Name.Equal["Torden, Bastion of Thunder: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -64,6 +71,16 @@ function GetCoVQuests(string ZoneName, string version)
 		
 		switch ${ZoneName}
 		{
+			case Lightning Strikes
+			{
+				do
+				{
+					OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+					wait 50
+				}
+				while (${Zone.Name.Equal["Coliseum of Valor"]})
+				break
+			}
 			case Tower Breach
 			{
 				switch ${version}
@@ -72,7 +89,7 @@ function GetCoVQuests(string ZoneName, string version)
 					{
 						do
 						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[7+${offset}]}]
 							wait 50
 						}
 						while (${Zone.Name.Equal["Coliseum of Valor"]})
@@ -82,7 +99,7 @@ function GetCoVQuests(string ZoneName, string version)
 					{
 						do
 						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[6+${offset}]}]
 							wait 50
 						}
 						while (${Zone.Name.Equal["Coliseum of Valor"]})
@@ -99,7 +116,7 @@ function GetCoVQuests(string ZoneName, string version)
 					{
 						do
 						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",10]
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[10+${offset}]}]
 							wait 50
 						}
 						while (${Zone.Name.Equal["Coliseum of Valor"]})
@@ -169,7 +186,14 @@ function GoPoD(string ZoneName, string version)
 }
 function GoPoI(string ZoneName, string version)
 {
+	variable int offset=0
+	variable string offsetQN
 	echo Debug going to "Plane of Innovation: ${ZoneName} [${version}]"
+	offsetQN:Set["A Stitch in Time, Part I: Security Measures"]
+	call check_quest "${offsetQN}"
+	if (${Return})
+		offset:Inc
+	
 	if (!${Zone.Name.Equal["Plane of Innovation: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
@@ -361,6 +385,20 @@ function GoThrone()
 		call waitfor_Zone "The Molten Throne"
 	}
 	echo Debug end of The Molten Throne
+}
+function GoVarig()
+{
+	call DMove -2 5 4 3
+	call DMove 66 0 116 3
+	do
+	{
+		wait 10
+		call IsPresent "Varig Ro" 30
+	}
+	while (!${Return})
+	call PKey "Page Up" 3
+	call PKey ZOOMOUT 20
+	call MoveCloseTo "Varig Ro"
 }
 function MendToon()
 {

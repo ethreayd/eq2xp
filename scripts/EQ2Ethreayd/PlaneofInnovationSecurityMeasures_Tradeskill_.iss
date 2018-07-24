@@ -202,8 +202,8 @@ function step002()
 			call DMove 53 4 -95 3
 			call DMove 48 4 -125 3
 			call DMove 63 4 -127 3
-			call CheckQuestStep 2
-			if (!${Return})
+			call CountItem "Electric Manaetic Device (EMD)"
+			if (!${Return}<15)
 			{
 				call OpenDoor "Junkyard West Door 03"
 				call DMove 98 3 -128 3
@@ -626,9 +626,15 @@ function step011()
 	call SMove -89 3 -401 100 12 5
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
-	
+	{
+		do
+		{
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+			wait 50
+			call IsPresent "Electric Manaetic Device (EMD)" 15
+		}
+		while (!${Return})
+	}
 	call DMove -89 -3 -378 3
 	wait 600
 	call DMove -88 3 -401 3

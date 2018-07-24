@@ -145,8 +145,7 @@ function step007()
 	call 2DNav 5 5
 	call Converse "Druzzil Ro" 5 TRUE
 	wait 20
-	call MoveCloseTo "Varig Ro"
-	call MoveCloseTo "Varig Ro"
+	call GoVarig
 	call Converse "Varig Ro" 8 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
