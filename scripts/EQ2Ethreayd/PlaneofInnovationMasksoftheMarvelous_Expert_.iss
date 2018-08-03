@@ -8,7 +8,6 @@ variable(script) bool AutoRez
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
-
 	variable int laststep=7
 	oc !c -resume
 	oc !c -letsgo
@@ -26,7 +25,6 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	if (!${NoShiny})
 		run EQ2Ethreayd/autoshinies 50 ${speed} 
 	
-	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -35,9 +33,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Expert]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-
+	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
+	
 	oc !c -OgreFollow All ${Me.Name}
 	if (${stepstart}==0)
 	{

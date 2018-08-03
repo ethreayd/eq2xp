@@ -1236,7 +1236,17 @@ function GetObject(string ObjectName, string ObjectVerb)
 		
 	}	
 }
-	
+function get_Potency()
+{
+	echo checking potency
+	variable int64 MyPotency
+	variable string sMyPotency=${Me.GetGameData[Stats.Potency].Label}
+	sMyPotency:Set[${sMyPotency.Replace[",",""]}]
+	sMyPotency:Set[${sMyPotency.Replace["%",""].Left[6]}]
+	sMyPotency:Set[${sMyPotency.Replace[".",""]}]
+	MyPotency:Set[${sMyPotency}]
+	return ${MyPotency}
+}	
 function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb, int quantity)
 {
 	call CountItem "${ActorName}"
@@ -1886,6 +1896,8 @@ function PauseZone()
 		Script[${sQN}]:Pause
 	if ${Script[livedierepeat](exists)}
 		Script[livedierepeat]:Pause
+	if ${Script[autoshinies](exists)}
+		Script[autoshinies]:Pause
 	press -release MOVEFORWARD
 	echo Clearing of zone "${Zone.Name}" is paused
 }
@@ -1942,6 +1954,8 @@ function ResumeZone()
 		Script[${sQN}]:Resume
 	if ${Script[livedierepeat](exists)}
 		Script[livedierepeat]:Resume
+	if ${Script[autoshinies](exists)}
+		Script[autoshinies]:Resume
 	echo Resuming clearing of zone "${Zone.Name}"
 }
 function ReturnEquipmentSlotHealth(string ItemSlot)
