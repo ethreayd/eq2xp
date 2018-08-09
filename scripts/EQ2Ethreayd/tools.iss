@@ -773,6 +773,8 @@ function ClickOn(string ActorName)
 		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
 	}
 }
+
+
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
@@ -1160,33 +1162,19 @@ function getChest(string ChestName)
 }
 function GetEffectIncrement(string EffectName)
 {
-   ; variable index:effect MyEffects
-   ; variable iterator MyEffectsIterator
     variable int Counter = 1
     variable int NumActorEffects = 0
-   
-   echo entering GetEffectIncrement
-   
+  
     Me:RequestEffectsInfo
     if (${Target(exists)})
         Target:RequestEffectsInfo
     if (${Target(exists)})
     {
-        NumActorEffects:Set[${Target.NumEffects}]
-        
+        NumActorEffects:Set[${Target.NumEffects}]   
         if (${NumActorEffects} > 0)
         {
             do
             {
-                ;if (!${Target.Effect[${Counter}].IsEffectInfoAvailable})
-                ;{
-				;	echo doing waitframe
-                 ;   do
-                  ;  {
-                   ;     waitframe
-                    ;}
-                    ;while (!${Target.Effect[${Counter}].IsEffectInfoAvailable})
-                ;}
 				if (${Target.Effect[${Counter}].ToEffectInfo.Name.Equal["${EffectName}"]})
 				{
 					echo exiting GetEffectIncrement (found ${Target.Effect[${Counter}].CurrentIncrements})

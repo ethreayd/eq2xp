@@ -392,6 +392,8 @@ function step007()
 				eq2execute gsay Prev AoE
 			if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
 				eq2execute gsay Next Prev
+			if (${Actor["${Named}"].Health}<15 && ${Actor["${Named}"].Health}>13)
+				OgreBotAPI:CastAbility["${Me.Name}","Unyielding Will"]
 			if (${Actor["${Named}"].Health}<10 && ${Actor["${Named}"].Health}>8)
 				eq2execute gsay Last Prev
 			if (${Actor["${Named}"].Health}<5 && ${Actor["${Named}"].Health}>3)
@@ -404,7 +406,7 @@ function step007()
 	
 	eq2execute summon
 	call StopHunt
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	oc !c -acceptreward
 	call DMove -140 10 -251 3 30 TRUE
 	ogre
 	wait 200
@@ -414,8 +416,9 @@ function step007()
 	if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
 		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
 	wait 100
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	OgreBotAPI:AcceptReward["${Me.Name}"]
+	oc !c -acceptreward
+	oc !c -acceptreward
+	oc !c -acceptreward
 	do
 	{
 		wait 200

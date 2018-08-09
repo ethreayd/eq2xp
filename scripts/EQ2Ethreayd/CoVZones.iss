@@ -27,27 +27,48 @@ function ExitZone()
 }
 function GetCoVQuests(string ZoneName, string version)
 {
+	string NPCName
 	call DMove -2 5 4 3
 	call DMove -109 0 1 3
-	call DMove -145 0 -93 3
-	call Converse "Rynzon, of The Spurned" 10
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
-	call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-	call DMove -130 0 -84 3
-	call MoveCloseTo "a Planar Chronicler"
-	call Converse "a Planar Chronicler" 3
-	call Converse "a Planar Chronicler" 3
-	call Converse "a Planar Chronicler" 3
-	call Converse "a Planar Chronicler" 3
+	call DMove -117 0 -90 3
+	switch ${ZoneName}
+	{
+		case Guk
+		{
+			call DMove -132 0 -108 3
+			NPCName:Set["Griv, of the Knights of Marr"]
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",7]
+			wait 20
+			call DMove -117 0 -90 3
+			break
+		}
+		case default
+		{
+			call DMove -145 0 -93 3
+			call Converse "Rynzon, of The Spurned" 10
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
+			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
+			call DMove -130 0 -84 3
+			call MoveCloseTo "a Planar Chronicler"
+			call Converse "a Planar Chronicler" 3
+			call Converse "a Planar Chronicler" 3
+			call Converse "a Planar Chronicler" 3
+			call Converse "a Planar Chronicler" 3
+			call DMove -117 0 -90 3	
+			break
+		}
+	}
 	call DMove -109 0 1 3
 }	
 function GoBoT(string ZoneName, string version)
