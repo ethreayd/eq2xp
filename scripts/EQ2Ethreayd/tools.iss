@@ -666,7 +666,47 @@ function CheckCombat(int MyDistance)
 		while (${Me.InCombatMode})
 	}
 }
-
+function CheckEffectOnTarget(string EffectName)
+{
+	variable int Counter = 1
+	variable int NumActorEffects = 0
+	if (${Target(exists)})
+    {
+		
+		Target:RequestEffectsInfo
+		wait 10
+		Target:RequestEffectsInfo
+		NumActorEffects:Set[${Target.NumEffects}]  
+		 if (${NumActorEffects} > 0)
+        {
+            do
+            {
+				if (${Target.Effect[${Counter}].ToEffectInfo.Name.Equal["${EffectName}"]})
+				{
+					return TRUE
+				}
+            }
+            while (${Counter:Inc} <= ${NumActorEffects})
+		}
+    }  	
+	return FALSE
+}
+function CheckDetriment(string EffectName)
+{
+	;on me only
+    variable index:effect MyEffects
+    variable iterator MyEffectsIterator
+    
+    Me:RequestEffectsInfo
+    
+    Me:QueryEffects[MyEffects, Type == "Detrimental", Name == "${EffectName}"]
+    MyEffects:GetIterator[MyEffectsIterator]
+ 
+    if ${MyEffectsIterator:First(exists)}
+		return TRUE
+	else
+		return FALSE
+}
 function CheckItem(string ItemName, int Quantity)
 {
 	call CountItem "${ItemName}"
@@ -1159,7 +1199,7 @@ function getChest(string ChestName)
 	{
 		call MoveCloseTo "${ChestName}"
 	}
-}
+}		
 function GetEffectIncrement(string EffectName)
 {
     variable int Counter = 1
@@ -1177,7 +1217,6 @@ function GetEffectIncrement(string EffectName)
             {
 				if (${Target.Effect[${Counter}].ToEffectInfo.Name.Equal["${EffectName}"]})
 				{
-					echo exiting GetEffectIncrement (found ${Target.Effect[${Counter}].CurrentIncrements})
 					return ${Target.Effect[${Counter}].CurrentIncrements}
 				}
             }
@@ -1185,7 +1224,6 @@ function GetEffectIncrement(string EffectName)
         }
         else
         {
-			echo exiting GetEffectIncrement
 			return 0
 		}
     }

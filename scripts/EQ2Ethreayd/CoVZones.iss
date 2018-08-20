@@ -27,7 +27,7 @@ function ExitZone()
 }
 function GetCoVQuests(string ZoneName, string version)
 {
-	string NPCName
+	variable string NPCName
 	call DMove -2 5 4 3
 	call DMove -109 0 1 3
 	call DMove -117 0 -90 3
@@ -42,6 +42,32 @@ function GetCoVQuests(string ZoneName, string version)
 			OgreBotAPI:ConversationBubble["${Me.Name}",7]
 			wait 20
 			call DMove -117 0 -90 3
+			break
+		}
+		case SoH
+		{
+			switch ${version}
+			{
+				case Solo
+				{
+					call DMove -145 0 -93 3
+					wait 20
+					NPCName:Set["Syr'Vala, of The Academy of Arcane Sciences"]
+					OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+					wait 20
+					OgreBotAPI:ConversationBubble["${Me.Name}",1]
+					wait 20
+					OgreBotAPI:ConversationBubble["${Me.Name}",9]
+					wait 20
+					call DMove -117 0 -90 3
+					break
+				}
+				case default
+				{
+					call DMove -145 0 -93 3
+					break
+				}
+			}
 			break
 		}
 		case default
@@ -305,15 +331,12 @@ function GoSoH(string ZoneName, string version)
 {
 	echo Debug going to "Shard of Hate: ${ZoneName} [${version}]"
 	call goCoV
-	call GetCoVQuests
-	call MendTool
-	call goHate
+	call ExitCoV
+	call DMove -762 347 1047 3
 	if (!${Zone.Name.Equal["ShardofHate: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Plane of Magic"
-		;call DMove 95 3 -164 3
-		; TO BE MODIFIED
-		;OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_ro_tower","Enter Solusek Ro's Tower"]
+		
 		wait 100
 		switch ${ZoneName}
 		{
@@ -325,6 +348,8 @@ function GoSoH(string ZoneName, string version)
 					{
 						do
 						{
+							OgreBotAPI:ApplyVerbForWho["${Me.Name}","Shard of Hate Portal","Step through the portal"]
+							wait 50
 							OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 							wait 50
 						}

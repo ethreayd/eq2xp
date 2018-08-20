@@ -49,6 +49,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
+	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
 		
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
@@ -275,6 +276,10 @@ function step003()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
+	call DMove -15 36 -194 3
+	wait 10
+	call DMove -14 37 -209 3
+	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]

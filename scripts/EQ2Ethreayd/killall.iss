@@ -2,6 +2,10 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	ScriptsToRun:Insert["loopSoH"]
+	ScriptsToRun:Insert["ShardofHateUtterContempt_Heroic_"]
+	ScriptsToRun:Insert["Outbreak_C1"]
+	ScriptsToRun:Insert["test"]
 	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Heroic_"]
 	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Expert_"]
 	ScriptsToRun:Insert["ShardofHateUtterContempt_Solo_"]

@@ -71,8 +71,9 @@ function step000()
 	wires:Set[${Return}]
 	call CountItem "power node"
 	nodes:Set[${Return}]
+	call CountItem "Electric Manaetic Device (EMD)"
 	
-	if (${nodes}<20 || ${wires}<20 || ${springs}<20)
+	if ((${nodes}<20 || ${wires}<20 || ${springs}<20) && ${Return}<15)
 	{
 		call DMove -73 -9 92 3
 		call Converse "Meldrath the Marvelous" 13
@@ -98,8 +99,9 @@ function step001()
 	wires:Set[${Return}]
 	call CountItem "power node"
 	nodes:Set[${Return}]
+	call CountItem "Electric Manaetic Device (EMD)"
 	
-	if (${nodes}<20 || ${wires}<20 || ${springs}<20)
+	if ((${nodes}<20 || ${wires}<20 || ${springs}<20) && ${Return}<15)
 	{
 		NotStuck:Set[FALSE]
 		do
