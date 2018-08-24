@@ -24,6 +24,11 @@ function main(int speed, bool NoShiny)
 		call goto_GH
 		wait 600
 		oc !c -RepairGear ${Me.Name}
+		wait 50
+		oc !c -RepairGear ${Me.Name}
+		wait 50
+		oc !c -RepairGear ${Me.Name}
+		
 		WaitTime:Set[${Math.Calc64[${Math.Rand[3600]}+3600]}]
 		echo will call logout_login ${WaitTime} now using ${Me.Name}
 		call logout_login ${WaitTime}

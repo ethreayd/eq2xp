@@ -12,9 +12,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	oc !c -LoadProfile Solo ${Me.Name}
 	wait 300
 	oc !c -letsgo ${Me.Name}
-	;if ${Script["livedierepeat"](exists)}
-	;	endscript livedierepeat
-	;run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["solodeath"](exists)}
+		endscript solodeath
+	run EQ2Ethreayd/solodeath ${NoShiny}
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -116,8 +116,8 @@ function step001()
 	call DMove -183 17 14 3
 	call DMove -149 15 11 3
 	call StartHunt "anarchic lurcher"
-	call DMove -143 15 17 3 30 FALSE FALSE 5
-	call DMove -148 15 21 3 30 FALSE FALSE 3
+	call DMove -143 15 17 3 30 TRUE FALSE 5
+	call DMove -148 15 21 3 30 TRUE FALSE 3
 	call DMove -146 15 37 3
 	wait 100
 	call CheckCombat
@@ -125,9 +125,9 @@ function step001()
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",15]
 	call DMove -149 15 22 3
 	call DMove -127 16 -4 3
-	call DMove -121 16 -16 3 FALSE FALSE 5
-	call DMove -127 16 -4 3 FALSE FALSE 5
-	call DMove -118 16 -5 3 30 FALSE FALSE 5
+	call DMove -121 16 -16 3 TRUE FALSE 5
+	call DMove -127 16 -4 3 TRUE FALSE 5
+	call DMove -118 16 -5 3 30 TRUE FALSE 5
 	wait 100
 	call CheckCombat
 	call DMove -107 16 -37 3

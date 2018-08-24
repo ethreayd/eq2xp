@@ -66,7 +66,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			}
 			if (!${IgnoreStuck})
 			{
-				echo Check Stuck
+				;echo Check Stuck
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -75,7 +75,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			}
 			if (!${IgnoreFight})
 			{
-				echo Pause if fighting (in 2DNav)
+				;echo Pause if fighting (in 2DNav)
 				call CheckCombat
 			}	
 		}
@@ -404,6 +404,7 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
     variable iterator ActorIterator
     variable bool Found
 	variable bool Hit
+	variable int ActorID
     EQ2:QueryActors[Actors]
     Actors:GetIterator[ActorIterator]
 	if (${Precision}<1)
@@ -415,6 +416,7 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 			if (${ActorIterator.Value.Name.Equal[""]})
 				{
 					echo Found an empty Actor (ID:${ActorIterator.Value.ID}) at ${ActorIterator.Value.Distance} m
+					ActorID:Set[${ActorIterator.Value.ID}]
 					Found:Set[TRUE]
 					echo Looking to ${verb} on Phantom Actor at ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
 					call TestArrivalCoord  ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
@@ -439,6 +441,7 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 		}
         while (${ActorIterator:Next(exists)} && !${Found})
 	}	
+	return ${ActorID}
 }
 
 function Ascend(float Y)
@@ -813,7 +816,31 @@ function ClickOn(string ActorName)
 		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
 	}
 }
-
+function ClickZone(int startX, int startY, int stopX, int stopY, int step)
+{
+	variable int X
+	variable int Y
+	
+	X:Set[${startX}]
+	Y:Set[${startY}]
+	do
+	{
+		echo clicking at ${X},${Y}
+		MouseTo ${X},${Y}
+		Mouse:LeftClick
+		Mouse:LeftClick
+		if (${X}>${stopX})
+		{
+			X:Set[${startX}]
+			Y:Set[${Math.Calc[${Y}+${step}]}]
+		}
+		X:Set[${Math.Calc[${X}+${step}]}]
+		wait 5
+	}
+	while (${Y}<${stopY})
+	echo End of ClickZone
+}
+ 
 
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
@@ -1155,7 +1182,7 @@ function FindLoS(string ActorName, string KeytoPress, float Distance, int PressT
 		}
 		else
 		{
-			call PKey ${KeytoPress} ${PressTime}
+			call PKey "${KeytoPress}" ${PressTime}
 		}
 		wait 5
 	}
@@ -1233,6 +1260,7 @@ function GetEffectIncrement(string EffectName)
 	   return 0
 	}
 }
+
 function GetObject(string ObjectName, string ObjectVerb)
 {
 	variable index:actor Actors
@@ -1966,6 +1994,7 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
+
 function RelayAll(string w0, string w1, string w2, string w3, string w4, string w5, string w6,string w7, string w8, string w9)
 {
 relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
@@ -2223,7 +2252,6 @@ function strip_QN(string questname)
 	echo OUT:"${sQN}"
 	return "${sQN}"
 }
-
 function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 {
 	if (${Distance}<1)
@@ -2242,7 +2270,8 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 			wait 10
 			if (${Queue})
 				ExecuteQueued
-			
+			if (${Actor["${Named}"].Distance} > 30)
+				eq2execute merc backoff
 			call IsPresent "${Named}" ${Distance} TRUE
 		}
 		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
@@ -2255,9 +2284,6 @@ function TargetAfterTime(string mytarget, int ntime)
 	wait ${ntime}
 	target ${mytarget}
 }
-
-
-
 function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
 {
 	variable float Ax
@@ -2305,7 +2331,7 @@ function Transmute(string ItemName)
 	wait 5
 	call AcceptReward TRUE
 }
-		
+
 function Unstuck(bool LR)
 {
 	ExecuteQueued
