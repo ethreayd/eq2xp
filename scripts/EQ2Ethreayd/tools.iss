@@ -621,6 +621,55 @@ function CastAbility(string AbilityName, bool NoWait)
 	}
 	call UseAbility "${AbilityName}"
 }
+function CastImmunity(string ToonName, int Health, int Pause)
+{
+	variable index:string ImmunityStack
+	variable int i
+	
+	ImmunityStack:Insert["Battle Frenzy"]
+	ImmunityStack:Insert["Wall of Force"]
+	ImmunityStack:Insert["Perfect Counter"]
+	ImmunityStack:Insert["Unyielding Will"]
+	ImmunityStack:Insert["Tower of Stone"]
+	ImmunityStack:Insert["Perfect Counter"]
+	ImmunityStack:Insert["Last Man Standing"]
+	ImmunityStack:Insert["Unyielding Will"]
+	ImmunityStack:Insert["Bob and Weave"]
+	ImmunityStack:Insert["Tsunami"]
+	ImmunityStack:Insert["Superior Guard"]
+	ImmunityStack:Insert["Inner Focus"]
+	ImmunityStack:Insert["Brawler's Tenacity"]
+	ImmunityStack:Insert["Stonewall"]
+	ImmunityStack:Insert["Devout Sacrament"]
+	ImmunityStack:Insert["Crusader's Faith"]
+	ImmunityStack:Insert["Holy Warding"]
+	ImmunityStack:Insert["Faith"]
+	ImmunityStack:Insert["Lay on Hands"]
+	ImmunityStack:Insert["Divine Aura"]
+	ImmunityStack:Insert["Infuriating Thorns]
+	ImmunityStack:Insert["Tortoise Shell"]
+	ImmunityStack:Insert["Tunare's Watch"]
+	ImmunityStack:Insert["Cyclone"]
+	ImmunityStack:Insert["Nature's Renewal"]
+	ImmunityStack:Insert["Tortoise Shell"]
+	ImmunityStack:Insert["Feral Tenacity"]
+	ImmunityStack:Insert["Ancestral Avenger"]
+	ImmunityStack:Insert["Ancestral Savior"]
+	ImmunityStack:Insert["Channeled Protection"]
+	ImmunityStack:Insert["Holy Salvation"]
+	ImmunityStack:Insert["Coercive Shout"]
+	ImmunityStack:Insert["Bladedance"]
+	
+	for ( i:Set[1] ; ${i} <= ${ImmunityStack.Used} ; i:Inc )
+	{
+    	if (${Actor[${ToonName}].Health} < ${Health})
+		{
+			oc !c -CastAbilityOnPlayer All "${ImmunityStack[${i}]}" ${ToonName}
+			wait $ {Math.Calc64[${Pause}*10]}
+		}
+	}
+
+}
 function check_quest(string questname)
 {
 	variable index:quest Quests
@@ -1092,8 +1141,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			}
 			if (${speed} < 2)
 			{
-				call Get2DDirection ${X} ${Z}
-				call Go2D ${X} ${Y} ${Z} ${Return} ${Precision}
+				call Go2D ${X} ${Y} ${Z} ${Precision}
 			}
 			if (${speed} == 2)
 				call 2DNav ${X} ${Z} ${IgnoreFight} TRUE ${Precision}
@@ -1212,13 +1260,7 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 	}
 }
 
-function Get2DDirection(float X, float Z)
-{
-	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
-		return "STRAFERIGHT"
-	else
-		return "STRAFELEFT"
-}	
+	
 function getChest(string ChestName)
 {
 	call IsPresent "${ChestName}" 30
@@ -1314,12 +1356,18 @@ function GetSpecialQty(string ActorName, float X, float Y, float Z, string verb,
 	}
 }
 
-function Go2D(float X, float Y, float Z, string strafe)
+function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 {
 	variable float loc0 
 	variable int Stucky
 	variable bool There
+	variable string strafe
 	echo enter function Go2D
+	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
+		strafe:Set["STRAFERIGHT"]
+	else
+		strafe:Set["STRAFELEFT"]
+	
 	do
 	{
 		Stucky:Set[0]
@@ -1340,7 +1388,7 @@ function Go2D(float X, float Y, float Z, string strafe)
 			if (${Return})
 				Stucky:Inc
 			echo Stucky=${Stucky}
-			call TestArrivalCoord ${X} ${Y} ${Z} 5
+			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
 			There:Set[${Return}]
 		}
 		while (${Stucky}<10 && !${There})
@@ -1351,9 +1399,11 @@ function Go2D(float X, float Y, float Z, string strafe)
 			wait 5
 			press -release ${strafe}
 		}		
-		call TestArrivalCoord ${X} ${Y} ${Z} 10
+		call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
 	}
 	while (!${Return})
+	if (${Icy})
+		press JUMP
 	echo exit function go2D
 }
 function goCoV()
@@ -1495,6 +1545,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
+	variable int Counter=0
 	variable float X0
 	variable float Y0
 	variable float Z0
@@ -1576,8 +1627,10 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						}
 					}
 				}
+				Counter:Inc
+				echo Counter in Harvest : ${Counter}
 			}
-			while ${ActorIterator:Next(exists)}
+			while (${ActorIterator:Next(exists)})
 		}		
 	}
 	echo exiting Harvest function
@@ -1789,8 +1842,10 @@ function MoveCloseTo(string ActorName)
 	variable string strafe
 	echo Moving closer to ${Actor["${ActorName}"].Name}
 	face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
-	call Get2DDirection ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
-	strafe:Set[${Return}]
+	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
+		strafe:Set["STRAFERIGHT"]
+	else
+		strafe:Set["STRAFELEFT"]
 	
 	press -hold MOVEFORWARD
 	do
@@ -2426,6 +2481,7 @@ function waitfor_Combat()
 }
 function WaitforGroupDistance(int Distance)
 {
+	echo waiting for group to be in a ${Distance}m radius
 	do
 	{
 		wait 10

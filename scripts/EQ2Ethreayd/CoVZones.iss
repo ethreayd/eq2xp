@@ -350,6 +350,8 @@ function GoSoH(string ZoneName, string version)
 						{
 							OgreBotAPI:ApplyVerbForWho["${Me.Name}","Shard of Hate Portal","Step through the portal"]
 							wait 50
+							OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
+							wait 50
 							OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 							wait 50
 						}

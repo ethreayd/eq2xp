@@ -9,6 +9,7 @@ function main(bool NoShiny, bool Heroic)
 	variable int Stucky
 	variable string sQN
 	variable int Restart=0
+	variable int i
 	do
 	{
 		echo start ldr loop
@@ -27,7 +28,10 @@ function main(bool NoShiny, bool Heroic)
 				echo Counter: ${Counter}
 			}
 			else
+			{
 				Counter:Set[0]
+				Resetting Counter : I'm not dead !!!
+			}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -37,10 +41,22 @@ function main(bool NoShiny, bool Heroic)
 			else
 				Stucky:Dec
 			call GroupDistance
+			echo Max Distance of a group member : ${Return}m
 		}
 		while ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
 		echo Live and let die ! ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
 		
+		if (!${GroupAlive})
+		{
+			for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+			{
+				if (${Me.Group[${i}].IsDead})
+				{
+					oc !c -CastAbilityOnPlayer All "Gather Remains" ${Me.Group[${i}].Name}
+					wait 100
+				}
+			}
+		}
 		if (${Me.IsDead} && ${Me.InventorySlotsFree}>0)
 		{
 			echo in loop - waiting 30s
@@ -61,12 +77,15 @@ function main(bool NoShiny, bool Heroic)
 				if (${Heroic})
 				{
 					oc !c -letsgo 
-					oc !c -revive 
+					oc !c -revive all 0
+					wait 100
+					relay all ogre
+					wait 300
 				}
 				else
 				{
 					oc !c -letsgo ${Me.Name}
-					oc !c -revive ${Me.Name}
+					oc !c -revive ${Me.Name} 0
 				}
 				echo waiting 1 min to recover
 				wait 600

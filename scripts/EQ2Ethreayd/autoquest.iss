@@ -12,7 +12,6 @@ function main(string Loop)
 	wait 300
 	call goto_GH
 	wait 600
-	call GuildH
 	echo Shinies
 	runscript EQ2Ethreayd/gardener
 	wait 1500

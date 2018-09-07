@@ -4,12 +4,11 @@ variable(script) int FightDistance
 variable(script) bool InRing
 variable(script) int MyStep
 variable(script) bool NoShinyGlobal
-variable(script) bool AutoRez
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 
-	variable int laststep=12
+	variable int laststep=9
 	NoShinyGlobal:Set[${NoShiny}]
 	MyStep:Set[${stepstart}]
 	oc !c -resume
@@ -36,14 +35,14 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
 	if (!${NoShiny})
-		run EQ2Ethreayd/autoshinies 50 1 
+		run EQ2Ethreayd/autoshinies 50 1
  
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
 	}
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Heroic]"
+	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Expert]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_ActorStanceChange]:AttachAtom[StanceChange]
@@ -65,6 +64,18 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 				call step012
 				return
 			}
+			call DMove 0 10 -502 3
+			wait 20
+			call DMove 15 11 -515 3
+			wait 50
+			call DMove 8 10 -544 3
+			wait 20
+			call DMove 11 10 -559 3
+			wait 20
+			call DMove 10 11 -539 3
+			wait 20
+			call DMove 2 10 -555 3
+			wait 20
 			stepstart:Set[4]
 		}
 	}
@@ -96,8 +107,6 @@ function step000()
 	}
 	while (${Return})
 	wait 10
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
 	echo must kill "${Named}"
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
@@ -128,33 +137,30 @@ function step001()
 	oc !c -UplinkOptionChange All checkbox_settings_movebehind FALSE
 	oc !c -UplinkOptionChange All checkbox_settings_moveinfront FALSE
 	call DMove 190 10 -643 3
-	call Go2D 212 12 -643 10 TRUE
-	call Go2D 231 11 -637 10 TRUE
-	call Go2D 288 2 -637  10 TRUE
+	call DMove 212 12 -643 1
+	call DMove 231 11 -637 1
+	call DMove 288 2 -637  1
 	wait 100
 	
-	call Go2D 296 0 -637 10 TRUE
-	call Go2D 398 -1 -637 10 TRUE
-	call Go2D 550 -17 -637 10 TRUE
-	call Go2D 551 -17 -587 10 TRUE
-	call Go2D 593 -17 -554 10 TRUE
-	call Go2D 620 -17 -536 10 TRUE
-	call Go2D 648 -17 -528 10 TRUE
-	call Go2D 713 -17 -550 10 TRUE
-	call Go2D 759 -17 -569 10 TRUE
-	call Go2D 772 -17 -647 10 TRUE
-	call Go2D 760 -17 -689 10 TRUE
-	call Go2D 736 -17 -723 10 TRUE
-	call WaitforGroupDistance 30
-	call Go2D 704 3 -748 10 TRUE
-	call WaitforGroupDistance 30
-	call DMove 694 9 -749 3 30
+	call DMove 296 0 -637 1
+	call DMove 398 -1 -637 1 30 TRUE
+	call DMove 550 -17 -637 1 30 TRUE
+	call DMove 551 -17 -587 1
+	call DMove 593 -17 -554 1
+	call DMove 620 -17 -536 1
+	call DMove 648 -17 -528 1
+	call DMove 713 -17 -550 1
+	call DMove 759 -17 -569 1
+	call DMove 772 -17 -647 1
+	call DMove 760 -17 -689 1
+	call DMove 736 -17 -723 1
 	
+	call DMove 704 3 -748 1
+	call DMove 694 9 -749 1
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Pause
-	call DMove 625 37 -748 3 30
-	
-	call Go2D 587 38 -718 10 TRUE
+	call DMove 625 37 -748 ${speed} ${FightDistance}
+	call DMove 593 38 -720 ${speed} ${FightDistance}
 	wait 100
 	call TanknSpank "${Named}" 50 TRUE  
 	
@@ -179,30 +185,31 @@ function step002()
 	
 	Ob_AutoTarget:Clear
 	
-	call DMove 580 38 -712 3
-	call DMove 540 54 -680 3
-	call DMove 530 73 -634 3
-	call DMove 535 84 -596 3
-	call DMove 554 89 -563 3
-	call Go2D 599 90 -514 10 TRUE 
-	call DMove 632 107 -494 3
-	call DMove 678 128 -496 3
-	call DMove 715 144 -525 3
-	call Go2D 768 145 -566 10 TRUE
-	call DMove 793 165 -605 3
-	call DMove 788 193 -671 3
-	call DMove 766 198 -691 3
-	
-	oc !c -pause
-	relay all run EQ2Ethreayd/TBoTTBH_C2
+	call DMove 574 38 -712 1
+	call DMove 540 56 -673 1
+	call DMove 531 73 -634 ${speed} ${FightDistance}
+	call DMove 537 86 -587 ${speed} ${FightDistance}
+	call DMove 562 90 -556 1
+	call DMove 600 90 -516 1
+	call DMove 647 114 -492 ${speed} ${FightDistance} 
+	call DMove 719 144 -520 ${speed} ${FightDistance} 
+	call DMove 769 145 -564 1
+	call DMove 794 169 -612 ${speed} ${FightDistance}
+	call DMove 789 193 -668 ${speed} ${FightDistance}
+	call DMove 767 198 -690 1
+	call DMove 725 198 -717 1
 	wait 100
-	while ${Script[TBoTTBH_C2](exists)}
-		wait 100
-	oc !c -resume
-	call WaitforGroupDistance 20
-	
-	call DMove 712 310 -683 3
-	call DMove 657 309 -635 3 30 TRUE TRUE
+	if (${Me.Loc.X}<800)
+	do
+	{
+		call MoveCloseTo "floor_diode_any_enchanter"
+		call PKey MOVEFORWARD 1
+		wait 50
+	}
+	while (${Me.Loc.X}<800)
+	call DMove 783 341 -751 ${speed} ${FightDistance}
+	call DMove 726 311 -692 ${speed} ${FightDistance}
+	call DMove 657 309 -635 ${speed} ${FightDistance}
 	oc !c -CampSpot
 	oc !c -joustout
 	InRing:Set[TRUE]
@@ -229,125 +236,123 @@ function step003()
 	call DMove 642 309 -615 3
 	call RelayAll ActivateVerb "Zone to Bottom" 642 309 -615 "Return to Bottom of Tower" TRUE
 	wait 50
-	
-	oc !c -pause
-	relay all run EQ2Ethreayd/TBoTTBH_C3
+	relay all face 701 -565
+	relay all press -hold MOVEFORWARD
+	wait 20
+	relay all press JUMP
+	wait 10
+	relay all press JUMP
+	relay all press -release MOVEFORWARD
+	call DMove 768 -17 -610 1
 	wait 100
-	while ${Script[TBoTTBH_C3](exists)}
-		wait 100
-	oc !c -resume
-	call WaitforGroupDistance 20
-		
-	call Go2D 768 -17 -610 10 TRUE
-		
 	call IsPresent "Auliffe Chaoswind's Treasure" 5000
 	if (${Return})
 	{
 		do
 		{
-			call Go2D 782 -17 -600 10 TRUE
+			call DMove 782 -17 -600 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 757 -17 -551 10 TRUE
+			call DMove 757 -17 -551 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 717 -17 -519 10 TRUE
+			call DMove 717 -17 -519 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 662 -17 -504 10 TRUE
+			call DMove 662 -17 -504 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 582 -17 -533 10 TRUE
+			call DMove 582 -17 -533 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 541 -17 -593 10 TRUE
+			call DMove 541 -17 -593 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 540 -17 -676 10 TRUE
+			call DMove 540 -17 -676 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 575 -17 -726 10 TRUE
+			call DMove 575 -17 -726 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 618 -17 -757 10 TRUE
+			call DMove 618 -17 -757 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 677 -17 -758 10 TRUE
+			call DMove 677 -17 -758 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 711 -17 -705 10 TRUE
+			call DMove 711 -17 -705 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 763 -17 -711 10 TRUE
+			call DMove 763 -17 -711 1
 			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 785 -17 -652 10 TRUE
+			call DMove 785 -17 -652 1
 			call getChest "Auliffe Chaoswind's Treasure"
 			call IsPresent "Auliffe Chaoswind's Treasure" 5000
 		}
 		while (${Return})
 	}
-	oc !c -revive All 0
-	oc !c -Evac
-	
+	call DMove 782 -17 -600 1
+	call DMove 757 -17 -551 1
+	call DMove 717 -17 -519 1
+	call DMove 662 -17 -504 1
+	call DMove 582 -17 -533 1
+	call DMove 543 -17 -637 1
+	call DMove 524 -12 -637 1
+	call DMove 472 -4 -636 1
+	call DMove 362 5 -635 1
+	call DMove 262 5 -636 1
+	call DMove 230 11 -636 3
+	call DMove 49 10 -628 3
+	call DMove 8 10 -545 3
+	call DMove -10 10 -378 3
+	call DMove -9 5 -324 3
+	call DMove -1 -2 -282 3
+	call DMove 0 -20 -124 3
+	call DMove -1 -2 -12 3
+	oc !c -revive
+	wait 100
+	call DMove -1 -20 -120 3
+	call DMove -1 10 -440 3
+	call DMove 3 10 -458 3
+	call DMove 15 11 -479 3
+	call DMove -5 10 -504 3
+	call DMove 15 11 -511 3
+	call DMove 6 10 -552 3
 }
 
 function step004()
 {
 	call StopHunt
-	call DMove -1 -20 -120 3
-	call DMove -1 10 -440 3
-	call DMove 3 10 -458 3
-	call DMove 15 11 -511 3
-	call DMove 6 10 -552 3
 	call DMove -19 10 -543 3
 	call DMove -59 10 -639 3
 	call DMove -202 10 -646 3
+	
 }
 	
 function step005()
 {
 	call StopHunt
 	MyStep:Set[5]
-	call DMove -167 10 -649 3
-	call DMove -238 11 -641 3
-	call DMove -541 -17 -635 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	
-	call DMove -578 -17 -565 3
-	call DMove -641 -17 -519 3
-	call DMove -738 -17 -542 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -781 -17 -623 3
-	call DMove -766 -17 -672 3
-	call DMove -745 -17 -712 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -706 12 -752 3
-	call DMove -653 34 -758 3
-	call DMove -588 38 -723 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -537 61 -683 3
-	call DMove -525 84 -615 3
-	call DMove -560 90 -554 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -577 90 -529 3
-	call DMove -626 114 -489 3
-	call DMove -718 145 -517 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -736 145 -539 3
-	call DMove -755 145 -551 3
-	call DMove -800 174 -604 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -763 198 -703 3
-	call DMove -781 199 -723 3
-	call DMove -881 213 -795 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -1023 255 -896 3
-	call DMove -1045 256 -905 3
-	call DMove -1118 255 -955 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
-	call DMove -1162 256 -1018 3
-	call DMove -1188 256 -1039 3
-	call DMove -1275 295 -1235 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
+	call DMove -167 10 -649 ${speed} ${FightDistance}
+	call DMove -238 11 -641 ${speed} ${FightDistance}
+	call DMove -541 -17 -635 ${speed} ${FightDistance}
+	wait 100
+	call DMove -578 -17 -565 ${speed} ${FightDistance}
+	call DMove -641 -17 -519 ${speed} ${FightDistance}
+	call DMove -738 -17 -542 ${speed} ${FightDistance}
+	call DMove -781 -17 -623 ${speed} ${FightDistance}
+	call DMove -766 -17 -672 ${speed} ${FightDistance}
+	call DMove -745 -17 -712 ${speed} ${FightDistance}
+	call DMove -706 12 -752 ${speed} ${FightDistance}
+	call DMove -653 34 -758 ${speed} ${FightDistance}
+	call DMove -588 38 -723 ${speed} ${FightDistance}
+	call DMove -537 61 -683 ${speed} ${FightDistance}
+	call DMove -525 84 -615 ${speed} ${FightDistance}
+	call DMove -560 90 -554 ${speed} ${FightDistance}
+	call DMove -577 90 -529 ${speed} ${FightDistance}
+	call DMove -626 114 -489 ${speed} ${FightDistance}
+	call DMove -718 145 -517 ${speed} ${FightDistance}
+	call DMove -736 145 -539 ${speed} ${FightDistance}
+	call DMove -755 145 -551 ${speed} ${FightDistance}
+	call DMove -800 174 -604 ${speed} ${FightDistance}
+	call DMove -763 198 -703 ${speed} ${FightDistance}
+	call DMove -781 199 -723 ${speed} ${FightDistance}
+	call DMove -881 213 -795 ${speed} ${FightDistance}
+	call DMove -1023 255 -896 ${speed} ${FightDistance}
+	call DMove -1045 256 -905 ${speed} ${FightDistance}
+	call DMove -1118 255 -955 ${speed} ${FightDistance}
+	call DMove -1162 256 -1018 ${speed} ${FightDistance}
+	call DMove -1188 256 -1039 ${speed} ${FightDistance}
+	call DMove -1275 295 -1235 ${speed} ${FightDistance}
 	call DMove -1352 290 -1288 3
 }
 
@@ -356,9 +361,6 @@ function step006()
 	variable string Named
 	Named:Set["Keeper of Past Lore"]
 	call StopHunt
-	if ${Script["autoshinies"](exists)}
-			Script["autoshinies"]:Pause
-	
 	call IsPresent "${Named}" 200
 	if (${Return})
 	{
@@ -370,9 +372,10 @@ function step006()
 		oc !c -resume
 		call WaitforGroupDistance 20
 		wait 100
+		
 		call DMove -1261 295 -1386 3
 		oc !c -Come2Me ${Me.Name} All 3
-		;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
+		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
 		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
 	
 		call TanknSpank "${Named}"
@@ -381,10 +384,8 @@ function step006()
 		eq2execute summon
 		wait 50
 		oc !c -AcceptReward
-		;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
+		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
 		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
-		if ${Script["autoshinies"](exists)}
-			Script["autoshinies"]:Resume
 		call DMove -1281 295 -1329 3
 		call DMove -1326 300 -1301 3
 	}
@@ -407,9 +408,7 @@ function step007()
 	wait 100
 	call DMove -1066 367 -933 3
 	call DMove -1033 366 -903 3
-	call DMove -943 353 -835 3
-	call CheckCombat
-	call DMove -917 347 -820 3 30 TRUE TRUE 5
+	call DMove -917 347 -820 3
 }
 	
 function step008()
@@ -417,25 +416,13 @@ function step008()
 	echo "waiting for best moment to move on"
 	if ${Script["livedierepeat"](exists)}
 		Script["livedierepeat"]:Pause
-	if ${Script["autoshinies"](exists)}
-		Script["autoshinies"]:Pause
-	oc !c -CampSpot
-	oc !c -joustout all
 	do
 	{
 		wait 10
 	}
-	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -890)
-	echo "GO GO GO"	
-	oc !c -CS_Set_ChangeCampSpotBy all 60 0 0
-	wait 40
-	oc !c -CS_Set_ChangeCampSpotBy all 30 0 70
-	wait 40
-	oc !c -CS_Set_ChangeCampSpotBy all 20 0 20
-	
-	call WaitforGroupDistance 20
-	wait 100
-	oc !c -letsgo 
+	while (${Actor["a virulent sandstorm"].Z} < -748 && ${Actor["a virulent sandstorm"].Z} > -790)
+	echo "GO GO GO"
+	call DMove -813 345 -740 3 5 TRUE TRUE 
 	if ${Script["livedierepeat"](exists)}
 		Script["livedierepeat"]:Resume
 	call DMove -717 310 -672 3
@@ -461,59 +448,20 @@ function step009()
 	oc !c -joustin ${Me.Name}
 	call DMove -622 309 -600 ${speed} ${FightDistance} TRUE
 	
-	
+
 	Ob_AutoTarget:Clear
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 	oc !c -joustout
-	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 20
-	echo "must kill ${Named}"
-	call IsPresent "${Named}"
-	if (${Return})
-	{
-		target "${Named}"
-		do
-		{
-			wait 10
-			if (${Me.IsDead})
-				AutoRez:Set[TRUE]
-			echo ${Named} at ${Actor["${Named}"].Health}%
-			if (${AutoRez} && ${Actor["${Named}"].Health}<25)
-			{
-				eq2execute gsay Activating AutoRez
-				AutoRez:Set[FALSE]
-			}
-			if (${Actor["${Named}"].Health}<49 && ${Actor["${Named}"].Health}>47)
-				eq2execute gsay AoE Prev
-			if (${Actor["${Named}"].Health}<39 && ${Actor["${Named}"].Health}>37)
-				eq2execute gsay Prev AoE
-			if (${Actor["${Named}"].Health}<29 && ${Actor["${Named}"].Health}>27)
-			{
-				OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
-				OgreBotAPI:UseItem_Relay[All,"Tome of the Planes"]
-				eq2execute gsay Next Prev
-			}
-			if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
-				OgreBotAPI:CastAbility["${Me.Name}","Unyielding Will"]
-			if (${Actor["${Named}"].Health}<9 && ${Actor["${Named}"].Health}>7)
-				eq2execute gsay Last Prev
-			if (${Actor["${Named}"].Health}<5 && ${Actor["${Named}"].Health}>3)
-				eq2execute gsay Ward DP
-			ExecuteQueued
-			call IsPresent "${Named}" 100 TRUE
-		}
-		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
-	}
+	call TanknSpank "${Named}"
 		
 	oc !c -AcceptReward
 	eq2execute summon
 	wait 50
 	oc !c -AcceptReward
 	oc !c -letsgo
-	if ${Script["autoshinies"](exists)}
-		Script["autoshinies"]:Resume
 	oc !c -AcceptReward
 	oc !c -AcceptReward
 	oc !c -AcceptReward
@@ -533,11 +481,10 @@ function step009()
 		wait 200
 	}
 	while (!${Zone.Name.Equal["Coliseum of Valor"]})
-	oc !c -Zone
+	oc !c -Zone	
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
 }
-
 function DrainPower(string Named)
 {
 	do
@@ -595,7 +542,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo group seems dead - restarting zone
 		if ${Script["RestartZone"}](exists)}
 			endscript RestartZone
-		runscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+		runscript EQ2Ethreayd/RestartZone ${MyStep} 0 ${speed} ${NoShinyGlobal}
 	}
 }
 atom HandleAllEvents(string Message)

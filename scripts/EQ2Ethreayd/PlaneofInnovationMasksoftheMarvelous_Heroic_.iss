@@ -89,9 +89,12 @@ function step001()
 	call TanknSpank "${Named}"
 	oc !c -letsgo
 	eq2execute summon
+	wait 20
 	oc !c -acceptreward
+	wait 20
 	oc !c -acceptreward
-	
+	wait 20
+	oc !c -acceptreward
 	call DMove -58 3 11 ${speed} ${FightDistance}
 	call DMove -41 -10 137 ${speed} ${FightDistance}
 }	
@@ -113,9 +116,13 @@ function step002()
 	call WaitforGroupDistance 20
 	oc !c -letsgo
 	call DMove 115 3 -35 3
+	oc !c -Come2Me ${Me.Name} All 3
+	call WaitforGroupDistance 20
+	
 	oc !c -CampSpot
 	oc !c -joustout
 	wait 20
+	
 	oc !c -CS_Set_ChangeCampSpotBy All -70 0 0
 	
 	call TanknSpank "${Named}" 100
@@ -128,6 +135,14 @@ function step002()
 	}
 	while (!${Return})
 	eq2execute summon
+	oc !c -letsgo
+	eq2execute summon
+	wait 20
+	oc !c -acceptreward
+	wait 20
+	oc !c -acceptreward
+	wait 20
+	oc !c -acceptreward
 }
 
 function step003()
@@ -138,10 +153,17 @@ function step003()
 	
 	call StopHunt
 	call DMove 71 3 -81 3
+	wait 30
+	call CheckCombat
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Pause
 	call AutoPassDoor "Junkyard West Door 01" 69 4 -101
 	wait 50
-	call DMove 48 4 -93 ${speed} ${FightDistance}
-	call DMove 60 4 -127 1 ${FightDistance}
+	call DMove 48 4 -93 3
+	call DMove 60 4 -127 1
+	call CheckCombat
+	call DMove 48 4 -93 3
+	call DMove 60 4 -127 1
 	call WaitforGroupDistance 20
 	call AutoPassDoor "Junkyard West Door 03" 70 4 -130
 	wait 50
@@ -157,6 +179,8 @@ function step003()
 	
 	call TanknSpank "${Named}" 200
 	oc !c -letsgo
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Resume
 	do
 	{
 		eq2execute summon
@@ -316,10 +340,8 @@ function step006()
 	call DMove 82 10 -210 3 ${FightDistance}
 	if ${Script["livedierepeat"](exists)}
 		Script["livedierepeat"]:Pause
-	call Converse "Meldrath the Marvelous" 32
-	wait 100
 	ogre qh
-	call Converse "Meldrath the Marvelous" 16
+	call Converse "Meldrath the Marvelous" 32 FALSE TRUE
 	wait 100
 	ogre end qh
 	wait 20
@@ -334,6 +356,8 @@ function step006()
 	oc !c -ofol---
 	call DMove 44 3 -272 ${speed} ${FightDistance}
 	call DMove -27 3 -278 ${speed} ${FightDistance}
+	oc !c -Come2Me ${Me.Name} All 3
+	wait 20
 	call DMove -59 17 -282 1 ${FightDistance}
 	call DMove -72 12 -279 1 ${FightDistance}
 	call DMove -97 13 -279 1 ${FightDistance}
@@ -363,9 +387,9 @@ function step007()
 	
 	;oc !c -CampSpot ${Me.Name}
 	;oc !c -joustout ${Me.Name}
-	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
+	;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
-	OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
+	OgreBotAPI:UseItem_Relay[All,"Brew of Readiness"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -391,7 +415,11 @@ function step007()
 			if (${Actor["${Named}"].Health}<27 && ${Actor["${Named}"].Health}>25)
 				eq2execute gsay Prev AoE
 			if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
+			{
+				OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
+				OgreBotAPI:UseItem_Relay[All,"Tome of the Planes"]
 				eq2execute gsay Next Prev
+			}
 			if (${Actor["${Named}"].Health}<15 && ${Actor["${Named}"].Health}>13)
 				OgreBotAPI:CastAbility["${Me.Name}","Unyielding Will"]
 			if (${Actor["${Named}"].Health}<10 && ${Actor["${Named}"].Health}>8)
@@ -407,17 +435,15 @@ function step007()
 	eq2execute summon
 	call StopHunt
 	oc !c -acceptreward
+	wait 10
+	oc !c -acceptreward
 	call DMove -140 10 -251 3 30 TRUE
 	ogre
 	wait 200
-	
-	call ActivateVerb "zone_to_valor" -145 10 -251 "Return to the Entrance" TRUE
-	wait 100
-	if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
-		call ActivateVerb "zone_to_valor" -145 10 -251 "Colisseum of Valor" TRUE
-	wait 100
 	oc !c -acceptreward
+	wait 10
 	oc !c -acceptreward
+	wait 10
 	oc !c -acceptreward
 	do
 	{
@@ -425,10 +451,13 @@ function step007()
 		if (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
 		{
 			call DMove -145 10 -251 1
-			OgreBotAPI:Special["${Me.Name}"]
+			OgreBotAPI:Special["All"]
 		}
 	}
 	while (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Heroic]"]})
+	oc !c -Zone
+	if ${Script["livedierepeat"](exists)}
+		endscript livedierepeat
 }
 
 function OpenChargedDoor()
@@ -443,17 +472,7 @@ function OpenChargedDoor()
 	call CheckCombat ${FightDistance}
 	Me.Inventory["${PrimaryWeapon}"]:Equip
 }
-;function TurnKey(string Named)
-;{
-;	echo pausing 30s for resting
-;	wait 300
-;	do
-;	{
-;		press MOVEFORWARD
-;		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${Named}","Turn Key"]
-;	}
-;	while (${KeyOn})
-;}
+
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	if (${Message.Find["shock imminent"]} > 0)
