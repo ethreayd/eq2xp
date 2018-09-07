@@ -277,7 +277,6 @@ function step003()
 	}
 	oc !c -revive All 0
 	oc !c -Evac
-	
 }
 
 function step004()
