@@ -2,6 +2,15 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
+	variable int x
+	ScriptsToRun:Insert["PlaneofDiseaseInfestedMesa_ExpertEvent_"]
+	ScriptsToRun:Insert["PlaneofDiseaseInfestedMesa_EventHeroic_"]
+	ScriptsToRun:Insert["PlaneofInnovationGearsintheMachine_Expert_"]
+	ScriptsToRun:Insert["PlaneofInnovationGearsintheMachine_Heroic_"]
+	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Expert_"]
+	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Heroic_"]
+	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Expert_"]
+	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Heroic_"]
 	ScriptsToRun:Insert["TheFabledRuinsofGukHallsoftheFallen_Solo_"]
 	ScriptsToRun:Insert["loopSoH"]
 	ScriptsToRun:Insert["ShardofHateUtterContempt_Heroic_"]
@@ -49,13 +58,14 @@ function main()
 	ScriptsToRun:Insert["LegacyofPowerHerosDevotion"]
 	ScriptsToRun:Insert["LegacyofPowerSecretsinanArcaneLand"]
 	ScriptsToRun:Insert["autopop"]
-	
 
-	variable int x
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{
-        echo Killing script ${ScriptsToRun[${x}]}
+        
 		if ${Script["${ScriptsToRun[${x}]}"](exists)}
-			endscript "${ScriptsToRun[${x}]}"
+		{
+			echo Killing script ${ScriptsToRun[${x}]}
+			endscript "${ScriptsToRun[${x}]}"		
+		}
 	}
 }

@@ -108,6 +108,7 @@ function step000()
 function step001()
 {
 	variable string Named
+	variable int Counter
 	Named:Set["Rideepa the Prideful"]
 	eq2execute merc resume
 	call StopHunt
@@ -130,11 +131,12 @@ function step001()
 		OgreBotAPI:Special["${Me.Name}"]
 		wait 20
 		call CountItem "pure fungus"
+		Counter:Inc
 	}
-	while (${Return}>0)
+	while (${Return}>0 && ${Counter}<30)
 	call DMove 73 -40 -121 1 30 FALSE FALSE 2
 	call DMove 81 -32 -128 3 30 FALSE FALSE 5
-	call DMove 106 -32 -115 3
+	call DMove 106 -32 -115 3 
 	call DMove 133 -41 -138 3
 	call DMove 145 -44 -157 3
 	call DMove 129 -41 -164 3
@@ -212,8 +214,8 @@ function step002()
 	call DMove -9 -40 -197 3
 	call DMove -27 -39 -185 3
 	call DMove -48 -39 -166 3
-	call DMove -106 -39 -158 3
-	call DMove -136 -46 -195 3
+	call DMove -106 -39 -158 3 30 TRUE
+	call DMove -136 -46 -195 3 30 TRUE
 	call DMove -127 -46 -208 3 30 TRUE
 	call DMove -120 -40 -164 3 30 TRUE
 	call DMove -97 -39 -147 3 30 TRUE 

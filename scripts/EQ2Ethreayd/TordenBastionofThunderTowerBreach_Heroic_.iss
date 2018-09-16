@@ -69,6 +69,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		}
 	}
 	oc !c -OgreFollow All ${Me.Name}
+	echo starting at step ${stepstart}
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -112,6 +113,8 @@ function step000()
 	wait 50
 	oc !c -AcceptReward
 	wait 20
+	call Loot
+
 	call DMove 14 11 -515 ${speed} ${FightDistance}
 	call DMove 14 12 -523 ${speed} ${FightDistance}
 	call DMove 14 11 -537 ${speed} ${FightDistance}
@@ -163,6 +166,8 @@ function step001()
 	wait 50
 	oc !c -AcceptReward
 	wait 20
+	call Loot
+
 	relay all ogre
 	wait 300
 	oc !c -letsgo
@@ -216,69 +221,22 @@ function step002()
 	oc !c -AcceptReward
 	wait 20
 	oc !c -AcceptReward
+	call Loot
+
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
 }
-
 function step003()
 {
-	variable bool Loop=FALSE
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
 	call DMove 642 309 -615 3
-	call RelayAll ActivateVerb "Zone to Bottom" 642 309 -615 "Return to Bottom of Tower" TRUE
+	eq2execute summon
 	wait 50
-	
-	oc !c -pause
-	relay all run EQ2Ethreayd/TBoTTBH_C3
-	wait 100
-	while ${Script[TBoTTBH_C3](exists)}
-		wait 100
-	oc !c -resume
-	call WaitforGroupDistance 20
-		
-	call Go2D 768 -17 -610 10 TRUE
-		
-	call IsPresent "Auliffe Chaoswind's Treasure" 5000
-	if (${Return})
-	{
-		do
-		{
-			call Go2D 782 -17 -600 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 757 -17 -551 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 717 -17 -519 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 662 -17 -504 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 582 -17 -533 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 541 -17 -593 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 540 -17 -676 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 575 -17 -726 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 618 -17 -757 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 677 -17 -758 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 711 -17 -705 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 763 -17 -711 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 785 -17 -652 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call IsPresent "Auliffe Chaoswind's Treasure" 5000
-		}
-		while (${Return})
-	}
+	oc !c -AcceptReward
+	wait 50
 	oc !c -revive All 0
-	oc !c -Evac
+	oc !c -Evac	
 }
-
 function step004()
 {
 	call StopHunt
@@ -382,6 +340,8 @@ function step006()
 		oc !c -AcceptReward
 		;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
 		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
+		call Loot
+
 		if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
 		call DMove -1281 295 -1329 3
@@ -465,6 +425,7 @@ function step009()
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	oc !c -ChangeCastStackListBoxItemByTag ALL wards TRUE
 	
 	oc !c -joustout
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 20
@@ -505,7 +466,8 @@ function step009()
 		}
 		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
 	}
-		
+	oc !c -ChangeCastStackListBoxItemByTag ALL wards FALSE
+
 	oc !c -AcceptReward
 	eq2execute summon
 	wait 50
@@ -515,7 +477,8 @@ function step009()
 		Script["autoshinies"]:Resume
 	oc !c -AcceptReward
 	oc !c -AcceptReward
-	oc !c -AcceptReward
+	call Loot
+
 	oc !c -letsgo
 	call DMove -643 309 -638 3
 	eq2execute summon

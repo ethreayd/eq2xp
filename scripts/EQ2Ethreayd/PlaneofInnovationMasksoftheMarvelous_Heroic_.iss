@@ -54,11 +54,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 			}
 		}		
 	}
-	
-	
-	
 	call StartQuest ${stepstart} ${stepstop} TRUE
-	
 	echo End of Quest reached
 }
 
@@ -95,6 +91,7 @@ function step001()
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
+
 	call DMove -58 3 11 ${speed} ${FightDistance}
 	call DMove -41 -10 137 ${speed} ${FightDistance}
 }	
@@ -118,7 +115,8 @@ function step002()
 	call DMove 115 3 -35 3
 	oc !c -Come2Me ${Me.Name} All 3
 	call WaitforGroupDistance 20
-	
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Pause
 	oc !c -CampSpot
 	oc !c -joustout
 	wait 20
@@ -138,11 +136,14 @@ function step002()
 	oc !c -letsgo
 	eq2execute summon
 	wait 20
+	call Loot
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
+	if ${Script["autoshinies"](exists)}
+		Script["autoshinies"]:Resume
 }
 
 function step003()
@@ -179,6 +180,8 @@ function step003()
 	
 	call TanknSpank "${Named}" 200
 	oc !c -letsgo
+	call Loot
+
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Resume
 	do
@@ -327,6 +330,8 @@ function step005()
 	
 	oc !c -letsgo
 	eq2execute summon
+	call Loot
+
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Resume
 }
@@ -375,19 +380,9 @@ function step007()
 	wait 50
 	call DMove -155 4 -267 3
 	wait 20
-	;oc !c -cs-jo-ji All Casters
-		
 	call DMove -136 5 -283 3 30 TRUE FALSE 5
 	wait 10
 	call DMove -151 3 -284 3 30 TRUE FALSE 5
-	;wait 10
-	;call DMove -146 5 -277 3 30 TRUE FALSE 5
-	;wait 10
-	;call DMove -150 5 -266 3 30 TRUE FALSE 5
-	
-	;oc !c -CampSpot ${Me.Name}
-	;oc !c -joustout ${Me.Name}
-	;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca TRUE
 	oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca TRUE
 	OgreBotAPI:UseItem_Relay[All,"Brew of Readiness"]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
@@ -437,7 +432,10 @@ function step007()
 	oc !c -acceptreward
 	wait 10
 	oc !c -acceptreward
+	call Loot
+
 	call DMove -140 10 -251 3 30 TRUE
+	eq2execute summon
 	ogre
 	wait 200
 	oc !c -acceptreward
@@ -494,8 +492,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
  
 atom HandleAllEvents(string Message)
 {
-	;echo Catch Event ${Message}
-    if (${Message.Find["have the Electro-Charged"]} > 0)
+   if (${Message.Find["have the Electro-Charged"]} > 0)
 	{
 		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor
@@ -504,16 +501,5 @@ atom HandleAllEvents(string Message)
 	{
 		oc !c -cs-jo-ji All Casters
 	}
-	;if (${Message.Find["need to turn his key"]} > 0)
-	;{
-	;	KeyOn:Set[TRUE]
-	;	oc !c -joustin ${Me.Name}
-	;	QueueCommand call TurnKey "Gearclaw the Collector"
-	;}
 	
-	;if (${Message.Find["Collector is energized"]} > 0)
-	;{
-	;	KeyOn:Set[FALSE]
-	;	oc !c -joustout ${Me.Name}
-	;}
 }

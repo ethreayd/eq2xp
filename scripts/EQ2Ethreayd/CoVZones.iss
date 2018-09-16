@@ -2,8 +2,8 @@ function ExitCoV()
 {	
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 		{
-			call DMove -2 5 4 3
-			call DMove 94 3 162 3
+			call DMove -2 5 4 3 30 TRUE
+			call DMove 94 3 162 3 30 TRUE
 			call ActivateVerb "zone_to_pom" 94 3 162 "Enter the Plane of Magic"
 			wait 50
 			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
@@ -16,7 +16,7 @@ function ExitZone()
 	ZoneName:Set["${Zone.Name}"]
 	if (!${Zone.Name.Left[40].Equal["Torden, Bastion of Thunder: Tower Breach"]})
 	{
-		call DMove 0 0 -1 3
+		call DMove 0 0 -1 3 30 TRUE
 	}
 	do
 	{
@@ -28,20 +28,20 @@ function ExitZone()
 function GetCoVQuests(string ZoneName, string version)
 {
 	variable string NPCName
-	call DMove -2 5 4 3
-	call DMove -109 0 1 3
-	call DMove -117 0 -90 3
+	call DMove -2 5 4 3 30 TRUE
+	call DMove -109 0 1 3 30 TRUE
+	call DMove -117 0 -90 3 30 TRUE
 	switch ${ZoneName}
 	{
 		case Guk
 		{
-			call DMove -132 0 -108 3
+			call DMove -132 0 -108 3 30 TRUE
 			NPCName:Set["Griv, of the Knights of Marr"]
 			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
 			wait 20
 			OgreBotAPI:ConversationBubble["${Me.Name}",7]
 			wait 20
-			call DMove -117 0 -90 3
+			call DMove -117 0 -90 3 30 TRUE
 			break
 		}
 		case SoH
@@ -50,7 +50,7 @@ function GetCoVQuests(string ZoneName, string version)
 			{
 				case Solo
 				{
-					call DMove -145 0 -93 3
+					call DMove -145 0 -93 3 30 TRUE
 					wait 20
 					NPCName:Set["Syr'Vala, of The Academy of Arcane Sciences"]
 					OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
@@ -59,20 +59,32 @@ function GetCoVQuests(string ZoneName, string version)
 					wait 20
 					OgreBotAPI:ConversationBubble["${Me.Name}",9]
 					wait 20
-					call DMove -117 0 -90 3
+					call DMove -117 0 -90 3 30 TRUE
 					break
 				}
 				case default
 				{
-					call DMove -145 0 -93 3
+					call DMove -145 0 -93 3 30 TRUE
 					break
 				}
 			}
 			break
 		}
+		case Heroic
+		{
+			call DMove -132 0 -108 3 30 TRUE
+			wait 20
+			NPCName:Set["Rayna, Concordium Mage"]
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",2]
+			wait 20
+			call DMove -117 0 -90 3 30 TRUE
+			break
+		}
 		case default
 		{
-			call DMove -145 0 -93 3
+			call DMove -145 0 -93 3 30 TRUE
 			call Converse "Rynzon, of The Spurned" 10
 			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
 			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
@@ -85,17 +97,17 @@ function GetCoVQuests(string ZoneName, string version)
 			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
 			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3	
 			call Converse "Syr'Vala, of The Academy of Arcane Sciences" 3
-			call DMove -130 0 -84 3
+			call DMove -130 0 -84 3 30 TRUE
 			call MoveCloseTo "a Planar Chronicler"
 			call Converse "a Planar Chronicler" 3
 			call Converse "a Planar Chronicler" 3
 			call Converse "a Planar Chronicler" 3
 			call Converse "a Planar Chronicler" 3
-			call DMove -117 0 -90 3	
+			call DMove -117 0 -90 3	30 TRUE
 			break
 		}
 	}
-	call DMove -109 0 1 3
+	call DMove -109 0 1 3 30 TRUE
 }	
 function GoBoT(string ZoneName, string version)
 {
@@ -110,8 +122,8 @@ function GoBoT(string ZoneName, string version)
 	if (!${Zone.Name.Equal["Torden, Bastion of Thunder: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
-		call DMove -2 5 4 3
-		call DMove -92 3 -158 3
+		call DMove -2 5 4 3 30 TRUE
+		call DMove -92 3 -158 3 30 TRUE
 		wait 50		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
 		wait 100
@@ -184,8 +196,8 @@ function GoPoD(string ZoneName, string version)
 	if (!${Zone.Name.Equal["Plane of Disease: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
-		call DMove -2 5 4 3
-		call DMove -193 3 0 3
+		call DMove -2 5 4 3 30 TRUE
+		call DMove -193 3 0 3 30 TRUE
 		wait 50		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 		wait 100
@@ -244,8 +256,8 @@ function GoPoI(string ZoneName, string version)
 	if (!${Zone.Name.Equal["Plane of Innovation: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
-		call DMove -2 5 4 3
-		call DMove -94 3 163 3
+		call DMove -2 5 4 3 30 TRUE
+		call DMove -94 3 163 3 30 TRUE
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
 		wait 100
 		switch ${ZoneName}
@@ -332,7 +344,7 @@ function GoSoH(string ZoneName, string version)
 	echo Debug going to "Shard of Hate: ${ZoneName} [${version}]"
 	call goCoV
 	call ExitCoV
-	call DMove -762 347 1047 3
+	call DMove -762 347 1047 3 30 TRUE
 	if (!${Zone.Name.Equal["ShardofHate: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Plane of Magic"
@@ -373,8 +385,8 @@ function GoSRT(string ZoneName, string version)
 	if (!${Zone.Name.Equal["Solusek Ro's Tower: ${ZoneName} [${version}]"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
-		call DMove -2 5 4 3
-		call DMove 95 3 -164 3
+		call DMove -2 5 4 3 30 TRUE
+		call DMove 95 3 -164 3 30 TRUE
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_ro_tower","Enter Solusek Ro's Tower"]
 		wait 100
@@ -426,8 +438,8 @@ function GoThrone()
 	if (!${Zone.Name.Equal["The Molten Throne"]})
 	{
 		call waitfor_Zone "Coliseum of Valor"
-		call DMove -2 5 4 3
-		call DMove 95 3 -149 3
+		call DMove -2 5 4 3 30 TRUE
+		call DMove 95 3 -149 3 30 TRUE
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_molten_throne","Enter the Molten Throne"]
 		wait 20
 		call waitfor_Zone "The Molten Throne"

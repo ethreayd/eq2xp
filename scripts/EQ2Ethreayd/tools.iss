@@ -15,21 +15,7 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function CMove(float X, float Z)
-{
-	echo entering CMove ${X} ${Z} 
-	face ${X} ${Z}
-	press -hold MOVEFORWARD
-	do
-	{	
-		wait 10
-		face ${X} ${Z}
-		call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
-	}
-	while (!${Return})
-	press -release MOVEFORWARD
-	echo exiting CMove ${X} ${Z} 
-}	
+
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -66,7 +52,6 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			}
 			if (!${IgnoreStuck})
 			{
-				;echo Check Stuck
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -75,7 +60,6 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			}
 			if (!${IgnoreFight})
 			{
-				;echo Pause if fighting (in 2DNav)
 				call CheckCombat
 			}	
 		}
@@ -115,7 +99,6 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 			}
 			if (!${IgnoreFight})
 			{
-				echo Pause if fighting (in 2DNav)
 				call CheckCombat
 			}	
 		}
@@ -154,7 +137,6 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				}
 				if (!${IgnoreFight})
 				{
-					;echo Pause if fighting (in 2DNav)
 					call CheckCombat
 				}	
 			}
@@ -189,7 +171,6 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				}
 				if (!${IgnoreFight})
 				{
-					;echo Pause if fighting (in 2DNav)
 					call CheckCombat
 				}	
 			}
@@ -889,8 +870,21 @@ function ClickZone(int startX, int startY, int stopX, int stopY, int step)
 	while (${Y}<${stopY})
 	echo End of ClickZone
 }
- 
-
+function CMove(float X, float Z)
+{
+	echo entering CMove ${X} ${Z} 
+	face ${X} ${Z}
+	press -hold MOVEFORWARD
+	do
+	{	
+		wait 10
+		face ${X} ${Z}
+		call TestArrivalCoord ${X} 0 ${Z} 10 TRUE
+	}
+	while (!${Return})
+	press -release MOVEFORWARD
+	echo exiting CMove ${X} ${Z} 
+} 
 function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 {
 	echo Conversing with ${NPCName} (${bubbles} bubbles to validate)
@@ -1260,13 +1254,27 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 	}
 }
 
-	
+
 function getChest(string ChestName)
 {
+	echo in function getChest
 	call IsPresent "${ChestName}" 30
 	if (${Return})
 	{
-		call MoveCloseTo "${ChestName}"
+		do
+		{
+			call GetObject "${ChestName}" Open 20
+			wait 20
+			oc !c -UplinkOptionChange All checkbox_settings_loot TOGGLE
+			oc !c -ofol---
+			oc !c -ofol---
+			oc !c -ofol---
+			wait 50
+			oc !c -OgreFollow All ${Me.Name}
+			oc !c -UplinkOptionChange All checkbox_settings_loot TOGGLE
+			call IsPresent "${ChestName}" 30
+		}
+		while (${Return})
 	}
 }		
 function GetEffectIncrement(string EffectName)
@@ -1303,15 +1311,16 @@ function GetEffectIncrement(string EffectName)
 	}
 }
 
-function GetObject(string ObjectName, string ObjectVerb)
+function GetObject(string ObjectName, string ObjectVerb, int Distance)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
 	
-	ObjectName:Set[ActorIterator
+	if (${Distance}<1)
+		Distance:Set[100]
 	
-	EQ2:QueryActors[Actors, Name  =- "${ObjectName}" && Distance <= 100]
+	EQ2:QueryActors[Actors, Name  =- "${ObjectName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -1329,7 +1338,6 @@ function GetObject(string ObjectName, string ObjectVerb)
 		call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 30 TRUE
 		face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
 		call ActivateVerb "${ObjectName}" ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} "${ObjectVerb}" TRUE
-		
 	}	
 }
 function get_Potency()
@@ -1577,7 +1585,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 				if (${ActorIterator.Value.X(exists)})
 				{
 					eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-					echo going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+					echo Harvest: going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 					if (${GoBack})
 					{
 						X0:Set[${Me.Loc.X}]
@@ -1607,6 +1615,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						wait 20
 						if (${ActorIterator.Value.Distance}<15 && !${Actor["${ActorIterator.Value.Name}"].CheckCollision})
 							call PetitPas ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}  3
+						wait 50
 						ogre harvestlite
 						echo trying to harvest ${ItemName}
 						wait 50
@@ -1818,7 +1827,20 @@ function logout_login(int secs)
 	ogre ${ToonName}
 	wait 600
 }
-	
+function Loot()
+{
+	echo Autoloot Running now !
+	wait 50
+	call getChest "Exquisite Chest"
+	wait 10
+	call getChest "Small Chest"
+	wait 10
+	call getChest "Treasure Chest"
+	wait 10
+	call getChest "Ornate Chest"
+	wait 10
+	echo End of Autoloot
+}	
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
@@ -2333,6 +2355,10 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 	}
 	echo "TanknSpank Debug Return : ${Return}"
 	echo "TanknSpank Debug InCombatMode : ${Me.InCombatMode}"
+	wait 20
+	eq2execute Summon
+	wait 20
+	
 }
 function TargetAfterTime(string mytarget, int ntime)
 {
@@ -2589,4 +2615,3 @@ function DetectCircles(float Distance, string Color)
 	return ${Counter}
 	echo out DetectCircles
 }
-

@@ -17,7 +17,7 @@ function main(float Distance, int speed, float height)
 	{
 		wait 100
 		call IsPresent ? ${Distance} TRUE
-		if (${Return})
+		if (${Return} && !${Me.InCombatMode})
 		{
 			call Abs ${Math.Calc64[${Me.Loc.Y}-${Actor["?"].Y}]}
 			if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})

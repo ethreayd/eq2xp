@@ -50,7 +50,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
-	
+	oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
 
 	if (${stepstart}==0)
 	{
@@ -64,22 +64,12 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 				call step012
 				return
 			}
-			call DMove 0 10 -502 3
-			wait 20
-			call DMove 15 11 -515 3
-			wait 50
-			call DMove 8 10 -544 3
-			wait 20
-			call DMove 11 10 -559 3
-			wait 20
-			call DMove 10 11 -539 3
-			wait 20
-			call DMove 2 10 -555 3
-			wait 20
+			
 			stepstart:Set[4]
 		}
 	}
 	oc !c -OgreFollow All ${Me.Name}
+	echo starting at step ${stepstart}
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -140,23 +130,51 @@ function step001()
 	call Go2D 212 12 -643 10 TRUE
 	call Go2D 231 11 -637 10 TRUE
 	call Go2D 288 2 -637  10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
 	wait 100
-	
+	oc !c -letsgo
 	call Go2D 296 0 -637 10 TRUE
 	call Go2D 398 -1 -637 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
+	wait 100
+	oc !c -letsgo
 	call Go2D 550 -17 -637 10 TRUE
 	call Go2D 551 -17 -587 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
+	wait 100
+	oc !c -letsgo
 	call Go2D 593 -17 -554 10 TRUE
 	call Go2D 620 -17 -536 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
+	wait 100
+	oc !c -letsgo
 	call Go2D 648 -17 -528 10 TRUE
 	call Go2D 713 -17 -550 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
+	wait 100
+	oc !c -letsgo
 	call Go2D 759 -17 -569 10 TRUE
 	call Go2D 772 -17 -647 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
+	wait 100
+	oc !c -letsgo
 	call Go2D 760 -17 -689 10 TRUE
 	call Go2D 736 -17 -723 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
 	call WaitforGroupDistance 30
+	oc !c -letsgo
 	call Go2D 704 3 -748 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
 	call WaitforGroupDistance 30
+	oc !c -letsgo
 	call DMove 694 9 -749 3 30
 	
 	if ${Script["autoshinies"](exists)}
@@ -164,6 +182,8 @@ function step001()
 	call DMove 625 37 -748 3 30
 	
 	call Go2D 587 38 -718 10 TRUE
+	oc !c -CampSpot
+	oc !c -joustout
 	wait 100
 	call TanknSpank "${Named}" 50 TRUE  
 	
@@ -177,6 +197,8 @@ function step001()
 	oc !c -letsgo
 	oc !c -OgreFollow All ${Me.Name}
 	wait 50
+	oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
+
 }	
 	
 function step002()
@@ -184,7 +206,6 @@ function step002()
 	variable string Named
 	Named:Set["Auliffe Chaoswind"]
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
 	Ob_AutoTarget:Clear
 	
@@ -231,59 +252,12 @@ function step002()
 
 function step003()
 {
-	variable bool Loop=FALSE
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
 	call DMove 642 309 -615 3
-	call RelayAll ActivateVerb "Zone to Bottom" 642 309 -615 "Return to Bottom of Tower" TRUE
+	eq2execute summon
 	wait 50
-	
-	oc !c -pause
-	relay all run EQ2Ethreayd/TBoTTBH_C3
-	wait 100
-	while ${Script[TBoTTBH_C3](exists)}
-		wait 100
-	oc !c -resume
-	call WaitforGroupDistance 20
-		
-	call Go2D 768 -17 -610 10 TRUE
-		
-	call IsPresent "Auliffe Chaoswind's Treasure" 5000
-	if (${Return})
-	{
-		do
-		{
-			call Go2D 782 -17 -600 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 757 -17 -551 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 717 -17 -519 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 662 -17 -504 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 582 -17 -533 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 541 -17 -593 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 540 -17 -676 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 575 -17 -726 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 618 -17 -757 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 677 -17 -758 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 711 -17 -705 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 763 -17 -711 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call Go2D 785 -17 -652 10 TRUE
-			call getChest "Auliffe Chaoswind's Treasure"
-			call IsPresent "Auliffe Chaoswind's Treasure" 5000
-		}
-		while (${Return})
-	}
+	oc !c -AcceptReward
+	wait 50
 	oc !c -revive All 0
 	oc !c -Evac	
 }
@@ -432,8 +406,9 @@ function step008()
 	do
 	{
 		wait 10
+		echo ${Actor["a virulent sandstorm"].X} [-770|-750] ${Actor["a virulent sandstorm"].Z} [-900|-880]
 	}
-	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -890)
+	while (${Actor["a virulent sandstorm"].Z} > -750 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -880)
 	echo "GO GO GO"	
 	oc !c -CS_Set_ChangeCampSpotBy all 60 0 0
 	wait 40
@@ -497,14 +472,16 @@ function step009()
 		if (!${Zone.Name.Equal["Coliseum of Valor"]})
 		{
 			call MoveCloseTo "zone_to_valor"
-			OgreBotAPI:Special["All"]
+			oc !c -Zone
 		}
 		wait 200
 	}
 	while (!${Zone.Name.Equal["Coliseum of Valor"]})
-	oc !c -Zone	
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
+	relay all ogre
+	wait 200
+	
 }
 function DrainPower(string Named)
 {

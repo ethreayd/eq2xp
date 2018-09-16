@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 
 function main(bool NoShiny, bool Heroic)
 {
@@ -30,7 +31,7 @@ function main(bool NoShiny, bool Heroic)
 			else
 			{
 				Counter:Set[0]
-				Resetting Counter : I'm not dead !!!
+				echo Resetting Counter : I'm not dead !!!
 			}
 			call CheckStuck ${loc0}
 			if (${Return})
@@ -99,7 +100,7 @@ function main(bool NoShiny, bool Heroic)
 					wait 100
 					call goCoV
 				}
-				if (${Heroic} && ${Return}<100 && ${Restart}<2)
+				if (${Heroic} && ${Return}<100 && ${Restart}<10)
 				{
 					echo LDR: if (${Heroic} && ${Return}<100 && ${Restart}<2)
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
@@ -110,7 +111,7 @@ function main(bool NoShiny, bool Heroic)
 				}
 				if (${Heroic} && ${Restart}>1)
 				{
-					echo LDR: if (${Heroic} && ${Restart}>1)
+					echo LDR: if (${Heroic} && ${Restart}>9)
 					
 					echo Zone is too hard for this team - Exiting
 					oc !c -pause
