@@ -8,13 +8,16 @@ variable(script) bool AutoRez
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
-
 	variable int laststep=7
+	relay all ogre
+	wait 200
 	oc !c -resume
 	oc !c -letsgo
 	if (!${Script["livedierepeat"](exists)})
 		run EQ2Ethreayd/livedierepeat ${NoShiny} TRUE
-	 
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
+	
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -121,7 +124,11 @@ function step002()
 	oc !c -joustout
 	wait 20
 	
-	oc !c -CS_Set_ChangeCampSpotBy All -70 0 0
+	oc !c -CS_Set_ChangeCampSpotBy All -70 0 -30
+	wait 50
+	eq2execute gsay Set up for ${Named}
+	wait 20
+	eq2execute gsay Set up for ${Named}
 	
 	call TanknSpank "${Named}" 100
 	wait 100
@@ -501,5 +508,4 @@ atom HandleAllEvents(string Message)
 	{
 		oc !c -cs-jo-ji All Casters
 	}
-	
 }

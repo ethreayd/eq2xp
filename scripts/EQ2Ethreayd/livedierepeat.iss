@@ -34,7 +34,7 @@ function main(bool NoShiny, bool Heroic)
 				echo Resetting Counter : I'm not dead !!!
 			}
 			call CheckStuck ${loc0}
-			if (${Return})
+			if (${Return} && !${Me.InCombatMode} )
 			{
 				Stucky:Inc
 				echo Stucky: ${Stucky}

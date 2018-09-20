@@ -28,6 +28,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	}
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
+	
 	if (${setspeed}==0)
 		speed:Set[3]
 	else
@@ -259,17 +262,18 @@ function step006()
 		Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 		OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",50]
-		call DMove 224 396 43 2
+		call DMove 224 396 43 2 30 TRUE
 		wait 20
 		oc !c -cs-jo-ji All Casters
 		wait 10
-		call DMove 209 392 42 2
+		call DMove 209 392 42 2 30 TRUE
 		wait 20
 		oc !c -CampSpot ${Me.Name} 1 200
 		wait 10
 		echo must kill "${Named}"
 		oc !c -joustin
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+		
 		call DMove 182 393 19 3 30 TRUE
 		call DMove 190 394 -3 3 30 TRUE
 		oc !c -joustout
@@ -291,8 +295,11 @@ function step006()
 		wait 20
 		oc !c -acceptreward
 		call Loot
+		oc !c -Come2Me ${Me.Name} All 3
 		call DMove 291 360 -41 3 30 TRUE
+		oc !c -Come2Me ${Me.Name} All 3
 		call DMove 276 333 -102 3 30 TRUE
+		oc !c -Come2Me ${Me.Name} All 3
 		call DMove 131 252 -131 3
 		call DMove 107 226 -190 3 
 		call DMove 165 181 -238 3 
@@ -318,7 +325,7 @@ function step007()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    		
 	call DMove 35 94 -228 ${speed} ${FightDistance}
-	call DMove 12 97 -191 ${speed} ${FightDistance}
+	call DMove 12 97 -191 ${speed} ${FightDistance} TRUE
 	oc !c -CampSpot
 	oc !c -joustout
 	echo must kill "${Named}"
@@ -349,7 +356,8 @@ function step008()
 	call DMove -49 126 -223 3 30 TRUE TRUE
 	wait 20
 	oc !c -CampSpot 
-		
+	if (${Script["ToonAssistant"](exists)})
+		relay all Script["ToonAssistant"]:Pause
 	if (${Me.Loc.Y}<170)
 	{
 		eq2execute gsay Set up for Rallius Rattican
@@ -366,6 +374,9 @@ function step008()
 	call Loot
 	wait 50
 	oc !c -acceptreward
+	if (${Script["ToonAssistant"](exists)})
+		relay all Script["ToonAssistant"]:Resume
+	
 }
 function step009()
 {
@@ -404,7 +415,9 @@ function ClimbingFMountain()
 {
 	CounterM:Set[0]
 	wait 300
-	ogre navtest node1
+	oc !c -Revive All 0
+	wait 100
+	relay all ogre navtest node1
 	if (!${Fight})
 		call DMove 308 97 -243 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
@@ -516,6 +529,10 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 			endscript RestartZone
 		runscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
+	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
+	{
+		 oc !c -Come2Me ${Me.Name} ${Speaker} 3
+	}
 }
 
 atom HandleAllEvents(string Message)
@@ -527,7 +544,7 @@ atom HandleAllEvents(string Message)
 		CounterM:Set[0]
 		target ${Me.Name}
 		press -release MOVEFORWARD
-		ogre navtest hide1
+		relay all ogre navtest hide1
 		press -release MOVEFORWARD
 		eq2execute merc backoff
 	}
@@ -548,7 +565,7 @@ atom HandleAllEvents(string Message)
 		target ${Me.Name}
 		CounterM:Set[0]
 		press -release MOVEFORWARD
-		ogre navtest node1
+		relay all ogre navtest node1
 		press -release MOVEFORWARD
 		eq2execute merc ranged
 		Fight:Set[FALSE]

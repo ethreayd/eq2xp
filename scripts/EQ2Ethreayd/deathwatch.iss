@@ -17,7 +17,7 @@ function main()
 			if ${Me.IsDead}
 			{
 				Counter:Inc
-				echo Counter: ${Counter}
+				echo Counter (deathwatch): ${Counter}
 			}
 			else
 				Counter:Set[0]

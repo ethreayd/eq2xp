@@ -38,6 +38,7 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["ToonAssistant"]
 	ScriptsToRun:Insert["wrap"]
 	ScriptsToRun:Insert["RestartZone"]
 	ScriptsToRun:Insert["deathwatch"]
@@ -68,4 +69,6 @@ function main()
 			endscript "${ScriptsToRun[${x}]}"		
 		}
 	}
+	press -release w
+	
 }

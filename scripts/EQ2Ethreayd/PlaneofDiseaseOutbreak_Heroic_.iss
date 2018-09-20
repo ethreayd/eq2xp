@@ -28,6 +28,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	}
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
+	
 	if (${setspeed}==0)
 		speed:Set[3]
 	else
@@ -317,7 +320,7 @@ function step007()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
    		
 	call DMove 35 94 -228 ${speed} ${FightDistance}
-	call DMove 12 97 -191 ${speed} ${FightDistance}
+	call DMove 12 97 -191 ${speed} ${FightDistance} TRUE
 	oc !c -CampSpot
 	oc !c -joustout
 	echo must kill "${Named}"

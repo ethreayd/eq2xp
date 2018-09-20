@@ -1103,6 +1103,30 @@ function DescribeItemInventory(string ItemName)
         while ${ItemIterator:Next(exists)}
     }
 }
+function DetectCircles(float Distance, string Color)
+{ 
+	variable index:actor Actors
+    variable iterator ActorIterator
+	variable int Counter
+	echo in DetectCircles
+    EQ2:QueryActors[Actors]
+    Actors:GetIterator[ActorIterator]
+	Distance:Set[10]
+    if ${ActorIterator:First(exists)}
+    {       
+		do
+		{
+			;qecho if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
+			if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
+			{
+				Counter:Inc
+			}
+		}
+        while (${ActorIterator:Next(exists)})
+	}
+	return ${Counter}
+	echo out DetectCircles
+}
 function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
 {
 	return ${Math.Distance[${X1},${Y1},${Z1},${X2},${Y2},${Z2}]}
@@ -1146,7 +1170,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			{
 				Stucky:Inc
 				SuperStucky:Inc
-				echo Stucky=${Stucky} / ${SuperStucky}
+				echo DMove:Stucky=${Stucky} / ${SuperStucky}
 			}
 			if (${Stucky}>2)
 			{
@@ -1536,6 +1560,16 @@ function GroupDistance()
 	}	
 	return ${MaxDistance}
 }
+function HurryUp(int Distance)
+{
+	variable int i
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].Distance}>${Distance})
+			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
+	}
+}
+
 function GuildH()
 {
 	echo Repair
@@ -2507,10 +2541,17 @@ function waitfor_Combat()
 }
 function WaitforGroupDistance(int Distance)
 {
+	variable int Counter
 	echo waiting for group to be in a ${Distance}m radius
 	do
 	{
 		wait 10
+		Counter:Inc
+		if (${Counter}>30)
+		{
+			call HurryUp ${Distance}
+			Counter:Set[0]
+		}	
 		call GroupDistance
 	}
 	while (${Return}>${Distance})
@@ -2589,29 +2630,4 @@ function WalkWithTheWind(float X, float Y, float Z)
 		call TestArrivalCoord ${X} ${Y} ${Z} 10 TRUE
 	}
 	while (!${Return})
-}
-
-function DetectCircles(float Distance, string Color)
-{ 
-	variable index:actor Actors
-    variable iterator ActorIterator
-	variable int Counter
-	echo in DetectCircles
-    EQ2:QueryActors[Actors]
-    Actors:GetIterator[ActorIterator]
-	Distance:Set[10]
-    if ${ActorIterator:First(exists)}
-    {       
-		do
-		{
-			;qecho if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
-			if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
-			{
-				Counter:Inc
-			}
-		}
-        while (${ActorIterator:Next(exists)})
-	}
-	return ${Counter}
-	echo out DetectCircles
 }

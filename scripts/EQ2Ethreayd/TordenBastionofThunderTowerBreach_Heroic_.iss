@@ -33,6 +33,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	FightDistance:Set[30]
 	
 	echo speed set to ${speed}
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
+
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
 	if (!${NoShiny})
