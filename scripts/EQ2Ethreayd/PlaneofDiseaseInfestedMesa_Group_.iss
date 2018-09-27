@@ -3,6 +3,7 @@
 variable(script) int speed
 variable(script) int FightDistance
 variable(script) bool NoShinyGlobal
+variable(script) bool ExpertZone
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
@@ -39,7 +40,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		NoShinyGlobal:Set[TRUE]
 		
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Plane of Disease: Infested Mesa [Expert Event]"
+	call isExpert "${Zone.Name}"
+	ExpertZone:Set[${Return}]
+	call waitfor_Zone "Plane of Disease: Infested Mesa" TRUE
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
@@ -47,8 +50,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	
 	oc !c -UplinkOptionChange All checkbox_settings_loot FALSE
 	oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_loot TRUE
-	
-	oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
+	if (${ExpertZone})
+		oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
 	echo setting speed at ${speed}/3 and Fight Distance at ${FightDistance}m
 	oc !c -OgreFollow All ${Me.Name}
 

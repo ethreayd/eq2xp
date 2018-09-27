@@ -41,7 +41,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous" TRUE
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-
+	if (${ExpertZone})
+		oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	oc !c -OgreFollow All ${Me.Name}

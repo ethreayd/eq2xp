@@ -10,6 +10,7 @@ variable(script) bool Curing
 variable(script) bool WaitCured
 variable(script) bool Toggle
 variable(script) bool NoShinyGlobal
+variable(script) bool ExpertZone
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
@@ -48,6 +49,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		stepstart:Set[3]
 	}
 	echo zone is ${Zone.Name}
+	call isExpert "${Zone.Name}"
+	ExpertZone:Set[${Return}]
 	call waitfor_Zone "Plane of Disease: Outbreak" TRUE
 	ISXEQ2:EnableAfflictionEvents
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
@@ -59,8 +62,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	
 	oc !c -UplinkOptionChange All checkbox_settings_loot FALSE
 	oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_loot TRUE
-	
-	oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
+	if (${ExpertZone})
+		oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
 	echo setting speed at ${speed}/3 and Fight Distance at ${FightDistance}m
 	oc !c -OgreFollow All ${Me.Name}
 
