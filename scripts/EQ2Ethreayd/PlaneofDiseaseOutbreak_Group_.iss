@@ -48,7 +48,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		stepstart:Set[3]
 	}
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Plane of Disease: Outbreak [Expert]"
+	call waitfor_Zone "Plane of Disease: Outbreak" TRUE
 	ISXEQ2:EnableAfflictionEvents
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
