@@ -9,6 +9,7 @@ variable(script) int IndexCounter=1
 variable(script) bool Curing
 variable(script) bool WaitCured
 variable(script) bool Toggle
+variable(script) bool NoShinyGlobal
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
@@ -37,7 +38,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		speed:Set[${setspeed}]
 	if (!${NoShiny})
 		run EQ2Ethreayd/autoshinies 100 ${speed} 
-	
+	NoShinyGlobal:Set[${NoShiny}]
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -264,6 +265,8 @@ function step006()
 		OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",50]
 		call DMove 224 396 43 2 30 TRUE
 		wait 20
+		
+		relay all end ToonAssistant
 		oc !c -cs-jo-ji All Casters
 		wait 10
 		call DMove 209 392 42 2 30 TRUE
@@ -283,7 +286,8 @@ function step006()
 			call IsPresent "${Named}"
 		}
 		while (${Return})
-	
+		if (!${Script["ToonAssistant"](exists)})
+			relay all run EQ2Ethreayd/ToonAssistant
 		oc !c -ChangeCastStackListBoxItemByTag ALL autorez FALSE
 		oc !c -ChangeCastStackListBoxItemByTag ALL absorbmagic FALSE
 		oc !c -letsgo
@@ -294,13 +298,27 @@ function step006()
 		eq2execute summon
 		wait 20
 		oc !c -acceptreward
+		wait 100
+		eq2execute summon
+		call CheckCombat
 		call Loot
 		oc !c -Come2Me ${Me.Name} All 3
 		call DMove 291 360 -41 3 30 TRUE
 		oc !c -Come2Me ${Me.Name} All 3
 		call DMove 276 333 -102 3 30 TRUE
 		oc !c -Come2Me ${Me.Name} All 3
+		wait 100
+		call CheckCombat
+		call DMove 281 377 -17 3
+		call DMove 237 392 10 3
+		eq2execute summon
+		call DMove 217 394 38 3
+		eq2execute summon
+		call Loot
+		call DMove 291 360 -41 3
+		call DMove 276 333 -102 3
 		call DMove 131 252 -131 3
+		eq2execute summon
 		call DMove 107 226 -190 3 
 		call DMove 165 181 -238 3 
 		call DMove 271 118 -205 3 
@@ -326,15 +344,12 @@ function step007()
    		
 	call DMove 35 94 -228 ${speed} ${FightDistance}
 	call DMove 12 97 -191 ${speed} ${FightDistance} TRUE
+	oc !c -Come2Me ${Me.Name} All 3
+	wait 50
 	oc !c -CampSpot
 	oc !c -joustout
-	echo must kill "${Named}"
-	do
-	{
-		wait 10
-		call IsPresent "${Named}"
-	}
-	while (${Return})
+	call TanknSpank "${Named}"
+	
 	oc !c -letsgo
 	eq2execute summon
 	wait 50
@@ -355,12 +370,13 @@ function step008()
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	call DMove -49 126 -223 3 30 TRUE TRUE
 	wait 20
-	oc !c -CampSpot 
-	if (${Script["ToonAssistant"](exists)})
-		relay all Script["ToonAssistant"]:Pause
+	oc !c -CampSpot
+	oc !c -joustout
+	relay all end ToonAssistant
 	if (${Me.Loc.Y}<170)
 	{
-		eq2execute gsay Set up for Rallius Rattican
+		eq2execute gsay Set up for ${Named}
+		eq2execute gsay Set up for
 	}
 	do
 	{
@@ -370,13 +386,12 @@ function step008()
 	while (${Return})
 	relay all OgreBotAPI:CancelMaintained["All","Singular Focus"]
 	oc !c -letsgo
+	wait 100
+	call CheckCombat
 	eq2execute summon
 	call Loot
 	wait 50
 	oc !c -acceptreward
-	if (${Script["ToonAssistant"](exists)})
-		relay all Script["ToonAssistant"]:Resume
-	
 }
 function step009()
 {
@@ -416,7 +431,9 @@ function ClimbingFMountain()
 	CounterM:Set[0]
 	wait 300
 	oc !c -Revive All 0
-	wait 100
+	wait 300
+	relay all ogre navtest node1
+	wait 200
 	relay all ogre navtest node1
 	if (!${Fight})
 		call DMove 308 97 -243 3 ${FightDistance} FALSE TRUE
@@ -431,7 +448,7 @@ function ClimbingFMountain()
 	if (!${Fight})
 		call DMove 120 246 -141 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 257 321 -111 3 ${FightDistance} FALSE TRUE
+		call DMove 259 325 -102 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
 		call DMove 283 338 -84 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
@@ -567,7 +584,6 @@ atom HandleAllEvents(string Message)
 		press -release MOVEFORWARD
 		relay all ogre navtest node1
 		press -release MOVEFORWARD
-		eq2execute merc ranged
 		Fight:Set[FALSE]
 		QueueCommand call ClimbingFMountain
 	}

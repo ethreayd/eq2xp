@@ -21,8 +21,9 @@ function main()
 			}
 			else
 				Counter:Set[0]
+			
 		}
-		while (${GroupAlive} || !${GroupDead} || ${Counter}<10)
+		while ((${GroupAlive} || !${GroupDead} || ${Counter}<10) && ${Counter}<100)
 		if ${Script["RestartZone"}](exists)}
 			endscript RestartZone
 		wait 100

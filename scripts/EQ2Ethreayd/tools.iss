@@ -15,8 +15,6 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-
-
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
 	variable float loc0 
@@ -826,13 +824,25 @@ function CheckWalking()
 			else
 				return TRUE
 }
-function CheckZone(string ZoneName)
+function CheckZone(string ZoneName, bool Partial)
 {
-	if (${Zone.Name.Equal["${ZoneName}"]})
-		return TRUE
+	if (!${Partial})
+	{
+		if (${Zone.Name.Equal["${ZoneName}"]})
+			return TRUE
+		else
+			return FALSE
+	}
 	else
-		return FALSE
-}	
+	{
+		if (${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]})
+			return TRUE
+		else
+			return FALSE
+	}
+	
+	
+}
 function ClickOn(string ActorName)
 {
 	variable index:actor Actors
@@ -1277,8 +1287,6 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 		while (!${Return} && !${Vanished} )
 	}
 }
-
-
 function getChest(string ChestName)
 {
 	echo in function getChest
@@ -1334,7 +1342,6 @@ function GetEffectIncrement(string EffectName)
 	   return 0
 	}
 }
-
 function GetObject(string ObjectName, string ObjectVerb, int Distance)
 {
 	variable index:actor Actors
@@ -1569,7 +1576,6 @@ function HurryUp(int Distance)
 			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
 	}
 }
-
 function GuildH()
 {
 	echo Repair
@@ -1581,7 +1587,6 @@ function GuildH()
 	call DepositAll "Scroll Depot"
 	wait 100
 }
-
 function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoBack)
 {
 	variable index:actor Actors
@@ -1639,7 +1644,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 						if (!${Actor["${ActorIterator.Value.Name}"].CheckCollision})
 						{
 							HasMoved:Set[TRUE]
-							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 15 FALSE TRUE
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 15 FALSE TRUE 5
 							wait 10
 						}
 					}	
@@ -1648,7 +1653,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 					{
 						wait 20
 						if (${ActorIterator.Value.Distance}<15 && !${Actor["${ActorIterator.Value.Name}"].CheckCollision})
-							call PetitPas ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}  3
+							call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}  3 15 TRUE TRUE 5
 						wait 50
 						ogre harvestlite
 						echo trying to harvest ${ItemName}
@@ -1777,12 +1782,23 @@ function isGroupDead()
 	else
 		return FALSE
 }
+function isMobAround(float Distance)
+{
+	variable index:actor Mobs
+	variable iterator MobIterator
+	EQ2:QueryActors[Mobs, Type  =- "NPC" && Distance <= ${Distance}]
+	Mobs:GetIterator[MobIterator]
+	if ${MobIterator:First(exists)}
+		return TRUE
+	else
+		return FALSE
+}
 function IsPresent(string ActorName, int Distance, bool Exact)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
-	
+
 	if (${Distance}<1)
 		Distance:Set[200]
 	
@@ -2055,7 +2071,7 @@ function OpenDoor(string ActorName)
 function PauseZone()
 {
 	variable string sQN
-	call strip_QN "${Zone.Name}"
+	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	if ${Script[${sQN}](exists)}
 		Script[${sQN}]:Pause
@@ -2064,7 +2080,7 @@ function PauseZone()
 	if ${Script[autoshinies](exists)}
 		Script[autoshinies]:Pause
 	press -release MOVEFORWARD
-	echo Clearing of zone "${Zone.Name}" is paused
+	echo Clearing of zone "${Zone.Name}" is paused (${sQN})
 }
 function PetitPas(float X, float Y, float Z, float Precision, bool Modified)
 {
@@ -2111,10 +2127,43 @@ function RelayAll(string w0, string w1, string w2, string w3, string w4, string 
 relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
 }
 
+function ReplaceStr(string inputText, string toReplace, string replaceWith)
+{
+; thanx to user01 for this one
+	variable int position = 1
+	variable int rposition = 1
+	variable string output = ""
+	variable string pre = ""
+	variable string post = ""
+	variable string remainingText = ${inputText}
+	while ${remainingText.Find["${toReplace}"](exists)}
+	{
+		pre:Set[""]
+		post:Set[""]
+		position:Set[${remainingText.Find["${toReplace}"]}]
+		rposition:Set[${Math.Calc[${remainingText.Length}-${position}-${toReplace.Length}+1]}]
+		if ${position} > 1
+		{
+			pre:Set[${remainingText.Left[${Math.Calc[${position}-1]}]}]
+		}
+		if ${rposition} > 0
+		{
+			post:Set[]
+		}
+		output:Set[${output}${pre}${replaceWith}]
+
+		remainingText:Set[${remainingText.Right[${rposition}]}]
+	}
+	if ${remainingText.Length} > 0 && !${remainingText.Equals[NULL]}
+	{
+		output:Set[${output}${remainingText}]
+	}
+	return ${output}
+}
 function ResumeZone()
 {
 	variable string sQN
-	call strip_QN "${Zone.Name}"
+	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	if ${Script[${sQN}](exists)}
 		Script[${sQN}]:Resume
@@ -2122,7 +2171,7 @@ function ResumeZone()
 		Script[livedierepeat]:Resume
 	if ${Script[autoshinies](exists)}
 		Script[autoshinies]:Resume
-	echo Resuming clearing of zone "${Zone.Name}"
+	echo Resuming clearing of zone "${Zone.Name}" (${sQN})
 }
 function ReturnEquipmentSlotHealth(string ItemSlot)
 {
@@ -2137,9 +2186,9 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 {
 	variable string sQN
-	call strip_QN "${Zone.Name}"
+	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
-	echo will clear zone "${Zone.Name}" Now !
+	echo will clear zone "${Zone.Name}" (${sQN}) Now !
     runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
     wait 5
 	if (!${NoWait})
@@ -2252,17 +2301,7 @@ function SMove(float X, float Y, float Z, float Distance, float RespectDistance,
 		while (!${Found2})
 	return ${Found2}
 }
-function isMobAround(float Distance)
-{
-	variable index:actor Mobs
-	variable iterator MobIterator
-	EQ2:QueryActors[Mobs, Type  =- "NPC" && Distance <= ${Distance}]
-	Mobs:GetIterator[MobIterator]
-	if ${MobIterator:First(exists)}
-		return TRUE
-	else
-		return FALSE
-}		
+		
 	
 function StealthMoveTo(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
 {
@@ -2350,7 +2389,7 @@ function StopHunt()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 }
-function strip_QN(string questname)
+function strip_QN(string questname, bool HeroicExpert)
 {
 	variable string sQN
 	echo IN:"${questname}"
@@ -2360,6 +2399,18 @@ function strip_QN(string questname)
 	sQN:Set["${sQN.Replace[":",""]}"]
 	sQN:Set["${sQN.Replace["'",""]}"]
 	sQN:Set["${sQN.Replace[" ",""]}"]
+	sQN:Set["${sQN.Replace[" ",""]}"]
+	if (${HeroicExpert})
+	{
+		call ReplaceStr "${sQN}" Expert Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" Heroic Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" GroupEvent Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" EventGroup Group
+		sQN:Set["${Return}"]
+	}	
 	echo OUT:"${sQN}"
 	return "${sQN}"
 }
@@ -2602,7 +2653,7 @@ function waitfor_Zone(string ZoneName)
 	do
 	{
 		wait 5
-		call CheckZone "${ZoneName}"
+		call CheckZone "${ZoneName}" TRUE
 	}
 	while (!${Return})
 	wait 100
@@ -2630,4 +2681,17 @@ function WalkWithTheWind(float X, float Y, float Z)
 		call TestArrivalCoord ${X} ${Y} ${Z} 10 TRUE
 	}
 	while (!${Return})
+}
+function isExpert(string ZoneName)
+{
+	if ${ZoneName.Right[8].Equal[\[Heroic\]]}
+		return FALSE
+	if ${ZoneName.Right[8].Equal[\[Expert\]]}
+		return TRUE
+	if ${ZoneName.Right[13].Equal[\[ExpertEvent\]]}
+		return TRUE
+	if ${ZoneName.Right[13].Equal[\[EventHeroic\]]}
+		return FALSE
+	if ${ZoneName.Right[6].Equal[\[Solo\]]}
+		return FALSE
 }

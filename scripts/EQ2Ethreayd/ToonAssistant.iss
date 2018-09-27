@@ -20,14 +20,16 @@
 function main(string questname)
 {
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-	
+	eq2execute spend_deity_point 2282608707 1
+	eq2execute spend_deity_point 2282608707 1
 	do
 	{
-		if (${Me.Power}<10)
+		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
-		if (${Me.Health}<10)
+		if (${Me.Health}<10 && !${Me.IsDead})
 			eq2execute gsay I really need healing now !
-	
+		if (${Me.IsDead})
+			eq2execute gsay Can I have a rez please ?
 		wait 1000
 	}
 	while (TRUE)
@@ -46,6 +48,7 @@ atom HandleAllEvents(string Message)
 	}
 	if (${Message.Find["Hurry up please, we have things to do"]} > 0)
 	{
-		run EQ2Ethreayd/wrap UnstuckR 20
+		if (!${Script["wrap"](exists)})
+			run EQ2Ethreayd/wrap UnstuckR 20
 	}
 }

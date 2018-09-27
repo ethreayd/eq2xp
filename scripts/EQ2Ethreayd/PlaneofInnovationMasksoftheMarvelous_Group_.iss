@@ -5,6 +5,7 @@ variable(script) bool Detected
 variable(script) bool Opened
 variable(script) bool KeyOn
 variable(script) bool AutoRez
+variable(script) bool ExpertZone
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
@@ -35,7 +36,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		stepstop:Set[${laststep}]
 	}
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous [Heroic]"
+	call isExpert "${Zone.Name}"
+	ExpertZone:Set[${Return}]
+	call waitfor_Zone "Plane of Innovation: Masks of the Marvelous" TRUE
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 
@@ -89,6 +92,7 @@ function step001()
 	oc !c -letsgo
 	eq2execute summon
 	wait 20
+	call Loot
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
@@ -97,8 +101,7 @@ function step001()
 
 	call DMove -58 3 11 ${speed} ${FightDistance}
 	call DMove -41 -10 137 ${speed} ${FightDistance}
-}	
-
+}
 function step002()
 {
 	variable string Named
@@ -114,21 +117,17 @@ function step002()
 	call CheckCombat
 	oc !c -Come2Me ${Me.Name} All 3
 	call WaitforGroupDistance 20
-	oc !c -letsgo
-	call DMove 115 3 -35 3
-	oc !c -Come2Me ${Me.Name} All 3
-	call WaitforGroupDistance 20
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Pause
 	oc !c -CampSpot
 	oc !c -joustout
 	wait 20
-	
-	oc !c -CS_Set_ChangeCampSpotBy All -70 0 -30
+	relay all end ToonAssistant
+	oc !c -CS_Set_ChangeCampSpotBy All -70 0 -10
 	wait 50
-	eq2execute gsay Set up for ${Named}
+	eq2execute gsay Set up for
 	wait 20
-	eq2execute gsay Set up for ${Named}
+	oc !c -SetUpFor
 	
 	call TanknSpank "${Named}" 100
 	wait 100
@@ -149,10 +148,11 @@ function step002()
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Resume
 }
-
 function step003()
 {
 	variable int Counter=0
@@ -175,12 +175,13 @@ function step003()
 	call WaitforGroupDistance 20
 	call AutoPassDoor "Junkyard West Door 03" 70 4 -130
 	wait 50
-	call DMove 92 3 -119 ${speed} ${FightDistance}
+	call DMove 92 3 -119 ${speed} ${FightDistance} TRUE
 	call DMove 95 3 -164 ${speed} ${FightDistance}
 	call CheckCombat
 	oc !c -CampSpot
 	oc !c -joustout
-	Ob_AutoTarget:AddActor["whirling gear",0,TRUE,FALSE]
+	if (${ExpertZone})
+		Ob_AutoTarget:AddActor["whirling gear",0,TRUE,FALSE]
 	oc !c -CS_Set_ChangeCampSpotBy All 100 0 0
 	wait 100
 	eq2execute gsay Set up for "${Named}"
@@ -332,7 +333,7 @@ function step005()
 	eq2execute gsay Set up for ${Named}
 	wait 20
 	oc !c -CS_Set_ChangeCampSpotBy All -40 0 0
-	eq2execute gsay Set up for ${Named}
+	oc !c -SetUpFor
 	call TanknSpank "${Named}" 100
 	
 	oc !c -letsgo
@@ -353,8 +354,8 @@ function step006()
 	if ${Script["livedierepeat"](exists)}
 		Script["livedierepeat"]:Pause
 	ogre qh
-	call Converse "Meldrath the Marvelous" 32 FALSE TRUE
-	wait 100
+	call Converse "Meldrath the Marvelous" 2 FALSE TRUE
+	wait 20
 	ogre end qh
 	wait 20
 	if ${Script["livedierepeat"](exists)}
@@ -362,12 +363,12 @@ function step006()
 	call DMove 91 10 -235 1 ${FightDistance}
 	call AutoPassDoor "Junkyard West Door 05" 91 10 -247
 	
-	call DMove 87 3 -265 ${speed} ${FightDistance}
+	call DMove 87 3 -265 ${speed} ${FightDistance} TRUE
 	oc !c -ofol---
 	oc !c -ofol---
 	oc !c -ofol---
-	call DMove 44 3 -272 ${speed} ${FightDistance}
-	call DMove -27 3 -278 ${speed} ${FightDistance}
+	call DMove 44 3 -272 ${speed} ${FightDistance} TRUE
+	call DMove -27 3 -278 ${speed} ${FightDistance} TRUE
 	oc !c -Come2Me ${Me.Name} All 3
 	wait 20
 	call DMove -59 17 -282 1 ${FightDistance}
@@ -401,37 +402,41 @@ function step007()
 	if (${Return})
 	{
 		target "${Named}"
-		do
+		if (${ExpertZone})
 		{
-			wait 10
-			if (${Me.IsDead})
-				AutoRez:Set[TRUE]
-			echo ${Named} at ${Actor["${Named}"].Health}%
-			if (${AutoRez} && ${Actor["${Named}"].Health}<25)
+			oc !c -ChangeCastStackListBoxItemByTag ALL wards TRUE
+			do
 			{
-				eq2execute gsay Activating AutoRez
-				AutoRez:Set[FALSE]
+				wait 10
+				if (${Me.IsDead})
+					AutoRez:Set[TRUE]
+				echo ${Named} at ${Actor["${Named}"].Health}%
+				if (${AutoRez} && ${Actor["${Named}"].Health}<25)
+				{
+					eq2execute gsay Activating AutoRez
+					AutoRez:Set[FALSE]
+				}
+				if (${Actor["${Named}"].Health}<35 && ${Actor["${Named}"].Health}>33)
+					eq2execute gsay AoE Prev
+				if (${Actor["${Named}"].Health}<27 && ${Actor["${Named}"].Health}>25)
+					eq2execute gsay Prev AoE
+				if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
+				{
+					OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
+					OgreBotAPI:UseItem_Relay[All,"Tome of the Planes"]
+					eq2execute gsay Next Prev
+				}
+				if (${Actor["${Named}"].Health}<15 && ${Actor["${Named}"].Health}>13)
+					OgreBotAPI:CastAbility["${Me.Name}","Unyielding Will"]
+				if (${Actor["${Named}"].Health}<10 && ${Actor["${Named}"].Health}>8)
+					eq2execute gsay Last Prev
+				if (${Actor["${Named}"].Health}<5 && ${Actor["${Named}"].Health}>3)
+					eq2execute gsay Ward DP
+				ExecuteQueued
+				call IsPresent "${Named}" 100 TRUE
 			}
-			if (${Actor["${Named}"].Health}<35 && ${Actor["${Named}"].Health}>33)
-				eq2execute gsay AoE Prev
-			if (${Actor["${Named}"].Health}<27 && ${Actor["${Named}"].Health}>25)
-				eq2execute gsay Prev AoE
-			if (${Actor["${Named}"].Health}<19 && ${Actor["${Named}"].Health}>17)
-			{
-				OgreBotAPI:UseItem_Relay[All,"Tome of the Ascended"]
-				OgreBotAPI:UseItem_Relay[All,"Tome of the Planes"]
-				eq2execute gsay Next Prev
-			}
-			if (${Actor["${Named}"].Health}<15 && ${Actor["${Named}"].Health}>13)
-				OgreBotAPI:CastAbility["${Me.Name}","Unyielding Will"]
-			if (${Actor["${Named}"].Health}<10 && ${Actor["${Named}"].Health}>8)
-				eq2execute gsay Last Prev
-			if (${Actor["${Named}"].Health}<5 && ${Actor["${Named}"].Health}>3)
-				eq2execute gsay Ward DP
-			ExecuteQueued
-			call IsPresent "${Named}" 100 TRUE
+			while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
 		}
-		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
 	}
 	
 	eq2execute summon

@@ -2,7 +2,7 @@
 
 variable(script) int speed
 variable(script) int FightDistance
-variable(script) bool Shiny
+variable(script) bool NoShinyGlobal
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
@@ -22,7 +22,6 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		if (!${Script["deathwatch"](exists)})
 			run EQ2Ethreayd/deathwatch
 	}
-	
 	if (!${Script["ToonAssistant"](exists)})
 		relay all run EQ2Ethreayd/ToonAssistant
 	if ${Script["autoshinies"](exists)}
@@ -31,22 +30,25 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		speed:Set[3]
 	else
 		speed:Set[${setspeed}]
-	if (!${NoShiny})
-		Shiny:Set[TRUE]
-	
+		
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
 	}
-	
+	if (${NoShiny})
+		NoShinyGlobal:Set[TRUE]
+		
 	echo zone is ${Zone.Name}
-	call waitfor_Zone "Plane of Disease: Infested Mesa [Event Heroic]"
+	call waitfor_Zone "Plane of Disease: Infested Mesa [Expert Event]"
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	
 	oc !c -UplinkOptionChange All checkbox_settings_loot FALSE
 	oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_loot TRUE
 	
+	oc !c -UplinkOptionChange All checkbox_settings_forcenamedcatab TRUE
 	echo setting speed at ${speed}/3 and Fight Distance at ${FightDistance}m
 	oc !c -OgreFollow All ${Me.Name}
 
@@ -100,9 +102,10 @@ function step001()
 	Ob_AutoTarget:AddActor["Grimror",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-	
-	if (!${Actor[Grimror].IsAggro})
+	call IsPresent "The Carrion Walker"
+	if (!${Actor[Grimror].IsAggro} || ${Return})
 	{
+		oc !c -SetUpFor
 		echo Grimror not here going to Deathbone step
 		call DMove -188 240 -69 3 TRUE
 		wait 20
@@ -119,6 +122,7 @@ function step001()
 			call CheckCombat
 		
 		oc !c -cs-jo-ji All Casters
+		oc !c -SetUpFor
 		oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_movemelee TRUE
 		wait 100
 		call IsPresent "pus-filled boil"
@@ -155,7 +159,8 @@ function step002()
 	variable string Named
 	variable int Counter
 	Named:Set["The Carrion Walker"]
-	if (!${Actor[Grimror].IsAggro})
+	call IsPresent "${Named}"
+	if (!${Actor[Grimror].IsAggro} || ${Return})
 	{
 		echo Grimror not here going to Carrion step
 		oc !c -letsgo
@@ -222,11 +227,16 @@ function step002()
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 		call DMove -198 241 -36 3 
 	}
+	call DMove -198 241 -36 3 30 TRUE
 	oc !c -CampSpot
 	if (!${Actor[Grimror].IsAggro})
 	{
-		wait 100
-		call CheckCombat
+		call IsPresent "${Named}"
+		if (!${Return})
+		{
+			wait 100
+			call CheckCombat
+		}
 		do
 		{
 			wait 10
@@ -235,7 +245,15 @@ function step002()
 			echo waiting for "${Named}" ${Counter}/100
 		}
 		while (!${Return} && ${Counter}<100)
+		oc !c -SetUpFor
 		wait 100
+		
+		call IsPresent "${Named}"
+		if (!${Return})
+		{
+			oc !c -letsgo
+			call step002
+		}
 		do
 		{
 			wait 10
@@ -254,6 +272,7 @@ function step003()
 {
 	variable string Named
 	variable int Counter
+	oc !c -ChangeCastStackListBoxItemByTag ALL wards TRUE
 	Named:Set["Grimror"]
 	eq2execute gsay Set up for ${Named}
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",40]
@@ -269,13 +288,15 @@ function step003()
 	while (!${Return} && ${Counter}<100)
 	oc !c -joustout
 	wait 100
+	
+	oc !c -SetUpFor
 	do
 	{
 		wait 10
 		call IsPresent "${Named}"
 	}
 	while (${Return})
-	
+	oc !c -ChangeCastStackListBoxItemByTag ALL wards FALSE
 	oc !c -acceptreward
 	oc !c -acceptreward
 	eq2execute summon
@@ -297,12 +318,11 @@ function step004()
 	oc !c -Evac
 	wait 200
 	oc !c -OgreFollow All ${Me.Name}
-	call DMove 101 250 -93 3
 	do
 	{
 		if (!${Zone.Name.Equal["Coliseum of Valor"]})
 		{
-			call MoveCloseTo "zone_to_valor"
+			call MoveCloseTo "Zone Exit"
 			oc !c -Zone	
 		}
 		wait 200
@@ -317,7 +337,8 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo group seems dead - restarting zone
 		if ${Script["RestartZone"}](exists)}
 			endscript RestartZone
-		runscript EQ2Ethreayd/RestartZone ${MyStep} 0 ${speed} ${NoShinyGlobal}
+		if (!${Script["RestartZone"}](exists)})
+			runscript EQ2Ethreayd/RestartZone ${MyStep} 0 ${speed} ${NoShinyGlobal}
 	}
 	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
 	{

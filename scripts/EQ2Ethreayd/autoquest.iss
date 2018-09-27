@@ -10,7 +10,7 @@ function main(string Loop)
 	call StopHunt
 	OgreBotAPI:Revive[${Me.Name}]
 	wait 300
-	call goto_GH
+	call CastAbility "Call to Guild Hall"
 	wait 600
 	echo Shinies
 	runscript EQ2Ethreayd/gardener
@@ -22,9 +22,10 @@ function main(string Loop)
 	wait 30
 	ogre plant -t ${ToonName}
 	wait 1200
+	ogre end plant
 	ogre ${ToonName}
 	wait 900
-	call goto_GH
+	call CastAbility "Call to Guild Hall"
 	wait 600
 	do
 	{
@@ -37,5 +38,5 @@ function main(string Loop)
 	wait 100
 	call goCoV
 	wait 100
-	run EQ2Ethreayd/${Loop}
+	relay is1 run EQ2Ethreayd/${Loop}
 }
