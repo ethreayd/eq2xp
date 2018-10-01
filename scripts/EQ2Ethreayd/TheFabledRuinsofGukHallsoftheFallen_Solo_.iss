@@ -420,8 +420,10 @@ function step003()
 	call DMove -28 -33 -370 3 FALSE TRUE
 	wait 20
 	call DMove -18 -32 -380 3 FALSE TRUE
-	oc !c -CampSpot {Me.Name}
+	oc !c -CampSpot ${Me.Name}
+	oc !c -CampSpot ${Me.Group[1].Name}
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -60 0 -6
+	oc !c -CS_Set_ChangeCampSpotBy ${Me.Group[1].Name} -60 0 -6
 	call TanknSpank "${Named}" 100
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -433,6 +435,7 @@ function step003()
 	call waitfor_Power 50
 	CurrentStep:Inc
 	call StopHunt
+	call SoloLetsgo
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -22 -32 -378 3 30 FALSE TRUE
 	call DMove -46 -68 -322 3 30 TRUE TRUE
