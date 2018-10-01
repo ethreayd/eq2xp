@@ -19,22 +19,25 @@ function main(float Distance, int speed, float height)
 		call IsPresent ? ${Distance} TRUE
 		if (${Return} && !${Me.InCombatMode})
 		{
+			echo IN AUTOSHINY
 			call Abs ${Math.Calc64[${Me.Loc.Y}-${Actor["?"].Y}]}
 			if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
 			{
 				echo shiny detected at altitude difference Y=${Return}(<${height})
-				call PauseZone
+				call PauseZone TRUE
 				do
 				{
 					wait 10 
 				}
 				while (!${Me.IsIdle})
+				echo I am Idle (in autoshiny)
 				call Abs ${Math.Calc64[${Me.Loc.Y}-${Actor["?"].Y}]}
-				if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
+				if (${Return}<${height} && ${Actor["?"].Distance}<${Distance} && !${Actor["?"].CheckCollision} )
 					call Harvest ? ${Distance} ${speed} TRUE TRUE
 				wait 10
 				call ResumeZone
 			}
+			echo OUT AUTOSHINY
 		}
 	}
 	while (${Script[${sQN}](exists)} && !${Me.IsDead})

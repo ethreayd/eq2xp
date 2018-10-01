@@ -1601,7 +1601,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 		Distance:Set[100]
 	if (${speed}<1)
 		speed:Set[1]
-	echo entering Harvest function
+	echo entering Harvest function ${ItemName} ${Distance} ${speed} ${is2D} ${GoBack}
 	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
@@ -2068,7 +2068,7 @@ function OpenDoor(string ActorName)
 		while ${ActorIterator:Next(exists)}
 	}
 }
-function PauseZone()
+function PauseZone(bool Catch22)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}" TRUE
@@ -2077,7 +2077,7 @@ function PauseZone()
 		Script[${sQN}]:Pause
 	if ${Script[livedierepeat](exists)}
 		Script[livedierepeat]:Pause
-	if ${Script[autoshinies](exists)}
+	if (${Script[autoshinies](exists)} && !${Catch22})
 		Script[autoshinies]:Pause
 	press -release MOVEFORWARD
 	echo Clearing of zone "${Zone.Name}" is paused (${sQN})
@@ -2304,8 +2304,19 @@ function SMove(float X, float Y, float Z, float Distance, float RespectDistance,
 		while (!${Found2})
 	return ${Found2}
 }
-		
-	
+function SoloFollow()
+{
+	if (${Me.GroupCount}==1)
+		eq2execute merc resume
+	if (${Me.GroupCount}==2)
+		oc !c -OgreFollow ${Me.Group[1].Name} ${Me.Name}
+}
+function SoloLetsgo()
+{
+	oc !c -letsgo ${Me.Name}
+	if (${Me.GroupCount}==2)
+		oc !c -letsgo ${Me.Group[1].Name}
+}	
 function StealthMoveTo(string ItemName, float Distance, float RespectDistance, int Precision, bool CheckCollision)
 {
 	variable index:actor Actors

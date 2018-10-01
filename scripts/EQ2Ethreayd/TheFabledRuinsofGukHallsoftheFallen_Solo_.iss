@@ -26,7 +26,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=5
 	oc !c -LoadProfile Solo ${Me.Name}
 	wait 150
-	oc !c -letsgo ${Me.Name}
+	call SoloLetsgo
 	if ${Script["solodeath"](exists)}
 		endscript solodeath
 	run EQ2Ethreayd/solodeath ${NoShiny}
@@ -41,10 +41,11 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	echo speed set to ${speed}
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
+	
 	if (!${NoShiny})
 		run EQ2Ethreayd/autoshinies 50 ${speed} 
-
-	
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
 		stepstop:Set[${laststep}]
@@ -76,7 +77,7 @@ function step000()
 {
 	variable string Named
 	Named:Set["an Ancient Fungoid"]
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove -9 0 -5 3
@@ -86,13 +87,17 @@ function step000()
 	call DMove 68 -23 -49 3
 	call DMove 68 -33 -81 3
 	call DMove 41 -33 -108 3
-	call DMove 72 -33 -146 3
+	call DMove 64 -33 -133 3
+	call DMove 44 -32 -143 3
+	call DMove 40 -39 -163 3
+	call DMove 41 -33 -143 3
+	call DMove 71 -32 -138 3
 	call DMove 71 -35 -186 3
 	call waitfor_Power 98
 	call waitfor_Health 98
 	call DMove 102 -37 -195 3
 	call TanknSpank "${Named}" 100
-	oc !c -letsgo ${Me.Name} 
+	call SoloLetsgo 
 	wait 100
 	eq2execute summon
 	wait 50
@@ -110,7 +115,7 @@ function step001()
 	variable string Named
 	variable int Counter
 	Named:Set["Rideepa the Prideful"]
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 90 -35 -199 3
@@ -137,9 +142,14 @@ function step001()
 	call DMove 73 -40 -121 1 30 FALSE FALSE 2
 	call DMove 81 -32 -128 3 30 FALSE FALSE 5
 	call DMove 106 -32 -115 3 
+	wait 20
 	call DMove 133 -41 -138 3
+	wait 20
 	call DMove 145 -44 -157 3
 	call DMove 129 -41 -164 3
+	oc !c -ofol--- ${Me.Group[1].Name}
+	oc !c -ofol--- ${Me.Group[1].Name}
+	oc !c -ofol--- ${Me.Group[1].Name}
 	call DMove 141 -41 -183 3
 	call DMove 151 -43 -186 3
 	call DMove 166 -51 -173 3
@@ -149,7 +159,7 @@ function step001()
 	call DMove 164 -61 -238 3 30 TRUE FALSE 10
 	oc !c -CampSpot ${Me.Name}
 	call TanknSpank "${Named}" 100
-	oc !c -letsgo ${Me.Name}
+	call SoloLetsgo
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -165,7 +175,7 @@ function step002()
 	variable string Named
 	variable int ActorID
 	Named:Set["Froppit the Everliving"]
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 
@@ -225,8 +235,8 @@ function step002()
 	
 	call TanknSpank "${Named}"
 	call waitfor_Power 50
-	oc !c -letsgo ${Me.Name} 
-	eq2execute merc resume
+	call SoloLetsgo 
+	call SoloFollow
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 100
 	eq2execute summon
@@ -240,7 +250,7 @@ function step003()
 {
 	variable string Named
 	Named:Set["Molinap the Destructor"]
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 
@@ -249,7 +259,7 @@ function step003()
 	call DMove -56 -43 -259 1 30 FALSE FALSE 3
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Pause
-	eq2execute merc resume
+	call SoloFollow
 	face -54 -43 -260
 	call PKey F9 5
 	call PKey PAGEDOWN 20
@@ -398,6 +408,8 @@ function step003()
 	call DMove -33 -69 -352 3
 	call DMove -53 -70 -349 1
 	call DMove -69 -65 -358 3
+	if ${Script["autoshinies"](exists)}
+			Script["autoshinies"]:Pause
 	call DMove -47 -62 -370 3
 	call DMove -5 -55 -364 3
 	call DMove -11 -51 -312 3
@@ -406,8 +418,10 @@ function step003()
 	call DMove -89 -41 -337 3
 	call DMove -83 -41 -372 3
 	call DMove -28 -33 -370 3 FALSE TRUE
-	call DMove -27 -32 -387 3 FALSE TRUE
-	call DMove -77 -31 -386 3 FALSE TRUE
+	wait 20
+	call DMove -18 -32 -380 3 FALSE TRUE
+	oc !c -CampSpot {Me.Name}
+	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -60 0 -6
 	call TanknSpank "${Named}" 100
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -448,7 +462,7 @@ function step004()
 	variable string Named
 	Named:Set["a Ghoul Usurper"]
 	
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	
@@ -541,7 +555,7 @@ function step004()
 	
 	call TanknSpank "${Named}" 100
 	
-	oc !c -letsgo ${Me.Name}
+	call SoloLetsgo
 	wait 100
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -559,7 +573,7 @@ function step005()
 	variable string Named
 	Named:Set["Lord Kurpep"]
 	
-	eq2execute merc resume
+	call SoloFollow
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 150 -64 -255 3
@@ -578,7 +592,7 @@ function step005()
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -40
 	call TanknSpank "${Named}" 100
 	
-	oc !c -letsgo ${Me.Name}
+	call SoloLetsgo
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
@@ -596,6 +610,10 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	if (${Speaker.Equal["Molinap the Destructor"]})
 	{
 		Me.Inventory["Shiny Golden Trinket"]:Use
+	}
+	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
+	{
+		 oc !c -Come2Me ${Me.Name} ${Speaker} 3
 	}
 }
 atom HandleAllEvents(string Message)
