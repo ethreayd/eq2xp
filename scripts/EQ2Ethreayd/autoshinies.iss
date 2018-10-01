@@ -9,7 +9,7 @@ function main(float Distance, int speed, float height)
 		speed:Set[1]
 	if (${height}<1)
 		height:Set[10]
-	call strip_QN "${Zone.Name}"
+	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	echo auto harvest shiny in zone "${Zone.Name}" ACTIVATED
     
@@ -23,9 +23,7 @@ function main(float Distance, int speed, float height)
 			if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
 			{
 				echo shiny detected at altitude difference Y=${Return}(<${height})
-				Script[${sQN}]:Pause
-				press -release MOVEFORWARD
-				echo Paused
+				call PauseZone
 				do
 				{
 					wait 10 
@@ -35,8 +33,7 @@ function main(float Distance, int speed, float height)
 				if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
 					call Harvest ? ${Distance} ${speed} TRUE TRUE
 				wait 10
-				Script[${sQN}]:Resume
-				echo Resumed
+				call ResumeZone
 			}
 		}
 	}

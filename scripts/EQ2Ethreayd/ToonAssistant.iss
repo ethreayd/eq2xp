@@ -20,6 +20,7 @@
 function main(string questname)
 {
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
 	do
@@ -30,11 +31,11 @@ function main(string questname)
 			eq2execute gsay I really need healing now !
 		if (${Me.IsDead})
 			eq2execute gsay Can I have a rez please ?
+		ExecuteQueued
 		wait 1000
 	}
 	while (TRUE)
 }
-
  
 atom HandleAllEvents(string Message)
 {
@@ -46,9 +47,20 @@ atom HandleAllEvents(string Message)
 	{
 		 eq2execute gsay ${Message}
 	}
+	
 	if (${Message.Find["Hurry up please, we have things to do"]} > 0)
 	{
 		if (!${Script["wrap"](exists)})
 			run EQ2Ethreayd/wrap UnstuckR 20
+	}
+}
+atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
+{
+	if (${Message.Find["Can I have a rez please"]} > 0)
+	{
+		if (!${Me.InCombatMode})
+		{
+			oc !c -CastAbilityOnPlayer ${Me.Name} "Gather Remains" ${Speaker} 
+		}
 	}
 }

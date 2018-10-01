@@ -1287,7 +1287,7 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 		while (!${Return} && !${Vanished} )
 	}
 }
-function getChest(string ChestName)
+function getChest(string ChestName, bool NoRetry)
 {
 	echo in function getChest
 	call IsPresent "${ChestName}" 30
@@ -1306,7 +1306,7 @@ function getChest(string ChestName)
 			oc !c -UplinkOptionChange All checkbox_settings_loot TOGGLE
 			call IsPresent "${ChestName}" 30
 		}
-		while (${Return})
+		while (${Return} && !${NoRetry} )
 	}
 }		
 function GetEffectIncrement(string EffectName)
@@ -1877,17 +1877,17 @@ function logout_login(int secs)
 	ogre ${ToonName}
 	wait 600
 }
-function Loot()
+function Loot(bool NoRetry)
 {
 	echo Autoloot Running now !
 	wait 50
-	call getChest "Exquisite Chest"
+	call getChest "Exquisite Chest" ${NoRetry} 
 	wait 10
-	call getChest "Small Chest"
+	call getChest "Small Chest" ${NoRetry} 
 	wait 10
-	call getChest "Treasure Chest"
+	call getChest "Treasure Chest" ${NoRetry} 
 	wait 10
-	call getChest "Ornate Chest"
+	call getChest "Ornate Chest" ${NoRetry} 
 	wait 10
 	echo End of Autoloot
 }	
@@ -2189,7 +2189,10 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" (${sQN}) Now !
-    runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
+	if (!${Script[${sQN}](exists)})
+		runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
+	else
+		Script[${sQN}]:Resume
     wait 5
 	if (!${NoWait})
 	{

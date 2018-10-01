@@ -3,6 +3,7 @@ function main()
 	variable index:string ScriptsToRun
 	variable string sQN
 	variable int x
+	ScriptsToRun:Insert["TheFabledRuinsofGukHallsoftheFallen_Group_"]
 	ScriptsToRun:Insert["PlaneofDiseaseInfestedMesa_Group_"]
 	ScriptsToRun:Insert["PlaneofInnovationGearsintheMachine_Group_"]
 	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Group_"]

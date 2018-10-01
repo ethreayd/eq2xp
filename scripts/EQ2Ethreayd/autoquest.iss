@@ -20,13 +20,13 @@ function main(string Loop)
 	wait 300
 	UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick	
 	wait 30
-	ogre plant -t ${ToonName}
-	wait 1200
-	ogre end plant
-	ogre ${ToonName}
-	wait 900
-	call CastAbility "Call to Guild Hall"
-	wait 600
+	;ogre plant -t ${ToonName}
+	;wait 1200
+	;ogre end plant
+	;ogre ${ToonName}
+	;wait 900
+	;call CastAbility "Call to Guild Hall"
+	;wait 600
 	do
 	{
 		call Transmute "Planar Transmutation Stone"

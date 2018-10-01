@@ -93,7 +93,7 @@ function step001()
 	oc !c -letsgo
 	eq2execute summon
 	wait 20
-	call Loot
+	call Loot TRUE
 	oc !c -acceptreward
 	wait 20
 	oc !c -acceptreward
@@ -125,6 +125,8 @@ function step002()
 	wait 20
 	relay all end ToonAssistant
 	oc !c -CS_Set_ChangeCampSpotBy All -70 0 -10
+	wait 50
+	target "${Named}"
 	wait 50
 	eq2execute gsay Set up for
 	wait 20
@@ -509,9 +511,5 @@ atom HandleAllEvents(string Message)
 	{
 		echo "Electro-Charged hand swap needed"
 		QueueCommand call OpenChargedDoor
-	}
-	if (${Message.Find["way to be grounded"]} > 0)
-	{
-		oc !c -cs-jo-ji All Casters
 	}
 }

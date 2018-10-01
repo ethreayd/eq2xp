@@ -186,13 +186,13 @@ function step004()
 	{
 		call DMove 246 63 -353 3
 		call DMove 162 72 -355 3
-		call DMove 150 78 -336 3
-	
+		call DMove 142 74 -341 3
+		oc !c -cs-jo-ji All Casters
 		Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 		Ob_AutoTarget:AddActor["Malarian Larva",0,TRUE,FALSE]
 	
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-		call DMove 125 72 -363 ${speed} ${FightDistance}
+		call DMove 131 74 -357 ${speed} ${FightDistance}
 	
 		echo must kill "${Named}"
 		do
@@ -206,6 +206,11 @@ function step004()
 		oc !c -AcceptReward
 		oc !c -UplinkOptionChange All checkbox_settings_loot TRUE
 		wait 50
+		oc !c -OgreFollow All ${Me.Name}
+		oc !c -ofol---
+		oc !c -ofol---
+		oc !c -ofol---
+		call WaitforGroupDistance 10
 		oc !c -UplinkOptionChange All checkbox_settings_loot FALSE
 		oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_loot TRUE
 		wait 50
@@ -214,7 +219,7 @@ function step004()
 		relay all Me.Inventory["Hirudin Extract"]:Use
 		wait 20
 		oc !c -AcceptReward
-		
+		oc !c -OgreFollow All ${Me.Name}
 		call DMove 137 74 -344 3 ${FightDistance}
 		call DMove 296 71 -323 3 ${FightDistance} TRUE
 	}	
@@ -459,7 +464,7 @@ function ClimbingFMountain()
 	if (!${Fight})
 		call DMove 250 392 4 3 ${FightDistance} FALSE TRUE
 	if (!${Fight})
-		call DMove 239 396 22 3 ${FightDistance} FALSE TRUE
+		call DMove 239 396 22 3 ${FightDistance} TRUE TRUE
 		
 	if (!${Fight})
 		OgreBotAPI:NoTarget[${Me.Name}]

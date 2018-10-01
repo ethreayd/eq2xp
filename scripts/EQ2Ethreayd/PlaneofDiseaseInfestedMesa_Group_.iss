@@ -136,9 +136,9 @@ function step001()
 			wait 10
 			call IsPresent "${Named}"
 			Counter:Inc
-			echo waiting for "${Named}" ${Counter}/100
+			echo waiting for "${Named}" ${Counter}/200
 		}
-		while (!${Return} && ${Counter}<100)
+		while (!${Return} && ${Counter}<200)
 		wait 100
 		do
 		{
@@ -277,18 +277,21 @@ function step003()
 	variable int Counter
 	oc !c -ChangeCastStackListBoxItemByTag ALL wards TRUE
 	Named:Set["Grimror"]
+	call StopHunt
+	Ob_AutoTarget:AddActor["Grimror",0,TRUE,FALSE]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	eq2execute gsay Set up for ${Named}
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",40]
 	wait 100
-	call CheckCombat
 	do
 	{
 		wait 10
-		call IsPresent "${Named}"
 		Counter:Inc
-		echo waiting for "${Named}" ${Counter}/100
+		echo waiting for "${Named}" ${Counter}/200
+		call IsPresent "${Named}"
 	}
-	while (!${Return} && ${Counter}<100)
+	while (!${Return} && ${Counter}<200)
 	oc !c -joustout
 	wait 100
 	
@@ -320,7 +323,12 @@ function step004()
 	wait 200
 	oc !c -Evac
 	wait 200
+	oc !c -letsgo
 	oc !c -OgreFollow All ${Me.Name}
+	oc !c -ofol---
+	oc !c -ofol---
+	oc !c -ofol---
+	
 	do
 	{
 		if (!${Zone.Name.Equal["Coliseum of Valor"]})
