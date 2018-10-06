@@ -588,6 +588,47 @@ function BelltoZone(string ZoneName)
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]})
 		call goto_GH
 }
+function Boost()
+{
+; from THG snacks script
+	oc !c -pause
+	if ${Me.Inventory[Dolma](exists)}
+	{
+		Me.Inventory[Dolma]:Use
+		wait 10
+	}
+	if ${Me.Inventory[Atole](exists)}
+	{
+		Me.Inventory[Atole]:Use
+		wait 10
+	}
+	if ${Me.Inventory[Chebakia](exists)}
+	{
+		Me.Inventory[Chebakia]:Use
+		wait 10
+	}
+	if ${Me.Inventory[Tejuino](exists)}
+	{
+		Me.Inventory[Tejuino]:Use
+		wait 10
+	}
+	if ${Me.Inventory[Jaffa](exists)}
+	{
+		Me.Inventory[Jaffa]:Use
+		wait 10
+	}
+	if ${Me.Inventory["Valorous Elixir of Intellect"](exists)}
+	{
+		Me.Inventory["Valorous Elixir of Intellect"]:Use
+		wait 10
+	}
+	if ${Me.Inventory["Planar Elixir of Intellect"](exists)}
+	{
+		Me.Inventory["Planar Elixir of Intellect"]:Use
+		wait 10
+	}
+	oc !c -resume
+} 
 function CastAbility(string AbilityName, bool NoWait)
 {
 	if (!${NoWait})
@@ -991,6 +1032,20 @@ function CoVMender()
 		call DMove -2 5 4 3
 	}
 }
+function CureArchetype(string Archetype)
+{
+	;variable int Counter=0
+	variable int i
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		echo getting Archetype for ${Me.Group[${i}].Class}
+		call get_Archetype "${Me.Group[${i}].Class}"
+		echo it's ${Return}
+		if (${Return.Equal[${Archetype}]})
+			oc !c -CastAbilityOnPlayer Priest Cure ${Me.Group[${i}].Name}
+	}		
+}
+
 function CurrentQuestStep()
 {
     variable index:collection:string Details    
@@ -1118,7 +1173,7 @@ function DetectCircles(float Distance, string Color)
 	variable index:actor Actors
     variable iterator ActorIterator
 	variable int Counter
-	echo in DetectCircles
+	;echo in DetectCircles
     EQ2:QueryActors[Actors]
     Actors:GetIterator[ActorIterator]
 	Distance:Set[10]
@@ -1126,7 +1181,7 @@ function DetectCircles(float Distance, string Color)
     {       
 		do
 		{
-			;qecho if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
+			;echo if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
 			if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
 			{
 				Counter:Inc
@@ -1135,7 +1190,7 @@ function DetectCircles(float Distance, string Color)
         while (${ActorIterator:Next(exists)})
 	}
 	return ${Counter}
-	echo out DetectCircles
+	;echo out DetectCircles
 }
 function Dist(float X1, float Y1, float Z1, float X2, float Y2, float Z2)
 {
@@ -1370,6 +1425,112 @@ function GetObject(string ObjectName, string ObjectVerb, int Distance)
 		face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
 		call ActivateVerb "${ObjectName}" ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} "${ObjectVerb}" TRUE
 	}	
+}
+function get_Archetype(string ToonClass)
+{
+	switch ${ToonClass}
+	{
+		case warrior
+		{
+			return fighter
+			break
+		}
+		case berserker
+		{
+			return fighter
+			break
+		}
+		case guardian
+		{
+			return fighter
+			break
+		}
+		case paladin
+		{
+			return fighter
+			break
+		}
+		case shadowknight
+		{
+			return fighter
+			break
+		}
+		case monk
+		{
+			return fighter
+			break
+		}
+		case bruiser
+		{
+			return fighter
+			break
+		}
+		case warden
+		{
+			return priest
+			break
+		}
+		case mystic
+		{
+			return priest
+			break
+		}
+		case defiler
+		{
+			return priest
+			break
+		}
+		case fury
+		{
+			return priest
+			break
+		}
+		case templar
+		{
+			return priest
+			break
+		}
+		case inquisitor
+		{
+			return priest
+			break
+		}
+		case conjuror
+		{
+			return mage
+			break
+		}
+		case necromancer
+		{
+			return mage
+			break
+		}
+		case warlock
+		{
+			return mage
+			break
+		}
+		case wizard
+		{
+			return mage
+			break
+		}
+		case illusionist
+		{
+			return mage
+			break
+		}
+		case coercer
+		{
+			return mage
+			break
+		}
+		Default
+		{
+			return scout
+			break
+		}	
+	}
 }
 function get_Potency()
 {

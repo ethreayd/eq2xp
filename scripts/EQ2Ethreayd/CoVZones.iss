@@ -82,7 +82,7 @@ function GetCoVQuests(string ZoneName, string version)
 			call DMove -117 0 -90 3 30 TRUE
 			break
 		}
-		case default
+		Default
 		{
 			call DMove -145 0 -93 3 30 TRUE
 			call Converse "Rynzon, of The Spurned" 10

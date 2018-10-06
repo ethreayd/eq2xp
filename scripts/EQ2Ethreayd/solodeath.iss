@@ -22,15 +22,7 @@ function main(bool NoShiny)
 		
 		echo Restarting Zone ${Zone.Name}
 		wait 50
-		oc !c -revive ${Me.Name} 9
-		oc !c -revive ${Me.Name} 8
-		oc !c -revive ${Me.Name} 7
-		oc !c -revive ${Me.Name} 6
-		oc !c -revive ${Me.Name} 5
-		oc !c -revive ${Me.Name} 4
-		oc !c -revive ${Me.Name} 3
-		oc !c -revive ${Me.Name} 2
-		oc !c -revive ${Me.Name} 1
+		oc !c -revive ${Me.Name} 0
 		echo waiting 1 min for death sickness
 		wait 600
 		call strip_QN "${Zone.Name}"

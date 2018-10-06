@@ -36,6 +36,10 @@ function main(string Loop)
 	while (${Return}>0)
 	ogre depot -allh -hda -llda -cda
 	wait 100
+	oc !c -ArcannaseEffigyOfRebirth All
+	wait 20
+	oc !c -ArcannaseEffigyOfRebirth All
+	wait 20
 	call goCoV
 	wait 100
 	relay is1 run EQ2Ethreayd/${Loop}
