@@ -376,6 +376,15 @@ function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, 
 		call DMove ${X} ${Y} ${Z} 3
 	}
 }
+function ActivateVerbOn(string ActorName, string verb, bool UseID)
+{
+	if ${UseID}
+		eq2execute apply_verb ${Actor[Query,Name=="${ActorName}"].ID} "${verb}"
+	else
+		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
+	wait 50
+}
+
 
 function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Precision)
 {

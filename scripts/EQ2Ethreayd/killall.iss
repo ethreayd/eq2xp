@@ -12,6 +12,7 @@ function main()
 	ScriptsToRun:Insert["loopSoH"]
 	ScriptsToRun:Insert["ShardofHateUtterContempt_Group_"]
 	ScriptsToRun:Insert["TBoTTBH_C1"]
+	ScriptsToRun:Insert["SRTTOC_C1"]
 	ScriptsToRun:Insert["Outbreak_C1"]
 	ScriptsToRun:Insert["test"]
 	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Group_"]
@@ -64,5 +65,6 @@ function main()
 		}
 	}
 	press -release w
+	oc !c -letsgo
 	
 }

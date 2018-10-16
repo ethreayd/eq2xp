@@ -6,7 +6,7 @@ variable(script) int MyStep
 variable(script) bool NoShinyGlobal
 variable(script) bool AutoRez
 
-function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny, bool ForceNamed)
 {
 
 	variable int laststep=12
@@ -121,132 +121,139 @@ function step000()
 	call DMove 14 11 -515 ${speed} ${FightDistance}
 	call DMove 14 12 -523 ${speed} ${FightDistance}
 	call DMove 14 11 -537 ${speed} ${FightDistance}
-	call DMove 50 10 -637 ${speed} ${FightDistance}
+	
 }	
 
 function step001()
 {
 	variable string Named
-	Named:Set["Inquisitor Barol"]
-	MyStep:Set[1]
-	call StopHunt
-	oc !c -UplinkOptionChange All checkbox_settings_movemelee FALSE
-	oc !c -UplinkOptionChange All checkbox_settings_movebehind FALSE
-	oc !c -UplinkOptionChange All checkbox_settings_moveinfront FALSE
-	call DMove 190 10 -643 3
-	call Go2D 212 12 -643 10 TRUE
-	call Go2D 231 11 -637 10 TRUE
-	call Go2D 288 2 -637  10 TRUE
-	wait 100
+	if (${ForceNamed})
+	{
+		call DMove 50 10 -637 ${speed} ${FightDistance}
+		Named:Set["Inquisitor Barol"]
+		MyStep:Set[1]
+		call StopHunt
+		oc !c -UplinkOptionChange All checkbox_settings_movemelee FALSE
+		oc !c -UplinkOptionChange All checkbox_settings_movebehind FALSE
+		oc !c -UplinkOptionChange All checkbox_settings_moveinfront FALSE
+		call DMove 190 10 -643 3
+		call Go2D 212 12 -643 10 TRUE
+		call Go2D 231 11 -637 10 TRUE
+		call Go2D 288 2 -637  10 TRUE
+		wait 100
 	
-	call Go2D 296 0 -637 10 TRUE
-	call Go2D 398 -1 -637 10 TRUE
-	call Go2D 550 -17 -637 10 TRUE
-	call Go2D 551 -17 -587 10 TRUE
-	call Go2D 593 -17 -554 10 TRUE
-	call Go2D 620 -17 -536 10 TRUE
-	call Go2D 648 -17 -528 10 TRUE
-	call Go2D 713 -17 -550 10 TRUE
-	call Go2D 759 -17 -569 10 TRUE
-	call Go2D 772 -17 -647 10 TRUE
-	call Go2D 760 -17 -689 10 TRUE
-	call Go2D 736 -17 -723 10 TRUE
-	call WaitforGroupDistance 30
-	call Go2D 704 3 -748 10 TRUE
-	call WaitforGroupDistance 30
-	call DMove 694 9 -749 3 30
+		call Go2D 296 0 -637 10 TRUE
+		call Go2D 398 -1 -637 10 TRUE
+		call Go2D 550 -17 -637 10 TRUE
+		call Go2D 551 -17 -587 10 TRUE
+		call Go2D 593 -17 -554 10 TRUE
+		call Go2D 620 -17 -536 10 TRUE
+		call Go2D 648 -17 -528 10 TRUE
+		call Go2D 713 -17 -550 10 TRUE
+		call Go2D 759 -17 -569 10 TRUE
+		call Go2D 772 -17 -647 10 TRUE
+		call Go2D 760 -17 -689 10 TRUE
+		call Go2D 736 -17 -723 10 TRUE
+		call WaitforGroupDistance 30
+		call Go2D 704 3 -748 10 TRUE
+		call WaitforGroupDistance 30
+		call DMove 694 9 -749 3 30
 	
-	if ${Script["autoshinies"](exists)}
+		if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Pause
-	call DMove 625 37 -748 3 30
+		call DMove 625 37 -748 3 30
 	
-	call Go2D 587 38 -718 10 TRUE
-	wait 100
-	call TanknSpank "${Named}" 50 TRUE  
+		call Go2D 587 38 -718 10 TRUE
+		wait 100
+		call TanknSpank "${Named}" 50 TRUE  
 	
-	oc !c -AcceptReward
-	eq2execute summon
-	wait 50
-	oc !c -AcceptReward
-	wait 20
-	call Loot
-
-	relay all ogre
-	wait 300
-	oc !c -letsgo
-	oc !c -OgreFollow All ${Me.Name}
-	wait 50
+		oc !c -AcceptReward
+		eq2execute summon
+		wait 50
+		oc !c -AcceptReward
+		wait 20
+		call Loot
+		relay all ogre
+		wait 300
+		oc !c -letsgo
+		oc !c -OgreFollow All ${Me.Name}
+		wait 50
+	}
 }	
 	
 function step002()
 {
 	variable string Named
-	Named:Set["Auliffe Chaoswind"]
-	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
-	Ob_AutoTarget:Clear
-	
-	call DMove 580 38 -712 3
-	call DMove 540 54 -680 3
-	call DMove 530 73 -634 3
-	call DMove 535 84 -596 3
-	call DMove 554 89 -563 3
-	call Go2D 599 90 -514 10 TRUE 
-	call DMove 632 107 -494 3
-	call DMove 678 128 -496 3
-	call DMove 715 144 -525 3
-	call Go2D 768 145 -566 10 TRUE
-	call DMove 793 165 -605 3
-	call DMove 788 193 -671 3
-	call DMove 766 198 -691 3
-	
-	oc !c -pause
-	relay all run EQ2Ethreayd/TBoTTBH_C2
-	wait 100
-	while ${Script[TBoTTBH_C2](exists)}
+	if (${ForceNamed})
+	{
+		Named:Set["Auliffe Chaoswind"]
+		call StopHunt
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		Ob_AutoTarget:Clear
+		call DMove 580 38 -712 3
+		call DMove 540 54 -680 3
+		call DMove 530 73 -634 3
+		call DMove 535 84 -596 3
+		call DMove 554 89 -563 3
+		call Go2D 599 90 -514 10 TRUE 
+		call DMove 632 107 -494 3
+		call DMove 678 128 -496 3
+		call DMove 715 144 -525 3
+		call Go2D 768 145 -566 10 TRUE
+		call DMove 793 165 -605 3
+		call DMove 788 193 -671 3
+		call DMove 766 198 -691 3
+		oc !c -pause
+		relay all run EQ2Ethreayd/TBoTTBH_C2
 		wait 100
-	oc !c -resume
-	call WaitforGroupDistance 20
-	
-	call DMove 712 310 -683 3
-	call DMove 657 309 -635 3 30 TRUE TRUE
-	oc !c -CampSpot
-	oc !c -joustout
-	InRing:Set[TRUE]
-	eq2execute gsay Set up for ${Named}
-	call TanknSpank "${Named}"
-	
-	oc !c -letsgo
-	oc !c -AcceptReward
-	eq2execute summon
-	wait 50
-	oc !c -AcceptReward
-	wait 20
-	oc !c -AcceptReward
-	call Loot
+		while ${Script[TBoTTBH_C2](exists)}
+			wait 100
+		oc !c -resume
+		call WaitforGroupDistance 20
+		call DMove 712 310 -683 3
+		call DMove 657 309 -635 3 30 TRUE TRUE
+		oc !c -CampSpot
+		oc !c -joustout
+		InRing:Set[TRUE]
+		eq2execute gsay Set up for ${Named}
+		call TanknSpank "${Named}"
+		oc !c -letsgo
+		oc !c -AcceptReward
+		eq2execute summon
+		wait 50
+		oc !c -AcceptReward
+		wait 20
+		oc !c -AcceptReward
+		call Loot
 
-	if ${Script["autoshinies"](exists)}
+		if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
+	}		
 }
 function step003()
 {
-	call StopHunt
-	call DMove 642 309 -615 3
-	eq2execute summon
-	wait 50
-	oc !c -AcceptReward
-	wait 50
-	oc !c -revive All 0
-	oc !c -Evac	
+	if (${ForceNamed})
+	{
+		call StopHunt
+		call DMove 642 309 -615 3
+		eq2execute summon
+		wait 50
+		oc !c -AcceptReward
+		wait 50
+		oc !c -revive All 0
+		oc !c -Evac
+	}
 }
 function step004()
 {
-	call StopHunt
-	call DMove -1 -20 -120 3
-	call DMove -1 10 -440 3
-	call DMove 3 10 -458 3
-	call DMove 15 11 -511 3
+	if (${ForceNamed})
+	{
+		call StopHunt
+		call DMove -1 -20 -120 3
+		call DMove -1 10 -440 3
+		call DMove 3 10 -458 3
+		call DMove 15 11 -511 3
+	}
 	call DMove 6 10 -552 3
 	call DMove -19 10 -543 3
 	call DMove -59 10 -639 3
@@ -344,7 +351,7 @@ function step006()
 		;oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_namedca FALSE
 		oc !c -UplinkOptionChange Healers checkbox_settings_disablecaststack_ca FALSE
 		call Loot
-
+		relay all run endsafe TBoTTBH_C1
 		if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
 		call DMove -1281 295 -1329 3
@@ -386,13 +393,16 @@ function step008()
 	do
 	{
 		wait 10
+		echo Sandstorm : ${Actor["a virulent sandstorm"].X} (-900 to -870) ${Actor["a virulent sandstorm"].Z} (-770 to -760)
 	}
-	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -890)
+	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -870)
 	echo "GO GO GO"	
-	oc !c -CS_Set_ChangeCampSpotBy all 60 0 0
-	wait 40
+	oc !c -CS_Set_ChangeCampSpotBy all 20 0 10
+	wait 20
+	oc !c -CS_Set_ChangeCampSpotBy all 40 0 -10
+	wait 30
 	oc !c -CS_Set_ChangeCampSpotBy all 30 0 70
-	wait 40
+	wait 30
 	oc !c -CS_Set_ChangeCampSpotBy all 20 0 20
 	
 	call WaitforGroupDistance 20
@@ -558,8 +568,12 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	if (${Message.Find["eathMate!!!"]} > 0)
 	{
 		echo group seems dead - restarting zone
-		if ${Script["RestartZone"}](exists)}
-			endscript RestartZone
+		do
+		{
+			if (${Script["RestartZone"}](exists)})
+				endscript RestartZone
+		}
+		while (${Script["RestartZone"}](exists)})
 		runscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 }
