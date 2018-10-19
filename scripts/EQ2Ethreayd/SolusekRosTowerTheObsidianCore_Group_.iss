@@ -16,7 +16,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	if ${Script["livedierepeat"](exists)}
 		endscript livedierepeat
 	if (!${Script["deathwatch"](exists)})
-			run EQ2Ethreayd/deathwatch
+		run EQ2Ethreayd/deathwatch
 	if (${setspeed}==0)
 	{
 		speed:Set[3]

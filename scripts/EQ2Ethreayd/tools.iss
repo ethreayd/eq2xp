@@ -560,7 +560,7 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQu
 	while (!${Return})
 }
 
-function AvoidRedCircles(float Distance)
+function AvoidRedCircles(float Distance, bool IsGroup)
 {
 	variable index:actor Actors
     variable iterator ActorIterator
@@ -571,14 +571,13 @@ function AvoidRedCircles(float Distance)
 		AvoidDistance:Set[${Distance}]
 		
 	EQ2:QueryActors[Actors, Distance <=${AvoidDistance} && Aura =- "design_circle_warning_zone"]
-	EQ2:QueryActors[Actors, Distance <=${AvoidDistance} && Aura =- "design_circle_warning_zone"]
 	
     Actors:GetIterator[ActorIterator]
 	
     if ${ActorIterator:First(exists)}
     {
-		echo Red Circle (${ActorIterator.Value.ID}) detected at ${ActorIterator.Value.Distance}m
-		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance}
+		echo Red Circle (${ActorIterator.Value.ID}) detected at ${ActorIterator.Value.Distance}m (Group=${IsGroup})
+		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance} ${IsGroup}
 	}
 }
 function BelltoZone(string ZoneName)
@@ -1113,6 +1112,10 @@ function DescribeActor(int ActorID)
 	echo Type:				${Actor[${ActorID}].Type}
 	echo SuffixTitle:		${Actor[${ActorID}].SuffixTitle}
 	echo ConColor:			${Actor[${ActorID}].ConColor}
+	echo Distance: 			${Actor[${ActorID}].Distance}
+	echo X					${Actor[${ActorID}].Loc.X}
+	echo Y					${Actor[${ActorID}].Loc.Y}
+	echo Z					${Actor[${ActorID}].Loc.Z}
 }
 function DescribeItemInventory(string ItemName)
 {
@@ -1183,16 +1186,18 @@ function DetectCircles(float Distance, string Color)
     variable iterator ActorIterator
 	variable int Counter
 	;echo in DetectCircles
-    EQ2:QueryActors[Actors]
+    if (${Distance}<1)
+		Distance:Set[10]
+    EQ2:QueryActors[Actors, Distance <= ${Distance}]
     Actors:GetIterator[ActorIterator]
-	Distance:Set[10]
-    if ${ActorIterator:First(exists)}
+	if ${ActorIterator:First(exists)}
     {       
 		do
 		{
-			;echo if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.ID.Aura.Equal["${Color}"]} && ${ActorIterator.Value.Distance}<${Distance})
-			if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
+			if (${Actor[${ActorIterator.Value.ID}].Aura.Equal[${Color}]})
+			;if (${ActorIterator.Value.Name.Equal[""]} && ${ActorIterator.Value.Distance}<${Distance})
 			{
+				;echo ${Actor[${ActorIterator.Value.ID}].Aura.Equal[${Color}]} (${ActorIterator.Value.ID}) spotted
 				Counter:Inc
 			}
 		}
@@ -1990,7 +1995,7 @@ function IsPresent(string ActorName, int Distance, bool Exact)
 	else
 		return FALSE
 }
-function JoustOut(int ActorID, float Distance)
+function JoustOut(int ActorID, float Distance, bool IsGroup)
 {
 	variable float AvoidDistance
 	variable float X0
@@ -2019,7 +2024,10 @@ function JoustOut(int ActorID, float Distance)
 	if (!${Z1}==0) 
 	{
 		Slope:Set[${Math.Calc64[${X1}/${Z1}]}]
-		Z2:Set[${Math.Calc64[(${JoustDistance}/(${Slope}+1))]}]
+		if (!(${Math.Calc64[${Slope}+1]}==0))
+			Z2:Set[${Math.Calc64[(${JoustDistance}/(${Slope}+1))]}]
+		else
+			Z2:Set[1]
 		X2:Set[${Math.Calc64[${Slope}*${Z2}]}]
 	}
 	else 
@@ -2033,8 +2041,11 @@ function JoustOut(int ActorID, float Distance)
 		Z2:Set[${Math.Calc64[(-1)*${Z2}]}]
 		
 	echo JoustOut function called : ${X0} ${Z0} ${X1} ${Z1} ${X2} ${Z2} ${Slope} ${JoustDistance}
-	
-	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}]
+	if (!${IsGroup})
+		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}
+	else
+		oc !c -CS_Set_ChangeCampSpotBy All ${X2} 0 ${Z2}
+		
 }
 function logout_login(int secs)
 {
