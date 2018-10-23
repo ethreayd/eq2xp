@@ -396,12 +396,8 @@ function step007()
 	    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
-	do
-	{
-		wait 10
-		call IsPresent "Gearclaw the Collector"
-	}
-	while (${Return})
+	call TanknSpank "Gearclaw the Collector"
+	
 	eq2execute summon
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume

@@ -175,7 +175,9 @@ function step003()
 	call CheckCombat
 	call DMove 48 4 -93 3
 	call DMove 60 4 -127 1
+	call DMove 46 4 -125 3
 	call WaitforGroupDistance 20
+	call DMove 60 4 -127 3
 	call AutoPassDoor "Junkyard West Door 03" 70 4 -130
 	wait 50
 	call DMove 92 3 -119 ${speed} ${FightDistance} TRUE

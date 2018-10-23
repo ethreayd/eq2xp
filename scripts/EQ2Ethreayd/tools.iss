@@ -1358,7 +1358,7 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 }
 function getChest(string ChestName, bool NoRetry)
 {
-	echo in function getChest
+	echo in function getChest ${ChestName} ${NoRetry}
 	call IsPresent "${ChestName}" 30
 	if (${Return})
 	{
@@ -1375,7 +1375,7 @@ function getChest(string ChestName, bool NoRetry)
 			oc !c -UplinkOptionChange All checkbox_settings_loot TOGGLE
 			call IsPresent "${ChestName}" 30
 		}
-		while (${Return} && !${NoRetry} )
+		while (${Return} && !${NoRetry})
 	}
 }		
 function GetEffectIncrement(string EffectName)
@@ -1620,45 +1620,7 @@ function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 		press JUMP
 	echo exit function go2D
 }
-function goCoV()
-{	
-	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
-	{
-		call IsPresent "Mechanical Travel Gear"
-		if (${Return})
-		{
-			call MoveCloseTo "Mechanical Travel Gear"
-			wait 20
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Mechanical Travel Gear","Travel to the Planes"]
-			wait 20
-			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
-			call waitfor_Zone "Coliseum of Valor"
-		}
-		call IsPresent "Large Ulteran Spire"
-		if (${Return})
-		{
-			call MoveCloseTo "Large Ulteran Spire"
-			wait 20
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
-			wait 50
-			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
-			wait 600
-		}
-	}
-	
-	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
-	{
-		call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
-		call DMove -2 5 4 3
-	}
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
-	{
-		call goto_GH
-		wait 600
-		call goCoV
-	}
-	call waitfor_Zone "Coliseum of Valor"
-}
+
 function GoDown()
 {
 	echo "Going Down : 5 5 5"
@@ -1731,15 +1693,21 @@ function goto_GH()
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	}
 }
-function GroupDistance()
+function GroupDistance(bool Debug)
 {
 	variable int MaxDistance=0
 	variable int i
 	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
 	{
+		if (${Debug})
+		{
+			echo ${i}: ${Me.Group[${i}].Name} ${Me.Group[${i}].Distance}/${MaxDistance}
+		}
 		if (${Me.Group[${i}].Distance}>${MaxDistance})
 			MaxDistance:Set[${Me.Group[${i}].Distance}]
-	}	
+	}
+	if (${Debug})
+		echo Calculated Max Distance is ${MaxDistance}
 	return ${MaxDistance}
 }
 function HurryUp(int Distance)
