@@ -11,9 +11,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 
 	variable int laststep=7
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	 
 	if (${setspeed}==0)
 	{
@@ -81,7 +82,21 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
-	
+	if (${stepstart}==0)
+	{
+		call IsPresent "Ancient Clockwork Prototype" 500
+		if (!${Return})
+		{
+			stepstart:Set[2]
+			call IsPresent "The Glitched Guardian 10101" 500
+			if (!${Return})
+			{
+				call DMove 109 -10 142 3
+				call DMove 116 3 3 3
+				stepstart:Set[4]
+			}
+		}		
+	}
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -423,6 +438,8 @@ function step007()
 	while (${Zone.Name.Equal["Plane of Innovation: Masks of the Marvelous [Solo]"]})
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 
 function OpenChargedDoor()

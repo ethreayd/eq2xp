@@ -27,9 +27,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	oc !c -LoadProfile Solo ${Me.Name}
 	wait 150
 	call SoloLetsgo
-	if ${Script["solodeath"](exists)}
-		endscript solodeath
-	run EQ2Ethreayd/solodeath ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -607,6 +608,8 @@ function step005()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {

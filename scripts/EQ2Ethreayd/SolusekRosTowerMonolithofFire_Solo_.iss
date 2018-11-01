@@ -14,9 +14,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=9
 		
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -735,6 +736,8 @@ function step009()
 		call ActivateVerb "zone_to_valor" 0 239 -90 "Coliseum of Valor" TRUE
 		wait 300
 	}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 function DoSwords()
 {

@@ -561,7 +561,7 @@ atom HandleAllEvents(string Message)
 		oc !c -CS_Set_ChangeRelativeCampSpotBy All 0 0 -30
 	}
  }
- atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
+atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	if (${Message.Find["eathMate!!!"]} > 0)
 	{
@@ -572,7 +572,8 @@ atom HandleAllEvents(string Message)
 				endscript RestartZone
 		}
 		while (${Script["RestartZone"}](exists)})
-		runscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+		
+		runscript EQ2Ethreayd/wrapscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
 	{

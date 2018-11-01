@@ -6,13 +6,13 @@ variable(script) bool InDecay
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
-
-	variable int laststep=7
-	
+	variable int laststep=6
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -92,6 +92,9 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 				stepstart:Set[1]
 			}
 		}
+		call IsPresent "Adan" 2000
+		if (${Return})
+			InDecay:Set[TRUE]
 		if (${InDecay} && ${Me.Loc.Y}>-400)
 		{
 			call DMove -188 75 146 3
@@ -109,7 +112,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 			stepstart:Set[5]
 			call IsPresent "Darwol Adan" 1000
 			if  (!${Return})
-				stepstart:Set[7]
+				stepstart:Set[6]
 		}
 	}
 	
@@ -175,6 +178,7 @@ function step000()
 	
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
+	call Loot
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 }	
 
@@ -251,6 +255,7 @@ function step002()
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 50
+	call Loot
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -321,6 +326,7 @@ function step004()
 	while (${Return})
 	eq2execute summon
 	wait 50
+	call Loot
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
 	OgreBotAPI:AcceptReward["${Me.Name}"]
@@ -332,6 +338,9 @@ function step004()
 function step005()
 {
 	variable string Named
+	variable string Nest
+	variable int Counter=0
+
 	Named:Set["Darwol Adan"]
 	eq2execute merc resume
 	call StopHunt
@@ -340,140 +349,139 @@ function step005()
 	call DMove 331 -474 -89 ${speed} ${FightDistance}
 	call DMove 286 -474 -91 ${speed} ${FightDistance}
 	call DMove 226 -475 -90 ${speed} ${FightDistance}
-	call DMove 222 -474 -142 ${speed} ${FightDistance}
-	call DMove 222 -487 -237 ${speed} ${FightDistance}
-	call DMove 223 -492 -293 ${speed} ${FightDistance}
-	call DMove 173 -494 -298 ${speed} ${FightDistance}
-	call DMove 123 -502 -299 ${speed} ${FightDistance}
-	call DMove 73 -510 -299 ${speed} ${FightDistance}
-	call DMove -4 -517 -305 ${speed} ${FightDistance}
-	
-	call StopHunt
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-	
-	call DMove -28 -517 -244 ${speed} ${FightDistance}
-	
-	do
+
+	call IsPresent "${Named}" 2000
+	if (${Return})
 	{
-		face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
-		if (!${Actor["${Named}"].CheckCollision})
+		call DMove 222 -474 -142 ${speed} ${FightDistance}
+		call DMove 222 -487 -237 ${speed} ${FightDistance}
+		call DMove 223 -492 -293 ${speed} ${FightDistance}
+		call DMove 173 -494 -298 ${speed} ${FightDistance}
+		call DMove 123 -502 -299 ${speed} ${FightDistance}
+		call DMove 73 -510 -299 ${speed} ${FightDistance}
+		call DMove -4 -517 -305 ${speed} ${FightDistance}
+	
+		call StopHunt
+		Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
+	
+		call DMove -28 -517 -244 ${speed} ${FightDistance}
+	
+		do
 		{
-			echo must kill "${Named}"
-			call DMove ${Actor["${Named}"].X}  ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
+			face ${Actor["${Named}"].X} ${Actor["${Named}"].Z}
+			if (!${Actor["${Named}"].CheckCollision})
+			{
+				echo must kill "${Named}"
+				call DMove ${Actor["${Named}"].X}  ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
+			}
+			wait 10
 		}
-		wait 10
-	}
-	while (!${Me.InCombatMode})
-	oc !c -CampSpot ${Me.Name}
-	do
-	{
-		wait 10
-		ExecuteQueued
-		call IsPresent "${Named}" 80
-	}
-	while (${Return})
-	oc !c -letsgo ${Me.Name}
-	call PKey ZOOMOUT 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-}
-
-function step006()
-{
-	variable string Named
-	variable string Nest
-	variable int Counter=0
+		while (!${Me.InCombatMode})
+		oc !c -CampSpot ${Me.Name}
+		do
+		{
+			wait 10
+			ExecuteQueued
+			call IsPresent "${Named}" 80
+		}
+		while (${Return})
+		oc !c -letsgo ${Me.Name}
+		call PKey ZOOMOUT 20
+		OgreBotAPI:AcceptReward["${Me.Name}"]
 	
-	Named:Set["Wavadozzik Adan"]
-	Nest:Set["an arachnae nest"]
-	eq2execute merc resume
-	call StopHunt
+		Named:Set["Wavadozzik Adan"]
+		Nest:Set["an arachnae nest"]
+		eq2execute merc resume
+		call StopHunt
 	
-	OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",40]
-	Ob_AutoTarget:AddActor["${Nest}",0,FALSE,FALSE]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_meleeattack","FALSE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	target ${Me.Name}
-	call PKey "Page Up" 5
-	call PKey ZOOMOUT 20	
-	call DMove -84 -520 163 3 30 TRUE
-	target "${Named}"
-	wait 20
-	do
-	{	
+		OgreBotAPI:AutoTarget_SetScanHeight["${Me.Name}",40]
+		Ob_AutoTarget:AddActor["${Nest}",0,FALSE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_meleeattack","FALSE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_rangedattack","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		target ${Me.Name}
+		call PKey "Page Up" 5
+		call PKey ZOOMOUT 20	
+		call DMove -84 -520 163 3 30 TRUE
 		target "${Named}"
-		wait 5
-	}
-	while (!${Me.InCombatMode})
-	
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
 		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
+		do
+		{	
+			target "${Named}"
+			wait 5
+		}
+		while (!${Me.InCombatMode})
 	
-	call DMove -58 -521 113 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
+		Counter:Set[0]
+		do
+		{
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			wait 20
+			call IsPresent "${Nest}" 40
+		}
+		while (${Return} && ${Counter}<6)
 	
-	call DMove -80 -521 162 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
+		call DMove -58 -521 113 3 30 TRUE
+		Counter:Set[0]
+		do
+		{
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			wait 20
+			call IsPresent "${Nest}" 40
+		}
+		while (${Return} && ${Counter}<6)
+	
+		call DMove -80 -521 162 3 30 TRUE
+		Counter:Set[0]
+		do
+		{
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			wait 20
+			call IsPresent "${Nest}" 40
+		}
+		while (${Return} && ${Counter}<6)
 
-	call DMove -55 -521 110 3 30 TRUE
-	Counter:Set[0]
-	do
-	{
-		call FindLoS "${Nest}" STRAFELEFT 10
-		Counter:Inc
-		wait 20
-		call IsPresent "${Nest}" 40
-	}
-	while (${Return} && ${Counter}<6)
-		
-	call PKey CENTER 5
-	call PKey "Page Down" 3
-	Ob_AutoTarget:Clear
-	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
-	echo must kill "${Named}"
-	call DMove ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
-	do
-	{
-		wait 10
-		call IsPresent "${Named}"
-	}
-	while (${Return})
-	eq2execute summon
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		call DMove -55 -521 110 3 30 TRUE
+		Counter:Set[0]
+		do
+		{
+			call FindLoS "${Nest}" STRAFELEFT 10
+			Counter:Inc
+			wait 20
+			call IsPresent "${Nest}" 40
+		}
+		while (${Return} && ${Counter}<6)
 	
-	call DMove -2 -517 122 ${speed} ${FightDistance}
-	call DMove 222 -492 125 ${speed} ${FightDistance}
-	call DMove 220 -475 -89 ${speed} ${FightDistance}
+		call PKey CENTER 5
+		call PKey "Page Down" 3
+		Ob_AutoTarget:Clear
+		Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
+		echo must kill "${Named}"
+		call DMove ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z} 3 30 TRUE
+		do
+		{
+			wait 10
+			call IsPresent "${Named}"
+		}
+		while (${Return})
+		eq2execute summon
+		wait 20
+		call Loot
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		call StopHunt
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	
+		call DMove -2 -517 122 ${speed} ${FightDistance}
+		call DMove 222 -492 125 ${speed} ${FightDistance}
+		call DMove 220 -475 -89 ${speed} ${FightDistance}
+	}
 }
 	
-function step007()
+function step006()
 {
 	variable string Named
 	
@@ -486,25 +494,18 @@ function step007()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
 	Ob_AutoTarget:AddActor["Primordial",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
-	target "${Named}"
-	wait 20
 	do
 	{	
-		target "${Named}"
-		wait 5
+		wait 10
+		call IsPresent "${Named}" 100
 	}
-	while (!${Me.InCombatMode})
+	while (!${Return})
 	call AlterGenes
 	echo must kill "${Named}"
-	do
-	{
-		ExecuteQueued
-		wait 10
-		call IsPresent "${Named}"
-	}
-	while (${Return})
+	call TanknSpank "${Named}" TRUE
 	eq2execute summon
 	wait 20
+	call Loot
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
@@ -516,6 +517,8 @@ function step007()
 	call DMove -443	28 225 3 30
 	call DMove -462 28 236 3 30
 	OgreBotAPI:Special["${Me.Name}"]
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 
 function FightDarwol()
@@ -594,19 +597,19 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo Catch Event Affliction in HandleEvents
 		QueueCommand call FightDarwol
 	}
+	
+}
+ 
+atom HandleAllEvents(string Message)
+{
+	if (${Message.Find["lord of the festrus returns"]} > 0)
+	{
+		FestrusLord:Set[TRUE]
+		echo Lord of the Festrus detected
+	}
 	if (${Message.Find["microbes have mutated"]} > 0)
 	{
 		echo Catch Event Microbes in HandleEvents
 		QueueCommand call AlterGenes
-	}
-}
- 
-atom HandleAllEvents(string Message)
- {
-	;echo Catch Event ${Message}
-    if (${Message.Find["lord of the festrus returns"]} > 0)
-	{
-		FestrusLord:Set[TRUE]
-		echo Lord of the Festrus detected
 	}
  }

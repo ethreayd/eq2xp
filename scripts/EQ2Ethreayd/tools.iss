@@ -727,7 +727,29 @@ function check_quest(string questname)
         while ${It:Next(exists)}
 	}
 	return FALSE
-}    
+}
+function CheckAuraLoc(float X, float Z, float R, string AuraColor)
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+	variable int Counter
+	
+	EQ2:QueryActors[Actors, Aura=="${AuraColor}"]
+    Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+    {
+		do
+		{
+			if (${Math.Distance[${Actor[${ActorIterator.Value.ID}].Loc.X}, ${Actor[${ActorIterator.Value.ID}].Loc.Z}, ${X}, ${Z}]}<${R})
+				Counter:Inc
+		}
+		while (${ActorIterator:Next(exists)})
+	}
+	if ${Counter}>0
+		return FALSE
+	else
+		return TRUE
+}
 function CheckCombat(int MyDistance)
 {
 	if (${MyDistance}<1)
@@ -2753,7 +2775,7 @@ function waitfor_Combat()
 	} 
 	while (${Me.InCombatMode})
 }
-function WaitforGroupDistance(int Distance)
+function WaitforGroupDistance(int Distance, bool NoRush)
 {
 	variable int Counter
 	echo waiting for group to be in a ${Distance}m radius
@@ -2761,7 +2783,7 @@ function WaitforGroupDistance(int Distance)
 	{
 		wait 10
 		Counter:Inc
-		if (${Counter}>30)
+		if (${Counter}>30 && !${NoRush})
 		{
 			call HurryUp ${Distance}
 			Counter:Set[0]

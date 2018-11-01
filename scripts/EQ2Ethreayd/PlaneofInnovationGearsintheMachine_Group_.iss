@@ -344,7 +344,7 @@ function GoBetweenCircles()
 				
 				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z}) 
 				{
-					call CheckLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]}
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
@@ -354,7 +354,7 @@ function GoBetweenCircles()
 				}
 				else
 				{
-					call CheckLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]}
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
@@ -364,7 +364,7 @@ function GoBetweenCircles()
 				}
 				if (${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Me.Loc.Z}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 0
@@ -374,7 +374,7 @@ function GoBetweenCircles()
 				}
 				else
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Me.Loc.Z}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 0
@@ -385,7 +385,7 @@ function GoBetweenCircles()
 				
 				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X})
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
@@ -395,7 +395,7 @@ function GoBetweenCircles()
 				}
 				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}>=${Actor[${ActorIterator.Value.ID}].Loc.X})
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
@@ -403,9 +403,9 @@ function GoBetweenCircles()
 						Moved:Set[TRUE]
 					}
 				}
-				if (${Me.Loc.Z}>=${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X})
+				if (${Me.Loc.Z}>=${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
@@ -415,7 +415,7 @@ function GoBetweenCircles()
 				}
 				if (${Me.Loc.Z}>=${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}>=${Actor[${ActorIterator.Value.ID}].Loc.X})
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
@@ -425,7 +425,7 @@ function GoBetweenCircles()
 				}
 				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z}) 
 				{
-					call CheckLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-2*${R}]}
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-2*${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-2*${R}]}
@@ -435,7 +435,7 @@ function GoBetweenCircles()
 				}
 				else
 				{
-					call CheckLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+2*${R}]}
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+2*${R}]} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+2*${R}]}
@@ -445,7 +445,7 @@ function GoBetweenCircles()
 				}
 				if (${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-2*${R}]} ${Me.Loc.Z}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-2*${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-2*${R}]} 0 0
@@ -455,7 +455,7 @@ function GoBetweenCircles()
 				}
 				else
 				{
-					call CheckLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+2*${R}]} ${Me.Loc.Z}
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+2*${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
 					if (${Return} && !${Moved})
 					{
 						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+2*${R}]} 0 0
@@ -468,32 +468,7 @@ function GoBetweenCircles()
         while (${ActorIterator:Next(exists)})
 	}
 }
-function CheckLoc(float X, float Z)
-{
-	variable index:actor Actors
-    variable iterator ActorIterator
-	variable float R
-	variable int Counter
-	
-	echo Testing Moving to loc ${X} ${Z}
-	R:Set[13]
-    EQ2:QueryActors[Actors, Aura=="design_circle_warning_zone"]
-    Actors:GetIterator[ActorIterator]
-	if ${ActorIterator:First(exists)}
-    {
-		do
-		{
-			if (${Math.Distance[${Actor[${ActorIterator.Value.ID}].Loc.X}, ${Actor[${ActorIterator.Value.ID}].Loc.Z}, ${X}, ${Z}]}<${R})
-				Counter:Inc
-		}
-		while (${ActorIterator:Next(exists)})
-	}
-	echo CheckLoc found ${Counter} issue(s)
-	if ${Counter}>0
-		return FALSE
-	else
-		return TRUE
-}
+
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 

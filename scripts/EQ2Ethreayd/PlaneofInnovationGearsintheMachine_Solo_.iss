@@ -7,9 +7,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 
 	variable int laststep=9
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -221,9 +222,11 @@ function step003()
 	call check_quest "Legacy of Power: An Innovative Approach"
 	if (${Return})
 	{
+		echo I am on "Legacy of Power: An Innovative Approach" Quest
 		do
 		{
-			call ActivateVerb "Magnetic	Ether Compensator" -128 4 -35 "Gather" TRUE
+			call MoveCloseTo "Magnetic Ether Compensator"
+			call ActivateVerbOn "Magnetic Ether Compensator" "Gather"
 			wait 20
 			call CheckQuestStep 5
 		}
@@ -333,7 +336,7 @@ function step006()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	call DMove 26 4 -180 2 ${FightDistance}
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
-	Script["livedierepeat"]:Pause
+	
 	oc !c -CampSpot ${Me.Name}
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 0 0 -60
 	
@@ -342,28 +345,38 @@ function step006()
 	Ob_AutoTarget:AddActor["${Named}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
     OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+	call CheckCombat
 	do
 	{
-		wait 10
-	}
-	while (!${Me.InCombatMode})
-	
-	do
-	{
-		wait 10
-		echo Avoid Red Circles function launched
-		call AvoidRedCircles 30
+		call DetectCircles 50 design_circle_warning_zone
+		if (${Return}>0)
+		{
+			call GoBetweenCircles
+		}
+		else
+		{
+			if (${Me.Loc.Z}<-240)
+			{
+				oc !c -CS_Set_ChangeCampSpotBy All 0 0 50
+				wait 40
+			}
+			if (${Me.Loc.Z}>-130)
+			{
+				oc !c -CS_Set_ChangeCampSpotBy All 0 0 -50
+				wait 40
+			}
+		}	
+		wait 5
 		call IsPresent "${Named}" 200
 	}
 	while (${Return})
-	Script["livedierepeat"]:Resume
+	
 	call PKey ZOOMOUT 20	
 	eq2execute summon
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	oc !c -letsgo ${Me.Name}
 	eq2execute summon
-	
-}	
+}
 	
 function step007()
 {	
@@ -407,7 +420,7 @@ function step007()
 }
 
 function step008()
-{	
+{
 	call check_quest "Legacy of Power: An Innovative Approach"
 	if (${Return})
 	{
@@ -439,17 +452,172 @@ function step009()
 	eq2execute summon
 	call ActivateVerb "zone_to_valor" 26 4 -230 "Coliseum of Valor" TRUE
 	OgreBotAPI:Special["${Me.Name}"]
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
+}
+
+function GoBetweenCircles()
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+	variable float R
+	variable bool Moved
+	
+	R:Set[13]
+    EQ2:QueryActors[Actors, Aura=="design_circle_warning_zone" && Distance <= ${R}]
+    Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+    {
+		echo Some circles not far>>>
+		do
+		{
+			echo dealing with Circle ID ${ActorIterator.Value.ID}
+			if (${Me.Loc.Z}<=${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} && ${Me.Loc.Z}>=${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]})
+			{
+				echo I need to move away from ${Actor[${ActorIterator.Value.ID}].Loc.X} ${Actor[${ActorIterator.Value.ID}].Loc.Z}
+				if (${Me.Loc.Z}<-260)
+				{
+					echo to close to border
+					oc !c -CS_Set_ChangeCampSpotBy All 0 0 60
+					wait 30
+				}
+				
+				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z}) 
+				{
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				else
+				{
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 0
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				else
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 0
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				
+				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X})
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}>=${Actor[${ActorIterator.Value.ID}].Loc.X})
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.Z}>=${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.Z}>=${Actor[${ActorIterator.Value.ID}].Loc.Z} && ${Me.Loc.X}>=${Actor[${ActorIterator.Value.ID}].Loc.X})
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+${R}]} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+${R}]} 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.Z}<${Actor[${ActorIterator.Value.ID}].Loc.Z}) 
+				{
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-2*${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}-2*${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				else
+				{
+					call CheckAuraLoc ${Me.Loc.X} ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}+2*${R}]} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All 0 0 ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.Z}-${Me.Loc.Z}+2*${R}]}
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				if (${Me.Loc.X}<${Actor[${ActorIterator.Value.ID}].Loc.X}) 
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-2*${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}-2*${R}]} 0 0
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+				else
+				{
+					call CheckAuraLoc ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}+2*${R}]} ${Me.Loc.Z} ${R} design_circle_warning_zone
+					if (${Return} && !${Moved})
+					{
+						oc !c -CS_Set_ChangeCampSpotBy All ${Math.Calc64[${Actor[${ActorIterator.Value.ID}].Loc.X}-${Me.Loc.X}+2*${R}]} 0 0
+						wait 20
+						Moved:Set[TRUE]
+					}
+				}
+			}
+		}
+        while (${ActorIterator:Next(exists)})
+	}
 }
 
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
- {
+{
 	;echo Catch Event ${ChatType} ${Message} ${Speaker} ${TargetName} ${SpeakerIsNPC} ${ChannelName} 
-    if (${Message.Find["gains an electric charge"]} > 0)
+	if (${Message.Find["gains an electric charge"]} > 0)
 	{
 		target ${Me.Name}
 		QueueCommand call TargetAfterTime "${Speaker}" 200
 	}
- }
+}
 atom StanceChange(string ActorID, string ActorName, string ActorType, string OldStance, string NewStance, string TargetID, string Distance, string IsInGroup, string IsInRaid)
 {
     if (${NewStance.Equal["DEAD"]})

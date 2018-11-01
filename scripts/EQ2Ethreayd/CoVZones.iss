@@ -146,22 +146,17 @@ function GoBoT(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[7+${offset}]}]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone ${Math.Calc64[7+${offset}]}
 						break
 					}
 					case Heroic
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[6+${offset}]}]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone ${Math.Calc64[6+${offset}]}
+						break
+					}
+					case Expert
+					{
+						call EnterZone ${Math.Calc64[5+${offset}]}
 						break
 					}
 				}
@@ -173,12 +168,17 @@ function GoBoT(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",${Math.Calc64[10+${offset}]}]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone ${Math.Calc64[10+${offset}]}
+						break
+					}
+					case Heroic
+					{
+						call EnterZone ${Math.Calc64[9+${offset}]}
+						break
+					}
+					case Expert
+					{
+						call EnterZone ${Math.Calc64[8+${offset}]}
 						break
 					}
 				}
@@ -219,6 +219,7 @@ function goCoV()
 	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
 	{
 		call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+		wait 600
 		call DMove -2 5 4 3
 	}
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
@@ -248,12 +249,17 @@ function GoPoD(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 7
+						break
+					}
+					case Heroic
+					{
+						call EnterZone 6
+						break
+					}
+					case Expert
+					{
+						call EnterZone 5
 						break
 					}
 				}
@@ -265,12 +271,17 @@ function GoPoD(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",9]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 9
+						break
+					}
+					case Heroic
+					{
+						call EnterZone 8
+						break
+					}
+					case Expert
+					{
+						call EnterZone 7
 						break
 					}
 				}
@@ -307,22 +318,17 @@ function GoPoI(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 6
 						break
 					}
 					case Heroic
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",5]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 5
+						break
+					}
+					case Expert
+					{
+						call EnterZone 4
 						break
 					}
 				}
@@ -334,22 +340,17 @@ function GoPoI(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 3
 						break
 					}
 					case Heroic
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 2
+						break
+					}
+					case Expert
+					{
+						call EnterZone 1
 						break
 					}
 				}
@@ -437,12 +438,18 @@ function GoSRT(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						
+						call EnterZone 4
+						break
+					}
+					case Heroic
+					{
+						call EnterZone 3
+						break
+					}
+					case Expert
+					{
+						call EnterZone 2
 						break
 					}
 				}
@@ -454,12 +461,17 @@ function GoSRT(string ZoneName, string version)
 				{
 					case Solo
 					{
-						do
-						{
-							OgreBotAPI:ZoneDoorForWho["${Me.Name}",8]
-							wait 50
-						}
-						while (${Zone.Name.Equal["Coliseum of Valor"]})
+						call EnterZone 8
+						break
+					}
+					case Heroic
+					{
+						call EnterZone 7
+						break
+					}
+					case Expert
+					{
+						call EnterZone 6
 						break
 					}
 				}
@@ -545,4 +557,13 @@ function RebootZones()
 	call goCoV
 	call DMove -2 5 4 3
 	run EQ2Ethreayd/autopop
+}
+function EnterZone(int num)
+{
+	do
+	{
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",${num}]
+		wait 50
+	}
+	while (${Zone.Name.Equal["Coliseum of Valor"]})
 }

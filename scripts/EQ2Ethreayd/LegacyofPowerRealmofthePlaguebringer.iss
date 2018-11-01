@@ -62,24 +62,33 @@ function step001()
 	{	
 		call DMove -2 5 4 3
 		call DMove -167 3 7 3
+		call ActivateVerbOnPhantomActor "Activate E-POD" 5 5
+		wait 50
 		OgreBotAPI:Special["${Me.Name}"]
 		wait 50
 		call DMove -193 3 0 3
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
 	call waitfor_Zone "Plane of Disease: Outbreak [Solo]"
 	echo will clear zone "${Zone.Name}" Now !
-    call RunZone 0 0 0 TRUE
-	echo zone "${Zone.Name}" Cleared !
+    	call RunZone 0 0 0 TRUE
 }
 function step002()
 {
 	call goCoV
 	call waitfor_Zone "Coliseum of Valor"
+	call CheckQuestStep 2
+	if (!${Return})
+	{
+		call CheckQuestStep 5
+		if (!${Return})
+			call step001
+	}
+	echo zone "${Zone.Name}" Cleared !
 	call DMove -2 5 4 3
 	call DMove -167 3 7 3
 	OgreBotAPI:Special["${Me.Name}"]
@@ -109,7 +118,7 @@ function step004()
 	call DMove -193 3 0 3
 	OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_pod","Enter the Plane of Disease"]
 	wait 20
-	OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
+	OgreBotAPI:ZoneDoorForWho["${Me.Name}",6]
 	wait 50	
 	call waitfor_Zone "Plane of Disease: The Source [Solo]"
 	

@@ -131,7 +131,14 @@ function step002()
 	eq2execute gsay Set up for
 	wait 20
 	oc !c -SetUpFor
-	
+	; setup from Ogre is not great my is4 is banging the wall
+	; tank loc 101 3 -27
+	; is2 loc 86 3 -39
+	; is3 loc 
+	; is4 loc
+	; is5 loc
+	; is6 loc
+	; And I always trigger the rez bug here
 	call TanknSpank "${Named}" 100
 	wait 100
 	oc !c -letsgo

@@ -22,8 +22,9 @@ function main(int stepstart, int stepstop, int speed)
 	ScriptsToRun:Insert["A Stitch in Time, Part II: Lightning Strikes"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
-	
-	
+	ogre
+	wait 150
+	eq2execute merc resume
 	variable int x
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{

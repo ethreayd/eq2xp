@@ -125,9 +125,9 @@ function main(bool NoShiny, bool Heroic)
 					else
 						run EQ2Ethreayd/LoopHeroic
 				}
+				echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 				if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 				{
-					echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 					echo Restarting Zone from LDR
 					run EQ2Ethreayd/wrap RunZone 0 0 0 ${NoShiny}
 				}

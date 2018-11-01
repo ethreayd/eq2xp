@@ -67,7 +67,7 @@ function step001()
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",4]
 		wait 50
 	}
 	call waitfor_Zone "Torden, Bastion of Thunder: Tower Breach [Solo]"
@@ -85,7 +85,7 @@ function step002()
 		
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_bot","Enter Torden, Bastion of Thunder"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",7]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",10]
 		wait 50
 	}
 	call waitfor_Zone "Torden, Bastion of Thunder: Winds of Change [Solo]"

@@ -12,9 +12,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	oc !c -LoadProfile Solo ${Me.Name}
 	wait 300
 	oc !c -letsgo ${Me.Name}
-	if ${Script["solodeath"](exists)}
-		endscript solodeath
-	run EQ2Ethreayd/solodeath ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -353,6 +354,8 @@ function step004()
 	
 	if ${Script["autoshinies"](exists)}
 		Script["autoshinies"]:Resume
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 
 function CircleFight(string Named)

@@ -8,8 +8,7 @@ variable(script) bool AutoRez
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny, bool ForceNamed)
 {
-
-	variable int laststep=12
+	variable int laststep=9
 	NoShinyGlobal:Set[${NoShiny}]
 	MyStep:Set[${stepstart}]
 	oc !c -resume
@@ -267,9 +266,10 @@ function step005()
 	call DMove -167 10 -649 3
 	call DMove -238 11 -641 3
 	call DMove -541 -17 -635 3
+	call DMove -238 11 -641 3 TRUE
 	oc !c -Come2Me ${Me.Name} All 3
 	call WaitforGroupDistance 20
-	
+	call DMove -541 -17 -635 2
 	call DMove -578 -17 -565 3
 	call DMove -641 -17 -519 3
 	call DMove -738 -17 -542 3
@@ -330,12 +330,13 @@ function step006()
 	if (${Return})
 	{
 		oc !c -pause
+		
 		relay all run EQ2Ethreayd/TBoTTBH_C1
 		wait 100
 		while ${Script[TBoTTBH_C1](exists)}
 			wait 100
+		call WaitforGroupDistance 20 TRUE
 		oc !c -resume
-		call WaitforGroupDistance 20
 		wait 100
 		call DMove -1261 295 -1386 3
 		oc !c -Come2Me ${Me.Name} All 3
@@ -393,9 +394,9 @@ function step008()
 	do
 	{
 		wait 10
-		echo Sandstorm : ${Actor["a virulent sandstorm"].X} (-900 to -870) ${Actor["a virulent sandstorm"].Z} (-770 to -760)
+		echo Sandstorm : ${Actor["a virulent sandstorm"].X} (-900 to -870) ${Actor["a virulent sandstorm"].Z} (-780 to -760)
 	}
-	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -770 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -870)
+	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -780 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -870)
 	echo "GO GO GO"	
 	oc !c -CS_Set_ChangeCampSpotBy all 20 0 10
 	wait 20
@@ -574,7 +575,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 				endscript RestartZone
 		}
 		while (${Script["RestartZone"}](exists)})
-		runscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+		runscript  EQ2Ethreayd/wrapscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 }
 atom HandleAllEvents(string Message)
