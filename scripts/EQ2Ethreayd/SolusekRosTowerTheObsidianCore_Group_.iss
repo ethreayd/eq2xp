@@ -568,12 +568,12 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo group seems dead - restarting zone
 		do
 		{
-			if (${Script["RestartZone"}](exists)})
+			if (${Script["RestartZone"](exists)})
 				endscript RestartZone
 		}
-		while (${Script["RestartZone"}](exists)})
+		while (${Script["RestartZone"](exists)})
 		
-		runscript EQ2Ethreayd/wrapscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+		run EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
 	{

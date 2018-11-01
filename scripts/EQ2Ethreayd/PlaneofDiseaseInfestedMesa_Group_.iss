@@ -346,10 +346,14 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	if (${Message.Find["eathMate!!!"]} > 0)
 	{
 		echo group seems dead - restarting zone
-		if ${Script["RestartZone"}](exists)}
-			endscript RestartZone
-		if (!${Script["RestartZone"}](exists)})
-			runscript EQ2Ethreayd/RestartZone ${MyStep} 0 ${speed} ${NoShinyGlobal}
+		do
+		{
+			if (${Script["RestartZone"](exists)})
+				endscript RestartZone
+		}
+		while (${Script["RestartZone"](exists)})
+		
+		run EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
 	{

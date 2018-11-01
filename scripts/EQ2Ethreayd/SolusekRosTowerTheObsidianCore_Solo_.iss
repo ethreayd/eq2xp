@@ -168,11 +168,12 @@ function step002()
 {
 	variable string Named
 	Named:Set["The Molten Behemoth"]
-
+	call DMove 0 -121 -77 1 30 FALSE FALSE 3
 	call IsPresent "${Named}" 500
 	if (${Return})
 	{
 		eq2execute merc resume
+		
 		call DMove -1 -120 -120 3
 		call DMove 0 -122 -151 ${speed} ${FightDistance}
 		call DMove 7 -122 -154 ${speed} ${FightDistance}

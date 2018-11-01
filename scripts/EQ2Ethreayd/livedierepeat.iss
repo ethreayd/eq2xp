@@ -13,7 +13,7 @@ function main(bool NoShiny, bool Heroic)
 	variable int i
 	do
 	{
-		echo start ldr loop
+		echo start ldr loop (${Heroic})
 		Stucky:Set[0]
 		do
 		{

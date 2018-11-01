@@ -76,13 +76,7 @@ function step001()
 	call CheckQuestStep 0
 	if (!${Return})
 	{
-		call CheckQuestStep 2
-		if (!${Return})
-			call step001
-		call CheckQuestStep 3
-		if (!${Return})
-			call step001
-
+		call step000
 	}
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
 	{	

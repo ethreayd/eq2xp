@@ -398,6 +398,8 @@ function step008()
 	}
 	while (${Actor["a virulent sandstorm"].Z} > -760 || ${Actor["a virulent sandstorm"].Z} < -780 || ${Actor["a virulent sandstorm"].X} < -900 || ${Actor["a virulent sandstorm"].X} > -870)
 	echo "GO GO GO"	
+	if ${Script["livedierepeat"](exists)}
+		Script["livedierepeat"]:Resume
 	oc !c -CS_Set_ChangeCampSpotBy all 20 0 10
 	wait 20
 	oc !c -CS_Set_ChangeCampSpotBy all 40 0 -10
@@ -571,11 +573,11 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		echo group seems dead - restarting zone
 		do
 		{
-			if (${Script["RestartZone"}](exists)})
-				endscript RestartZone
+			if (${Script["RestartZone"](exists)})
+				end RestartZone
 		}
-		while (${Script["RestartZone"}](exists)})
-		runscript  EQ2Ethreayd/wrapscript EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+		while (${Script["RestartZone"](exists)})
+		run EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
 	}
 }
 atom HandleAllEvents(string Message)

@@ -512,6 +512,18 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		Opened:Set[TRUE]
 	}
+	if (${Message.Find["eathMate!!!"]} > 0)
+	{
+		echo group seems dead - restarting zone
+		do
+		{
+			if (${Script["RestartZone"](exists)})
+				endscript RestartZone
+		}
+		while (${Script["RestartZone"](exists)})
+		
+		run EQ2Ethreayd/RestartZone 0 0 ${speed} ${NoShinyGlobal}
+	}
 }
  
 atom HandleAllEvents(string Message)
