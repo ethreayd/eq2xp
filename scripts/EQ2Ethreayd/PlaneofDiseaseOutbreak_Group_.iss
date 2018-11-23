@@ -12,10 +12,11 @@ variable(script) bool Toggle
 variable(script) bool NoShinyGlobal
 variable(script) bool ExpertZone
 
-function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
+function main(int stepstart, int stepstop, int setspeed, bool NoShiny, bool ForceNamed)
 {
 	variable int laststep=9
 	variable int count
+	oc !c -UplinkOptionChange All checkbox_settings_disablecaststack FALSE
 	oc !c -resume
 	oc !c -letsgo
 	if (${Script["LoopHeroic"](exists)})
@@ -44,10 +45,12 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	{
 		stepstop:Set[${laststep}]
 	}
-	if (${stepstart}==0)
-	{
+	if (${stepstart}==0 && !${ForceNamed})
 		stepstart:Set[3]
-	}
+	if (${stepstart}==0 && ${ForceNamed} && ${Actor[Felkruk].IsAggro})
+		stepstart:Set[2]
+	echo FYI IndexCounter is at ${IndexCounter}
+	
 	echo zone is ${Zone.Name}
 	call isExpert "${Zone.Name}"
 	ExpertZone:Set[${Return}]
@@ -83,14 +86,12 @@ function step000()
 	call DMove 562 83 39 3
 	call DMove 532 82 35 3
 	call StopHunt
-	call Converse "Felkruk" 16
 }
 
 function step001()
 {
 	variable string Named
 	Named:Set["Springview Healer"]
-	oc !c -UplinkOptionChange All checkbox_settings_disablecaststack_cure TRUE
 	
 	call ActivateVerb "crypt_1" 548 83 61 "Reach for the crypt" TRUE TRUE
 	call ActivateVerb "crypt_2" 569 83 55 "Reach for the crypt" TRUE TRUE
@@ -126,24 +127,12 @@ function step002()
 	Named:Set["Felkruk"]
 	
 	call StopHunt
-	
-	call DMove 534 68 -43 ${speed} ${FightDistance}
-	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	oc !c -UplinkOptionChange All checkbox_settings_disablecaststack_cure TRUE
-
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-
-	echo must kill "${Named}"
+	call DMove 534 68 -43 3 30 TRUE 
 	relay all run EQ2Ethreayd/Outbreak_C1
 
-	do
-	{
-		wait 10
-		ExecuteQueued
-		call IsPresent "${Named}"
-	}
-	while (${Return})
+	call TanknSpank "${Named}" 50 TRUE
+	
 	oc !c -acceptreward
 	eq2execute summon
 	wait 50
@@ -473,7 +462,16 @@ function CureAll()
 {
 	variable int i
 	variable string Curer
-	Curer:Set[Healers]
+	echo launching CureAll (in order) function with IndexCounter at ${IndexCounter}
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		call get_Archetype Me.Group[${i}].Class}
+		if (${Return.Equal["priest"]})
+		{
+			Curer:Set[${Me.Group[${i}].Name}]
+			echo ${Me.Group[${i}].Name} has been selected as Curer
+		}
+	}
 	oc !c -UplinkOptionChange ${Curer} checkbox_settings_disablecaststack TRUE
 	for ( i:Set[1] ; ${i} < ${IndexCounter} ; i:Inc )
 	{
@@ -481,6 +479,7 @@ function CureAll()
 		echo curing ${CurseOrder[${i}]} (${i})
 		eq2execute gsay need cure for ${CurseOrder[${i}]} (${i})
 		oc !c -CastAbilityOnPlayer ${Curer} "cure curse" ${CurseOrder[${i}]}
+		echo ${Curer} cure curse on ${CurseOrder[${i}]} now !
 		do
 		{
 			
@@ -499,7 +498,9 @@ function OrderedCures(string ActorName)
 	if (${IndexCounter}<2)
 	{
 		CurseOrder:Insert[${ActorName}]
+		echo adding ${ActorName} to chain
 		IndexCounter:Inc
+		echo FYI IndexCounter is at ${IndexCounter}
 	}
 	else
 	{
@@ -514,11 +515,13 @@ function OrderedCures(string ActorName)
 			if (${Found}<1)
 			{
 				CurseOrder:Insert[${ActorName}]
+				echo adding ${ActorName} to chain
 				IndexCounter:Inc
 			}
 		}
 	}
 	QueueCommand call CureAll
+	echo CureAll Queued to stack
 }
 atom HandleCurses(int ActorID, int TraumaCounter, int ArcaneCounter, int NoxiousCounter, int ElementalCounter, int CursedCounter)
 {
@@ -562,6 +565,12 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	if (${Message.Find["t see target"]} > 0 || ${Message.Find["oo far away"]} > 0)
 	{
 		 oc !c -Come2Me ${Me.Name} ${Speaker} 3
+	}
+	if (${Message.Find["eed ordered cure"]} > 0)
+	{
+		Curing:Set[TRUE]
+		call OrderedCures ${Speaker}
+		echo FYI IndexCounter is at ${IndexCounter} and ${Speaker} is requesting a cure
 	}
 }
 
@@ -607,10 +616,5 @@ atom HandleAllEvents(string Message)
 		else
 			oc !c -CS_Set_ChangeCampSpotBy All 0 0 40
 		Toggle:Set[(!${Toggle})]
-	}
-	if (${Message.Find["eed ordered cure"]} > 0)
-	{
-		Curing:Set[TRUE]
-		call OrderedCures ${Speaker}
 	}
 }

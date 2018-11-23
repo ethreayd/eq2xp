@@ -167,7 +167,9 @@ function step000()
 	call DMove 562 83 39 3
 	call DMove 532 82 35 3
 	call StopHunt
-	call Converse "Felkruk" 16
+	call CheckCombat
+	IF (!${Actor[Felkruk].IsAggro})
+		call Converse "Felkruk" 16
 }
 
 function step001()

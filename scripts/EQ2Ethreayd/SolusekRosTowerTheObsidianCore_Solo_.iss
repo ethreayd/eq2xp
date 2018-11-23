@@ -109,7 +109,7 @@ function step000()
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",50]
-	call DMove 0 -6 -51 ${speed} ${FightDistance}
+	call DMove 0 -6 -50 3
 	Ob_AutoTarget:AddActor["construct of flames",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["Solitude",0,TRUE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -168,12 +168,12 @@ function step002()
 {
 	variable string Named
 	Named:Set["The Molten Behemoth"]
-	call DMove 0 -121 -77 1 30 FALSE FALSE 3
+	call DMove 0 -121 -76 1 30 FALSE FALSE 2
 	call IsPresent "${Named}" 500
 	if (${Return})
 	{
 		eq2execute merc resume
-		
+		call DMove 0 -121 -84 1 30 FALSE FALSE 2
 		call DMove -1 -120 -120 3
 		call DMove 0 -122 -151 ${speed} ${FightDistance}
 		call DMove 7 -122 -154 ${speed} ${FightDistance}
@@ -247,7 +247,7 @@ function step003()
 	
 	if (${Return} || ${isNamed})
 	{
-		call DMove -5 -137 -84 1
+		call DMove 0 -137 -84 1 30 FALSE FALSE 2
 		call MoveJump 25 -136 -54 5 -136 -74
 		Ob_AutoTarget:AddActor["${mob}",0,TRUE,FALSE]
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -329,7 +329,7 @@ function step004()
 	call IsPresent "${Named}"
 	if (${Return})
 	{
-		call PetitPas 4 -156 -81 3
+		call DMove 0 -156 -84 1 30 FALSE FALSE 2
 		
 		echo Prepare to Run and Jump
 

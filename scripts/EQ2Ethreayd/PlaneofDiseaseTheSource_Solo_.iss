@@ -81,21 +81,23 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	if (${stepstart}==0)
 	{
 		call IsPresent "festrus" 2000
-		if (!${Return} && ${Me.Loc.Y}>-400)
+		echo call IsPresent "festrus" 2000 --> ${Return}
+		if (${Return} && ${Me.Loc.Y}>-400)
 		{
-			wait 600
-			echo waiting for a min (I don't remember why)
+			InDecay:Set[TRUE]
+			
 			call IsPresent "festrus" 2000
 			if (!${Return})
 			{
+				InDecay:Set[TRUE]
 				call DMove -402 28 260 3
 				stepstart:Set[1]
 			}
 		}
-		call IsPresent "Adan" 2000
+		call IsPresent "Rancine" 2000
 		if (${Return})
 			InDecay:Set[TRUE]
-		if (${InDecay} && ${Me.Loc.Y}>-400)
+		if (!${InDecay} && ${Me.Loc.Y}>-400)
 		{
 			call DMove -188 75 146 3
 			call DMove -85 88 88 3
