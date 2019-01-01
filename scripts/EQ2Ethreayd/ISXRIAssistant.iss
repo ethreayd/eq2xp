@@ -101,6 +101,7 @@ function Zone_DoomfireTheEnkindledTowersSolo()
 }
 function MainChecks()
 {
+	echo in MainChecks Loop
 	if (!${Me.Grouped} && !${Me.InCombatMode})
 	{
 		eq2execute merc resume
@@ -147,10 +148,22 @@ function MainChecks()
 		RI
 		wait 100
 		UIElement[RI].FindUsableChild[Start,button]:LeftClick
-	}		
+	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
+	call ReturnEquipmentSlotHealth Primary
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20 )
+	{
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+		if (${Script["CDLoop"](exists)})
+			end CDLoop
+		call goto_GH
+		call GuildH
+		if (!${Script["CDLoop"](exists)})
+			run EQ2Ethreayd/CDLoop
+	}	
 }
 function gotoSlupgaloop()
 {
