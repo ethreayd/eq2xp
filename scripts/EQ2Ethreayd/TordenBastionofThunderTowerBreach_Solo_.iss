@@ -286,6 +286,7 @@ function step002()
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
+	call DMove 657 309 -635 3
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume

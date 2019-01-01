@@ -98,6 +98,9 @@ function main(bool NoShiny, bool Heroic)
 					call goto_GH
 					call GuildH
 					wait 100
+					
+					echo Repair
+					oc !c -RepairGear
 					call goCoV
 				}
 				if (${Heroic} && ${Return}<100 && ${Restart}<10)
@@ -106,7 +109,7 @@ function main(bool NoShiny, bool Heroic)
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
 					wait 50
 					echo Repair
-					oc !c -repair
+					oc !c -RepairGear
 					wait 50
 				}
 				if (${Heroic} && ${Restart}>1)
@@ -148,7 +151,7 @@ function main(bool NoShiny, bool Heroic)
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
 					wait 50
 					echo Repair
-					oc !c -repair
+					oc !c -RepairGear
 					wait 50
 					call RunZone 0 0 0 ${NoShiny}
 				}
@@ -157,6 +160,9 @@ function main(bool NoShiny, bool Heroic)
 					call goto_GH
 					call GuildH
 					wait 100
+					
+					echo Repair
+					oc !c -RepairGear
 					call goCoV
 					if (!${Script["LoopSolo"](exists)} && !${Heroic})
 						run EQ2Ethreayd/LoopSolo

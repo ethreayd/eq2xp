@@ -371,7 +371,6 @@ function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, 
 	wait 50
 	if (${triggerFight} && ${is2D})
 	{
-		echo in if (${triggerFight} && ${is2D}) at ActivateVerb
 		wait 50
 		call waitfor_Combat
 		call DMove ${X} ${Y} ${Z} 3
@@ -855,6 +854,35 @@ function CheckQuestStep(int step)
 		return FALSE
     }
 }
+
+function CheckS()
+{
+	variable index:ability MyAbilities
+    variable iterator MyAbilitiesIterator
+    variable int Timer = 0
+	Me:QueryAbilities[MyAbilities, ID =- "4094834160" || ID =- "3812013292"]
+    MyAbilities:GetIterator[MyAbilitiesIterator]
+	if ${MyAbilitiesIterator:First(exists)}
+    {
+        do
+        {
+            if (!${MyAbilitiesIterator.Value.IsAbilityInfoAvailable})
+            {
+                do
+                {
+                    wait 2
+                }
+                while (!${MyAbilitiesIterator.Value.IsAbilityInfoAvailable} && ${Timer:Inc} < 1500)
+            }
+    
+            return ${MyAbilitiesIterator.Value.IsReady}
+            Timer:Set[0]
+        }
+        while ${MyAbilitiesIterator:Next(exists)}
+    }
+	else
+        return FALSE
+}
 function CheckSwimming()
 {
 	echo trying to not swim anymore
@@ -1301,35 +1329,24 @@ function EndZone()
 }
 function Evac()
 {
-	echo not implemented yet
-	switch ${Me.Class}
+	switch ${Me.Archetype}
 	{
 		case scout
-			echo evac of scout
+			Me.Ability["Escape"]:Use
 		break
-		case warrior
-			echo evac
-		break
-		case cleric
-			echo evac
-		break
-		case brawler
-			echo evac
-		break
-		case druid
-			echo evac
-		break
-		case sorcerer
-			echo evac
-		break
-		case enchanter
-			echo evac
-		break
-		case summoner
-			echo evac
+		case priest
+			switch ${Me.Class}
+			{
+				case druid
+					Me.Ability["Verdurous Journey"]:Use
+				break
+				default
+					Me.Inventory["Totem of Escape"]:Use
+				break
+			}
 		break
 		default
-			echo evac
+			Me.Inventory["Totem of Escape"]:Use
 		break
 	}
 }
@@ -2355,14 +2372,14 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	return ${ItemHealth}
 }
 
-function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait, bool ForceNamed)
+function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" (${sQN}) Now !
 	if (!${Script[${sQN}](exists)})
-		runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny} ${ForceNamed}
+		runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
 	else
 		Script[${sQN}]:Resume
     wait 5
@@ -2602,7 +2619,6 @@ function strip_QN(string questname, bool HeroicExpert)
 }
 function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 {
-	echo Tanking and Spanking ${Named} at max distance ${Distance}m with Queue at ${Queue} and Collision Check at !${NoCC}
 	if (${Distance}<1)
 		Distance:Set[50]
 	Ob_AutoTarget:AddActor["${Named}",0,!${NoCC},FALSE]
@@ -2610,10 +2626,9 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	echo "must kill ${Named}"
-	call IsPresent "${Named}" ${Distance}
+	call IsPresent "${Named}"
 	if (${Return})
 	{
-		echo starting to fight ${Named}
 		target "${Named}"
 		do
 		{
@@ -2778,21 +2793,20 @@ function waitfor_Combat()
 	} 
 	while (${Me.InCombatMode})
 }
-function WaitforGroupDistance(int Distance, bool NoRush)
+function WaitforGroupDistance(int Distance)
 {
 	variable int Counter
-	echo waiting for group to be in a ${Distance}m radius (in WaitforGroupDistance)
+	echo waiting for group to be in a ${Distance}m radius
 	do
 	{
 		wait 10
 		Counter:Inc
-		if (${Counter}>30 && !${NoRush})
+		if (${Counter}>30)
 		{
 			call HurryUp ${Distance}
 			Counter:Set[0]
 		}	
-		call GroupDistance TRUE
-		echo GroupDistance reply with value ${Return} and distance is ${Distance}, does (${Return}>${Distance}) ?
+		call GroupDistance
 	}
 	while (${Return}>${Distance})
 }
@@ -2870,6 +2884,22 @@ function WalkWithTheWind(float X, float Y, float Z)
 		call TestArrivalCoord ${X} ${Y} ${Z} 10 TRUE
 	}
 	while (!${Return})
+}
+function WhereIs(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+		echo I am at ${Me.Loc.X} ${Me.Loc.Y} ${Me.Loc.Z}
+		eq2execute way ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
+		return TRUE
+	}
+	else
+		return FALSE
 }
 function isExpert(string ZoneName)
 {
