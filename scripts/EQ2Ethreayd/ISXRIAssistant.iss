@@ -157,8 +157,10 @@ function MainChecks()
 	{
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 		if (${Script["CDLoop"](exists)})
 			end CDLoop
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 		call goto_GH
 		call GuildH
 		if (!${Script["CDLoop"](exists)})
