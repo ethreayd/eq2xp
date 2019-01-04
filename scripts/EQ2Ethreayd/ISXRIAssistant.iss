@@ -81,9 +81,35 @@ function Zone_AwuidorTheNebulousDeepSolo()
 }
 function Zone_EryslaiTheBixelHiveSolo()
 {
+	variable string Named
 	do
 	{
 		call MainChecks
+		Named:Set["Daishani"]
+		
+		call IsPresent "${Named}" 50
+		if (${Return} && ${Actor["${Named}"].IsAggro})
+		{
+			echo correcting ISXRI Bug with ${Named} fight...
+			face "${Named}"
+			target "${Named}"
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call DMove -634 403 -161 3
+			eq2execute merc attack
+			wait 600
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		call IsPresent "?" 5
+		if (${Return} && ${Me.X} < -540 && ${Me.X} > -550 &&  ${Me.Y} < 650 && ${Me.Y} > 640 && ${Me.Z} < -180 && ${Me.Z} > -190)
+		{
+			echo correcting ISXRI Bug with shiny
+			
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			;call DMove -634 403 -161 3
+			;eq2execute merc attack
+			;wait 600
+			;UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
 		wait 1000
 	}
 	while (${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]})
@@ -153,14 +179,17 @@ function MainChecks()
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
 	call ReturnEquipmentSlotHealth Primary
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20 )
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
 	{
+		echo rebooting loop
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 		if (${Script["CDLoop"](exists)})
 			end CDLoop
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+		if (${Script["Buffer:RZ"](exists)})
+			end Buffer:RZ
+		
 		call goto_GH
 		call GuildH
 		if (!${Script["CDLoop"](exists)})
@@ -208,6 +237,8 @@ function CloseCombat(string Named, float Distance, bool MoveIn)
 			target "${Named}"
 			if ${MoveIn}
 				call MoveCloseTo "${Named}"
+			else
+				eq2execute merc attack
 		}
 }
 atom HandleAllEvents(string Message)

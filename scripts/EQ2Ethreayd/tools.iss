@@ -1765,14 +1765,32 @@ function HurryUp(int Distance)
 			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
 	}
 }
+function TransmuteAll(string ItemName)
+{
+	call CountItem "${ItemName}"
+	echo transmuting ${Return} ${ItemName}
+	if (${Return}>0)
+	{
+		do
+		{
+			call Transmute "${ItemName}"
+			wait 10
+			call CountItem "${ItemName}"
+		}
+		while (${Return}>0)
+	}
+}
 function GuildH()
 {
 	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
 	{
+		wait 100
 		echo Repair
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
 		wait 100
+		call TransmuteAll "Planar Tranmutation Stone"
+		call TransmuteAll "Celestial Transmutation Stone"
 		echo First Depot
 		ogre depot -allh -hda -llda -cda
 		wait 50

@@ -19,6 +19,15 @@
 
 function main()
 {
+	call ReturnEquipmentSlotHealth Primary
+	if (${Me.IsDead} || ${Return}<11)
+	{
+		wait 100
+		echo --- Reviving
+		RIMUIObj:Revive[${Me.Name}]
+		wait 400
+		call goto_GH
+	}
 	call GuildH
 	call getQuests
 	if (!${Script["ISXRIAssistant"](exists)})
@@ -26,13 +35,25 @@ function main()
 	do
 	{
 		call ReturnEquipmentSlotHealth Primary
+		
 		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10 && ${Zone.Name.Left[6].Equal["Myrist"]})
 		{
+			echo starting RZ
 			RZ
 			wait 30
 			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
 		}
 		wait 1000
+		if (${Me.IsDead} && ${Zone.Name.Left[6].Equal["Myrist"]})
+		{
+			wait 100
+			echo --- Reviving
+			RIMUIObj:Revive[${Me.Name}]
+			wait 400
+			call goto_GH
+			call GuildH
+			call getQuests
+		}
 	}
 	while (TRUE)
 }
