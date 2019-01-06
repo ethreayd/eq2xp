@@ -167,10 +167,10 @@ function MainChecks()
 	{
 		wait 100
 		echo Dead and Alone --- Reviving
-		RIMUIObj:Revive[${Me.Name}]
-		wait 400
 		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 		wait 100
+		RIMUIObj:Revive[${Me.Name}]
+		wait 400
 		RI
 		wait 100
 		UIElement[RI].FindUsableChild[Start,button]:LeftClick
