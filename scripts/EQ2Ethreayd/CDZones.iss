@@ -1,9 +1,17 @@
+function EnterZone(int num)
+{
+	do
+	{
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",${num}]
+		wait 50
+	}
+	while (${Zone.Name.Equal["Coliseum of Valor"]})
+}
 function getQuests(string ZoneName, string version)
 {
 	variable string NPCName
 	if (${Me.Y}<400 || ${Me.Y}>430)
 		call goEPG
-		
 	call DMove 751 411 -364 3
 	
 	switch ${ZoneName}
@@ -162,13 +170,4 @@ function RebootZones()
 	call goCoV
 	call DMove -2 5 4 3
 	run EQ2Ethreayd/autopop
-}
-function EnterZone(int num)
-{
-	do
-	{
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",${num}]
-		wait 50
-	}
-	while (${Zone.Name.Equal["Coliseum of Valor"]})
 }

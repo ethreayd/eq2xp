@@ -21,6 +21,7 @@ variable(script) int RICrashed
 
 function main(string questname)
 {
+	variable int IdleTime
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	RIStart:Set[TRUE]
@@ -36,9 +37,15 @@ function main(string questname)
 			call Zone_EryslaiTheBixelHiveSolo
 		if ${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]}
 			call Zone_DoomfireTheEnkindledTowersSolo
-			
+		if ${Me.IsIdle}
+			IdleTime:Inc
+		Else
+			IdleTime:Set[0]
 		ExecuteQueued
+		if ${IdleTime} > 36
+			call RebootLoop
 		wait 1000
+		
 	}
 	while (TRUE)
 }
@@ -74,7 +81,26 @@ function Zone_AwuidorTheNebulousDeepSolo()
 	{
 		call MainChecks
 		call CloseCombat "Pontis Aqueous" 35
-		
+		if (${Me.X} < -1350 && ${Me.X} > -1365 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove -1376 610 19 2
+		}
+		if (${Me.X} < 1370 && ${Me.X} > -1355 &&  ${Me.Y} < 620 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 1376 610 19 2
+		}
+		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < -1300 && ${Me.Z} > -1315)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 1 611 -1323 2
+		}
+		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} > 1295 && ${Me.Z} < 1310)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 0 611 1314 2
+		}
 		wait 1000
 	}
 	while (${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]})
@@ -180,21 +206,24 @@ function MainChecks()
 		echo must be stunned or stifled
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
-	{
-		echo rebooting loop
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
-		if (${Script["CDLoop"](exists)})
-			end CDLoop
-		if (${Script["Buffer:RZ"](exists)})
-			end Buffer:RZ
-		
-		call goto_GH
-		call GuildH
-		if (!${Script["CDLoop"](exists)})
-			run EQ2Ethreayd/CDLoop
-	}	
+		call RebootLoop	
+}
+
+function RebootLoop()
+{
+	echo rebooting loop
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	if (${Script["CDLoop"](exists)})
+		end CDLoop
+	if (${Script["Buffer:RZ"](exists)})
+		end Buffer:RZ
+	
+	call goto_GH
+	call GuildH
+	if (!${Script["CDLoop"](exists)})
+		run EQ2Ethreayd/CDLoop
 }
 function gotoSlupgaloop()
 {

@@ -809,6 +809,20 @@ function CheckDetriment(string EffectName)
 	else
 		return FALSE
 }
+function CheckFlyingZone()
+{
+	variable bool Flying
+	call CheckCombat 30
+	press -hold FLYUP
+	wait 20
+	press -release FLYUP
+	if ${Me.FlyingUsingMount}
+		Flying:Set[TRUE]
+ 	else
+		Flying:Set[FALSE]
+	call GoDown
+	return ${Flying}
+}
 function CheckItem(string ItemName, int Quantity)
 {
 	call CountItem "${ItemName}"
@@ -854,7 +868,6 @@ function CheckQuestStep(int step)
 		return FALSE
     }
 }
-
 function CheckS()
 {
 	variable index:ability MyAbilities
@@ -883,6 +896,18 @@ function CheckS()
 	else
         return FALSE
 }
+function CheckStuck(float loc)
+{
+	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
+	if (${loc}==${loc0})
+	{
+		return TRUE
+	}
+	else
+	{
+		return FALSE
+	}
+}
 function CheckSwimming()
 {
 	echo trying to not swim anymore
@@ -900,22 +925,6 @@ function CheckSwimming()
 		press -release MOVEFORWARD 
 	}
 }
-
-
-
-function CheckStuck(float loc)
-{
-	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
-	if (${loc}==${loc0})
-	{
-		return TRUE
-	}
-	else
-	{
-		return FALSE
-	}
-}
-
 function CheckWalking()
 {
 
@@ -2807,11 +2816,25 @@ function UnstuckR(int randomize)
 	wait ${Math.Rand[${randomize}]}
 	press -release STRAFERIGHT
 }
+function Unstuck_out(bool FlyingZone)
+{
+	if ${FlyingZone}
+	{
+		press -hold FLYUP	
+		wait 100
+		press -release FLYUP
+		press -hold MOVEFORWARD
+		wait 50
+		press -release MOVEFORWARD
+		call GoDown
+	}
+	else
+		call UnstuckR 100
+}
 function UseAbility(string MyAbilityName)
 {
-Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
+	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
-
 function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 {
 	variable index:actor Actors
