@@ -181,7 +181,7 @@ function main(string rtarget, float DistStop)
 			wait 5
 		}
 		while (${Stucky}<10 && !${Me.IsDead} && ${Blocked}<10)
-		echo really stuck (${Stucky}-${Blocked}) ! going UP ? ${IsFlying}!
+		echo really stuck (${Stucky}-${Blocked}) ! going UP ? ${FlyingZone}!
 		call Unstuck_out
 	}
 	while (${Stucky}<20 &&  !${Me.IsDead} && ${Blocked}<20)
