@@ -17,7 +17,9 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CDZones.iss"
 variable(script) bool RIStart
+variable(script) bool StoneSkin
 variable(script) int RICrashed
+variable(script) int Stucky
 
 function main(string questname)
 {
@@ -49,110 +51,10 @@ function main(string questname)
 	}
 	while (TRUE)
 }
-function Zone_VegarlsonRuinsofRatheSolo()
-{
-	do
-	{
-		call MainChecks
-		if (${Me.X}<-270 && ${Me.X}>-300 && ${Me.Z}>-244 && ${Me.Z}<-200 && ${RIStart})
-		{
-			;UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			RIStart:Set[FALSE]
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-			echo pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-			call gotoSlupgaloop
-		}
-		if (${Me.X}<-60 && ${Me.X}>-80 && ${Me.Z}>600 && ${Me.Z}<690 && ${RIStart})
-		{
-			;UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			RIStart:Set[FALSE]
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-			echo pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-			call gotoForrestBarrens
-		}
-		ExecuteQueued
-		wait 10
-	}
-	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
-}
-function Zone_AwuidorTheNebulousDeepSolo()
-{
-	do
-	{
-		call MainChecks
-		call CloseCombat "Pontis Aqueous" 35
-		if (${Me.X} < -1350 && ${Me.X} > -1365 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
-		{
-			echo correcting ISXRI Bug with stuck
-			call DMove -1376 610 19 2
-		}
-		if (${Me.X} < 1370 && ${Me.X} > -1355 &&  ${Me.Y} < 620 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
-		{
-			echo correcting ISXRI Bug with stuck
-			call DMove 1376 610 19 2
-		}
-		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < -1300 && ${Me.Z} > -1315)
-		{
-			echo correcting ISXRI Bug with stuck
-			call DMove 1 611 -1323 2
-		}
-		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} > 1295 && ${Me.Z} < 1310)
-		{
-			echo correcting ISXRI Bug with stuck
-			call DMove 0 611 1314 2
-		}
-		wait 1000
-	}
-	while (${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]})
-}
-function Zone_EryslaiTheBixelHiveSolo()
-{
-	variable string Named
-	do
-	{
-		call MainChecks
-		Named:Set["Daishani"]
-		
-		call IsPresent "${Named}" 50
-		if (${Return} && ${Actor["${Named}"].IsAggro})
-		{
-			echo correcting ISXRI Bug with ${Named} fight...
-			face "${Named}"
-			target "${Named}"
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			call DMove -634 403 -161 3
-			eq2execute merc attack
-			wait 600
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-		}
-		call IsPresent "?" 5
-		if (${Return} && ${Me.X} < -540 && ${Me.X} > -550 &&  ${Me.Y} < 650 && ${Me.Y} > 640 && ${Me.Z} < -180 && ${Me.Z} > -190)
-		{
-			echo correcting ISXRI Bug with shiny
-			
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			;call DMove -634 403 -161 3
-			;eq2execute merc attack
-			;wait 600
-			;UIElement[RI].FindUsableChild[Start,button]:LeftClick
-		}
-		wait 1000
-	}
-	while (${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]})
-}
-function Zone_DoomfireTheEnkindledTowersSolo()
-{
-	echo Entering Doomfire Solo loop
-	do
-	{
-		call MainChecks
-		call CloseCombat "Ra-Sekjet, the Molten" 60 TRUE
-		wait 1000
-	}
-	while (${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]})
-}
 function MainChecks()
 {
+	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
+		
 	echo in MainChecks Loop
 	if (!${Me.Grouped} && !${Me.InCombatMode})
 	{
@@ -204,9 +106,166 @@ function MainChecks()
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
+	wait 20
+	call CheckStuck ${loc0}
+	if (${Return} && !${Me.InCombatMode})
+		Stucky:Inc
+	else
+		Stucky:Set[0]
+	
+	if ${Stucky}>10
+	{
+		call UnstuckR 10
+		Stucky:Set[0]
+	}	
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
 		call RebootLoop	
+}
+function Zone_AwuidorTheNebulousDeepSolo()
+{
+	do
+	{
+		call MainChecks
+		call CloseCombat "Pontis Aqueous" 35
+		if (${Me.X} < -1350 && ${Me.X} > -1365 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove -1376 610 19 2
+		}
+		if (${Me.X} < 1370 && ${Me.X} > -1355 &&  ${Me.Y} < 620 && ${Me.Y} > 600 && ${Me.Z} < 30 && ${Me.Z} > 15)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 1376 610 19 2
+		}
+		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} < -1300 && ${Me.Z} > -1315)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 1 611 -1323 2
+		}
+		if (${Me.X} < 10 && ${Me.X} > -10 &&  ${Me.Y} < 615 && ${Me.Y} > 600 && ${Me.Z} > 1295 && ${Me.Z} < 1310)
+		{
+			echo correcting ISXRI Bug with stuck
+			call DMove 0 611 1314 2
+		}
+		wait 1000
+	}
+	while (${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]})
+}
+function Zone_DoomfireTheEnkindledTowersSolo()
+{
+	echo Entering Doomfire Solo loop
+	do
+	{
+		call MainChecks
+		call CloseCombat "Ra-Sekjet, the Molten" 60 TRUE
+		wait 1000
+	}
+	while (${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]})
+}
+function Zone_EryslaiTheBixelHiveSolo()
+{
+	variable string Named
+	do
+	{
+		call MainChecks
+		Named:Set["Daishani"]
+		
+		call IsPresent "${Named}" 50
+		if (${Return} && ${Actor["${Named}"].IsAggro})
+		{
+			echo correcting ISXRI Bug with ${Named} fight...
+			face "${Named}"
+			target "${Named}"
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call DMove -634 403 -161 3
+			eq2execute merc attack
+			wait 600
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		call IsPresent "?" 5
+		if (${Return} && ${Me.X} < -540 && ${Me.X} > -550 &&  ${Me.Y} < 650 && ${Me.Y} > 640 && ${Me.Z} < -180 && ${Me.Z} > -190)
+		{
+			echo correcting ISXRI Bug with shiny
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 20
+			call DMove -530 643 -179 1
+			call DMove -520 642 -176 1 30 FALSE FALSE 3
+			call DMove -530 644 -170 1 30 FALSE FALSE 3
+			call DMove -544 648 -179 1 30 FALSE FALSE 3
+			wait 10
+			ogre hl
+			wait 100
+			ogre end hl
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		call IsPresent "?" 10
+		if (${Return} && ${Me.X} < -665 && ${Me.X} > -675 &&  ${Me.Y} < 410 && ${Me.Y} > 395 && ${Me.Z} < -185 && ${Me.Z} > -200)
+		{
+			echo correcting ISXRI Bug with shiny
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 20
+			call DMove -665 403 -190 2 30 FALSE FALSE 3
+			call DMove -670 403 -197 2 30 FALSE FALSE 3
+			call DMove -676 403 -197 2 30 FALSE FALSE 3
+			wait 20
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			ogre hl
+			wait 100
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			ogre hl
+			wait 100
+			ogre end hl
+			call DMove -676 403 -197 2 30 FALSE FALSE 3
+			call DMove -670 403 -197 2 30 FALSE FALSE 3
+			call DMove -665 403 -190 2 30 FALSE FALSE 3
+			wait 20
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		wait 1000
+	}
+	while (${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]})
+}
+function Zone_VegarlsonRuinsofRatheSolo()
+{
+	do
+	{
+		call MainChecks
+		call IsPresent "Runic Stone" 2000
+		eq2execute loc
+		if (!${Return} && ${Me.X} < -230 && ${Me.X} > -320 &&  ${Me.Y} < 45 && ${Me.Y} > 25 && ${Me.Z} < -180 && ${Me.Z} > -270)
+		{
+			echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+			RIStart:Set[FALSE]
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+			call DMove -291 37 -224 3
+			call gotoSlurpgaloop
+		}
+		call IsPresent "Glimmerstone" 20
+		if (${Return})
+		{
+			echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+			RIStart:Set[FALSE]
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+			call DMove -291 37 -224 3 30 TRUE TRUE 10
+			call FightGlimmerstone
+		}
+		call IsPresent "vekerchiki drone" 40
+		if (${Return})
+		{
+			echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+			RIStart:Set[FALSE]
+			IElement[RI].FindUsableChild[Start,button]:LeftClick
+			call MoveCloseTo "vekerchiki drone"
+			call TanknSpank "vekerchiki drone" 25
+			IElement[RI].FindUsableChild[Start,button]:LeftClick
+			RIStart:Set[TRUE]
+		}
+		
+		ExecuteQueued
+		wait 10
+	}
+	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
 }
 
 function RebootLoop()
@@ -225,8 +284,126 @@ function RebootLoop()
 	if (!${Script["CDLoop"](exists)})
 		run EQ2Ethreayd/CDLoop
 }
-function gotoSlupgaloop()
+function FightGlimmerstone()
 {
+	variable string Named
+	Named:Set[Glimmerstone]
+	echo starting ${Named} fight script
+	call IsPresent "Runic Stone" 20
+	if (${Return})
+	{
+		do
+		{
+			call MoveCloseTo "Runic Stone"
+			call ActivateVerbOn "Runic Stone" Push TRUE
+			wait 10
+			call IsPresent "Runic Stone" 20
+		}
+		while (${Return})
+	}
+	do
+	{
+		wait 10
+		call IsPresent "${Named}" 20
+	}
+	while (!${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	call DMove -314 38 -234 3 30 TRUE TRUE 10
+	call DMove -340 37 -235 3 30 TRUE TRUE 10
+	call MoveCloseTo "Runic Stone"
+	call ActivateVerbOn "Runic Stone" Activate TRUE
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	call DMove -340 37 -235 3 30 TRUE TRUE 10
+	call DMove -314 38 -234 3 30 TRUE TRUE 10
+	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	do
+	{
+		target "${Named}"
+		wait 10
+	}
+	while (!${StoneSkin})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	call DMove -309 37 -176 3 30 TRUE TRUE 10
+	call DMove -323 36 -172 3 30 TRUE TRUE 10
+	call MoveCloseTo "Runic Stone"
+	call ActivateVerbOn "Runic Stone" Activate TRUE
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	call DMove -323 36 -172 3 30 TRUE TRUE 10
+	call DMove -309 37 -176 3 30 TRUE TRUE 10
+	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	do
+	{
+		target "${Named}"
+		wait 10
+	}
+	while (!${StoneSkin})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	call DMove -268 38 -213 3 30 TRUE TRUE 10
+	call DMove -236 32 -242 3 30 TRUE TRUE 10
+	call MoveCloseTo "Runic Stone"
+	call ActivateVerbOn "Runic Stone" Activate TRUE
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	call DMove -236 32 -242 3 30 TRUE TRUE 10
+	call DMove -268 38 -213 3 30 TRUE TRUE 10
+	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	do
+	{
+		target "${Named}"
+		wait 10
+	}
+	while (!${StoneSkin})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	call DMove -313 35 -195 3 30 TRUE TRUE 10
+	call DMove -266 32 -257 3 30 TRUE TRUE 10
+	call DMove -243 33 -157 3 30 TRUE TRUE 10
+	call MoveCloseTo "Runic Stone"
+	call ActivateVerbOn "Runic Stone" Activate TRUE
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	call DMove -243 33 -157 3 30 TRUE TRUE 10
+	call DMove -266 32 -257 3 30 TRUE TRUE 10
+	call DMove -313 35 -195 3 30 TRUE TRUE 10
+	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	call TanknSpank "${Named}"
+	wait 20
+	call gotoSlurpgaloop
+}
+function gotoSlurpgaloop()
+{
+	variable string Named
+	Named:Set[Slurpgaloop]
+	
 	call DMove -295 37 -232 3
 	call DMove -270 37 -213 3
 	call DMove -253	39 -219 3
@@ -249,6 +426,39 @@ function gotoSlupgaloop()
 	call DMove 202 107 157 2
 	call DMove 235 109 193 3
 	call DMove 259 109 200 3
+	wait 20
+	RI
+	wait 50
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	RIStart:Set[TRUE]
+	do
+	{
+		wait 10
+		call IsPresent "${Named}" 500
+	}
+	while (${Return})
+	if (${Me.Y} < 50)
+		call gotoForrestBarrens
+}
+function gotoForrestBarrens()
+{
+	echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+	RIStart:Set[FALSE]
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	call DMove 407 18 325 3
+	call DMove 383 22 324 3
+	call DMove 375 26 307 2
+	call DMove 383 23 284 3
+	call DMove 395 41 221 3
+	call DMove 445 37 161 2
+	ogre hl
+	wait 100
+	ogre end hl
+	call DMove 401 40 224 3
+	call DMove 381 30 267 3
+	call DMove 365 42 287 3
+	call DMove 353 47 312 3
+	call DMove 310 77 309 3
 	wait 20
 	RI
 	wait 50
@@ -279,6 +489,11 @@ atom HandleAllEvents(string Message)
 	if (${Message.Equal["Too far away"]})
 	{
 		 eq2execute gsay ${Message}
+	}
+	if (${Message.Find["seeks protection within the stones"]}>0)
+	{
+		echo Named has stoneskin on
+		StoneSkin:Set[TRUE]
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
