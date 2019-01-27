@@ -2828,7 +2828,7 @@ function Unstuck_out(bool FlyingZone)
 		call GoDown
 	}
 	else
-		call UnstuckR 100
+		call UnstuckR 10
 }
 function UseAbility(string MyAbilityName)
 {
