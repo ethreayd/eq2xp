@@ -1774,17 +1774,6 @@ function HurryUp(int Distance)
 			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
 	}
 }
-function TransmuteAll(string ItemName)
-{
-	variable int i
-	call CountItem "${ItemName}"
-	echo transmuting ${Return} ${ItemName}
-	for ( i:Set[0] ; ${i} < ${Return} ; i:Inc )
-	{
-		call Transmute "${ItemName}"
-		wait 10
-	}
-}
 function GuildH()
 {
 	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
@@ -2781,7 +2770,17 @@ function Transmute(string ItemName)
 	wait 5
 	call AcceptReward TRUE
 }
-
+function TransmuteAll(string ItemName)
+{
+	variable int i
+	call CountItem "${ItemName}"
+	echo transmuting ${Return} ${ItemName}
+	for (i:Set[0] ; ${i} < ${Return(int)} ; i:Inc)
+	{
+		call Transmute "${ItemName}"
+		wait 10
+	}
+}
 function Unstuck(bool LR)
 {
 	ExecuteQueued
