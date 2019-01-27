@@ -1776,17 +1776,13 @@ function HurryUp(int Distance)
 }
 function TransmuteAll(string ItemName)
 {
+	variable int i
 	call CountItem "${ItemName}"
 	echo transmuting ${Return} ${ItemName}
-	if (${Return}>0)
+	for ( i:Set[0] ; ${i} < ${Return} ; i:Inc )
 	{
-		do
-		{
-			call Transmute "${ItemName}"
-			wait 10
-			call CountItem "${ItemName}"
-		}
-		while (${Return}>0)
+		call Transmute "${ItemName}"
+		wait 10
 	}
 }
 function GuildH()
@@ -2806,6 +2802,9 @@ function Unstuck(bool LR)
 }
 function UnstuckR(int randomize)
 {
+	if ${randomize}<1
+		randomize:Set[20]
+	echo moving random ${randomize}
 	press -hold MOVEBACKWARD
 	wait ${Math.Rand[${randomize}]}
 	press -release MOVEBACKWARD

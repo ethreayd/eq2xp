@@ -32,6 +32,8 @@ function main(string rtarget, float DistStop)
 	variable float loc0=0
 	variable float loc1=0
 	variable bool Enemy=FALSE
+	
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
 	if (!${FlyingZone})
@@ -124,10 +126,11 @@ function main(string rtarget, float DistStop)
 								if ${Return}
 									Stucky:Inc
 								loc1:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-								echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m
+								echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m (stucky at ${Stucky})
+								press MOVEFORWARD
 								wait 10
 							}
-							while (${ActorIterator.Value.Distance(exists)} && ${ActorIterator.Value.Distance}<${DistStop})
+							while (${ActorIterator.Value.Distance(exists)} && ${ActorIterator.Value.Distance}<${DistStop} && ${Stucky}<20)
 						}
 						else
 							Blocked:Inc
@@ -138,6 +141,7 @@ function main(string rtarget, float DistStop)
 						if (${Nb}==${MyIndex})
 						{
 							echo "All ressources are blocked"
+							Blocked:Inc
 							stuck:Set[FALSE]
 							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 							if (${FlyingZone})
@@ -153,7 +157,8 @@ function main(string rtarget, float DistStop)
 							{
 								press -release FLYUP
 								call GoDown
-							}	
+							}
+							call UnstuckR
 							call CheckStuck ${loc0}
 							if (!${Return})
 								Stucky:Set[0]
@@ -252,5 +257,12 @@ function Exclude_Ressources(string ResourceName)
 	else
 	{
 		return FALSE
+	}
+}
+atom HandleAllEvents(string Message)
+{
+	if (${Message.Equal["Can't see target"]})
+	{
+		 Stucky:Inc
 	}
 }
