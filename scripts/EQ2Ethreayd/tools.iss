@@ -325,7 +325,19 @@ function AcceptReward(bool AcceptAll)
 	}
 	while (${RewardWindow(exists)} && ${AcceptAll})
 }
-
+function ActivateAggro(string ActorName, string verb, float distance)
+{
+	call MoveCloseTo "${ActorName}" ${distance}
+	do
+	{
+		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+		press MOVEFORWARD
+		call ActivateVerbOn "${ActorName}" "${verb}" TRUE
+	}
+	while (!${Actor["${ActorName}"].IsAggro})
+	echo ${ActorName} is now aggro
+	
+}
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
 	variable string ItemSwap
@@ -1748,6 +1760,26 @@ function goto_GH()
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	}
 }
+function GuildH()
+{
+	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
+	{
+		echo Starting GH churns
+		wait 100
+		echo Repair
+		OgreBotAPI:RepairGear[${Me.Name}]
+		RIMUIObj:Repair[${Me.Name}]
+		wait 100
+		call TransmuteAll "Planar Tranmutation Stone"
+		call TransmuteAll "Celestial Transmutation Stone"
+		echo First Depot
+		ogre depot -allh -hda -llda -cda
+		wait 50
+		call DepositAll "Scroll Depot"
+		wait 100
+		echo GH churns finished
+	}
+}
 function GroupDistance(bool Debug)
 {
 	variable int MaxDistance=0
@@ -1764,33 +1796,6 @@ function GroupDistance(bool Debug)
 	if (${Debug})
 		echo Calculated Max Distance is ${MaxDistance}
 	return ${MaxDistance}
-}
-function HurryUp(int Distance)
-{
-	variable int i
-	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
-	{
-		if (${Me.Group[${i}].Distance}>${Distance})
-			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
-	}
-}
-function GuildH()
-{
-	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
-	{
-		wait 100
-		echo Repair
-		OgreBotAPI:RepairGear[${Me.Name}]
-		RIMUIObj:Repair[${Me.Name}]
-		wait 100
-		call TransmuteAll "Planar Tranmutation Stone"
-		call TransmuteAll "Celestial Transmutation Stone"
-		echo First Depot
-		ogre depot -allh -hda -llda -cda
-		wait 50
-		call DepositAll "Scroll Depot"
-		wait 100
-	}
 }
 function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoBack)
 {
@@ -1817,7 +1822,6 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
-	
 	echo "There is ${Count} ${ItemName}"
 	if (${Count}>0)
 	{
@@ -1958,6 +1962,15 @@ function HuntItem(string ActorName, string ItemName, float X, float Y, float Z, 
 	}
 	echo Found ${Counter}/${number} ${ItemName} in Inventory - Stop Hunting
 	call StopHunt
+}
+function HurryUp(int Distance)
+{
+	variable int i
+	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+	{
+		if (${Me.Group[${i}].Distance}>${Distance})
+			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
+	}
 }
 function isGroupAlive()
 {
@@ -2117,12 +2130,13 @@ function Move(string ActorName, float X, float Y, float Z, bool is2D)
 	}
 	wait 10
 }
-
-function MoveCloseTo(string ActorName)
+function MoveCloseTo(string ActorName, float Distance)
 {
 	variable float loc0=0
 	variable int Stucky=0
 	variable string strafe
+	if (${Distance}<1)
+		Distance:Set[5]
 	echo Moving closer to ${Actor["${ActorName}"].Name}
 	face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
 	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
@@ -2145,7 +2159,7 @@ function MoveCloseTo(string ActorName)
 		else
 			Stucky:Set[0]
 	}
-	while (${Actor["${ActorName}"].Distance}>5 && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
+	while (${Actor["${ActorName}"].Distance}>${Distance} && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
 	press -release MOVEFORWARD
 	wait 10
 	if (${Stucky}>299)
@@ -2171,7 +2185,6 @@ function MoveJump(float X, float Y, float Z, float X0, float X1, float X2)
 	}
 	while (!${Return})
 }
-
 function MoveTo(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	target ${Me.Name}
@@ -2775,10 +2788,13 @@ function TransmuteAll(string ItemName)
 	variable int i
 	call CountItem "${ItemName}"
 	echo transmuting ${Return} ${ItemName}
-	for (i:Set[0] ; ${i} < ${Return(int)} ; i:Inc)
+	if (${Return}>0)
 	{
-		call Transmute "${ItemName}"
-		wait 10
+		for (i:Set[0] ; ${i} < ${Return(int)} ; i:Inc)
+		{
+			call Transmute "${ItemName}"
+			wait 10
+		}
 	}
 }
 function Unstuck(bool LR)

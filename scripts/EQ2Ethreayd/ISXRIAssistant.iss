@@ -20,6 +20,7 @@ variable(script) bool RIStart
 variable(script) bool StoneSkin
 variable(script) int RICrashed
 variable(script) int Stucky
+variable(script) bool DoDrones
 
 function main(string questname)
 {
@@ -178,7 +179,7 @@ function Zone_EryslaiTheBixelHiveSolo()
 			face "${Named}"
 			target "${Named}"
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			call DMove -634 403 -161 3
+			call DMove -634 403 -161 3 30 TRUE TRUE 10
 			eq2execute merc attack
 			wait 600
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
@@ -235,11 +236,15 @@ function Zone_VegarlsonRuinsofRatheSolo()
 		eq2execute loc
 		if (!${Return} && ${Me.X} < -230 && ${Me.X} > -320 &&  ${Me.Y} < 45 && ${Me.Y} > 25 && ${Me.Z} < -180 && ${Me.Z} > -270)
 		{
-			echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-			RIStart:Set[FALSE]
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-			call DMove -291 37 -224 3
-			call gotoSlurpgaloop
+			call IsPresent "Living Stone" 100
+			if (!${Return})
+			{
+				echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				RIStart:Set[FALSE]
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+				call DMove -291 37 -224 3 30 TRUE TRUE 10
+				call gotoSlurpgaloop
+			}
 		}
 		call IsPresent "Glimmerstone" 20
 		if (${Return})
@@ -250,18 +255,43 @@ function Zone_VegarlsonRuinsofRatheSolo()
 			call DMove -291 37 -224 3 30 TRUE TRUE 10
 			call FightGlimmerstone
 		}
-		call IsPresent "vekerchiki drone" 40
+		call IsPresent "vekerchiki mound" 60
+		if (${Return} && (${DoDrones}||(${Me.X} < 280 && ${Me.X} > 265 &&  ${Me.Y} < 115 && ${Me.Y} > 100 && ${Me.Z} < 200 && ${Me.Z} > 190)))
+		{
+			echo going to mound
+			RIStart:Set[FALSE]
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call MoveCloseTo "vekerchiki mound"
+			call TanknSpank "vekerchiki mound" 25
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			RIStart:Set[TRUE]
+		}
+		call IsPresent "vekerchiki" 40
+		if (${Return} && ${DoDrones})
+		{
+			echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+			echo fighting some drones
+			RIStart:Set[FALSE]
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call MoveCloseTo "vekerchiki"
+			call TanknSpank "vekerchiki"
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			RIStart:Set[TRUE]
+		}
+		call IsPresent "muddite lurcher" 10
 		if (${Return})
 		{
 			echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+			echo applying mud
 			RIStart:Set[FALSE]
-			IElement[RI].FindUsableChild[Start,button]:LeftClick
-			call MoveCloseTo "vekerchiki drone"
-			call TanknSpank "vekerchiki drone" 25
-			IElement[RI].FindUsableChild[Start,button]:LeftClick
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 20
+			call MoveCloseTo "muddite lurcher"
+			call ActivateVerbOn "muddite lurcher" "Apply sticky vekerchiki mud" TRUE
+			wait 300
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			RIStart:Set[TRUE]
 		}
-		
 		ExecuteQueued
 		wait 10
 	}
@@ -310,8 +340,7 @@ function FightGlimmerstone()
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	call DMove -314 38 -234 3 30 TRUE TRUE 10
 	call DMove -340 37 -235 3 30 TRUE TRUE 10
-	call MoveCloseTo "Runic Stone"
-	call ActivateVerbOn "Runic Stone" Activate TRUE
+	call ActivateAggro "Runic Stone" Activate 10
 	StoneSkin:Set[FALSE]
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
@@ -323,7 +352,7 @@ function FightGlimmerstone()
 	while (${Return})
 	call DMove -340 37 -235 3 30 TRUE TRUE 10
 	call DMove -314 38 -234 3 30 TRUE TRUE 10
-	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	call DMove -289 37 -230 3 30 TRUE TRUE 5
 	do
 	{
 		target "${Named}"
@@ -333,8 +362,7 @@ function FightGlimmerstone()
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	call DMove -309 37 -176 3 30 TRUE TRUE 10
 	call DMove -323 36 -172 3 30 TRUE TRUE 10
-	call MoveCloseTo "Runic Stone"
-	call ActivateVerbOn "Runic Stone" Activate TRUE
+	call ActivateAggro "Runic Stone" Activate 10
 	StoneSkin:Set[FALSE]
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
@@ -346,7 +374,7 @@ function FightGlimmerstone()
 	while (${Return})
 	call DMove -323 36 -172 3 30 TRUE TRUE 10
 	call DMove -309 37 -176 3 30 TRUE TRUE 10
-	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	call DMove -289 37 -230 3 30 TRUE TRUE 5
 	do
 	{
 		target "${Named}"
@@ -356,8 +384,7 @@ function FightGlimmerstone()
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	call DMove -268 38 -213 3 30 TRUE TRUE 10
 	call DMove -236 32 -242 3 30 TRUE TRUE 10
-	call MoveCloseTo "Runic Stone"
-	call ActivateVerbOn "Runic Stone" Activate TRUE
+	call ActivateAggro "Runic Stone" Activate 10
 	StoneSkin:Set[FALSE]
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
@@ -369,7 +396,7 @@ function FightGlimmerstone()
 	while (${Return})
 	call DMove -236 32 -242 3 30 TRUE TRUE 10
 	call DMove -268 38 -213 3 30 TRUE TRUE 10
-	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	call DMove -289 37 -230 3 30 TRUE TRUE 5
 	do
 	{
 		target "${Named}"
@@ -380,8 +407,7 @@ function FightGlimmerstone()
 	call DMove -313 35 -195 3 30 TRUE TRUE 10
 	call DMove -266 32 -257 3 30 TRUE TRUE 10
 	call DMove -243 33 -157 3 30 TRUE TRUE 10
-	call MoveCloseTo "Runic Stone"
-	call ActivateVerbOn "Runic Stone" Activate TRUE
+	call ActivateAggro "Runic Stone" Activate 10
 	StoneSkin:Set[FALSE]
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
@@ -391,10 +417,10 @@ function FightGlimmerstone()
 		call IsPresent "Runic Stone" 10
 	}
 	while (${Return})
-	call DMove -243 33 -157 3 30 TRUE TRUE 10
-	call DMove -266 32 -257 3 30 TRUE TRUE 10
-	call DMove -313 35 -195 3 30 TRUE TRUE 10
-	call DMove -291 37 -224 3 30 TRUE TRUE 10
+	call DMove -243 33 -157 3 30 TRUE TRUE 3
+	call DMove -284 32 -160 3 30 TRUE TRUE 10
+	call DMove -278 37 -213 3 30 TRUE TRUE 10
+	call DMove -289 37 -230 3 30 TRUE TRUE 5
 	call TanknSpank "${Named}"
 	wait 20
 	call gotoSlurpgaloop
@@ -437,6 +463,8 @@ function gotoSlurpgaloop()
 		call IsPresent "${Named}" 500
 	}
 	while (${Return})
+	DoDrones:Set[TRUE]
+	echo activating DoDrones variable at ${DoDrones}
 	if (${Me.Y} < 50)
 		call gotoForrestBarrens
 }
@@ -494,6 +522,11 @@ atom HandleAllEvents(string Message)
 	{
 		echo Named has stoneskin on
 		StoneSkin:Set[TRUE]
+	}
+	if (${Message.Find["disturbance of the hive has caused an enormous"]}>0)
+	{
+		echo Named Heaper is spawned
+		DoDrones:Set[FALSE]
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
