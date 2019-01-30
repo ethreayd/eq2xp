@@ -330,8 +330,14 @@ function ActivateAggro(string ActorName, string verb, float distance)
 	call MoveCloseTo "${ActorName}" ${distance}
 	do
 	{
-		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
-		press MOVEFORWARD
+		do
+		{
+			face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+			press MOVEFORWARD -hold
+			wait 1
+			press MOVEFORWARD -release
+		}
+		while (${Actor["${ActorName}"].Distance}>5)
 		call ActivateVerbOn "${ActorName}" "${verb}" TRUE
 	}
 	while (!${Actor["${ActorName}"].IsAggro})
@@ -390,6 +396,7 @@ function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, 
 }
 function ActivateVerbOn(string ActorName, string verb, bool UseID)
 {
+	echo do ${verb} on ${ActorName} (${UseID})
 	if ${UseID}
 		eq2execute apply_verb ${Actor[Query,Name=="${ActorName}"].ID} "${verb}"
 	else
@@ -1000,6 +1007,20 @@ function ClickZone(int startX, int startY, int stopX, int stopY, int step)
 	}
 	while (${Y}<${stopY})
 	echo End of ClickZone
+}
+function CloseCombat(string Named, float Distance, bool MoveIn)
+{
+	echo CloseCombat with ${Named} ${Distance} (${MoveIn})
+	call IsPresent "${Named}" ${Distance}
+	if (${Return} && ${Actor["${Named}"].IsAggro})
+	{
+		face "${Named}"
+		target "${Named}"
+		if ${MoveIn}
+			call MoveCloseTo "${Named}"
+		else
+			eq2execute merc attack
+	}
 }
 function CMove(float X, float Z)
 {
@@ -2345,10 +2366,27 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
-
+function PullNamed(string Named)
+{
+	variable float X0=${Me.X}
+	variable float Y0=${Me.Y}
+	variable float Z0=${Me.Z}
+	echo Pulling ${Named}...
+	face "${Named}"
+	target "${Named}"
+	wait 50
+	if (${Actor["${Named}"].Distance}>20)
+	{
+		call CloseCombat "${Named}" 50 TRUE
+		wait 10
+		call DMove ${X0} ${Y0} ${Z0} 2 30 TRUE
+		face "${Named}"
+		target "${Named}"
+	}
+}
 function RelayAll(string w0, string w1, string w2, string w3, string w4, string w5, string w6,string w7, string w8, string w9)
 {
-relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
+	relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
 }
 
 function ReplaceStr(string inputText, string toReplace, string replaceWith)
@@ -2729,7 +2767,6 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 	wait 20
 	eq2execute Summon
 	wait 20
-	
 }
 function TargetAfterTime(string mytarget, int ntime)
 {
