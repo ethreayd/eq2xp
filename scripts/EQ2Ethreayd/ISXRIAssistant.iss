@@ -349,25 +349,26 @@ function Zone_VegarlsonRuinsofRatheSolo()
 }
 function DoMud()
 {
+	variable int Counter
 	echo starting DoMud function
 	wait 20
 	if (!${Me.InCombatMode})
 	{
-		call IsPresent "muddite lurcher" 20
+		call IsPresent "muddite lurcher" 20 TRUE
 		if (${Return})
 		{
 			call MoveCloseTo "muddite lurcher"
 			call ActivateVerbOn "muddite lurcher" "Apply sticky vekerchiki mud" TRUE
-			wait 50
+			wait 20
 			if ${DoMiniMud}
 			{
 				do
 				{
-					call IsPresent "minimud" 50
-					wait 10
+					wait 50		
+					call IsPresent "minimud" 30
 				}
 				while (!${Return})
-				call TanknSpank "minimud"
+				call TanknSpank "minimud" 30
 				DoMiniMud:Set[FALSE]
 			}
 		}
