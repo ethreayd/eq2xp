@@ -25,6 +25,7 @@ variable(script) bool DoSlurp
 variable(script) bool DoMiniMud
 variable(script) bool MeltingMud
 variable(script) bool Mudwalker
+variable(script) int Snowball=0
 
 function main(string questname)
 {
@@ -36,14 +37,15 @@ function main(string questname)
 	{
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
 			eq2execute merc resume
-		if ${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]}
-			call Zone_VegarlsonRuinsofRatheSolo
+		
 		if ${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]}
 			call Zone_AwuidorTheNebulousDeepSolo
-		if ${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]}
-			call Zone_EryslaiTheBixelHiveSolo
 		if ${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]}
 			call Zone_DoomfireTheEnkindledTowersSolo
+		if ${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]}
+			call Zone_EryslaiTheBixelHiveSolo
+		if ${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]}
+			call Zone_VegarlsonRuinsofRatheSolo
 		if ${Me.IsIdle}
 			IdleTime:Inc
 		Else
@@ -52,7 +54,6 @@ function main(string questname)
 		if ${IdleTime} > 36
 			call RebootLoop
 		wait 1000
-		
 	}
 	while (TRUE)
 }
@@ -274,39 +275,18 @@ function Zone_VegarlsonRuinsofRatheSolo()
 			while (${Return})
 		}
 		call IsPresent "vekerchiki mound" 50
-		if (${Return} && ${Me.X} < 280 && ${Me.X} > 250 &&  ${Me.Y} < 115 && ${Me.Y} > 100 && ${Me.Z} < 200 && ${Me.Z} > 180)
-		{
-			echo going to mound
-			RIStart:Set[FALSE]
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			do
-			{
-				call MoveCloseTo "vekerchiki mound"
-				call TanknSpank "vekerchiki mound" 25
-				wait 50
-				call IsPresent "vekerchiki mound" 20
-			}
-			while (${Return})
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			RIStart:Set[TRUE]
-		}
-		call IsPresent "vekerchiki mound" 50
-		if (${Return} && ${Me.X} < 240 && ${Me.X} > 210 &&  ${Me.Y} < 115 && ${Me.Y} > 100 && ${Me.Z} < 210 && ${Me.Z} > 180)
-		{
-			echo going to mound
-			RIStart:Set[FALSE]
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			do
-			{
-				call MoveCloseTo "vekerchiki mound"
-				call TanknSpank "vekerchiki mound" 25
-				wait 50
-				call IsPresent "vekerchiki mound" 20
-			}
-			while (${Return})
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			RIStart:Set[TRUE]
-		}
+		if (${Return} && ((${Me.X} < 240 && ${Me.X} > 210 && ${Me.Y} < 115 && ${Me.Y} > 100 && ${Me.Z} < 210 && ${Me.Z} > 180) || (${Me.X} < 280 && ${Me.X} > 250 && ${Me.Y} < 115 && ${Me.Y} > 100 && ${Me.Z} < 200 && ${Me.Z} > 180)))
+			call DoMound
+		call IsPresent "vekerchiki mound" 30
+		if (${Return} && ${DoDrones})
+			call DoMound
+		
+		call IsPresent "The Monstrous Mudwalker" 500
+		if (${Return})
+			Mudwalker:Set[TRUE]
+		else
+			Mudwalker:Set[FALSE]
+		
 		call IsPresent "muddite lurcher" 10
 		if (${Return} && !${Mudwalker})
 		{
@@ -342,23 +322,66 @@ function Zone_VegarlsonRuinsofRatheSolo()
 			RIStart:Set[TRUE]
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
+		call IsPresent "Koni Ferus" 20
+		if (${Return})
+		{
+			echo Final fight detected
+			do
+			{
+				wait 10
+				call IsPresent "Koni Ferus" 20
+			}
+			while (${Return})
+			do
+			{
+				wait 10
+				call IsPresent "Pete Bog" 20
+			}
+			while (${Return})
+			Snowball:Set[0]
+			echo all named defeated - checking quest
+			call check_quest "Elements of Destruction: Planes of Disorder"
+			if (${Return})
+			{
+				call FightNajena
+			}
+		}
 		ExecuteQueued
 		wait 10
+	
+		call IsPresent "Lady Najena" 40
+		if (${Return})
+			call FightNajena
 	}
 	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
 }
+function DoMound()
+{
+	echo going to mound
+	RIStart:Set[FALSE]
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	do
+	{
+		call MoveCloseTo "vekerchiki mound"
+		call TanknSpank "vekerchiki mound" 25
+		wait 50
+		call IsPresent "vekerchiki mound" 20
+	}
+	while (${Return})
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	RIStart:Set[TRUE]
+}
 function DoMud()
 {
-	variable int Counter
 	echo starting DoMud function
+	ExecuteQueued
 	wait 20
 	if (!${Me.InCombatMode})
 	{
 		call IsPresent "muddite lurcher" 20 TRUE
-		if (${Return})
+		if (${Return} && !${MeltingMud} && !${Actor["muddite lurcher"].CheckCollision} && !${Actor["muddite lurcher"].IsAggro})
 		{
-			call MoveCloseTo "muddite lurcher"
-			call ActivateVerbOn "muddite lurcher" "Apply sticky vekerchiki mud" TRUE
+			call ActivateAll "muddite lurcher" "Apply sticky vekerchiki mud" 20
 			wait 20
 			if ${DoMiniMud}
 			{
@@ -376,6 +399,108 @@ function DoMud()
 	else
 		call DoMud
 }
+function FightNajena()
+{
+	echo waiting for Lady Najena fight
+	do
+	{
+		wait 10
+		call IsPresent "Lady Najena" 30
+	}
+	while (!${Return})
+	do
+	{
+	wait 10
+	}
+	while (!${Actor["Lady Najena"].IsAggro})
+	target "Lady Najena"
+	wait 50
+	press F1
+	call DMove 595 14 -312 3 30 TRUE TRUE 5
+	do
+	{
+		target "Lady Najena"
+		call IsPresent "snowboulder"
+		if (${Return})
+		{
+			call ActivateVerbOn "snowboulder" "Pick up" TRUE
+			wait 20
+			call NextBoulder ${Snowball}
+			wait 50
+		}
+		wait 10
+		ExecuteQueued
+		call IsPresent "Lady Najena" 30
+	}
+	while (${Return} && ${Number}<5)
+	call DMove 471 14 -296 3 30 TRUE TRUE 5
+	do
+	{
+		call ActivateVerbOn "teleporter from Najena fight" Examine TRUE
+		wait 20
+		call ActivateVerbOn "teleporter from Najena fight" Teleport TRUE
+		wait 20
+	}
+	while (${Me.X}>0)
+	call DMove -345 43 -404 3
+	do
+	{
+		call ActivateVerbOn Exit Exit TRUE
+	}
+	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
+	
+}
+function NextBoulder(int Number)
+{
+	variable float X0=${Me.X}
+	variable float Y0=${Me.Y}
+	variable float Z0=${Me.Z}
+	press F9
+	call PKey PAGEDOWN 20
+	call PKey PAGEUP 5
+	press F1
+	echo moving to ${Number} loc 
+	if (${Number}==0)
+	{
+		echo moving to loc 0 (${Number})
+		call DMove 586 13 -310 3 30 TRUE FALSE 5
+	}
+	if (${Number}==1)
+	{
+		echo moving to loc 1 (${Number})
+		call DMove 566 13 -307 3 30 TRUE FALSE 5
+	}
+	if (${Number}==2)
+	{
+		echo moving to loc 2 (${Number})
+		call DMove 538 13 -305 3 30 TRUE FALSE 5
+	}
+	if (${Number}==3)
+	{
+		echo moving to loc 3 (${Number})
+		call DMove 515 13 -303 3 30 TRUE FALSE 5
+	}
+	if (${Number}==4)
+	{
+		echo moving to loc 4 (${Number})
+		call DMove 486 13 -299 3 30 TRUE FALSE 5
+	}
+	echo clicking	
+	do
+	{
+		MouseTo 1000,750
+		wait 10
+		Mouse:LeftClick
+	}
+	while (${Number}==${Snowball})
+	if (${Number}<5)
+	{
+		echo moving back
+		press F1
+		call DMove ${X0} ${Y0} ${Z0} 3 30 TRUE FALSE 5
+		press F9
+	}
+}
 function RebootLoop()
 {
 	echo rebooting loop
@@ -391,6 +516,11 @@ function RebootLoop()
 	call GuildH
 	if (!${Script["CDLoop"](exists)})
 		run EQ2Ethreayd/CDLoop
+}
+function ResetMeltingMud()
+{
+	wait 100
+	MeltingMud:Set[FALSE]
 }
 function FightGlimmerstone()
 {
@@ -413,6 +543,7 @@ function FightGlimmerstone()
 	}
 	while (!${StoneSkin} && ${Return})
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
 	call DMove -314 38 -234 3 30 TRUE FALSE 10
 	call DMove -340 37 -235 3 30 TRUE FALSE 5
@@ -428,9 +559,12 @@ function FightGlimmerstone()
 		call IsPresent "Runic Stone" 10
 	}
 	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -340 37 -235 3 30 TRUE FALSE 5
 	call DMove -314 38 -234 3 30 TRUE FALSE 10
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
 	{
 		call PullNamed "${Named}"
@@ -439,6 +573,7 @@ function FightGlimmerstone()
 	}
 	while (!${StoneSkin} && ${Return})
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
 	call DMove -309 37 -176 3 30 TRUE FALSE 10
 	call DMove -323 36 -172 3 30 TRUE FALSE 5
@@ -452,9 +587,12 @@ function FightGlimmerstone()
 		call IsPresent "Runic Stone" 10
 	}
 	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -323 36 -172 3 30 TRUE FALSE 5
 	call DMove -309 37 -176 3 30 TRUE FALSE 10
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
 	{
 		call PullNamed "${Named}"
@@ -463,6 +601,7 @@ function FightGlimmerstone()
 	}
 	while (!${StoneSkin} && ${Return})
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
 	call DMove -271 38 -215 3 30 TRUE FALSE 10
 	call DMove -236 32 -242 3 30 TRUE FALSE 5
@@ -476,9 +615,12 @@ function FightGlimmerstone()
 		call IsPresent "Runic Stone" 10
 	}
 	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -236 32 -242 3 30 TRUE FALSE 5
 	call DMove -268 38 -213 3 30 TRUE FALSE 10
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
 	{
 		call PullNamed "${Named}"
@@ -487,6 +629,7 @@ function FightGlimmerstone()
 	}
 	while (!${StoneSkin} && ${Return})
 	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
 	call DMove -304 35 -196 3 30 TRUE FALSE 10
 	call DMove -271 32 -155 3 30 TRUE FALSE 10
@@ -502,10 +645,13 @@ function FightGlimmerstone()
 		call IsPresent "Runic Stone" 10
 	}
 	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
 	call DMove -243 33 -157 3 30 TRUE FALSE 5
 	call DMove -284 32 -160 3 30 TRUE FALSE 10
 	call DMove -278 37 -213 3 30 TRUE FALSE 10
 	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 	do
 	{
 		call PullNamed "${Named}"
@@ -569,7 +715,7 @@ function gotoSlurpgaloop()
 	{
 		call DMove 255 110 196 3
 		call DMove 255 76 271 3
-		call TanknSpank "vekerchiki mound" 25
+		call DoMound
 		call DMove 280 77 312 3
 		call gotoHeaper
 	}
@@ -599,23 +745,23 @@ function gotoHeaper()
 {	
 	call DMove 275 78 317 3
 	call DMove 230 76 297 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 193 70 307 3
 	call DMove 137 57 286 3
 	call DMove 119 57 318 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 145 61 344 3
 	call DMove 130 44 377 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 223 41 396 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 204 40 413 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 266 48 481 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	call DMove 234 39 445 3
 	call DMove 195 47 472 3
-	call TanknSpank "vekerchiki mound" 25
+	call DoMound
 	wait 20
 	RI
 	wait 50
@@ -667,6 +813,12 @@ atom HandleAllEvents(string Message)
 	{
 		echo Melting in mud
 		MeltingMud:Set[TRUE]
+		QueueCommand call ResetMeltingMud
+	}
+	if (${Message.Find["snow boulder froze a section"]}>0)
+	{
+		Snowball:Inc
+		echo Bridger part ${Snowball}/5 done
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

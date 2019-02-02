@@ -344,6 +344,25 @@ function ActivateAggro(string ActorName, string verb, float distance)
 	echo ${ActorName} is now aggro
 	
 }
+function ActivateAll(string ActorName, string verb, float MaxDistance)
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+    
+    EQ2:QueryActors[Actors, Distance <= ${MaxDistance} ]
+    Actors:GetIterator[ActorIterator]
+  
+    if ${ActorIterator:First(exists)}
+    {
+        do
+        {
+            echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m)
+			call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 3 30 FALSE FALSE 5
+			eq2execute apply_verb ${ActorIterator.Value.ID} "${verb}"
+        }
+        while ${ActorIterator:Next(exists)}
+    }
+}
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
 	variable string ItemSwap
@@ -365,7 +384,6 @@ function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffect
 		Me.Inventory["${ItemSwap}"]:Equip
 	}
 }
-
 function ActivateSpecial(string ActorName, float X, float Y, float Z)
 {
 	call TestArrivalCoord  ${X} ${Y} ${Z}
@@ -374,7 +392,6 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	OgreBotAPI:Special["${Me.Name}"]
 	wait 50
 }
-
 function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight, bool UseID)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
@@ -403,8 +420,6 @@ function ActivateVerbOn(string ActorName, string verb, bool UseID)
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","${ActorName}","${verb}"]
 	wait 50
 }
-
-
 function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Precision)
 {
 	variable index:actor Actors
@@ -1018,8 +1033,7 @@ function CloseCombat(string Named, float Distance, bool MoveIn)
 		target "${Named}"
 		if ${MoveIn}
 			call MoveCloseTo "${Named}"
-		else
-			eq2execute merc attack
+		eq2execute merc attack
 	}
 }
 function CMove(float X, float Z)
