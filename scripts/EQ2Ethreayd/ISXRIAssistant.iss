@@ -57,6 +57,362 @@ function main(string questname)
 	}
 	while (TRUE)
 }
+function DoMound()
+{
+	echo going to mound
+	RIStart:Set[FALSE]
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	do
+	{
+		call MoveCloseTo "vekerchiki mound"
+		call TanknSpank "vekerchiki mound" 25
+		wait 50
+		call IsPresent "vekerchiki mound" 20
+	}
+	while (${Return})
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	RIStart:Set[TRUE]
+}
+function DoMud()
+{
+	echo starting DoMud function
+	ExecuteQueued
+	wait 20
+	if (!${Me.InCombatMode})
+	{
+		call IsPresent "muddite lurcher" 20 TRUE
+		if (${Return} && !${MeltingMud} && !${Actor["muddite lurcher"].CheckCollision} && !${Actor["muddite lurcher"].IsAggro})
+		{
+			call ActivateAll "muddite lurcher" "Apply sticky vekerchiki mud" 20
+			wait 20
+			if ${DoMiniMud}
+			{
+				do
+				{
+					wait 50		
+					call IsPresent "minimud" 30
+				}
+				while (!${Return})
+				call TanknSpank "minimud" 30
+				DoMiniMud:Set[FALSE]
+			}
+		}
+	}
+	else
+		call DoMud
+}
+function FightGlimmerstone()
+{
+	variable string Named
+	Named:Set[Glimmerstone]
+	echo starting ${Named} fight script
+	do
+	{
+		wait 10
+		call IsPresent "${Named}" 20
+	}
+	while (!${Return})
+	StoneSkin:Set[TRUE]
+	do
+	{
+		face "${Named}" 
+		target "${Named}"
+		wait 10
+		call IsPresent "${Named}" 200	
+	}
+	while (!${StoneSkin} && ${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	call DMove -314 38 -234 3 30 TRUE FALSE 10
+	call DMove -340 37 -235 3 30 TRUE FALSE 5
+	call PKey "Page Up" 3
+	call PKey ZOOMOUT 20
+	call ActivateAggro "Runic Stone" Activate 10
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -340 37 -235 3 30 TRUE FALSE 5
+	call DMove -314 38 -234 3 30 TRUE FALSE 10
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		call PullNamed "${Named}"
+		wait 10
+		call IsPresent "${Named}" 200	
+	}
+	while (!${StoneSkin} && ${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	call DMove -309 37 -176 3 30 TRUE FALSE 10
+	call DMove -323 36 -172 3 30 TRUE FALSE 5
+	call ActivateAggro "Runic Stone" Activate 10
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -323 36 -172 3 30 TRUE FALSE 5
+	call DMove -309 37 -176 3 30 TRUE FALSE 10
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		call PullNamed "${Named}"
+		wait 10
+		call IsPresent "${Named}" 200	
+	}
+	while (!${StoneSkin} && ${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	call DMove -271 38 -215 3 30 TRUE FALSE 10
+	call DMove -236 32 -242 3 30 TRUE FALSE 5
+	call ActivateAggro "Runic Stone" Activate 10
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -236 32 -242 3 30 TRUE FALSE 5
+	call DMove -268 38 -213 3 30 TRUE FALSE 10
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		call PullNamed "${Named}"
+		wait 10
+		call IsPresent "${Named}" 200		
+	}
+	while (!${StoneSkin} && ${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	call DMove -304 35 -196 3 30 TRUE FALSE 10
+	call DMove -271 32 -155 3 30 TRUE FALSE 10
+	call DMove -243 33 -157 3 30 TRUE FALSE 5
+	if (!${DoSlurp})
+		call ActivateAggro "Runic Stone" Activate 10
+	StoneSkin:Set[FALSE]
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		target "Runic Stone"
+		wait 10
+		call IsPresent "Runic Stone" 10
+	}
+	while (${Return})
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	press F1
+	call DMove -243 33 -157 3 30 TRUE FALSE 5
+	call DMove -284 32 -160 3 30 TRUE FALSE 10
+	call DMove -278 37 -213 3 30 TRUE FALSE 10
+	call DMove -289 37 -230 3 30 TRUE FALSE 5
+	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+	do
+	{
+		call PullNamed "${Named}"
+		wait 10
+		call IsPresent "${Named}" 200		
+	}
+	while (!${StoneSkin} && ${Return})
+	call TanknSpank "${Named}"
+	wait 20
+	call PKey "Page Down" 3
+	call gotoSlurpgaloop
+}
+function FightNajena()
+{
+	echo waiting for Lady Najena fight
+	do
+	{
+		wait 10
+		call IsPresent "Lady Najena" 30
+	}
+	while (!${Return})
+	do
+	{
+		wait 10
+	}
+	while (!${Actor["Lady Najena"].IsAggro})
+	target "Lady Najena"
+	wait 100
+	press F1
+	call DMove 605 14 -312 3 30 TRUE TRUE 5
+	do
+	{
+		
+		do
+		{
+			target "Lady Najena"
+			eq2execute merc attack
+			wait 200
+			eq2execute merc backoff
+			call IsPresent "Lady Najena" 20
+		}
+		while (!${Return})
+		
+		call IsPresent "snowboulder"
+		if (${Return})
+		{
+			call ActivateVerbOn "snowboulder" "Pick up" TRUE
+			wait 20
+			call NextBoulder ${Snowball}
+			if (${Mudwalker})
+			{
+				press F1
+				call DMove 595 14 -312 3 30 TRUE TRUE 5
+			}
+			wait 50
+		}
+		wait 10
+		ExecuteQueued
+		call IsPresent "Lady Najena" 500
+	}
+	while (${Return} && ${Number}<5)
+	call DMove 471 14 -296 3 30 TRUE TRUE 5
+	do
+	{
+		call ActivateVerbOn "teleporter from Najena fight" Examine TRUE
+		wait 20
+		call ActivateVerbOn "teleporter from Najena fight" Teleport TRUE
+		wait 20
+	}
+	while (${Me.X}>0)
+	call DMove -345 43 -404 3
+	do
+	{
+		call ActivateVerbOn Exit Exit TRUE
+	}
+	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
+	
+}
+function gotoForrestBarrens()
+{
+	echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+	RIStart:Set[FALSE]
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	call DMove 407 18 325 3
+	call DMove 383 22 324 3
+	call DMove 375 26 307 2
+	call DMove 383 23 284 3
+	call DMove 395 41 221 3
+	call DMove 445 37 161 2
+	ogre hl
+	wait 100
+	ogre end hl
+	call DMove 401 40 224 3
+	call DMove 381 30 267 3
+	call DMove 365 42 287 3
+	call DMove 353 47 312 3
+	call DMove 310 77 309 3
+	call gotoHeaper
+}
+function gotoHeaper()
+{	
+	call DMove 275 78 317 3
+	call DMove 230 76 297 3
+	call DoMound
+	call DMove 193 70 307 3
+	call DMove 137 57 286 3
+	call DMove 119 57 318 3
+	call DoMound
+	call DMove 145 61 344 3
+	call DMove 130 44 377 3
+	call DoMound
+	call DMove 223 41 396 3
+	call DoMound
+	call DMove 204 40 413 3
+	call DoMound
+	call DMove 266 48 481 3
+	call DoMound
+	call DMove 234 39 445 3
+	call DMove 195 47 472 3
+	call DoMound
+	wait 20
+	RI
+	wait 50
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	RIStart:Set[TRUE]
+}
+function gotoSlurpgaloop()
+{
+	variable string Named
+	Named:Set[Slurpgaloop]
+	echo Glimmerstone is done
+	call DMove -295 37 -232 3
+	call DMove -270 37 -213 3
+	call DMove -253	39 -219 3
+	call DMove -193 32 -172 3
+	call DMove -182 31 -149 3
+	call DMove -118 33 -123 3
+	call DMove -123 39 -84 3
+	call DMove -93 50 -50 3
+	call DMove -4 97 -19 3
+	call DMove -10 106 16 3
+	call DMove -24 106 16 3
+	call DMove -20 111 27 2
+	call DMove -8 88 60 3
+	call DMove 4 104 58 3
+	call DMove 1 111 86 3
+	call DMove 44 94 164 3
+	call DMove 91 93 158 3
+	call DMove 113 92 174 3
+	call DMove 156 89 180 3
+	call DMove 202 107 157 2
+	call DMove 235 109 193 3
+	call DMove 259 109 200 3
+	wait 20
+	call IsPresent "${Named}" 2000
+	if (${Return})
+	{
+		RI
+		wait 50
+		UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		RIStart:Set[TRUE]
+		do
+		{
+			wait 10
+			call IsPresent "${Named}" 500
+		}
+		while (${Return})
+		echo Slurpgaloop is done
+		DoDrones:Set[TRUE]
+		echo activating DoDrones variable at ${DoDrones}
+		;if (${Me.Y} < 50)
+		call gotoForrestBarrens
+	}
+	else
+	{
+		call DMove 255 110 196 3
+		call DMove 255 76 271 3
+		call DoMound
+		call DMove 280 77 312 3
+		call gotoHeaper
+	}
+}
 function MainChecks()
 {
 	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
@@ -66,8 +422,9 @@ function MainChecks()
 	{
 		eq2execute merc resume
 		wait 100
-	}	
-	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode})
+	}
+	call IsPresent "Lady Najena" 50
+	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode} && !${Return})
 	{
 		RICrashed:Inc
 		echo RI seems crashed (test N=${RICrashed})
@@ -78,7 +435,7 @@ function MainChecks()
 			wait 100
 			call Evac
 			wait 600
-			call IsPresent Exit 15
+			call IsPresent Exit 25
 			if (!${Return} && !${Me.IsDead})
 			{
 				RI
@@ -127,6 +484,72 @@ function MainChecks()
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
 		call RebootLoop	
+}
+function NextBoulder(int Number)
+{
+	press F9
+	call PKey PAGEDOWN 20
+	call PKey PAGEUP 5
+	press F1
+	call DMove 595 14 -312 3 30 TRUE FALSE 5
+	echo moving to ${Number} loc 
+	if (${Number}==0)
+	{
+		echo moving to loc 0 (${Number})
+		call DMove 592 13 -310 3 30 TRUE FALSE 5
+	}
+	if (${Number}==1)
+	{
+		echo moving to loc 1 (${Number})
+		call DMove 566 13 -307 3 30 TRUE FALSE 5
+	}
+	if (${Number}==2)
+	{
+		echo moving to loc 2 (${Number})
+		call DMove 538 13 -305 3 30 TRUE FALSE 5
+	}
+	if (${Number}==3)
+	{
+		echo moving to loc 3 (${Number})
+		call DMove 515 13 -303 3 30 TRUE FALSE 5
+	}
+	if (${Number}==4)
+	{
+		echo moving to loc 4 (${Number})
+		call DMove 490 13 -299 3 30 TRUE FALSE 5
+	}
+	echo clicking	
+	MouseTo 1000,750
+	wait 10
+	Mouse:LeftClick
+	press F9
+	if (${Number}<5)
+	{
+		echo moving back
+		press F1
+		call DMove 595 14 -312 3 30 TRUE FALSE 5
+	}
+}
+function RebootLoop()
+{
+	echo rebooting loop
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	if (${Script["CDLoop"](exists)})
+		end CDLoop
+	if (${Script["Buffer:RZ"](exists)})
+		end Buffer:RZ
+	
+	call goto_GH
+	call GuildH
+	if (!${Script["CDLoop"](exists)})
+		run EQ2Ethreayd/CDLoop
+}
+function ResetMeltingMud()
+{
+	wait 100
+	MeltingMud:Set[FALSE]
 }
 function Zone_AwuidorTheNebulousDeepSolo()
 {
@@ -355,420 +778,6 @@ function Zone_VegarlsonRuinsofRatheSolo()
 	}
 	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
 }
-function DoMound()
-{
-	echo going to mound
-	RIStart:Set[FALSE]
-	UIElement[RI].FindUsableChild[Start,button]:LeftClick
-	do
-	{
-		call MoveCloseTo "vekerchiki mound"
-		call TanknSpank "vekerchiki mound" 25
-		wait 50
-		call IsPresent "vekerchiki mound" 20
-	}
-	while (${Return})
-	UIElement[RI].FindUsableChild[Start,button]:LeftClick
-	RIStart:Set[TRUE]
-}
-function DoMud()
-{
-	echo starting DoMud function
-	ExecuteQueued
-	wait 20
-	if (!${Me.InCombatMode})
-	{
-		call IsPresent "muddite lurcher" 20 TRUE
-		if (${Return} && !${MeltingMud} && !${Actor["muddite lurcher"].CheckCollision} && !${Actor["muddite lurcher"].IsAggro})
-		{
-			call ActivateAll "muddite lurcher" "Apply sticky vekerchiki mud" 20
-			wait 20
-			if ${DoMiniMud}
-			{
-				do
-				{
-					wait 50		
-					call IsPresent "minimud" 30
-				}
-				while (!${Return})
-				call TanknSpank "minimud" 30
-				DoMiniMud:Set[FALSE]
-			}
-		}
-	}
-	else
-		call DoMud
-}
-function FightNajena()
-{
-	echo waiting for Lady Najena fight
-	do
-	{
-		wait 10
-		call IsPresent "Lady Najena" 30
-	}
-	while (!${Return})
-	do
-	{
-	wait 10
-	}
-	while (!${Actor["Lady Najena"].IsAggro})
-	target "Lady Najena"
-	wait 50
-	press F1
-	call DMove 595 14 -312 3 30 TRUE TRUE 5
-	do
-	{
-		target "Lady Najena"
-		call IsPresent "snowboulder"
-		if (${Return})
-		{
-			call ActivateVerbOn "snowboulder" "Pick up" TRUE
-			wait 20
-			call NextBoulder ${Snowball}
-			wait 50
-		}
-		wait 10
-		ExecuteQueued
-		call IsPresent "Lady Najena" 30
-	}
-	while (${Return} && ${Number}<5)
-	call DMove 471 14 -296 3 30 TRUE TRUE 5
-	do
-	{
-		call ActivateVerbOn "teleporter from Najena fight" Examine TRUE
-		wait 20
-		call ActivateVerbOn "teleporter from Najena fight" Teleport TRUE
-		wait 20
-	}
-	while (${Me.X}>0)
-	call DMove -345 43 -404 3
-	do
-	{
-		call ActivateVerbOn Exit Exit TRUE
-	}
-	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
-	
-}
-function NextBoulder(int Number)
-{
-	variable float X0=${Me.X}
-	variable float Y0=${Me.Y}
-	variable float Z0=${Me.Z}
-	press F9
-	call PKey PAGEDOWN 20
-	call PKey PAGEUP 5
-	press F1
-	echo moving to ${Number} loc 
-	if (${Number}==0)
-	{
-		echo moving to loc 0 (${Number})
-		call DMove 586 13 -310 3 30 TRUE FALSE 5
-	}
-	if (${Number}==1)
-	{
-		echo moving to loc 1 (${Number})
-		call DMove 566 13 -307 3 30 TRUE FALSE 5
-	}
-	if (${Number}==2)
-	{
-		echo moving to loc 2 (${Number})
-		call DMove 538 13 -305 3 30 TRUE FALSE 5
-	}
-	if (${Number}==3)
-	{
-		echo moving to loc 3 (${Number})
-		call DMove 515 13 -303 3 30 TRUE FALSE 5
-	}
-	if (${Number}==4)
-	{
-		echo moving to loc 4 (${Number})
-		call DMove 486 13 -299 3 30 TRUE FALSE 5
-	}
-	echo clicking	
-	do
-	{
-		MouseTo 1000,750
-		wait 10
-		Mouse:LeftClick
-	}
-	while (${Number}==${Snowball})
-	if (${Number}<5)
-	{
-		echo moving back
-		press F1
-		call DMove ${X0} ${Y0} ${Z0} 3 30 TRUE FALSE 5
-		press F9
-	}
-}
-function RebootLoop()
-{
-	echo rebooting loop
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
-	if (${Script["CDLoop"](exists)})
-		end CDLoop
-	if (${Script["Buffer:RZ"](exists)})
-		end Buffer:RZ
-	
-	call goto_GH
-	call GuildH
-	if (!${Script["CDLoop"](exists)})
-		run EQ2Ethreayd/CDLoop
-}
-function ResetMeltingMud()
-{
-	wait 100
-	MeltingMud:Set[FALSE]
-}
-function FightGlimmerstone()
-{
-	variable string Named
-	Named:Set[Glimmerstone]
-	echo starting ${Named} fight script
-	do
-	{
-		wait 10
-		call IsPresent "${Named}" 20
-	}
-	while (!${Return})
-	StoneSkin:Set[TRUE]
-	do
-	{
-		face "${Named}" 
-		target "${Named}"
-		wait 10
-		call IsPresent "${Named}" 200	
-	}
-	while (!${StoneSkin} && ${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	call DMove -314 38 -234 3 30 TRUE FALSE 10
-	call DMove -340 37 -235 3 30 TRUE FALSE 5
-	call PKey "Page Up" 3
-	call PKey ZOOMOUT 20
-	call ActivateAggro "Runic Stone" Activate 10
-	StoneSkin:Set[FALSE]
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		target "Runic Stone"
-		wait 10
-		call IsPresent "Runic Stone" 10
-	}
-	while (${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -340 37 -235 3 30 TRUE FALSE 5
-	call DMove -314 38 -234 3 30 TRUE FALSE 10
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		call PullNamed "${Named}"
-		wait 10
-		call IsPresent "${Named}" 200	
-	}
-	while (!${StoneSkin} && ${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	call DMove -309 37 -176 3 30 TRUE FALSE 10
-	call DMove -323 36 -172 3 30 TRUE FALSE 5
-	call ActivateAggro "Runic Stone" Activate 10
-	StoneSkin:Set[FALSE]
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		target "Runic Stone"
-		wait 10
-		call IsPresent "Runic Stone" 10
-	}
-	while (${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -323 36 -172 3 30 TRUE FALSE 5
-	call DMove -309 37 -176 3 30 TRUE FALSE 10
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		call PullNamed "${Named}"
-		wait 10
-		call IsPresent "${Named}" 200	
-	}
-	while (!${StoneSkin} && ${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	call DMove -271 38 -215 3 30 TRUE FALSE 10
-	call DMove -236 32 -242 3 30 TRUE FALSE 5
-	call ActivateAggro "Runic Stone" Activate 10
-	StoneSkin:Set[FALSE]
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		target "Runic Stone"
-		wait 10
-		call IsPresent "Runic Stone" 10
-	}
-	while (${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -236 32 -242 3 30 TRUE FALSE 5
-	call DMove -268 38 -213 3 30 TRUE FALSE 10
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		call PullNamed "${Named}"
-		wait 10
-		call IsPresent "${Named}" 200		
-	}
-	while (!${StoneSkin} && ${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	call DMove -304 35 -196 3 30 TRUE FALSE 10
-	call DMove -271 32 -155 3 30 TRUE FALSE 10
-	call DMove -243 33 -157 3 30 TRUE FALSE 5
-	if (!${DoSlurp})
-		call ActivateAggro "Runic Stone" Activate 10
-	StoneSkin:Set[FALSE]
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		target "Runic Stone"
-		wait 10
-		call IsPresent "Runic Stone" 10
-	}
-	while (${Return})
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	press F1
-	call DMove -243 33 -157 3 30 TRUE FALSE 5
-	call DMove -284 32 -160 3 30 TRUE FALSE 10
-	call DMove -278 37 -213 3 30 TRUE FALSE 10
-	call DMove -289 37 -230 3 30 TRUE FALSE 5
-	UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
-	do
-	{
-		call PullNamed "${Named}"
-		wait 10
-		call IsPresent "${Named}" 200		
-	}
-	while (!${StoneSkin} && ${Return})
-	call TanknSpank "${Named}"
-	wait 20
-	call PKey "Page Down" 3
-	call gotoSlurpgaloop
-}
-function gotoSlurpgaloop()
-{
-	variable string Named
-	Named:Set[Slurpgaloop]
-	echo Glimmerstone is done
-	call DMove -295 37 -232 3
-	call DMove -270 37 -213 3
-	call DMove -253	39 -219 3
-	call DMove -193 32 -172 3
-	call DMove -182 31 -149 3
-	call DMove -118 33 -123 3
-	call DMove -123 39 -84 3
-	call DMove -93 50 -50 3
-	call DMove -4 97 -19 3
-	call DMove -10 106 16 3
-	call DMove -24 106 16 3
-	call DMove -20 111 27 2
-	call DMove -8 88 60 3
-	call DMove 4 104 58 3
-	call DMove 1 111 86 3
-	call DMove 44 94 164 3
-	call DMove 91 93 158 3
-	call DMove 113 92 174 3
-	call DMove 156 89 180 3
-	call DMove 202 107 157 2
-	call DMove 235 109 193 3
-	call DMove 259 109 200 3
-	wait 20
-	call IsPresent "${Named}" 2000
-	if (${Return})
-	{
-		RI
-		wait 50
-		UIElement[RI].FindUsableChild[Start,button]:LeftClick
-		RIStart:Set[TRUE]
-		do
-		{
-			wait 10
-			call IsPresent "${Named}" 500
-		}
-		while (${Return})
-		echo Slurpgaloop is done
-		DoDrones:Set[TRUE]
-		echo activating DoDrones variable at ${DoDrones}
-		;if (${Me.Y} < 50)
-		call gotoForrestBarrens
-	}
-	else
-	{
-		call DMove 255 110 196 3
-		call DMove 255 76 271 3
-		call DoMound
-		call DMove 280 77 312 3
-		call gotoHeaper
-	}
-}
-function gotoForrestBarrens()
-{
-	echo killing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-	RIStart:Set[FALSE]
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	call DMove 407 18 325 3
-	call DMove 383 22 324 3
-	call DMove 375 26 307 2
-	call DMove 383 23 284 3
-	call DMove 395 41 221 3
-	call DMove 445 37 161 2
-	ogre hl
-	wait 100
-	ogre end hl
-	call DMove 401 40 224 3
-	call DMove 381 30 267 3
-	call DMove 365 42 287 3
-	call DMove 353 47 312 3
-	call DMove 310 77 309 3
-	call gotoHeaper
-}
-function gotoHeaper()
-{	
-	call DMove 275 78 317 3
-	call DMove 230 76 297 3
-	call DoMound
-	call DMove 193 70 307 3
-	call DMove 137 57 286 3
-	call DMove 119 57 318 3
-	call DoMound
-	call DMove 145 61 344 3
-	call DMove 130 44 377 3
-	call DoMound
-	call DMove 223 41 396 3
-	call DoMound
-	call DMove 204 40 413 3
-	call DoMound
-	call DMove 266 48 481 3
-	call DoMound
-	call DMove 234 39 445 3
-	call DMove 195 47 472 3
-	call DoMound
-	wait 20
-	RI
-	wait 50
-	UIElement[RI].FindUsableChild[Start,button]:LeftClick
-	RIStart:Set[TRUE]
-}
-
 atom HandleAllEvents(string Message)
 {
 	if (${Message.Equal["Can't see target"]})
@@ -819,6 +828,11 @@ atom HandleAllEvents(string Message)
 	{
 		Snowball:Inc
 		echo Bridger part ${Snowball}/5 done
+	}
+	if (${Message.Find["have already been frozen"]}>0)
+	{
+		Snowball:Inc
+		echo resuming to part ${Snowball}/5
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

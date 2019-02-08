@@ -44,7 +44,7 @@ function main()
 			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
 		}
 		wait 1000
-		if (${Me.IsDead} && ${Zone.Name.Left[6].Equal["Myrist"]})
+		if ((${Me.IsDead}||${Return}<11) && ${Zone.Name.Left[6].Equal["Myrist"]})
 		{
 			wait 100
 			echo --- Reviving
