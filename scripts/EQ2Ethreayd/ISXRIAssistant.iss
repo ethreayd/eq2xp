@@ -613,7 +613,7 @@ function Zone_EryslaiTheBixelHiveSolo()
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
 		call IsPresent "?" 5
-		if (${Return} && ${Me.X} < -540 && ${Me.X} > -550 &&  ${Me.Y} < 650 && ${Me.Y} > 640 && ${Me.Z} < -180 && ${Me.Z} > -190)
+		if (${Return} && ${Me.X} < -490 && ${Me.X} > -500 &&  ${Me.Y} < 650 && ${Me.Y} > 635 && ${Me.Z} < -170 && ${Me.Z} > -180)
 		{
 			echo correcting ISXRI Bug with shiny
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
@@ -650,6 +650,19 @@ function Zone_EryslaiTheBixelHiveSolo()
 			call DMove -665 403 -190 2 30 FALSE FALSE 3
 			wait 20
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		if (${Me.X} < -490 && ${Me.X} > -500 &&  ${Me.Y} < 650 && ${Me.Y} > 635 && ${Me.Z} < -170 && ${Me.Z} > -190)
+		{
+			echo correcting ISXRI Bug with last fight
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 20
+			press F1
+			call DMove -485 639 -174 3 30 TRUE FALSE 5
+			wait 10
+			call MoveJump -507 641 -176 -494 639 -174
+			call DMove -546 648 -172 3 30 TRUE FALSE 5
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call TanknSpank Aurorax
 		}
 		wait 1000
 	}
@@ -823,6 +836,10 @@ atom HandleAllEvents(string Message)
 		echo Melting in mud
 		MeltingMud:Set[TRUE]
 		QueueCommand call ResetMeltingMud
+		Snowball:Dec
+		if ${Snowball}<0
+			Snowball:Set[0]
+		echo Bridger part ${Snowball}/5 done
 	}
 	if (${Message.Find["snow boulder froze a section"]}>0)
 	{
