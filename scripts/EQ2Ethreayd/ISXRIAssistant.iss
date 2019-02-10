@@ -661,8 +661,8 @@ function Zone_EryslaiTheBixelHiveSolo()
 			wait 10
 			call MoveJump -507 641 -176 -494 639 -174
 			call DMove -546 648 -172 3 30 TRUE FALSE 5
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			call TanknSpank Aurorax
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
 		wait 1000
 	}
