@@ -655,12 +655,16 @@ function Zone_EryslaiTheBixelHiveSolo()
 		{
 			echo correcting ISXRI Bug with last fight
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
+			press F1
 			wait 20
 			press F1
 			call DMove -485 639 -174 3 30 TRUE FALSE 5
+			press F1
 			wait 10
 			call MoveJump -507 641 -176 -494 639 -174
 			call DMove -546 648 -172 3 30 TRUE FALSE 5
+			UIElement[CombatBotMiniUI].FindUsableChild[Pause,button]:LeftClick
 			call TanknSpank Aurorax
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
