@@ -392,6 +392,21 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	OgreBotAPI:Special["${Me.Name}"]
 	wait 50
 }
+function ActivateSpire()
+{
+	variable string ActorName
+	call IsPresent Spire 30 FALSE TRUE
+	ActorName:Set["${Return}"]
+	if (!${ActorName.Equal["FALSE"]})
+	{
+		call MoveCloseTo "${ActorName}"
+		wait 20
+		call ActivateVerbOn "${ActorName}" "Voyage Through Norrath" TRUE
+		wait 10
+	}
+	else
+		echo no Spire in 30m reach
+}
 function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight, bool UseID)
 {
 	echo Looking to ${verb} ${ActorName} at ${X},${Y},${Z}
@@ -1783,6 +1798,7 @@ function goHate()
 	}
 	call waitfor_Zone "Plane of Magic"
 }
+
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -2046,11 +2062,12 @@ function isMobAround(float Distance)
 	else
 		return FALSE
 }
-function IsPresent(string ActorName, int Distance, bool Exact)
+function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
+	variable string FullActorName
 
 	if (${Distance}<1)
 		Distance:Set[200]
@@ -2064,14 +2081,22 @@ function IsPresent(string ActorName, int Distance, bool Exact)
 	{
 		do
 		{
-			Count:Inc	
+			Count:Inc
+			FullActorName:Set["${ActorIterator.Value.Name}"]
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
 	if (${Count}>0)
-		return TRUE
+	{
+		if (${ReturnName})
+			return ${FullActorName}
+		else
+			return TRUE
+	}
 	else
+	{
 		return FALSE
+	}
 }
 function JoustOut(int ActorID, float Distance, bool IsGroup)
 {

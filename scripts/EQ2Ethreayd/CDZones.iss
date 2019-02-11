@@ -90,17 +90,11 @@ function goMyrist()
 	ZoneName:Set["Myrist, the Great Library"]
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
-		call IsPresent "Large Ulteran Spire"
-		if (${Return})
-		{
-			call MoveCloseTo "Large Ulteran Spire"
-			wait 20
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
-			wait 50
-			OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-			RIMUIObj:TravelMap["${Me.Name}","Myrist",1,2]
-			wait 300
-		}
+		call ActivateSpire
+		wait 50
+		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
+		RIMUIObj:TravelMap["${Me.Name}","Myrist",1,2]
+		wait 300
 	}
 	
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[25].Equal["${ZoneName}"]})
