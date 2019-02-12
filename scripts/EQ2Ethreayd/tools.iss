@@ -1077,13 +1077,18 @@ function Converse(string NPCName, int bubbles, bool giant, bool OgreQH)
 		call PKey "Page Up" 3
 		call PKey ZOOMOUT 20		
 	}
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	target "${NPCName}"
+	eq2execute hail "${NPCName}"
+	
 	wait 10
 	variable int x
    	for ( x:Set[0] ; ${x} <= ${bubbles} ; x:Inc )
 	{
 		if (!${OgreQH})
+		{
 			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			RIMUIObj:HailOption["${Me.Name}",1]
+		}	
 		wait 15
 	}
 	if (${giant})
@@ -1413,7 +1418,7 @@ function Evac()
 			{
 				case druid
 					echo debug: in druid case
-					Me.Ability["Verdurous Journey"]:Use
+					Call UseAbility "Verdurous Journey"
 				break
 				
 					echo debug: in default case
@@ -1831,6 +1836,18 @@ function GuildH()
 		echo GH churns finished
 	}
 }
+function GuildHarvest()
+{
+	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
+	{
+		echo getting harvest and harvest quests
+	
+		call Converse Gatherer 3
+		call Converse Hunter 3
+		call Converse Miner 3
+	}
+}
+
 function GroupDistance(bool Debug)
 {
 	variable int MaxDistance=0

@@ -71,6 +71,7 @@ function main()
 	echo I am in Zone ${Zone.Name}
 	call GuildH
 	echo I am in Zone ${Zone.Name}
+	call GuildHarvest
 	do
 	{
 		if (${Me.IsDead})
