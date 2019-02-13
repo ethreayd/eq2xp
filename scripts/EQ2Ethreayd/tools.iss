@@ -608,7 +608,46 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQu
 	}
 	while (!${Return})
 }
-
+function AutoPlant()
+{
+	variable string ToonName
+	
+	ToonName:Set[${Me.Name}]
+	echo I am in Zone ${Zone.Name} as ${ToonName} 
+	echo calling Ogre plant for ${Me.Name}
+	ogre plant -t ${Me.Name}
+	wait 20
+	echo I am in Zone ${Zone.Name}
+	UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
+	wait 600
+	echo I am in Zone ${Zone.Name}
+	echo waiting for Login Scene
+	wait 100
+	do
+	{
+		wait 5
+	}
+	while (!${Zone.Name.Equal["LoginScene"]} && !${Zone.Name.Right[10].Equal["Guild Hall"]})
+	wait 100
+	echo I am in Zone ${Zone.Name}	
+	wait 50
+	echo logging as ${ToonName}
+	ogre ${ToonName}
+	echo I am in Zone ${Zone.Name}
+	wait 100
+	echo I am in Zone ${Zone.Name}
+	do
+	{
+		wait 5
+	}
+	while (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal[""]})
+	echo I am in Zone ${Zone.Name}
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
+		call goto_GH
+	wait 20
+	echo I am in Zone ${Zone.Name} - unpacking "A bushel of harvests" if any
+	call UnpackItem "A bushel of harvests" 1
+}	
 function AvoidRedCircles(float Distance, bool IsGroup)
 {
 	variable index:actor Actors
@@ -1833,6 +1872,7 @@ function GuildH()
 		wait 50
 		call DepositAll "Scroll Depot"
 		wait 100
+		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
 		echo GH churns finished
 	}
 }
@@ -2889,6 +2929,18 @@ function TransmuteAll(string ItemName)
 			wait 10
 		}
 	}
+}
+function UnpackItem(string ItemName, int RewardID)
+{
+	while ${Me.Inventory["${ItemName}"](exists)}
+   {
+		eq2execute inventory unpack ${Me.Inventory["${ItemName}"].Index}
+		wait 5
+		RewardWindow:AcceptReward[${RewardWindow.Reward[${RewardID}].LinkID}]
+		wait 5
+		RewardWindow:Receive
+		wait 5
+   }
 }
 function Unstuck(bool LR)
 {

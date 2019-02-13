@@ -19,10 +19,7 @@
 
 function main()
 {
-	variable string ToonName
 	wait 120
-	ToonName:Set[${Me.Name}]
-	echo I am in Zone ${Zone.Name} as ${ToonName} 
 	if (${Me.IsDead})
 	{
 		wait 100
@@ -31,47 +28,19 @@ function main()
 		OgreBotAPI:Revive[${Me.Name}]
 		wait 300
 	}
-	
 	call goto_GH
-	echo I am in Zone ${Zone.Name}
 	wait 100
 	echo I am in Zone ${Zone.Name}
-	echo calling Ogre plant for ${Me.Name}
-	ogre plant -t ${Me.Name}
-	wait 20
-	echo I am in Zone ${Zone.Name}
-	UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
-	wait 600
-	echo I am in Zone ${Zone.Name}
-	echo waiting for Login Scene
-	wait 100
-	do
-	{
-		wait 5
-	}
-	while (!${Zone.Name.Equal["LoginScene"]} && !${Zone.Name.Right[10].Equal["Guild Hall"]})
-	wait 100
-	echo I am in Zone ${Zone.Name}	
-	wait 50
-	echo logging as ${ToonName}
-	ogre ${ToonName}
-	echo I am in Zone ${Zone.Name}
-	wait 100
-	echo I am in Zone ${Zone.Name}
-	do
-	{
-		wait 5
-	}
-	while (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal[""]})
-	echo I am in Zone ${Zone.Name}
-	wait 100
-	echo I am in Zone ${Zone.Name}
+	echo calling AutoPlant
+	call AutoPlant
 	echo resuming CDHLoop
-	call goto_GH
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
+		call goto_GH
 	echo I am in Zone ${Zone.Name}
 	call GuildH
 	echo I am in Zone ${Zone.Name}
 	call GuildHarvest
+	ogre depot -allh -hda -llda -cda
 	do
 	{
 		if (${Me.IsDead})
