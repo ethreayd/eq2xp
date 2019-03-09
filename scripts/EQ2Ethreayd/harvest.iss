@@ -32,8 +32,16 @@ function main(string rtarget, float DistStop)
 	variable float loc0=0
 	variable float loc1=0
 	variable bool Enemy=FALSE
+	variable float X0
+	variable float Z0
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	call CheckCombat
+	call BaryCenterX "${rtarget}"
+	X0:Set[${Return}]
+	call BaryCenterZ "${rtarget}"
+	Z0:Set[${Return}]
+	call CheckCombat
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
 	if (!${FlyingZone})
@@ -43,7 +51,12 @@ function main(string rtarget, float DistStop)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_ignorenonaggro","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
-	
+	if (${FlyingZone})
+	{
+		echo Barycenter for ${rtarget} is at ${X0},-,${Z0}
+		call 3DNav ${X0} ${Math.Calc64[${Me.Y}+50]} ${Z0}
+		call GoDown
+	}
 	do 
 	{
 		do 
@@ -79,12 +92,14 @@ function main(string rtarget, float DistStop)
 			call MyCount
 			Nb:Set[${Return}]
 			echo Found ${Nb} ressources within range (Blocked counter is at ${Blocked} and stucky counter at ${Stucky})
+			call CheckCombat
 			if ${ActorIterator:First(exists)}
 			{
 				MyIndex:Set[0]
 				do
 				{
 					call GoDown
+					call CheckCombat
 					eq2execute merc resume
 					echo found ${ActorIterator.Value.Name} - check collision
 					face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
@@ -97,6 +112,11 @@ function main(string rtarget, float DistStop)
 					{	
 						echo found ${ActorIterator.Value.Name} at ${meters}m without collision
 						Stucky:Set[0]
+						if (${FlyingZone} && (${Math.Calc64[${Me.Y}+5]} < ${ActorIterator.Value.Y}))
+						{
+							call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
+							call GoDown
+						}
 						target ${Me.Name}
 						LastDistance:Set[${ActorIterator.Value.Distance}]
 						do
@@ -106,11 +126,13 @@ function main(string rtarget, float DistStop)
 						while (!${Me.IsIdle})
 						do
 						{
+							call CheckCombat
 							stuck:Set[FALSE]
 							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 							press -hold MOVEFORWARD
 							wait 1
 							press -release MOVEFORWARD
+								
 							call CheckStuck ${loc0}
 							stuck:Set[${Return}]
 						}
@@ -127,6 +149,7 @@ function main(string rtarget, float DistStop)
 									Stucky:Inc
 								loc1:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 								echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m (stucky at ${Stucky})
+								call CheckCombat
 								press MOVEFORWARD
 								wait 10
 							}
@@ -146,26 +169,29 @@ function main(string rtarget, float DistStop)
 							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 							if (${FlyingZone})
 							{
-								press -hold FLYUP
-								wait 30
+								call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
+								call CheckStuck ${loc0}
+								if (!${Return})
+								{
+									Stucky:Set[0]
+									Blocked:Set[0]
+								}
 							}
-							
-							press -hold MOVEFORWARD
-							wait 100
-							press -release MOVEFORWARD
-							if (${FlyingZone})
+							else
 							{
-								press -release FLYUP
-								call GoDown
+								echo can't fly here, trying to do without
+								press -hold MOVEFORWARD
+								wait 100
+								press -release MOVEFORWARD
+								call UnstuckR
+								call CheckStuck ${loc0}
+								if (!${Return})
+									Stucky:Set[0]
+								stuck:Set[${Return}]
+								press -hold TURNRIGHT
+								wait 5
+								press -release TURNRIGHT
 							}
-							call UnstuckR
-							call CheckStuck ${loc0}
-							if (!${Return})
-								Stucky:Set[0]
-							stuck:Set[${Return}]
-							press -hold TURNRIGHT
-							wait 5
-							press -release TURNRIGHT
 						}
 					}
 
@@ -175,12 +201,7 @@ function main(string rtarget, float DistStop)
 			else
 			{
 				echo "Searching ressources"
-				press -hold MOVEFORWARD
-				wait 50
-				press -release MOVEFORWARD
-				press -hold TURNRIGHT
-				wait 5
-				press -release TURNRIGHT
+				call UnstuckR
 				
 			}
 			wait 5
@@ -189,7 +210,9 @@ function main(string rtarget, float DistStop)
 		echo really stuck (${Stucky}-${Blocked}) ! going UP ? ${FlyingZone}!
 		call Unstuck_out
 	}
-	while (${Stucky}<20 &&  !${Me.IsDead} && ${Blocked}<20)
+	while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20)
+	echo while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20) stucky - not dead - blocked
+	call GoDown
 	echo harvest script shutdown (${Stucky}-${Blocked})
 	;eq2execute "quit login"
 	;ActorIterator:Reset
@@ -261,8 +284,14 @@ function Exclude_Ressources(string ResourceName)
 }
 atom HandleAllEvents(string Message)
 {
+	;echo event catched : ${Message}
 	if (${Message.Equal["Can't see target"]})
 	{
-		 Stucky:Inc
+		Stucky:Inc
+	}
+	if (${Message.Find["ou acquire"]}>0)
+	{
+		Stucky:Set[0]
+		Blocked:Set[0]
 	}
 }

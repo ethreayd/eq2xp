@@ -35,6 +35,7 @@ function main(string questname)
 	RIStart:Set[TRUE]
 	do
 	{
+		echo Zone is ${Zone.Name}
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
 			eq2execute merc resume
 		
@@ -42,6 +43,8 @@ function main(string questname)
 			call Zone_AwuidorTheNebulousDeepSolo
 		if ${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]}
 			call Zone_DoomfireTheEnkindledTowersSolo
+		if ${Zone.Name.Equal["Eryslai: The Midnight Aerie \[Solo\]"]}
+			call Zone_EryslaiTheMidnightAerieSolo
 		if ${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]}
 			call Zone_EryslaiTheBixelHiveSolo
 		if ${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]}
@@ -592,6 +595,30 @@ function Zone_DoomfireTheEnkindledTowersSolo()
 	}
 	while (${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]})
 }
+
+function Zone_EryslaiTheMidnightAerieSolo()
+{
+	variable string Named
+	do
+	{
+		call MainChecks
+		Named:Set["Beaknik"]
+		call IsPresent "${Named}" 50
+		if (${Return} && ${Me.X} < 960 && ${Me.X} > 940 &&  ${Me.Y} < 255 && ${Me.Y} > 245 && ${Me.Z} < 320 && ${Me.Z} > 310)
+		{
+			echo correcting ISXRI Bug (stuck in ${Named} fight)
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 20
+			call DMove 955 258 264 3
+			wait 10
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		}
+		
+		wait 1000
+	}
+	while (${Zone.Name.Equal["Eryslai: The Bixel Hive \[Solo\]"]})
+}
+
 function Zone_EryslaiTheBixelHiveSolo()
 {
 	variable string Named

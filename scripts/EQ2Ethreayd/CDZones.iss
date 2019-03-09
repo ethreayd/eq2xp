@@ -121,6 +121,37 @@ function goEPG()
 	call ActivateVerbOn "Teleporter to Elemental Portal Gallery" Touch TRUE
 	wait 100
 }
+function goPublicZone(string ZoneName)
+{
+	variable string LongZoneName
+	
+	if ((${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]}) && (${Me.Y}<400 || ${Me.Y}>430))
+		call goEPG
+	
+	switch ${ZoneName}
+	{
+		case Doomfire
+		{
+			LongZoneName:Set["Doomfire, the Burning Lands"]
+			echo Going to ${ZoneName} (${LongZoneName})
+			call DMove 730 412 -338 3
+			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE	
+		}
+		break
+		default
+		{
+			LongZoneName:Set["Vegarlson, the Earthen Badlands"]
+			echo no Zone selected going to ${ZoneName} (${LongZoneName})
+			call DMove 771 412 -338 3
+			call ActivateVerbOn "zone_to_poe" "Enter ${LongZoneName}" TRUE
+		}
+		break
+	}
+	wait 20
+	oc !c -ZoneDoor 1
+	RUIMObj:Door[${Me.Name},1]
+	call waitfor_Zone "${LongZoneName}"
+}
 function MendToon()
 {
 	call ReturnEquipmentSlotHealth Primary

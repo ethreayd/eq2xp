@@ -502,12 +502,7 @@ function Ascend(float Y)
 			{	
 				ExecuteQueued
 				echo stucked when ascending
-				press -hold STRAFELEFT
-				wait 5
-				press -release STRAFELEFT
-				press -hold STRAFERIGHT
-				wait 5
-				press -release STRAFERIGHT
+				call UnstuckR
 			}
 		}
 		while (${Me.Loc.Y}<${Y})
@@ -632,13 +627,11 @@ function AutoPlant()
 	echo I am in Zone ${Zone.Name}	
 	wait 50
 	echo logging as ${ToonName}
-	ogre ${ToonName}
-	echo I am in Zone ${Zone.Name}
-	wait 100
-	echo I am in Zone ${Zone.Name}
 	do
 	{
-		wait 5
+		ogre ${ToonName}
+		wait 300
+		echo I am in Zone ${Zone.Name}
 	}
 	while (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal[""]})
 	echo I am in Zone ${Zone.Name}
@@ -667,6 +660,52 @@ function AvoidRedCircles(float Distance, bool IsGroup)
 		echo Red Circle (${ActorIterator.Value.ID}) detected at ${ActorIterator.Value.Distance}m (Group=${IsGroup})
 		call JoustOut ${ActorIterator.Value.ID} ${AvoidDistance} ${IsGroup}
 	}
+}
+function BaryCenterX(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Counter=0
+	variable float Sigma
+	
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		
+		do
+		{
+			Sigma:Set[${Math.Calc64[${Sigma}+${ActorIterator.Value.X}]}]
+			Counter:Inc
+		}
+		while (${ActorIterator:Next(exists)})
+		return ${Math.Calc64[${Sigma}/${Counter}]}
+	}
+	else
+		return 0
+}
+function BaryCenterZ(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Counter=0
+	variable float Sigma
+	
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		
+		do
+		{
+			Sigma:Set[${Math.Calc64[${Sigma}+${ActorIterator.Value.Z}]}]
+			Counter:Inc
+		}
+		while (${ActorIterator:Next(exists)})
+		return ${Math.Calc64[${Sigma}/${Counter}]}
+	}
+	else
+		return 0
 }
 function BelltoZone(string ZoneName)
 {
@@ -788,33 +827,9 @@ function CastImmunity(string ToonName, int Health, int Pause)
 }
 function check_quest(string questname)
 {
-	variable index:quest Quests
-	variable iterator It
-	variable int NumQuests
-
-	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
-    
-	if (${NumQuests} < 1)
-	{
-		echo "No active quests found."
-		return
-	}
-	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	QuestJournalWindow:GetActiveQuests[Quests]
-	Quests:GetIterator[It]
-	if ${It:First(exists)}
-	{
-        do
-        {
-			if (${It.Value.Name.Equal["${questname}"]})
-			{
-				echo already on ${questname}
-				return TRUE
-        	}
-		}
-        while ${It:Next(exists)}
-	}
-	return FALSE
+	echo check_quest is deprecated and only preserved for backward compatibility. Please use CheckQuest instead.
+	call CheckQuest "${questname}"
+	return ${Return} 
 }
 function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 {
@@ -840,11 +855,18 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 }
 function CheckCombat(int MyDistance)
 {
+	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
-	OgreBotAPI:NoTarget[${Me.Name}]
+	
 	if (${Me.InCombatMode})
 	{
+		OgreBotAPI:NoTarget[${Me.Name}]
+		if ${Script["Buffer:OgreHarvestLite"](exists)}
+		{
+			ogre end harvestlite
+			WasHarvesting:Set[TRUE]
+		}
 		do
 		{	
 			wait 5
@@ -855,6 +877,8 @@ function CheckCombat(int MyDistance)
 		}
 		while (${Me.InCombatMode})
 	}
+	if ${WasHarvesting}
+		ogre harvestlite
 }
 function CheckEffectOnTarget(string EffectName)
 {
@@ -925,7 +949,36 @@ function CheckItem(string ItemName, int Quantity)
 		return 0
 	}
 }
-	
+function CheckQuest(string questname)
+{
+	variable index:quest Quests
+	variable iterator It
+	variable int NumQuests
+
+	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
+    
+	if (${NumQuests} < 1)
+	{
+		echo "No active quests found."
+		return
+	}
+	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
+	QuestJournalWindow:GetActiveQuests[Quests]
+	Quests:GetIterator[It]
+	if ${It:First(exists)}
+	{
+        do
+        {
+			if (${It.Value.Name.Equal["${questname}"]})
+			{
+				echo already on ${questname}
+				return TRUE
+        	}
+		}
+        while ${It:Next(exists)}
+	}
+	return FALSE
+}	
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
@@ -1861,6 +1914,7 @@ function GuildH()
 	{
 		echo Starting GH churns
 		wait 100
+		call UnpackItem "A bushel of harvests" 1
 		echo Repair
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
@@ -1873,6 +1927,7 @@ function GuildH()
 		call DepositAll "Scroll Depot"
 		wait 100
 		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
+		call ActivateVerbOn "Arcanna'se Effigy of Rebirth" "Channel Arcanna'se" TRUE
 		echo GH churns finished
 	}
 }
@@ -2000,16 +2055,76 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 	}
 	echo exiting Harvest function
 }
+function HarvestLite(string ItemName, int Quantity, float Distance, int speed, bool is2D)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Count=0
+	variable int Counter=0
+	if (${Distance}<1)
+		Distance:Set[100]
+	if (${speed}<1)
+		speed:Set[3]
+	echo entering HarvestLite function ${ItemName} ${Quantity} ${Distance} 
+	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			Count:Inc	
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+	echo "There is ${Count} ${ItemName}"
+	if (${Count}>0)
+	{
+		if ${ActorIterator:First(exists)}
+		{
+			do
+			{
+				if (${ActorIterator.Value.X(exists)})
+				{
+					eq2execute waypoint ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+					echo Harvest: going to ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+					if (${Actor[name,${ActorIterator.Value.Name}].CheckCollision} && !${is2D})
+					{
+						echo moving in 3D
+						call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
+						wait 10
+						call GoDown
+					}
+					else
+					{
+						echo moving in 2D
+						call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${speed} 15 FALSE TRUE 5
+						wait 10
+					}
+						
+					eq2execute loc
+					ogre harvestlite
+					echo trying to harvest ${ItemName}
+					wait 50
+						
+				}
+				Counter:Inc
+				echo Counter in Harvest : ${Counter}
+			}
+			while (${ActorIterator:Next(exists)} && ${Counter}<${Quantity})
+		}		
+	}
+	echo exiting Harvest function
+}
 function HarvestItem(string ItemName, int number, int speed, bool is2D)
 {
     variable int Counter=0
-	
-	call Harvest "${ItemName}" ${number} ${speed} ${is2D}
+	call HarvestLite "${ItemName}" ${number} 100 ${speed} ${is2D}
 	call CountItem "${ItemName}"
 	Counter:Set[${Return}]
 	if (${Counter}>=${number})
 		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
 }
+
 function Hunt(string ActorName, int distance, int number, bool nofly, bool IgnoreFight)
 {
 	variable index:actor Actors

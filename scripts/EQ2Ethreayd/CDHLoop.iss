@@ -17,11 +17,15 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CDZones.iss"
 
-function main()
+function main(string ZoneName)
 {
+	echo "Debug : waiting 12s"
+	if (${ZoneName.Equal[""]})
+		ZoneName:Set["Vegarlson"]
 	wait 120
 	if (${Me.IsDead})
 	{
+		echo "I am dead - waiting for 10s before reviving and stuff"
 		wait 100
 		echo --- Reviving
 		RIMUIObj:Revive[${Me.Name}]
@@ -29,8 +33,11 @@ function main()
 		wait 300
 	}
 	call goto_GH
+	echo "Debug : waiting 10s"
 	wait 100
+	
 	echo I am in Zone ${Zone.Name}
+	call UnpackItem "A bushel of harvests" 1
 	echo calling AutoPlant
 	call AutoPlant
 	echo resuming CDHLoop
@@ -50,7 +57,6 @@ function main()
 			RIMUIObj:Revive[${Me.Name}]
 			OgreBotAPI:Revive[${Me.Name}]
 		}
-			
 		call ReturnEquipmentSlotHealth Primary
 		if (${Return}<11)
 		{
@@ -59,24 +65,16 @@ function main()
 			call GuildH
 			call goEPG
 		}
-		if (${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]})
+		if ((${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]}) && ${Script["harvest"](exists)})
+			end harvest
+		call goPublicZone "${ZoneName}"
+		if (!${Script["harvest"](exists)})
+			run EQ2Ethreayd/harvest
+		
+		if (${Zone.Name.Find["${ZoneName}"]}==0)
 		{
-			if ${Script["harvest"](exists)}
-				end harvest
-			if (${Me.Y}<400 || ${Me.Y}>430)
-				call goEPG
-			call DMove 771 412 -338 3
-			call ActivateVerbOn "zone_to_poe" "Enter Vegarlson, the Earthen Badlands" TRUE
-			wait 20
-			oc !c -ZoneDoor 1
-			RUIMObj:Door[${Me.Name},1]
-			call waitfor_Zone "Vegarlson, the Earthen Badlands"
+			echo already in harvesting zone
 			if (!${Script["harvest"](exists)})
-				run EQ2Ethreayd/harvest
-		}
-		if (${Zone.Name.Left[31].Equal["Vegarlson, the Earthen Badlands"]})
-		{
-				if (!${Script["harvest"](exists)})
 				run EQ2Ethreayd/harvest
 		}
 		wait 600
