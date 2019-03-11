@@ -492,6 +492,7 @@ function Ascend(float Y)
 	{	
 		do
 		{	
+		
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			press -hold FLYUP
 			wait 5
@@ -502,7 +503,9 @@ function Ascend(float Y)
 			{	
 				ExecuteQueued
 				echo stucked when ascending
+				call CheckCombat
 				call UnstuckR
+				Stucky:Set[0]
 			}
 		}
 		while (${Me.Loc.Y}<${Y})
@@ -680,6 +683,33 @@ function BaryCenterX(string ActorName)
 		}
 		while (${ActorIterator:Next(exists)})
 		return ${Math.Calc64[${Sigma}/${Counter}]}
+	}
+	else
+		return 0
+}
+function BaryCenterY(string ActorName)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable int Counter=0
+	variable float Sigma=0
+	
+	EQ2:QueryActors[Actors, Name  =- ""]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		
+		do
+		{
+			if ${Sigma}<${ActorIterator.Value.Y}
+				Sigma:Set[${ActorIterator.Value.Y}]
+			Counter:Inc
+		}
+		while (${ActorIterator:Next(exists)})
+		if ${Sigma}>${Math.Calc64[${Me.Y}+100]}
+			return ${Math.Calc64[${Me.Y}+100]}
+		else
+			return ${Sigma}
 	}
 	else
 		return 0
@@ -1040,6 +1070,18 @@ function CheckS()
 function CheckStuck(float loc)
 {
 	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
+	if (${loc}==${loc0})
+	{
+		return TRUE
+	}
+	else
+	{
+		return FALSE
+	}
+}
+function CheckXZStuck(float loc)
+{
+	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
 	if (${loc}==${loc0})
 	{
 		return TRUE

@@ -14,7 +14,7 @@ variable(script) iterator NPCIterator
 variable(script) bool FlyingZone
 variable(script) int Stucky=0
 
-function main(string rtarget, float DistStop)
+function main(string rtarget, bool Special)
 {
 	ogre harvestlite
 	radar on
@@ -31,16 +31,28 @@ function main(string rtarget, float DistStop)
 	variable float xyz=0
 	variable float loc0=0
 	variable float loc1=0
+	variable float loc2=0
 	variable bool Enemy=FALSE
-	variable float X0
-	variable float Z0
+	variable float X0=0
+	variable float Y0=${Math.Calc64[${Me.Y}+10]}
+	variable float Z0=0
+	variable float Y1
+	variable float DistStop=4
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	call CheckCombat
-	call BaryCenterX "${rtarget}"
-	X0:Set[${Return}]
-	call BaryCenterZ "${rtarget}"
-	Z0:Set[${Return}]
+	face 0 0
+	call CheckSwimming
+	
+	if (!${rtarget.Equal[""]})
+	{	
+		call BaryCenterX "${rtarget}"
+		X0:Set[${Return}]
+		call BaryCenterY "${rtarget}"
+		Y0:Set[${Return}]
+		call BaryCenterZ "${rtarget}"
+		Z0:Set[${Return}]
+	}
 	call CheckCombat
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
@@ -51,18 +63,20 @@ function main(string rtarget, float DistStop)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_ignorenonaggro","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
-	if (${FlyingZone})
+	
+	if (${FlyingZone} && !${rtarget.Equal[""]} && ${Actor[Name,"${rtarget}"].Distance}>50)
 	{
-		echo Barycenter for ${rtarget} is at ${X0},-,${Z0}
-		call 3DNav ${X0} ${Math.Calc64[${Me.Y}+50]} ${Z0}
+		echo Barycenter for ${rtarget} is at ${X0},${Y0},${Z0}
+		eq2execute waypoint ${X0} ${Y0} ${Z0}
+		call 3DNav ${X0} ${Math.Calc64[${Y0}+10]} ${Z0}
 		call GoDown
+		face 0 0
+		call CheckSwimming
 	}
 	do 
 	{
 		do 
 		{
-			if (${DistStop}<4)
-				DistStop:Set[4]
 			do
 			{
 				echo in checkCombat loop (Enemy=${Enemy})
@@ -81,12 +95,12 @@ function main(string rtarget, float DistStop)
 			Enemy:Set[FALSE]
 			if (${rtarget.Equal[""]})
 			{	
-				EQ2:QueryActors[Actors, Type  =- "Resource" && Distance <= 100]
+				EQ2:QueryActors[Actors, Type  =- "Resource" && Distance <= 1000]
 			}
 			else
 			{	
 				echo looking only for ${rtarget} node
-				EQ2:QueryActors[Actors, Name  =- "${rtarget}" && Distance <= 100]
+				EQ2:QueryActors[Actors, Name  =- "${rtarget}" && Distance <= 1000]
 			}
 			Actors:GetIterator[ActorIterator]
 			call MyCount
@@ -112,10 +126,17 @@ function main(string rtarget, float DistStop)
 					{	
 						echo found ${ActorIterator.Value.Name} at ${meters}m without collision
 						Stucky:Set[0]
-						if (${FlyingZone} && (${Math.Calc64[${Me.Y}+5]} < ${ActorIterator.Value.Y}))
+						if (${FlyingZone})
 						{
-							call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
+							if (${Me.Y} < ${ActorIterator.Value.Y})
+								Y1:Set[${ActorIterator.Value.Y}]
+							else
+								Y1:Set[${Me.Y}]
+							
+							call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${Y1}+15]} ${ActorIterator.Value.Z}
 							call GoDown
+							face 0 0
+							call CheckSwimming
 						}
 						target ${Me.Name}
 						LastDistance:Set[${ActorIterator.Value.Distance}]
@@ -149,6 +170,8 @@ function main(string rtarget, float DistStop)
 									Stucky:Inc
 								loc1:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 								echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m (stucky at ${Stucky})
+								if (!${rtarget.Equal[""]} && ${Special})
+										OgreBotAPI:Special["${Me.Name}"]
 								call CheckCombat
 								press MOVEFORWARD
 								wait 10
@@ -164,6 +187,7 @@ function main(string rtarget, float DistStop)
 						if (${Nb}==${MyIndex})
 						{
 							echo "All ressources are blocked"
+							call CheckCombat
 							Blocked:Inc
 							stuck:Set[FALSE]
 							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
@@ -200,9 +224,24 @@ function main(string rtarget, float DistStop)
 			}
 			else
 			{
-				echo "Searching ressources"
-				call UnstuckR
-				
+				echo "Searching ressources / Flying up to enjoy the view"
+				if (${FlyingZone})
+				{
+					if (!${rtarget.Equal[""]})
+					{
+						call BaryCenterX "${rtarget}"
+						X0:Set[${Return}]
+						call BaryCenterY "${rtarget}"
+						Y0:Set[${Return}]
+						call BaryCenterZ "${rtarget}"
+						Z0:Set[${Return}]
+					}
+					if (${X0} != 0 && ${Z0} != 0)
+						call 3DNav ${X0} ${Math.Calc64[${Y0}+10]} ${Z0}
+					else
+						call 3DNav ${Me.X} ${Math.Calc64[${Me.Y}+10]} ${Me.Z}
+				}
+				call UnstuckR 100
 			}
 			wait 5
 		}
@@ -213,6 +252,8 @@ function main(string rtarget, float DistStop)
 	while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20)
 	echo while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20) stucky - not dead - blocked
 	call GoDown
+	face 0 0
+	call CheckSwimming
 	echo harvest script shutdown (${Stucky}-${Blocked})
 	;eq2execute "quit login"
 	;ActorIterator:Reset
