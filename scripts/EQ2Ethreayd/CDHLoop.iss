@@ -19,10 +19,10 @@
 
 function main(string ZoneName)
 {
-	echo "Debug : waiting 12s"
+	echo "Debug : waiting 10s"
 	if (${ZoneName.Equal[""]})
-		ZoneName:Set["Vegarlson"]
-	wait 120
+		ZoneName:Set["Doomfire"]
+	wait 100
 	if (${Me.IsDead})
 	{
 		echo "I am dead - waiting for 10s before reviving and stuff"
@@ -36,9 +36,14 @@ function main(string ZoneName)
 	echo "Debug : waiting 10s"
 	wait 100
 	
-	echo I am in Zone ${Zone.Name}
+	echo ${Me.Name} is in Zone ${Zone.Name}
 	call UnpackItem "A bushel of harvests" 1
-	echo calling AutoPlant
+	do
+	{
+		wait 5
+	}
+	while (!${Me.Name(exists)})
+	echo calling AutoPlant for ${Me.Name}
 	call AutoPlant
 	echo resuming CDHLoop
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -67,16 +72,11 @@ function main(string ZoneName)
 		}
 		if ((${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]}) && ${Script["harvest"](exists)})
 			end harvest
-		call goPublicZone "${ZoneName}"
+		if (${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]})
+			call goPublicZone "${ZoneName}"
 		if (!${Script["harvest"](exists)})
 			run EQ2Ethreayd/harvest
 		
-		if (${Zone.Name.Find["${ZoneName}"]}==0)
-		{
-			echo already in harvesting zone
-			if (!${Script["harvest"](exists)})
-				run EQ2Ethreayd/harvest
-		}
 		wait 600
 	}
 	while (TRUE)

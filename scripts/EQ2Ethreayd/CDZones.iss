@@ -138,7 +138,7 @@ function goPublicZone(string ZoneName)
 			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE	
 		}
 		break
-		default
+		case Vergalson
 		{
 			LongZoneName:Set["Vegarlson, the Earthen Badlands"]
 			echo no Zone selected going to ${ZoneName} (${LongZoneName})
@@ -151,6 +151,7 @@ function goPublicZone(string ZoneName)
 	oc !c -ZoneDoor 1
 	RUIMObj:Door[${Me.Name},1]
 	call waitfor_Zone "${LongZoneName}"
+	echo in zone ${ZoneName} (${LongZoneName})
 }
 function MendToon()
 {
