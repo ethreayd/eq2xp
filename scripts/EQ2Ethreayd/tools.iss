@@ -591,33 +591,7 @@ function CastAbility(string AbilityName, bool NoWait)
 }
 function check_quest(string questname)
 {
-	variable index:quest Quests
-	variable iterator It
-	variable int NumQuests
-
-	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
-    
-	if (${NumQuests} < 1)
-	{
-		echo "No active quests found."
-		return
-	}
-	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	QuestJournalWindow:GetActiveQuests[Quests]
-	Quests:GetIterator[It]
-	if ${It:First(exists)}
-	{
-        do
-        {
-			if (${It.Value.Name.Equal["${questname}"]})
-			{
-				echo already on ${questname}
-				return TRUE
-        	}
-		}
-        while ${It:Next(exists)}
-	}
-	return FALSE
+	call CheckQuest "${questname}"
 }    
 function CheckCombat(int MyDistance)
 {
@@ -651,7 +625,36 @@ function CheckItem(string ItemName, int Quantity)
 		return 0
 	}
 }
-	
+function CheckQuest(string questname)
+{
+	variable index:quest Quests
+	variable iterator It
+	variable int NumQuests
+
+	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
+    
+	if (${NumQuests} < 1)
+	{
+		echo "No active quests found."
+		return FALSE
+	}
+	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
+	QuestJournalWindow:GetActiveQuests[Quests]
+	Quests:GetIterator[It]
+	if ${It:First(exists)}
+	{
+        do
+        {
+			if (${It.Value.Name.Equal["${questname}"]})
+			{
+				echo already on ${questname}
+				return TRUE
+        	}
+		}
+        while ${It:Next(exists)}
+	}
+	return FALSE
+}    	
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
