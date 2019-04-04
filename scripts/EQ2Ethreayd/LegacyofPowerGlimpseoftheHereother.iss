@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 variable(script) string questname
 variable(script) string NPCName
 
@@ -68,14 +69,7 @@ function step000()
 	
 function step001()
 {	
-	if (${Zone.Name.Equal["Coliseum of Valor"]})
-	{
-		call DMove 92 3 163 3
-		OgreBotAPI:Special["${Me.Name}"]
-		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
-	}
-	call waitfor_Zone "Plane of Magic"
+	call ExitCoV
 	do
 	{
 		call MoveTo "Enchantress W." 598 37 544
@@ -94,11 +88,13 @@ function step001()
 
 function step002()
 {
+	call ExitCoV
 	do
 	{
 		call CheckQuestStep 3
 		if (!${Return})
 		{
+			call waitfor_Zone "Plane of Magic"
 			call navwrap -890 297 990
 			call Hunt "planar earth elemental" 100 1
 			wait 100
@@ -201,8 +197,10 @@ function step002()
 	}
 	while (${Return})
 }
+
 function step003()
 {	
+	call ExitCoV
 	do
 	{
 		call MoveTo "Enchantress W." 601 38 543
@@ -216,6 +214,7 @@ function step003()
 }
 function step004()
 {
+	call ExitCoV
 	do
 	{
 		call Hunt "Arcstone miner golem" 50 12 TRUE
@@ -223,7 +222,6 @@ function step004()
 	}
 	while (!${Return})
 	call StopHunt
-
 }
 function step005()
 {	

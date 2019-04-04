@@ -2,8 +2,22 @@ function main()
 {
 	variable index:string ScriptsToRun
 	variable string sQN
-	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Heroic_"]
-	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Heroic_"]
+	variable int x
+	ScriptsToRun:Insert["TheFabledRuinsofGukHallsoftheFallen_Group_"]
+	ScriptsToRun:Insert["PlaneofDiseaseInfestedMesa_Group_"]
+	ScriptsToRun:Insert["PlaneofInnovationGearsintheMachine_Group_"]
+	ScriptsToRun:Insert["SolusekRosTowerTheObsidianCore_Group_"]
+	ScriptsToRun:Insert["PlaneofDiseaseOutbreak_Group_"]
+	ScriptsToRun:Insert["TheFabledRuinsofGukHallsoftheFallen_Solo_"]
+	ScriptsToRun:Insert["loopSoH"]
+	ScriptsToRun:Insert["ShardofHateUtterContempt_Group_"]
+	ScriptsToRun:Insert["TBoTTBH_C1"]
+	ScriptsToRun:Insert["SRTTOC_C1"]
+	ScriptsToRun:Insert["Outbreak_C1"]
+	ScriptsToRun:Insert["test"]
+	ScriptsToRun:Insert["PlaneofInnovationMasksoftheMarvelous_Group_"]
+	ScriptsToRun:Insert["ShardofHateUtterContempt_Solo_"]
+	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Group_"]
 	ScriptsToRun:Insert["PlaneofInnovationSecurityMeasures_tradeskill_"]
 	ScriptsToRun:Insert["AStitchinTimePartISecurityMeasures"]
 	ScriptsToRun:Insert["ConservationofPlanarEnergy"]
@@ -19,7 +33,10 @@ function main()
 	ScriptsToRun:Insert["TordenBastionofThunderWindsofChange_Solo_"]
 	ScriptsToRun:Insert["TordenBastionofThunderTowerBreach_Solo_"]
 	ScriptsToRun:Insert["LegacyofPowerThroughStormsandMists"]
+	ScriptsToRun:Insert["ToonAssistant"]
 	ScriptsToRun:Insert["wrap"]
+	ScriptsToRun:Insert["RestartZone"]
+	ScriptsToRun:Insert["deathwatch"]
 	ScriptsToRun:Insert["loopHeroic"]
 	ScriptsToRun:Insert["loopSolo"]
 	ScriptsToRun:Insert["loopSRT"]
@@ -37,13 +54,17 @@ function main()
 	ScriptsToRun:Insert["LegacyofPowerHerosDevotion"]
 	ScriptsToRun:Insert["LegacyofPowerSecretsinanArcaneLand"]
 	ScriptsToRun:Insert["autopop"]
-	
 
-	variable int x
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{
-        echo Killing script ${ScriptsToRun[${x}]}
+        
 		if ${Script["${ScriptsToRun[${x}]}"](exists)}
-			endscript "${ScriptsToRun[${x}]}"
+		{
+			echo Killing script ${ScriptsToRun[${x}]}
+			endscript "${ScriptsToRun[${x}]}"		
+		}
 	}
+	press -release w
+	oc !c -letsgo
+	
 }

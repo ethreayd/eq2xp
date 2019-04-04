@@ -10,9 +10,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable bool Branch
 	
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -229,7 +230,8 @@ function step003()
 	eq2execute merc resume
 	call StopHunt
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	
+	call DMove -540 -17 634 1 30 FALSE FALSE 3
+	call DMove -530 -15 635 2 30 FALSE FALSE 3
 	call WalkWithTheWind -273 5 637
 }
 
@@ -272,6 +274,7 @@ function step005()
 	while (${Return})
 	
 	call DMove -614 38 737 1
+	call MoveCloseTo "a Wind Spirit"
 	call Converse "Wind Spirit" 2
 	wait 200
 	
@@ -284,19 +287,19 @@ function step005()
 	while (${Return})
 	
 	call DMove -565 90 550 1
+	call MoveCloseTo "a Wind Spirit"
 	call Converse "Wind Spirit" 2
 	wait 200
-	
-	
 	call DMove -729 145 534 1
-	
 	do
 	{
 		wait 10
 		call IsPresent "${Named}" 50
 	}
 	while (${Return})
-	
+		call DMove -729 145 534 1
+
+	call MoveCloseTo "a Wind Spirit"
 	call Converse "Wind Spirit" 2
 	wait 200
 	call DMove -757 198 726 ${speed} ${FightDistance}
@@ -308,7 +311,7 @@ function step005()
 		call IsPresent "${Named}" 50
 	}
 	while (${Return})
-	
+	call MoveCloseTo "a Wind Spirit"
 	call Converse "Wind Spirit" 2
 	wait 800
 	
@@ -680,6 +683,8 @@ function step014()
 		call ActivateVerb "Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
 		wait 300
 	}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
  
 atom HandleAllEvents(string Message)

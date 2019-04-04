@@ -9,7 +9,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
 	variable int laststep=9
 	variable int count
-	
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	oc !c -letsgo ${Me.Name}
 	
 	call IsPresent "The Carrion Larva" 500
@@ -52,9 +55,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 		}
 	}
 	
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	
 	echo "Archetype (${Me.Archetype}) is :"
 	if (${setspeed}==0)
 	{
@@ -166,7 +167,9 @@ function step000()
 	call DMove 562 83 39 3
 	call DMove 532 82 35 3
 	call StopHunt
-	call Converse "Felkruk" 16
+	call CheckCombat
+	IF (!${Actor[Felkruk].IsAggro})
+		call Converse "Felkruk" 16
 }
 
 function step001()
@@ -290,6 +293,7 @@ function step004()
 	}
 	while (${Return})
 	eq2execute summon
+	call Loot
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	Me.Inventory["Hirudin Extract"]:Use
@@ -339,7 +343,7 @@ function step006()
 	else
 		Me.Inventory["Hirudin Extract"]:Use
 	wait 20
-	Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
+	;Ob_AutoTarget:AddActor["putrid pile of flesh",0,TRUE,FALSE]
 	Ob_AutoTarget:AddActor["${Named}",0,TRUE,FALSE]
 	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
@@ -360,6 +364,7 @@ function step006()
 	call StopHunt
 	eq2execute summon
 	wait 300
+	call Loot
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	eq2execute summon
 	wait 20
@@ -515,6 +520,8 @@ function step009()
 		}
 		while (${Zone.Name.Equal["Plane of Disease: Outbreak [Solo]"]})
 	}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 function ClimbingFMountain()
 {

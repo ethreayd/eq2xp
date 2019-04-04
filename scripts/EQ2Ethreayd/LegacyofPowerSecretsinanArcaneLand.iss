@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 variable(script) string questname
 variable(script) string NPCName
 
@@ -49,13 +50,13 @@ function step001()
 
 function step002()
 {	
-	call 3DNav -148 600 -743
+	call 3DNav 177 600 -744
 	call GoDown
-	call ActivateVerb "Teleporter to Khali'Vahla's Artisan Terrace" -148 577 -743 "Touch"
-	call ActivateSpecial "esoteran reading stone scroll" -132 1263 -753
+	call ActivateVerb "Teleporter to Khali'Yrzu's Artisan Mesa" 177 583 -744 "Touch"
+	call ActivateSpecial "esoteran reading stone scroll" 205 1264 -720
 	Me.Inventory["Esoteran Reading Stone Scroll"]:Scribe
 	wait 10
-	call ActivateVerb "Teleporter to Khali'Vahla" -149 1263 -740 "Touch"
+	call ActivateVerb "Teleporter to Khali'Yrzu" 195 1264 -698 "Touch"
 }
 
 function step003()
@@ -84,10 +85,10 @@ function step003()
 	}
 	while (${item1}<1 || ${item2}<2 || ${item3}<2)
 
-	call ActivateVerb "Teleporter to Khali'Vahla's Artisan Terrace" -148 577 -743 "Touch"
+	call ActivateVerb "Teleporter to Khali'Yrzu's Artisan Mesa" 177 583 -744 "Touch"
 	call AutoCraft "Elaborate Chemistry Table" "Esoteran Reading Stone" 1
 	wait 20
-	call ActivateVerb "Teleporter to Khali'Vahla" -149 1263 -740 "Touch"
+	call ActivateVerb "Teleporter to Khali'Yrzu" 195 1264 -698 "Touch"
 	wait 20
 }
 

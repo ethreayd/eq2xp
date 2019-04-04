@@ -10,9 +10,8 @@ function main(string Loop)
 	call StopHunt
 	OgreBotAPI:Revive[${Me.Name}]
 	wait 300
-	call goto_GH
+	call CastAbility "Call to Guild Hall"
 	wait 600
-	call GuildH
 	echo Shinies
 	runscript EQ2Ethreayd/gardener
 	wait 1500
@@ -21,12 +20,13 @@ function main(string Loop)
 	wait 300
 	UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick	
 	wait 30
-	ogre plant -t ${ToonName}
-	wait 1200
-	ogre ${ToonName}
-	wait 900
-	call goto_GH
-	wait 600
+	;ogre plant -t ${ToonName}
+	;wait 1200
+	;ogre end plant
+	;ogre ${ToonName}
+	;wait 900
+	;call CastAbility "Call to Guild Hall"
+	;wait 600
 	do
 	{
 		call Transmute "Planar Transmutation Stone"
@@ -36,7 +36,11 @@ function main(string Loop)
 	while (${Return}>0)
 	ogre depot -allh -hda -llda -cda
 	wait 100
+	oc !c -ArcannaseEffigyOfRebirth All
+	wait 20
+	oc !c -ArcannaseEffigyOfRebirth All
+	wait 20
 	call goCoV
 	wait 100
-	run EQ2Ethreayd/${Loop}
+	relay is1 run EQ2Ethreayd/${Loop}
 }

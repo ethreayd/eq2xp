@@ -2,7 +2,7 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(global) Object_Get_SpewStats MyFaction_Get_SpewStats
 variable(script) int64 iFaction
-;You need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
+;You  need OGRE IN DEV VERSION FOR THE FACTION CHECK (HENCE THIS WHOLE SCRIPT) TO WORK !!!!
 function main(int stepstart, int stepstop, int speed)
 {
 	; thanks to Kannkor for the index usage example
@@ -19,10 +19,12 @@ function main(int stepstart, int stepstop, int speed)
 	ScriptsToRun:Insert["Legacy of Power: Tyrant's Throne"]
 	ScriptsToRun:Insert["Conservation of Planar Energy"]
 	ScriptsToRun:Insert["A Stitch in Time, Part I: Security Measures"]
+	ScriptsToRun:Insert["A Stitch in Time, Part II: Lightning Strikes"]
 	echo "Starting PoP quests"
 	echo " ${ScriptsToRun.Used} are supported"
-	
-	
+	ogre
+	wait 150
+	eq2execute merc resume
 	variable int x
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{

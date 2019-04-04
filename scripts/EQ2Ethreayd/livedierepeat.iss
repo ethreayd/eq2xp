@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 
 function main(bool NoShiny, bool Heroic)
 {
@@ -9,9 +10,10 @@ function main(bool NoShiny, bool Heroic)
 	variable int Stucky
 	variable string sQN
 	variable int Restart=0
+	variable int i
 	do
 	{
-		echo start ldr loop
+		echo start ldr loop (${Heroic})
 		Stucky:Set[0]
 		do
 		{
@@ -27,9 +29,12 @@ function main(bool NoShiny, bool Heroic)
 				echo Counter: ${Counter}
 			}
 			else
+			{
 				Counter:Set[0]
+				echo Resetting Counter : I'm not dead !!!
+			}
 			call CheckStuck ${loc0}
-			if (${Return})
+			if (${Return} && !${Me.InCombatMode} )
 			{
 				Stucky:Inc
 				echo Stucky: ${Stucky}
@@ -37,10 +42,22 @@ function main(bool NoShiny, bool Heroic)
 			else
 				Stucky:Dec
 			call GroupDistance
+			echo Max Distance of a group member : ${Return}m
 		}
 		while ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
 		echo Live and let die ! ((${GroupAlive} || ${Heroic}) && !${GroupDead} && ${Counter}<30 && ${Stucky}<60 && ${Return}<30)
 		
+		if (!${GroupAlive})
+		{
+			for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
+			{
+				if (${Me.Group[${i}].IsDead})
+				{
+					oc !c -CastAbilityOnPlayer All "Gather Remains" ${Me.Group[${i}].Name}
+					wait 100
+				}
+			}
+		}
 		if (${Me.IsDead} && ${Me.InventorySlotsFree}>0)
 		{
 			echo in loop - waiting 30s
@@ -61,12 +78,15 @@ function main(bool NoShiny, bool Heroic)
 				if (${Heroic})
 				{
 					oc !c -letsgo 
-					oc !c -revive 
+					oc !c -revive all 0
+					wait 100
+					relay all ogre
+					wait 300
 				}
 				else
 				{
 					oc !c -letsgo ${Me.Name}
-					oc !c -revive ${Me.Name}
+					oc !c -revive ${Me.Name} 0
 				}
 				echo waiting 1 min to recover
 				wait 600
@@ -78,20 +98,23 @@ function main(bool NoShiny, bool Heroic)
 					call goto_GH
 					call GuildH
 					wait 100
+					
+					echo Repair
+					oc !c -RepairGear
 					call goCoV
 				}
-				if (${Heroic} && ${Return}<100 && ${Restart}<2)
+				if (${Heroic} && ${Return}<100 && ${Restart}<10)
 				{
 					echo LDR: if (${Heroic} && ${Return}<100 && ${Restart}<2)
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
 					wait 50
 					echo Repair
-					oc !c -repair
+					oc !c -RepairGear
 					wait 50
 				}
 				if (${Heroic} && ${Restart}>1)
 				{
-					echo LDR: if (${Heroic} && ${Restart}>1)
+					echo LDR: if (${Heroic} && ${Restart}>9)
 					
 					echo Zone is too hard for this team - Exiting
 					oc !c -pause
@@ -105,9 +128,9 @@ function main(bool NoShiny, bool Heroic)
 					else
 						run EQ2Ethreayd/LoopHeroic
 				}
+				echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 				if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 				{
-					echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 					echo Restarting Zone from LDR
 					run EQ2Ethreayd/wrap RunZone 0 0 0 ${NoShiny}
 				}
@@ -128,7 +151,7 @@ function main(bool NoShiny, bool Heroic)
 					Me.Inventory["Mechanized Platinum Repository of Reconstruction"]:Use
 					wait 50
 					echo Repair
-					oc !c -repair
+					oc !c -RepairGear
 					wait 50
 					call RunZone 0 0 0 ${NoShiny}
 				}
@@ -137,6 +160,9 @@ function main(bool NoShiny, bool Heroic)
 					call goto_GH
 					call GuildH
 					wait 100
+					
+					echo Repair
+					oc !c -RepairGear
 					call goCoV
 					if (!${Script["LoopSolo"](exists)} && !${Heroic})
 						run EQ2Ethreayd/LoopSolo

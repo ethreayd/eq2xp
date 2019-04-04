@@ -9,7 +9,7 @@ function main(float Distance, int speed, float height)
 		speed:Set[1]
 	if (${height}<1)
 		height:Set[10]
-	call strip_QN "${Zone.Name}"
+	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	echo auto harvest shiny in zone "${Zone.Name}" ACTIVATED
     
@@ -17,27 +17,27 @@ function main(float Distance, int speed, float height)
 	{
 		wait 100
 		call IsPresent ? ${Distance} TRUE
-		if (${Return})
+		if (${Return} && !${Me.InCombatMode})
 		{
+			echo IN AUTOSHINY
 			call Abs ${Math.Calc64[${Me.Loc.Y}-${Actor["?"].Y}]}
 			if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
 			{
 				echo shiny detected at altitude difference Y=${Return}(<${height})
-				Script[${sQN}]:Pause
-				press -release MOVEFORWARD
-				echo Paused
+				call PauseZone TRUE
 				do
 				{
 					wait 10 
 				}
 				while (!${Me.IsIdle})
+				echo I am Idle (in autoshiny)
 				call Abs ${Math.Calc64[${Me.Loc.Y}-${Actor["?"].Y}]}
-				if (${Return}<${height} && ${Actor["?"].Distance}<${Distance})
+				if (${Return}<${height} && ${Actor["?"].Distance}<${Distance} && !${Actor["?"].CheckCollision} )
 					call Harvest ? ${Distance} ${speed} TRUE TRUE
 				wait 10
-				Script[${sQN}]:Resume
-				echo Resumed
+				call ResumeZone
 			}
+			echo OUT AUTOSHINY
 		}
 	}
 	while (${Script[${sQN}](exists)} && !${Me.IsDead})

@@ -1,4 +1,5 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CoVZones.iss"
 variable(script) string questname
 variable(script) string NPCName
 
@@ -61,7 +62,7 @@ function step000()
 		call DMove -94 3 163 3
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
 } 
@@ -88,7 +89,7 @@ function step003()
 		call DMove -94 3 163 3
 		OgreBotAPI:ApplyVerbForWho["${Me.Name}","zone_to_poi","Enter the Plane of Innovation"]
 		wait 20
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}",2]
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}",3]
 		wait 50
 	}
 	call waitfor_Zone "Plane of Innovation: Gears in the Machine [Solo]"

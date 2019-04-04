@@ -7,146 +7,255 @@
 #define TURNRIGHT d
 #define FLYUP space
 #define FLYDOWN x
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+
 variable(script) iterator ActorIterator
+variable(script) iterator NPCIterator
+variable(script) bool FlyingZone
 variable(script) int Stucky=0
 
-function main(string rtarget, float DistStop)
+function main(string rtarget, bool Special)
 {
 	ogre harvestlite
 	radar on
 	variable float Precision=3
 	variable int meters
 	variable index:actor Actors
+	variable index:actor NPC
 	variable float LastDistance
 	variable int MyIndex=0
 	variable int Nb=0
+	variable int Blocked=0
 	variable bool stuck=FALSE  
 	variable bool excluded=FALSE
 	variable float xyz=0
 	variable float loc0=0
+	variable float loc1=0
+	variable float loc2=0
+	variable bool Enemy=FALSE
+	variable float X0=0
+	variable float Y0=${Math.Calc64[${Me.Y}+10]}
+	variable float Z0=0
+	variable float Y1
+	variable float DistStop=4
+	
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	call CheckCombat
+	face 0 0
+	call CheckSwimming
+	
+	if (!${rtarget.Equal[""]})
+	{	
+		call BaryCenterX "${rtarget}"
+		X0:Set[${Return}]
+		call BaryCenterY "${rtarget}"
+		Y0:Set[${Return}]
+		call BaryCenterZ "${rtarget}"
+		Z0:Set[${Return}]
+	}
+	call CheckCombat
+	call CheckFlyingZone
+	FlyingZone:Set[${Return}]
+	if (!${FlyingZone})
+		echo No Flying Zone...
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",15]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_ignorenonaggro","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
+	
+	if (${FlyingZone} && !${rtarget.Equal[""]} && ${Actor[Name,"${rtarget}"].Distance}>50)
+	{
+		echo Barycenter for ${rtarget} is at ${X0},${Y0},${Z0}
+		eq2execute waypoint ${X0} ${Y0} ${Z0}
+		call 3DNav ${X0} ${Math.Calc64[${Y0}+10]} ${Z0}
+		call GoDown
+		face 0 0
+		call CheckSwimming
+	}
 	do 
 	{
-		Stucky:Set[0]		
-	do 
-	{
-		if (${DistStop}<4)
-		{	
-			DistStop:Set[4]
-		}
-
-		do
-		{	
-			wait 5
-		}
-		while (${Me.InCombatMode})
-		
-		if (${rtarget.Equal[""]})
-		{	
-			EQ2:QueryActors[Actors, Type  =- "Resource" && Distance <= 100]
-		}
-		else
-		{	
-			echo looking only for ${rtarget} node
-			EQ2:QueryActors[Actors, Name  =- "${rtarget}" && Distance <= 100]
-		}
-		Actors:GetIterator[ActorIterator]
-		call MyCount
-		Nb:Set[${Return}]
-		echo Found ${Nb} ressources within range
-		if ${ActorIterator:First(exists)}
+		do 
 		{
-			MyIndex:Set[0]
 			do
 			{
-				if (${Me.FlyingUsingMount})
+				echo in checkCombat loop (Enemy=${Enemy})
+				EQ2:QueryActors[NPC, Type  =- "NPC" && Distance <= 30]
+				Actors:GetIterator[NPCIterator]
+				if ${NPCIterator:First(exists)}
 				{
-					press -hold FLYDOWN
-					do
-					{	
-						wait 5
-					}
-					while (${Me.FlyingUsingMount})
-					press -release FLYDOWN
-				}
-				echo found ${ActorIterator.Value.Name} - check collision
-				face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
-				meters:Set[${ActorIterator.Value.Distance}]
-				MyIndex:Inc
-				wait 10
-				call Exclude_Ressources "${ActorIterator.Value.Name}"
-				excluded:Set[${Return}]
-				if (!${Actor[name,${ActorIterator.Value.Name}].CheckCollision} && !${excluded})
-				{	
-					echo found ${ActorIterator.Value.Name} at ${meters}m without collision
-					target ${Me.Name}
-					LastDistance:Set[${ActorIterator.Value.Distance}]
-					do
-					{
-						wait 5
-					}
-					while (!${Me.IsIdle})
-					do
-					{
-						stuck:Set[FALSE]
-						loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-						press -hold MOVEFORWARD
-						wait 1
-						press -release MOVEFORWARD
-						call CheckStuck ${loc0}
-						stuck:Set[${Return}]
-					}
-					while (${ActorIterator.Value.Distance}>${Precision} && ${ActorIterator.Value.Distance}<${LastDistance} && !${stuck})
-					wait 10
-					target ${ActorIterator.Value.Name}
-					do
-					{
-						echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m
-						wait 10
-					}
-					while (${ActorIterator.Value.Distance(exists)} && ${ActorIterator.Value.Distance}<${DistStop})
+					if ${NPCIterator.Value.IsAggro}
+						Enemy:Set[TRUE]
+					wait 5
 				}
 				else
-				{
-					echo ${ActorIterator.Value.Name} at ${meters}m is blocked
-					if (${Nb}==${MyIndex})
-					{
-						echo "All ressources are blocked"
-						stuck:Set[FALSE]
-						loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-						press -hold MOVEFORWARD
-						wait 50
-						press -release MOVEFORWARD
-						call CheckStuck ${loc0}
-						stuck:Set[${Return}]
-						press -hold TURNRIGHT
-						wait 5
-						press -release TURNRIGHT
-					}
-				}
-
+					Enemy:Set[FALSE]
 			}	
-			while ${ActorIterator:Next(exists)}
-		}
-		else
-		{
-			echo "Searching ressources"
-			press -hold MOVEFORWARD
-			wait 50
-			press -release MOVEFORWARD
-			press -hold TURNRIGHT
+			while (${Me.InCombatMode} && ${Enemy})
+			Enemy:Set[FALSE]
+			if (${rtarget.Equal[""]})
+			{	
+				EQ2:QueryActors[Actors, Type  =- "Resource" && Distance <= 1000]
+			}
+			else
+			{	
+				echo looking only for ${rtarget} node
+				EQ2:QueryActors[Actors, Name  =- "${rtarget}" && Distance <= 1000]
+			}
+			Actors:GetIterator[ActorIterator]
+			call MyCount
+			Nb:Set[${Return}]
+			echo Found ${Nb} ressources within range (Blocked counter is at ${Blocked} and stucky counter at ${Stucky})
+			call CheckCombat
+			if ${ActorIterator:First(exists)}
+			{
+				MyIndex:Set[0]
+				do
+				{
+					call GoDown
+					call CheckCombat
+					eq2execute merc resume
+					echo found ${ActorIterator.Value.Name} - check collision
+					face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+					meters:Set[${ActorIterator.Value.Distance}]
+					MyIndex:Inc
+					wait 10
+					call Exclude_Ressources "${ActorIterator.Value.Name}"
+					excluded:Set[${Return}]
+					if (!${Actor[name,${ActorIterator.Value.Name}].CheckCollision} && !${excluded})
+					{	
+						echo found ${ActorIterator.Value.Name} at ${meters}m without collision
+						Stucky:Set[0]
+						if (${FlyingZone})
+						{
+							if (${Me.Y} < ${ActorIterator.Value.Y})
+								Y1:Set[${ActorIterator.Value.Y}]
+							else
+								Y1:Set[${Me.Y}]
+							
+							call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${Y1}+15]} ${ActorIterator.Value.Z}
+							call GoDown
+							face 0 0
+							call CheckSwimming
+						}
+						target ${Me.Name}
+						LastDistance:Set[${ActorIterator.Value.Distance}]
+						do
+						{
+							wait 5
+						}
+						while (!${Me.IsIdle})
+						do
+						{
+							call CheckCombat
+							stuck:Set[FALSE]
+							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+							press -hold MOVEFORWARD
+							wait 1
+							press -release MOVEFORWARD
+								
+							call CheckStuck ${loc0}
+							stuck:Set[${Return}]
+						}
+						while (${ActorIterator.Value.Distance}>${Precision} && ${ActorIterator.Value.Distance}<${LastDistance} && !${stuck})
+						wait 10
+						target ${ActorIterator.Value.Name}
+						if (${ActorIterator.Value.Distance}<10)
+						{
+							Blocked:Set[0]
+							do
+							{
+								call CheckStuck ${loc1}
+								if ${Return}
+									Stucky:Inc
+								loc1:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+								echo harvesting ${ActorIterator.Value.Name} node at ${ActorIterator.Value.Distance}m (stucky at ${Stucky})
+								if (!${rtarget.Equal[""]} && ${Special})
+										OgreBotAPI:Special["${Me.Name}"]
+								call CheckCombat
+								press MOVEFORWARD
+								wait 10
+							}
+							while (${ActorIterator.Value.Distance(exists)} && ${ActorIterator.Value.Distance}<${DistStop} && ${Stucky}<20)
+						}
+						else
+							Blocked:Inc
+					}
+					else
+					{
+						echo ${ActorIterator.Value.Name} at ${meters}m is blocked
+						if (${Nb}==${MyIndex})
+						{
+							echo "All ressources are blocked"
+							call CheckCombat
+							Blocked:Inc
+							stuck:Set[FALSE]
+							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+							if (${FlyingZone})
+							{
+								call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
+								call CheckStuck ${loc0}
+								if (!${Return})
+								{
+									Stucky:Set[0]
+									Blocked:Set[0]
+								}
+							}
+							else
+							{
+								echo can't fly here, trying to do without
+								press -hold MOVEFORWARD
+								wait 100
+								press -release MOVEFORWARD
+								call UnstuckR
+								call CheckStuck ${loc0}
+								if (!${Return})
+									Stucky:Set[0]
+								stuck:Set[${Return}]
+								press -hold TURNRIGHT
+								wait 5
+								press -release TURNRIGHT
+							}
+						}
+					}
+
+				}	
+				while ${ActorIterator:Next(exists)}
+			}
+			else
+			{
+				echo "Searching ressources / Flying up to enjoy the view"
+				if (${FlyingZone})
+				{
+					if (!${rtarget.Equal[""]})
+					{
+						call BaryCenterX "${rtarget}"
+						X0:Set[${Return}]
+						call BaryCenterY "${rtarget}"
+						Y0:Set[${Return}]
+						call BaryCenterZ "${rtarget}"
+						Z0:Set[${Return}]
+					}
+					if (${X0} != 0 && ${Z0} != 0)
+						call 3DNav ${X0} ${Math.Calc64[${Y0}+10]} ${Z0}
+					else
+						call 3DNav ${Me.X} ${Math.Calc64[${Me.Y}+10]} ${Me.Z}
+				}
+				call UnstuckR 100
+			}
 			wait 5
-			press -release TURNRIGHT
-			
 		}
-		wait 5
+		while (${Stucky}<10 && !${Me.IsDead} && ${Blocked}<10)
+		echo really stuck (${Stucky}-${Blocked}) ! going UP ? ${FlyingZone}!
+		call Unstuck_out
 	}
-	while (1==1 && ${Stucky}<10)
-	echo really stuck (${Stucky}) going UP!!!
-	call unstuck
-	}
-	while (1==1)
-	echo harvest script shutdown
-	eq2execute "quit login"
+	while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20)
+	echo while (${Stucky}<20 && !${Me.IsDead} && ${Blocked}<20) stucky - not dead - blocked
+	call GoDown
+	face 0 0
+	call CheckSwimming
+	echo harvest script shutdown (${Stucky}-${Blocked})
+	;eq2execute "quit login"
 	;ActorIterator:Reset
 }
 
@@ -165,7 +274,7 @@ function mainY(float Distance)
 		if ${ActorIterator:First(exists)}
 		{
 			call MyCount
-			echo ${Return}
+			echo MyCount replies : ${Return}
 		}
 		if ${ActorIterator:First(exists)}
 		{
@@ -200,45 +309,6 @@ function MyCount()
 	}
 	return ${Count}
 }
-function unstuck()
-{
-		
-		press -hold FLYUP	
-		wait 100
-		press -release FLYUP
-		press -hold MOVEFORWARD
-		wait 50
-		press -release MOVEFORWARD
-		press -hold FLYDOWN
-		do
-		{	
-			wait 5
-		}
-		while (${Me.FlyingUsingMount})
-		press -release FLYDOWN
-}
-
-function CheckStuck(float loc)
-{
-	if (${Math.Calc64[${loc} - ${Me.Loc.X} * ${Me.Loc.X} - ${Me.Loc.Y} * ${Me.Loc.Y} - ${Me.Loc.Z} * ${Me.Loc.Z}]} < 10)
-	{
-		
-		press -hold MOVEFORWARD
-		wait 5
-		press -release MOVEFORWARD
-		if (${Math.Calc64[${loc} - ${Me.Loc.X} * ${Me.Loc.X} - ${Me.Loc.Y} * ${Me.Loc.Y} - ${Me.Loc.Z} * ${Me.Loc.Z}]} < 10)
-		{
-			echo "I stuck!"
-			Stucky:Inc
-			return TRUE
-		}
-	}
-	else
-	{
-		Stucky:Set[0]
-		return FALSE
-	}
-}
 
 function Exclude_Ressources(string ResourceName)
 {
@@ -251,5 +321,18 @@ function Exclude_Ressources(string ResourceName)
 	else
 	{
 		return FALSE
+	}
+}
+atom HandleAllEvents(string Message)
+{
+	;echo event catched : ${Message}
+	if (${Message.Equal["Can't see target"]})
+	{
+		Stucky:Inc
+	}
+	if (${Message.Find["ou acquire"]}>0)
+	{
+		Stucky:Set[0]
+		Blocked:Set[0]
 	}
 }

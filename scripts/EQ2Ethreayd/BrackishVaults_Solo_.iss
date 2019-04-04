@@ -8,9 +8,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=0
 	
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -184,7 +185,8 @@ function step000()
 		wait 50
 	}
 	while (${Zone.Name.Equal["Brackish Vaults [Solo]"]})
-	
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {

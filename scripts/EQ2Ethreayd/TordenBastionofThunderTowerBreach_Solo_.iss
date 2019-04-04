@@ -9,9 +9,10 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=12
 	
 	oc !c -letsgo ${Me.Name}
-	if ${Script["livedierepeat"](exists)}
-		endscript livedierepeat
-	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Pause
 	if (${setspeed}==0)
 	{
 		switch ${Me.Archetype}
@@ -285,6 +286,7 @@ function step002()
 	wait 50
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	wait 20
+	call DMove 657 309 -635 3
 	OgreBotAPI:AcceptReward["${Me.Name}"]
 	if ${Script["autoshinies"](exists)}
 			Script["autoshinies"]:Resume
@@ -567,6 +569,8 @@ function step012()
 	call DMove 0 0 -3 
 	call ActivateVerb "Exit" 0 0 -3 "To the Coliseum of Valor" TRUE
 	wait 50
+	if ${Script["autopop"](exists)}
+		Script["autopop"]:Resume
 }
 
 
