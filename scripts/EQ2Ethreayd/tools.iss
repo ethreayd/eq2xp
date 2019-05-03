@@ -808,10 +808,7 @@ function CastAbility(string AbilityName, bool NoWait)
 }
 function CastImmunity(string ToonName, int Health, int Pause)
 {
-<<<<<<< HEAD
-	call CheckQuest "${questname}"
-}    
-=======
+
 	variable index:string ImmunityStack
 	variable int i
 	
@@ -887,7 +884,6 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 	else
 		return TRUE
 }
->>>>>>> 22329338418bf851679266b2b111b900eee3498e
 function CheckCombat(int MyDistance)
 {
 	echo Debug: in function CheckCombat
@@ -1006,7 +1002,6 @@ function CheckItem(string ItemName, int Quantity)
 	}
 }
 function CheckQuest(string questname)
-<<<<<<< HEAD
 {
 	variable index:quest Quests
 	variable iterator It
@@ -1036,38 +1031,6 @@ function CheckQuest(string questname)
 	}
 	return FALSE
 }    	
-function CheckQuestStep(int step)
-=======
->>>>>>> 22329338418bf851679266b2b111b900eee3498e
-{
-	variable index:quest Quests
-	variable iterator It
-	variable int NumQuests
-
-	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
-    
-	if (${NumQuests} < 1)
-	{
-		echo "No active quests found."
-		return
-	}
-	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	QuestJournalWindow:GetActiveQuests[Quests]
-	Quests:GetIterator[It]
-	if ${It:First(exists)}
-	{
-        do
-        {
-			if (${It.Value.Name.Equal["${questname}"]})
-			{
-				echo already on ${questname}
-				return TRUE
-        	}
-		}
-        while ${It:Next(exists)}
-	}
-	return FALSE
-}	
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
@@ -2760,7 +2723,6 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
-
 function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 {
 	variable string sQN
@@ -2779,8 +2741,6 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-<<<<<<< HEAD
-=======
 function ShinyTrade()
 {
    variable string MerchantName
@@ -2836,7 +2796,6 @@ function SmartWait(int WaitTime)
 	if (${Return})
 		wait ${WaitTime}
 }
->>>>>>> 22329338418bf851679266b2b111b900eee3498e
 function StartHunt(string ActorName)
 {
 	Ob_AutoTarget:AddActor["${ActorName}",0,FALSE,FALSE]
