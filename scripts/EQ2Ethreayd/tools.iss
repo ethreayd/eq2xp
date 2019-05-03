@@ -885,6 +885,7 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 }
 function CheckCombat(int MyDistance)
 {
+	echo Debug: in function CheckCombat
 	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
@@ -896,6 +897,26 @@ function CheckCombat(int MyDistance)
 		{
 			ogre end harvestlite
 			WasHarvesting:Set[TRUE]
+		}
+		if ${Me.FlyingUsingMount}
+		{	
+			echo FLYING
+			call GoDown
+			wait 20
+		}
+		if ${Me.FlyingUsingMount}
+		{	
+			do
+			{
+				echo FLYING : MOVING
+
+				press -hold MOVEFORWARD
+				wait 1
+				press -release MOVEFORWARD
+				call GoDown
+				wait 5
+			}
+			while (${Me.FlyingUsingMount})
 		}
 		do
 		{	
@@ -1879,18 +1900,22 @@ function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 
 function GoDown()
 {
+	variable float loc0=0
 	echo "Going Down : 5 5 5"
 	if (${Me.FlyingUsingMount})
 	{
 		do
 		{
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			press -hold FLYDOWN
 			wait 5
+			call CheckStuck ${loc0}
 		}
-		while (${Me.FlyingUsingMount})
+		while (${Me.FlyingUsingMount} && !${Return})
 		press -release FLYDOWN
 	}
 	wait 10
+	echo "I am down or stuck"
 }
 function goHate()
 {	

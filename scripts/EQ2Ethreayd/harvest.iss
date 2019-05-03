@@ -40,10 +40,11 @@ function main(string rtarget, bool Special)
 	variable float DistStop=4
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	echo "Debug: Starting harvest script"
 	call CheckCombat
 	face 0 0
 	call CheckSwimming
-	
+	echo "Debug: Calculating ressource barycenter for ${rtarget}"
 	if (!${rtarget.Equal[""]})
 	{	
 		call BaryCenterX "${rtarget}"
@@ -53,11 +54,14 @@ function main(string rtarget, bool Special)
 		call BaryCenterZ "${rtarget}"
 		Z0:Set[${Return}]
 	}
+	echo "Debug: BaryCenter calculated at ${X0} ${Y0} ${Z0} for ${rtarget}"
 	call CheckCombat
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
 	if (!${FlyingZone})
 		echo No Flying Zone...
+	else
+		echo "Debug: We are in a flying zone"
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",15]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_ignorenonaggro","TRUE"]
@@ -93,6 +97,7 @@ function main(string rtarget, bool Special)
 			}	
 			while (${Me.InCombatMode} && ${Enemy})
 			Enemy:Set[FALSE]
+			echo "Debug: Querying Actors for ressources (${rtarget})"
 			if (${rtarget.Equal[""]})
 			{	
 				EQ2:QueryActors[Actors, Type  =- "Resource" && Distance <= 1000]
@@ -135,7 +140,7 @@ function main(string rtarget, bool Special)
 							
 							call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${Y1}+15]} ${ActorIterator.Value.Z}
 							call GoDown
-							face 0 0
+							;face 0 0
 							call CheckSwimming
 						}
 						target ${Me.Name}
@@ -150,6 +155,7 @@ function main(string rtarget, bool Special)
 							call CheckCombat
 							stuck:Set[FALSE]
 							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+							face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
 							press -hold MOVEFORWARD
 							wait 1
 							press -release MOVEFORWARD

@@ -146,6 +146,14 @@ function goPublicZone(string ZoneName)
 			call ActivateVerbOn "zone_to_poe" "Enter ${LongZoneName}" TRUE
 		}
 		break
+		case default
+		{
+			LongZoneName:Set["Doomfire, the Burning Lands"]
+			echo Going to ${ZoneName} (${LongZoneName})
+			call DMove 730 412 -338 3
+			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE	
+		}
+		break
 	}
 	wait 20
 	oc !c -ZoneDoor 1
