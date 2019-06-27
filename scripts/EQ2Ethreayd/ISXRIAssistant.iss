@@ -543,8 +543,12 @@ function RebootLoop()
 		end CDLoop
 	if (${Script["Buffer:RZ"](exists)})
 		end Buffer:RZ
-	
+	wait 100
+	echo --- Reviving
+	RIMUIObj:Revive[${Me.Name}]
+	wait 400
 	call goto_GH
+	wait 100
 	call GuildH
 	if (!${Script["CDLoop"](exists)})
 		run EQ2Ethreayd/CDLoop

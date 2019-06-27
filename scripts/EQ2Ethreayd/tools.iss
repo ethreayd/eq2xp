@@ -3176,6 +3176,47 @@ function UseAbility(string MyAbilityName)
 {
 	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
+function MineTS()
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable string Verb
+	
+	EQ2:QueryActors[Actors, Name  =- "loose" && Distance <= 50]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		
+			
+		do
+		{
+			echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+			call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 2 30 FALSE FALSE 5
+			do
+			{
+				if  ${ActorIterator.Value.Name.Equal["loose rubble"]}
+				{
+					Me.Inventory["Sturdy Pick"]:Equip
+					Verb:Set["Mine Rock"]
+				}
+				
+				if  ${ActorIterator.Value.Name.Equal["loose dirt"]}
+				{
+					Me.Inventory["Sturdy Shovel"]:Equip
+					Verb:Set["Clear Dirt"]
+				}
+				call ActivateVerbOn "${ActorIterator.Value.Name}" "${Verb}" TRUE
+				wait 20
+			}
+			while (${ActorIterator.Value.ID(exists)})
+		}
+		while (${ActorIterator:Next(exists)})
+	}
+}
+
+
+
+	
 function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 {
 	variable index:actor Actors
