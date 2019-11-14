@@ -517,6 +517,7 @@ function Ascend(float Y)
 	return ${Me.Loc.Y}
 }
 
+
 function AutoCraft(string tool, string myrecipe, int quantity)
 {
 	call MoveCloseTo "${tool}"
@@ -1322,6 +1323,11 @@ function CoVMender()
 		call DMove 107 0 2 3
 		call DMove -2 5 4 3
 	}
+}
+function CSGo(string Who, float X, float Y, float Z)
+{
+	oc !c -CS_Set_ChangeCampSpotBy ${Who} ${Math.Calc64[${X}-${Me.X}]} ${Math.Calc64[${Y}-${Me.Y}]} ${Math.Calc64[${Z}-${Me.Z}]}
+	
 }
 function CureArchetype(string Archetype)
 {
@@ -2342,6 +2348,15 @@ function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 		return FALSE
 	}
 }
+
+function KBMove(string Who, float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone, int Precision)
+{
+	oc !c -CampSpot ${Who}
+	oc !c -CS_Set_ChangeCampSpotBy ${Who} ${Math.Calc64[${X}-${Me.X}]} ${Math.Calc64[${Y}-${Me.Y}]} ${Math.Calc64[${Z}-${Me.Z}]}
+	call CheckCombat ${MyDistance}
+	oc !c -letsgo
+	call DMove ${X} ${Y} ${Z} ${speed} ${MyDistance} ${IgnoreFight} ${StuckZone} ${Precision}
+}
 function JoustOut(int ActorID, float Distance, bool IsGroup)
 {
 	variable float AvoidDistance
@@ -2743,6 +2758,40 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		while ${Script[${sQN}](exists)}
 			wait 5
 		echo zone "${Zone.Name}" Cleared !
+	}
+}
+function SetAscensionCS()
+{
+	;only needed to run on your main, do not relay
+	oc !c -ChangeCastStackListBoxItemByTag All eth FALSE
+	oc !c -ChangeCastStackListBoxItemByTag All elem FALSE
+	oc !c -ChangeCastStackListBoxItemByTag All geo FALSE
+	oc !c -ChangeCastStackListBoxItemByTag All thaum FALSE
+	
+	oc !c -ChangeCastStackListBoxItemByTag etherealist eth TRUE
+	oc !c -ChangeCastStackListBoxItemByTag elementalist elem TRUE
+	oc !c -ChangeCastStackListBoxItemByTag geomancer geo TRUE
+	oc !c -ChangeCastStackListBoxItemByTag thaumaturgist thaum TRUE
+	
+	echo you need to restart ogre when changing Ascension Class !!!
+}
+function WaitforCorpse()
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	echo searching Corpse
+	
+	EQ2:QueryActors[Actors, Type  =- "Corpse" && Distance <= 5]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			echo Found ${ActorIterator.Value.Name} corpse
+			wait 10
+		}	
+		while ${ActorIterator:Next(exists)}
 	}
 }
 function ShinyTrade()

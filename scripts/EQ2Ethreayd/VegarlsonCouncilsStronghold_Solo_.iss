@@ -99,9 +99,15 @@ function step001()
 		call DMove 1424 63 -349 3
 		call DMove 1129 63 -351 3
 		call DMove 1029 63 -351 3
+		call DMove 1013 63 -213 3
+		wait 50
 		call DMove 1023 63 -190 3
 		call DMove 1021 63 -52 3
+		call DMove 997 63 -63 3
+		wait 50
 		call DMove 936 63 -44 3
+		call DMove 912 63 -41 3
+		wait 50
 		call DMove 859 63 -15 3
 		call DMove 872 63 40 3
 	}
@@ -212,6 +218,7 @@ function step004()
 	call DMove 1032 275 40 3 30 TRUE
 	call DMove 1083 275 40 3
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
+	Ob_AutoTarget:AddActor["Aggregate Wall",0,!${NoCC},FALSE]
 	call TanknSpank "${Named}" 50 FALSE FALSE TRUE
 	call DMove 1083 275 40 1
 	ogre
@@ -281,8 +288,11 @@ function step006()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call DMove 1230 466 -179 3
 	call TanknSpank "${Named}"
+	eq2execute merc backoff
+	
 	ogre
 	wait 100
+	
 	call check_quest "Elements of Destruction: Layers of Order"
 	if (${Return})
 	{
@@ -290,6 +300,8 @@ function step006()
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	}
 	call DMove 1235 465 -236 3
+	eq2execute merc backoff
+
 }
 function step007()
 {
@@ -299,23 +311,33 @@ function step007()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 
 	call DMove 1212 439 -293 3
+	eq2execute merc backoff
 	call DMove 1156 378 -352 1
 	call DMove 1104 319 -385 1
 	call DMove 1027 266 -387 1
+	eq2execute merc backoff
 	call DMove 955 204 -401 3
+	eq2execute merc backoff
 	call DMove 887 153 -402 3
 	call DMove 813 94 -394 3
 	call DMove 755 47 -359 3
+	eq2execute merc backoff
 	call DMove 693 42 -339 3 30 TRUE FALSE 3
 	call DMove 652 38 -355 3
 	call DMove 641 15 -444 3
-	call DMove 629 13 -463 3
-	oc !c -CampSpot ${Me.Name} 1 200
-	oc !c -joustin ${Me.Name}
+	eq2execute merc backoff
+	oc !c -CampSpot ${Me.Name}
+	call CSGo ${Me.Name} 629 13 -463
+	eq2execute merc ranged
 	call TanknSpank "${Named}" 500
-	call DMove 642 14 -451 3
-	call ClickOn Portal
-	wait 30
+	Ob_AutoTarget:AddActor["Stone of",0,TRUE,FALSE]
+	oc !c -letsgo ${Me.Name}
+	while (${Me.X}<900)
+	{
+		call DMove 642 14 -451 3 30 FALSE FALSE 3
+		call ClickOn Portal
+		wait 30
+	}	
 	call DMove 1248 465 40 3
 	call ClickOn Door
 }
@@ -499,6 +521,7 @@ function FightinMud(string ActorName)
 			if (${Return} > 2 && !${Me.InCombat})
 				target "${ActorName}"
 			Killed:Set[FALSE]
+			echo first kill
 			oc !c -resume
 			do
 			{
@@ -508,6 +531,7 @@ function FightinMud(string ActorName)
 			Killed:Set[FALSE]
 			oc !c -pause
 			call DMove 1332 465 66 3 30 TRUE FALSE 3
+			echo second kill
 			oc !c -resume
 			do
 			{
@@ -518,6 +542,7 @@ function FightinMud(string ActorName)
 			oc !c -pause
 			call DMove 1382 465 64 3 30 TRUE
 			call DMove 1388 465 29 3 30 TRUE FALSE 3
+			echo third kill
 			oc !c -resume
 			do
 			{
@@ -534,6 +559,7 @@ function FightinMud(string ActorName)
 		}
 		while (${Return}>0)
 	}
+	echo all ${ActorName} should be dead
 }
 atom HandleAllEvents(string Message)
 {
