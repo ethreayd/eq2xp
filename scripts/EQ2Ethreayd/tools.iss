@@ -543,7 +543,6 @@ function AutoCraft(string tool, string myrecipe, int quantity)
 	wait 20
 	ogre end craft
 }
-
 function AutoHunt(int distance)
 {
 	
@@ -1287,6 +1286,7 @@ function CountAdds(string ActorName, int Distance, bool Exact)
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
+	echo There is ${Count} ${ActorName} in a ${Distance}m radius
 	return ${Count}
 }
 function CountItem(string ItemName)
@@ -1533,6 +1533,10 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 				Stucky:Inc
 				SuperStucky:Inc
 				echo DMove:Stucky=${Stucky} / ${SuperStucky}
+			}
+			if (${Stucky}>1)
+			{
+				call ClickOn Door
 			}
 			if (${Stucky}>2)
 			{
@@ -2466,7 +2470,7 @@ function MoveCloseTo(string ActorName, float Distance)
 		call Unstuck ${strafe}
 	echo quitting MoveCloseTo function
 }
-function MoveJump(float X, float Y, float Z, float X0, float X1, float X2)
+function MoveJump(float X, float Y, float Z, float X0, float Y0, float Z0)
 {
 	variable bool jumped
 	face ${X} ${Z}
@@ -3016,7 +3020,7 @@ function strip_QN(string questname, bool HeroicExpert)
 	echo OUT:"${sQN}"
 	return "${sQN}"
 }
-function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
+function TanknSpank(string Named, float Distance, bool Queue, bool NoCC, bool Immunity)
 {
 	if (${Distance}<1)
 		Distance:Set[50]
@@ -3036,6 +3040,8 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC)
 				ExecuteQueued
 			if (${Actor["${Named}"].Distance} > 30)
 				eq2execute merc backoff
+			if (${Immunity}) 
+				call CastImmunity ${Me.Name} 30 1
 			call IsPresent "${Named}" ${Distance} TRUE
 		}
 		while ((${Return} || ${Me.InCombatMode}) || ${Me.IsDead})
