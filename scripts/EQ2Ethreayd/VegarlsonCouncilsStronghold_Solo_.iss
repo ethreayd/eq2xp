@@ -409,7 +409,7 @@ function step010()
 	eq2execute merc resume
 	Named:Set["Council of Gravel"]
 	call DMove 1432 785 41 3 TRUE
-	call DMove 1432 785 89 3 TRUE
+	call KBMove "${Me.Name}" 1432 785 89 3 TRUE
 	target "${Named}"
 	do
 	{

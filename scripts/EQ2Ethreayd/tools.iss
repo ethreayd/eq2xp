@@ -2273,6 +2273,19 @@ function HurryUp(int Distance)
 			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
 	}
 }
+function isExpert(string ZoneName)
+{
+	if ${ZoneName.Right[8].Equal[\[Heroic\]]}
+		return FALSE
+	if ${ZoneName.Right[8].Equal[\[Expert\]]}
+		return TRUE
+	if ${ZoneName.Right[13].Equal[\[ExpertEvent\]]}
+		return TRUE
+	if ${ZoneName.Right[13].Equal[\[EventHeroic\]]}
+		return FALSE
+	if ${ZoneName.Right[6].Equal[\[Solo\]]}
+		return FALSE
+}
 function isGroupAlive()
 {
 	variable int Counter=0
@@ -3435,18 +3448,5 @@ function WhereIs(string ActorName)
 		return TRUE
 	}
 	else
-		return FALSE
-}
-function isExpert(string ZoneName)
-{
-	if ${ZoneName.Right[8].Equal[\[Heroic\]]}
-		return FALSE
-	if ${ZoneName.Right[8].Equal[\[Expert\]]}
-		return TRUE
-	if ${ZoneName.Right[13].Equal[\[ExpertEvent\]]}
-		return TRUE
-	if ${ZoneName.Right[13].Equal[\[EventHeroic\]]}
-		return FALSE
-	if ${ZoneName.Right[6].Equal[\[Solo\]]}
 		return FALSE
 }
