@@ -188,14 +188,14 @@ function 2DWalk(float X, float Z, int Precision)
 	echo DEPRECATED use 2DNav with ForceWalk option
 	call 2DNav ${X} ${Z} FALSE TRUE ${Precision}
 }
-function 3DNav(float X, float Y, float Z, int Precision)
+function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 {
 	variable float loc0 
 	variable int Stucky=0
 	variable bool WasRunning
 
 	eq2execute waypoint ${X} ${Y} ${Z}
-	call Ascend ${Y}
+	call Ascend ${Y} ${Swim}
 
 	if ${Precision}<1
 		Precision:Set[10]
@@ -213,7 +213,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
-			call Ascend ${Y}
+			call Ascend ${Y} ${Swim}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -222,7 +222,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 		}
 		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
-		call Ascend ${Y}
+		call Ascend ${Y} ${Swim}
 		eq2execute loc
 	}
 	else
@@ -236,7 +236,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 			face ${X} ${Z}
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
-			call Ascend ${Y}
+			call Ascend ${Y} ${Swim}
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -245,7 +245,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 		}
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
-		call Ascend ${Y}
+		call Ascend ${Y} ${Swim}
 		eq2execute loc
 	}
 	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
@@ -262,7 +262,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
-				call Ascend ${Y}
+				call Ascend ${Y} ${Swim}
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -271,7 +271,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 			}
 			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
-			call Ascend ${Y}
+			call Ascend ${Y} ${Swim}
 			eq2execute loc
 		}
 		else
@@ -285,7 +285,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
-				call Ascend ${Y}
+				call Ascend ${Y} ${Swim}
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -294,7 +294,7 @@ function 3DNav(float X, float Y, float Z, int Precision)
 			}
 			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
-			call Ascend ${Y}
+			call Ascend ${Y} ${Swim}
 			eq2execute loc
 		}
 	}
@@ -362,6 +362,27 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         }
         while ${ActorIterator:Next(exists)}
     }
+}
+function ActivateMelee()
+{
+	switch ${Me.Archetype}
+	{
+		case fighter
+		{
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
+		}
+		break
+		case priest
+		{
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
+		}
+		break
+		default
+		{
+			echo no melee configuration change for ${Me.Archetype}
+		}
+		break
+	}
 }
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
@@ -480,13 +501,13 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 	}	
 	return ${ActorID}
 }
-
-function Ascend(float Y)
+function Ascend(float Y, bool Swim)
 {
 	variable float loc0 
 	variable int Stucky=0
 	call CheckCombat
-	call CheckSwimming
+	if (!${Swim})
+		call CheckSwimming
 	echo Beginning Ascension... to ${Y}
 	if  (${Me.Loc.Y}<${Y})
 	{	
@@ -510,14 +531,10 @@ function Ascend(float Y)
 		}
 		while (${Me.Loc.Y}<${Y})
 	}
-	
-	
 	press -release FLYUP
  	eq2execute loc
 	return ${Me.Loc.Y}
 }
-
-
 function AutoCraft(string tool, string myrecipe, int quantity)
 {
 	call MoveCloseTo "${tool}"
@@ -587,7 +604,6 @@ function AutoHunt(int distance)
 		}		
 	}
 }
-
 function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQueue)
 {
 	echo autopassing "${DoorName}"
@@ -919,18 +935,64 @@ function CheckCombat(int MyDistance)
 			}
 			while (${Me.FlyingUsingMount})
 		}
+		if ${AntiKB}
+			oc !c -CampSpot ${Me.Name}
 		do
 		{	
 			wait 5
+			if (${MercMan})
+			{
+				if (!${Target(exists)})
+				{
+					eq2execute merc backoff
+				}
+			}
 			if (${Target.Distance} > ${MyDistance})
+			{
+				if (${MercMan})
+				{
+					eq2execute merc backoff
+					eq2execute pet backoff
+				}
 				press -hold MOVEFORWARD
+				if ${AntiKB}
+					oc !c -letsgo ${Me.Name}
+			}	
 			else
+			{
 				press -release MOVEFORWARD
+			}
+			if ${AntiKB}
+				oc !c -CampSpot ${Me.Name}
+			if (${MercMan})
+			{
+				eq2execute merc ranged
+				eq2execute pet attack
+			}	
 		}
 		while (${Me.InCombatMode})
 	}
 	if ${WasHarvesting}
 		ogre harvestlite
+	if ${AntiKB}
+		oc !c -letsgo ${Me.Name}
+	
+}
+function CheckDetriment(string EffectName)
+{
+	;on me only
+    variable index:effect MyEffects
+    variable iterator MyEffectsIterator
+    
+    Me:RequestEffectsInfo
+    
+    Me:QueryEffects[MyEffects, Type == "Detrimental", Name == "${EffectName}"]
+    MyEffects:GetIterator[MyEffectsIterator]
+ 
+    if ${MyEffectsIterator:First(exists)}
+		return TRUE
+	else
+		return FALSE
 }
 function CheckEffectOnTarget(string EffectName)
 {
@@ -956,22 +1018,6 @@ function CheckEffectOnTarget(string EffectName)
 		}
     }  	
 	return FALSE
-}
-function CheckDetriment(string EffectName)
-{
-	;on me only
-    variable index:effect MyEffects
-    variable iterator MyEffectsIterator
-    
-    Me:RequestEffectsInfo
-    
-    Me:QueryEffects[MyEffects, Type == "Detrimental", Name == "${EffectName}"]
-    MyEffects:GetIterator[MyEffectsIterator]
- 
-    if ${MyEffectsIterator:First(exists)}
-		return TRUE
-	else
-		return FALSE
 }
 function CheckFlyingZone()
 {
@@ -1342,7 +1388,6 @@ function CureArchetype(string Archetype)
 			oc !c -CastAbilityOnPlayer Priest Cure ${Me.Group[${i}].Name}
 	}		
 }
-
 function CurrentQuestStep()
 {
     variable index:collection:string Details    
@@ -1369,7 +1414,6 @@ function CurrentQuestStep()
         while ${DetailsIterator:Next(exists)}
     }
 }
-
 function DepositAll(string DepotName)
 {
 	Actor[Name,"${DepotName}"]:DoubleClick
@@ -1378,7 +1422,6 @@ function DepositAll(string DepotName)
 	wait 10
 	EQ2UIPage[Inventory,Container].Child[button,Container.WindowFrame.Close]:LeftClick
 }
-
 function DescribeActor(int ActorID)
 {
 	echo ID:				${ActorID}
@@ -1598,8 +1641,6 @@ function Evac()
 		break
 	}
 }
-
-
 function FindLoS(string ActorName, string KeytoPress, float Distance, int PressTime)
 {
 	if (${PressTime}<5)
@@ -1621,7 +1662,6 @@ function FindLoS(string ActorName, string KeytoPress, float Distance, int PressT
 	}
 	while (${Actor["${ActorName}"].CheckCollision} && ${Actor["${ActorName}"].Distance} < ${Distance})
 }
-
 function Follow2D(string ActorName,float X, float Y, float Z, float RespectDistance, bool Walk)
 {
 	variable index:actor Actors
@@ -1908,7 +1948,6 @@ function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 		press JUMP
 	echo exit function go2D
 }
-
 function GoDown()
 {
 	variable float loc0=0
@@ -1953,7 +1992,6 @@ function goHate()
 			wait 600
 		}
 	}
-	
 	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
 	{
 		;call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
@@ -1973,7 +2011,6 @@ function goHate()
 	}
 	call waitfor_Zone "Plane of Magic"
 }
-
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -2020,7 +2057,6 @@ function GuildHarvest()
 		call Converse Miner 3
 	}
 }
-
 function GroupDistance(bool Debug)
 {
 	variable int MaxDistance=0
@@ -2202,7 +2238,6 @@ function HarvestItem(string ItemName, int number, int speed, bool is2D)
 	if (${Counter}>=${number})
 		echo Found ${Counter} ${ItemName}/${number} in Inventory - Stop Harvesting
 }
-
 function Hunt(string ActorName, int distance, int number, bool nofly, bool IgnoreFight)
 {
 	variable index:actor Actors
@@ -2270,7 +2305,12 @@ function HurryUp(int Distance)
 	for ( i:Set[0] ; ${i} < ${Me.GroupCount} ; i:Inc )
 	{
 		if (${Me.Group[${i}].Distance}>${Distance})
+		{
 			eq2execute tell ${Me.Group[${i}].Name} Hurry up please, we have things to do
+			eq2execute merc backoff
+			wait 50
+			eq2execute merc ranged
+		}
 	}
 }
 function isExpert(string ZoneName)
@@ -2361,13 +2401,13 @@ function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 		return FALSE
 	}
 }
-
 function KBMove(string Who, float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone, int Precision)
 {
 	oc !c -CampSpot ${Who}
 	oc !c -CS_Set_ChangeCampSpotBy ${Who} ${Math.Calc64[${X}-${Me.X}]} ${Math.Calc64[${Y}-${Me.Y}]} ${Math.Calc64[${Z}-${Me.Z}]}
+	wait 50
 	call CheckCombat ${MyDistance}
-	oc !c -letsgo
+	oc !c -letsgo ${Who}
 	call DMove ${X} ${Y} ${Z} ${speed} ${MyDistance} ${IgnoreFight} ${StuckZone} ${Precision}
 }
 function JoustOut(int ActorID, float Distance, bool IsGroup)
@@ -2604,7 +2644,6 @@ function navwrap(float X, float Y, float Z)
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
 }
-
 function OpenDoor(string ActorName)
 {
 	variable index:actor Actors
@@ -2788,25 +2827,23 @@ function SetAscensionCS()
 	
 	echo you need to restart ogre when changing Ascension Class !!!
 }
-function WaitforCorpse()
+function SetSoloEnv()
 {
-	variable index:actor Actors
-	variable iterator ActorIterator
-	
-	echo searching Corpse
-	
-	EQ2:QueryActors[Actors, Type  =- "Corpse" && Distance <= 5]
-	Actors:GetIterator[ActorIterator]
-	if ${ActorIterator:First(exists)}
-	{
-		do
-		{
-			echo Found ${ActorIterator.Value.Name} corpse
-			wait 10
-		}	
-		while ${ActorIterator:Next(exists)}
-	}
+	oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} potion TRUE
+	oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} solo TRUE
+	oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} group FALSE
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkmana","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkmana",98]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_autotargetwhenhated","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_forcenamedcatab","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_enableonscreenassistant","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_enableogremcp","TRUE"]
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","text_autotarget_scanradius",20]
 }
+
 function ShinyTrade()
 {
    variable string MerchantName
@@ -3112,7 +3149,7 @@ function TanknSpank(string Named, float Distance, bool Queue, bool NoCC, bool Im
 	echo "TanknSpank Debug InCombatMode : ${Me.InCombatMode}"
 	wait 20
 	eq2execute Summon
-	wait 20
+	wait 50
 }
 function TargetAfterTime(string mytarget, int ntime)
 {
@@ -3341,6 +3378,26 @@ function waitfor_Combat()
 		wait 5
 	} 
 	while (${Me.InCombatMode})
+}
+
+function WaitforCorpse()
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	echo searching Corpse
+	
+	EQ2:QueryActors[Actors, Type  =- "Corpse" && Distance <= 5]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			echo Found ${ActorIterator.Value.Name} corpse
+			wait 10
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
 }
 function WaitforGroupDistance(int Distance)
 {

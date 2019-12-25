@@ -4,7 +4,7 @@ variable(script) int FightDistance
 variable(script) int GravelDoor
 variable(script) string DoorArray[3]
 variable(script) bool Killed = FALSE
-
+variable(global) bool MercMan = TRUE
 
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
@@ -12,8 +12,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=10
 	
 	oc !c -letsgo ${Me.Name}
-	;if (!${Script["livedierepeat"](exists)})
-	;	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -25,8 +25,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	echo speed set to ${speed}
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
-	;if (!${NoShiny})
-	;	run EQ2Ethreayd/autoshinies 50 ${speed} 
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 50 ${speed} 
  
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -36,18 +36,13 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call waitfor_Zone "Vegarlson: Council's Stronghold [Solo]"
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 
-
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkmana","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkmana",98]
+	
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
-	
+	call SetSoloEnv
 
 	if (${stepstart}==0)
 	{
@@ -58,11 +53,14 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	{
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_disableabilitycollisionchecks","TRUE"]
 		Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	}
 	call StartQuest ${stepstart} ${stepstop} TRUE
-	
 	echo End of Quest reached
+	ogre
 }
 
 function step000()
@@ -70,8 +68,6 @@ function step000()
 	variable string Named
 	Named:Set["The Great Gravelly One"]
 	eq2execute merc resume
-	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call DMove 651 63 34 3
 	call DMove 872 63 40 3
 	call TanknSpank "${Named}"
@@ -81,7 +77,6 @@ function step001()
 	variable string Named
 	Named:Set["Guardian of Gravel"]
 	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call IsPresent "${Named}" 5000
 	if (${Return})
 	{
@@ -112,6 +107,16 @@ function step001()
 		call DMove 872 63 40 3
 	}
 	call StopHunt
+	call check_quest "Elements of Destruction: Layers of Order"
+	if (${Return})
+	{
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_disableabilitycollisionchecks","TRUE"]
+		Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	}
 }	
 function step002()
 {
@@ -171,7 +176,6 @@ function step003()
 	Named:Set["Guardian of Stones"]
 	call StopHunt
 	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	
 	call DMove 1014 275 39 3
 	call IsPresent "${Named}" 5000
@@ -182,8 +186,12 @@ function step003()
 		call check_quest "Elements of Destruction: Layers of Order"
 		if (${Return})
 		{
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
 			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_disableabilitycollisionchecks","TRUE"]
 			Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 		}
 		call DMove 1025 275 85 3
 		call DMove 1111 275 97 3
@@ -205,7 +213,6 @@ function step003()
 		call DMove 1112 275 -19 3
 		call DMove 1016 275 -4 3
 		call DMove 1014 275 39 3 30 TRUE
-		
 	}
 }
 function step004()
@@ -221,11 +228,12 @@ function step004()
 	Ob_AutoTarget:AddActor["Aggregate Wall",0,!${NoCC},FALSE]
 	call TanknSpank "${Named}" 50 FALSE FALSE TRUE
 	call DMove 1083 275 40 1
+	wait 100
 	ogre
 	wait 100
+	call SetSoloEnv
 	call ClickOn Door
 	call DMove 1106 275 40 3
-
 }
 function step005()
 {
@@ -278,66 +286,73 @@ function step006()
 	Named:Set["cursed guard"]
 	eq2execute merc resume
 	call StopHunt
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 	
-	
-	call DMove 1131 465 40 3
-	call DMove 1134 465 8 3
-	call DMove 1210 465 -3 3
-	call DMove 1211 465 -161 3
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-	call DMove 1230 466 -179 3
-	call TanknSpank "${Named}"
-	eq2execute merc backoff
-	
-	ogre
-	wait 100
-	
-	call check_quest "Elements of Destruction: Layers of Order"
+	call IsPresent "Escargore" 5000
 	if (${Return})
 	{
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-	}
-	call DMove 1235 465 -236 3
-	eq2execute merc backoff
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
+		call DMove 1131 465 40 3
+		call DMove 1134 465 8 2
+		call DMove 1210 465 -3 3
+		call DMove 1211 465 -161 3
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+		call DMove 1230 466 -179 3
+		call TanknSpank "${Named}"
+		eq2execute merc backoff
 
+		ogre
+		wait 100
+		call SetSoloEnv
+
+		call check_quest "Elements of Destruction: Layers of Order"
+			if (${Return})
+			{
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_disableabilitycollisionchecks","TRUE"]
+				Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+			}
+		call DMove 1235 465 -236 3
+		eq2execute merc backoff
+		Named:Set["Escargore"]
+		eq2execute merc resume
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+
+		call DMove 1212 439 -293 3
+		eq2execute merc backoff
+		call DMove 1156 378 -352 1
+		call DMove 1104 319 -385 1
+		call DMove 1027 266 -387 1
+		eq2execute merc backoff
+		call DMove 955 204 -401 3
+		eq2execute merc backoff
+		call DMove 887 153 -402 3
+		call DMove 813 94 -394 3 30 TRUE FALSE 3
+		eq2execute merc backoff
+		call DMove 755 47 -359 3 30 TRUE FALSE 3
+		eq2execute merc backoff
+		call DMove 693 42 -339 3 30 TRUE FALSE 3
+		call DMove 652 38 -355 3
+		call DMove 641 15 -444 3
+		eq2execute merc backoff
+		oc !c -CampSpot ${Me.Name}
+		call CSGo ${Me.Name} 629 13 -463
+		eq2execute merc ranged
+		Ob_AutoTarget:AddActor["Stone of",0,TRUE,FALSE]
+		call TanknSpank "${Named}" 500
+		oc !c -letsgo ${Me.Name}
+		while (${Me.X}<900)
+		{
+			call DMove 642 14 -451 3 30 FALSE FALSE 3
+			call ClickOn Portal
+			wait 30
+		}
+	}
 }
 function step007()
 {
-	variable string Named
-	Named:Set["Escargore"]
-	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-
-	call DMove 1212 439 -293 3
-	eq2execute merc backoff
-	call DMove 1156 378 -352 1
-	call DMove 1104 319 -385 1
-	call DMove 1027 266 -387 1
-	eq2execute merc backoff
-	call DMove 955 204 -401 3
-	eq2execute merc backoff
-	call DMove 887 153 -402 3
-	call DMove 813 94 -394 3
-	call DMove 755 47 -359 3
-	eq2execute merc backoff
-	call DMove 693 42 -339 3 30 TRUE FALSE 3
-	call DMove 652 38 -355 3
-	call DMove 641 15 -444 3
-	eq2execute merc backoff
-	oc !c -CampSpot ${Me.Name}
-	call CSGo ${Me.Name} 629 13 -463
-	eq2execute merc ranged
-	call TanknSpank "${Named}" 500
-	Ob_AutoTarget:AddActor["Stone of",0,TRUE,FALSE]
-	oc !c -letsgo ${Me.Name}
-	while (${Me.X}<900)
-	{
-		call DMove 642 14 -451 3 30 FALSE FALSE 3
-		call ClickOn Portal
-		wait 30
-	}	
 	call DMove 1248 465 40 3
 	call ClickOn Door
 }
@@ -351,7 +366,16 @@ function step008()
 	call ClickOn Pedestal
 	call DMove 1271 465 27 3
 	call DMove 1290 465 38 3
-	call TanknSpank "Stone of Thudos"
+	call check_quest "Elements of Destruction: Layers of Order"
+	if (${Return})
+	{
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_disableabilitycollisionchecks","TRUE"]
+		Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
+	}
 	do
 	{
 		Unfinished:Set[FALSE]
@@ -399,66 +423,90 @@ function step009()
 	call DMove 1365 635 40 3
 	call ClickOn Leaves
 	wait 30
-	call DMove 1438 635 39 3
-	call ClickOn Portal
-	wait 30
+	while (${Me.Y}<700)
+	{
+		call DMove 1438 635 39 3 30 FALSE FALSE 3
+		call ClickOn Portal
+		wait 30
+	}	
 }
 function step010()
 {
 	variable string Named
+	call StopHunt
 	eq2execute merc resume
 	Named:Set["Council of Gravel"]
 	call DMove 1432 785 41 3 TRUE
-	call KBMove "${Me.Name}" 1432 785 89 3 TRUE
-	target "${Named}"
-	do
+	oc !c -CampSpot ${Me.Name}
+	call CSGo "${Me.Name}" 1432 785 89
+	call IsPresent "${Named}" 500
+	if (${Return})
 	{
-		Me.Inventory[Query, Name =- "Severed Ethereal Gravel"]:Use
-		wait 300
-		call IsPresent "${Named}"
-	}
-	while (${Return})
-	
+		target "${Named}"
+		do
+		{
+			Me.Inventory[Query, Name =- "Severed Ethereal Gravel"]:Use
+			wait 300
+			eq2execute merc backoff
+			call IsPresent "${Named}"
+			wait 50
+			eq2execute merc ranged
+		}
+		while (${Return})
+	}	
 	Named:Set["Council of Stone"]
-	target "${Named}"
-	do
+	call IsPresent "${Named}" 500
+	if (${Return})
 	{
-		Me.Inventory[Query, Name =- "Severed Ethereal Stones"]:Use
-		wait 300
-		call IsPresent "${Named}"
+		target "${Named}"
+		do
+		{
+			Me.Inventory[Query, Name =- "Severed Ethereal Stones"]:Use
+			wait 300
+			call IsPresent "${Named}"
+		}
+		while (${Return})
 	}
-	while (${Return})
-	
 	Named:Set["Council of Soil"]
-	target "${Named}"
-	do
+	call IsPresent "${Named}" 500
+	if (${Return})
 	{
-		;Me.Inventory[Query, Name =- "Severed Ethereal Soil"]:Use
-		wait 300
-		call IsPresent "${Named}"
+		target "${Named}"
+		do
+		{
+			;Me.Inventory[Query, Name =- "Severed Ethereal Soil"]:Use
+			wait 300
+			call IsPresent "${Named}"
+		}
+		while (${Return})
 	}
-	while (${Return})
-	
 	Named:Set["Council of Leaves"]
-	target "${Named}"
-	do
+	call IsPresent "${Named}" 500
+	if (${Return})
 	{
-		Me.Inventory[Query, Name =- "Severed Ethereal Leaves"]:Use
-		wait 300
-		call IsPresent "${Named}"
+		target "${Named}"
+		do
+		{
+			Me.Inventory[Query, Name =- "Severed Ethereal Leaves"]:Use
+			wait 300
+			call IsPresent "${Named}"
+		}
+		while (${Return})
 	}
-	while (${Return})
 	eq2execute Summon
-	
+	oc !c -letsgo ${Me.Name}
 	call check_quest "Elements of Destruction: Layers of Order"
 	if (${Return})
 	{
 		Me.Inventory[Query, Name =- "Inert Vegarlson Purifying Rune"]:Use
 		wait 50
 		call DMove 1432 785 41 3
-		call DMove 1498 785 41 3
-		call ClickOn Portal
-		wait 30
+		while (${Me.X}>0)
+		{
+			call DMove 1498 785 41 3
+			call ClickOn Portal
+			wait 30
+		}
 		call DMove -37 121 24 3
 		call DMove -69 121 22 3
 		call DMove -91 121 25 3
@@ -474,21 +522,18 @@ function step010()
 		oc !c -Special
 		call DMove -217 114 161 3 30 FALSE FALSE 5
 		call DMove -208 110 123 3
-		call DMove -174 122 144 3
+		call DMove -180 121 141 3
+		call DMove -176 123 134 1 30 FALSE FALSE 3
 		call DMove -197 119 49 3
-		call DMove -178 115 36 3 30 FALSE FALSE 5
-		call DMove -161 116 25 1 30 FALSE FALSE 5
-		call DMove -113 116 24 3 30 FALSE FALSE 5
-		do
+		call DMove -184 32 -51 3
+		call DMove -142 33 -18 3
+		while (${Me.X}<0)
 		{
-			wait 10
-		}
-		while (TRUE)
-		
-		echo this isn't done yet !!!
+			call DMove -111 39 32 3 30 FALSE FALSE 3
+			call ClickOn Portal
+			wait 30
+		}	
 	}
-	
-	
 	call DMove 1431 785 99 3
 	call DMove 1431 784 109 3
 	do
@@ -601,6 +646,10 @@ atom HandleAllEvents(string Message)
 		echo DoorArray[${GravelDoor}]:Set["W"]
 	}
 	if (${Message.Find["You have killed"]})
+	{
+		Killed:Set[TRUE]
+	}
+	if (${Message.Find["has killed"]})
 	{
 		Killed:Set[TRUE]
 	}

@@ -1,6 +1,8 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 variable(script) int speed
 variable(script) int FightDistance
+variable(global) bool AntiKB = TRUE
+variable(global) bool MercMan = TRUE
 ;variable(script) int GravelDoor
 ;variable(script) string DoorArray[3]
 ;variable(script) bool Killed = FALSE
@@ -12,8 +14,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=5
 	
 	oc !c -letsgo ${Me.Name}
-	;if (!${Script["livedierepeat"](exists)})
-	;	run EQ2Ethreayd/livedierepeat ${NoShiny}
+	if (!${Script["livedierepeat"](exists)})
+		run EQ2Ethreayd/livedierepeat ${NoShiny}
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -25,8 +27,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	echo speed set to ${speed}
 	if ${Script["autoshinies"](exists)}
 		endscript autoshinies
-	;if (!${NoShiny})
-	;	run EQ2Ethreayd/autoshinies 50 ${speed} 
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 50 ${speed} 
  
 	if (${stepstop}==0 || ${stepstop}>${laststep})
 	{
@@ -35,34 +37,24 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	echo zone is ${Zone.Name} starting at step ${stepstart}/${stepstop}
 	call waitfor_Zone "Awuidor: Marr's Ascent [Solo]"
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
-
+	call SetAscensionCS
 
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_moveinfront","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movebehind","FALSE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkhp","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_checkmana","TRUE"]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkhp",98]
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_checkmana",98]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",${FightDistance}]
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",30]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_setup_moveintomeleerangemaxdistance",25]
-	
+	call ActivateMelee
+	call SetSoloEnv
 
 	if (${stepstart}==0)
 	{
 		echo stepstart is zero - nothing to do
 	}
-	call check_quest "Elements of Destruction: Layers of Order"
-	if (${Return})
-	{
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","textentry_autohunt_scanradius",25]
-		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
-		Ob_AutoTarget:AddActor["Stone of Thudos",0,FALSE,FALSE]
-	}
-	call StartQuest ${stepstart} ${stepstop} TRUE
 	
+	call StartQuest ${stepstart} ${stepstop} TRUE
 	echo End of Quest reached
+	ogre
 }
 
 function step000()
@@ -71,8 +63,9 @@ function step000()
 	Named:Set["Hirpo the Frosted Spine"]
 	eq2execute merc resume
 	
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call DMove 201 322 -128 3
+	call KBMove "${Me.Name}" 30 338 -129 3
+	call KBMove "${Me.Name}" 11 338 -111 3
 	call KBMove "${Me.Name}" 30 338 -129 3
 	call KBMove "${Me.Name}" 6 338 -156 3
 	call KBMove "${Me.Name}" -46 335 -129 3
@@ -80,7 +73,7 @@ function step000()
 	call KBMove "${Me.Name}" -181 322 -151 3
 	call KBMove "${Me.Name}" -227 322 -123 3
 	call DMove -3 338 -129 3
-	call DMove 9 510 -130 3 30 TRUE
+	call Ascend 510 TRUE
 	call DMove 39 490 -129 3 30 TRUE
 	call KBMove "${Me.Name}" 165 490 -123 3
 	call TanknSpank "${Named}"
@@ -91,38 +84,39 @@ function step001()
 	variable string Named
 	Named:Set["Torrent of Awuidor"]
 	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call KBMove "${Me.Name}" 108 490 -110 3
 	call DMove 104 491 -129 3
 	call DMove 21 496 -129 3
 	call DMove 5 496 -110 3
 	call KBMove "${Me.Name}" -38 491 -128 3
+	wait 50
 	call KBMove "${Me.Name}" -178 490 -131 3
 	call DMove -123 490 -107 3
 	call DMove -85 490 -127 3
 	call DMove 0 495 -129 3
-	call DMove -5 667 -135 3
+	call Ascend 667 TRUE
 	call KBMove "${Me.Name}" -32 668 -124 3
 	call KBMove "${Me.Name}" -4 668 -79 3
 	call KBMove "${Me.Name}" 62 668 -131 3
 	call KBMove "${Me.Name}" 0 668 -187 3
+	
+	AntiKB:Set[FALSE]
+	oc !c -CampSpot ${Me.Name}
 	call TanknSpank "${Named}"
+	wait 100
+	call TanknSpank "${Named}"
+	oc !c -letsgo ${Me.Name}
 }	
 function step002()
 {
 	variable string Named
 	Named:Set["Etrigon Icefist"]
 	eq2execute merc resume
+	AntiKB:Set[TRUE]
 	call DMove -1 668 -50 3
-	call IsPresent "Leaving Boss02 To Floor"
-	while (${Return})
-	{
-		wait 10
-		call IsPresent "Leaving Boss02 To Floor"
-	}
-	oc !c -Special All
 	while (${Me.Z} < 0)
 	{
+		oc !c -Special ${Me.Name}
 		wait 10
 	}
 	call KBMove "${Me.Name}" 12 355 22 3
@@ -150,11 +144,9 @@ function step003()
 	Named:Set["Grobnor the Elder Orb"]
 	call StopHunt
 	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
-	
 	call DMove 18 338 137 3
 	call DMove -1 338 136 3
-	call DMove -6 510 137 3
+	call Ascend 510 TRUE
 	call DMove -55 490 136 3
 	call KBMove "${Me.Name}" -169 490 133 3
 	call DMove -21 496 136 3
@@ -174,27 +166,22 @@ function step004()
 	Named:Set["Tethys All-Mother"]
 	call StopHunt
 	eq2execute merc resume
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE"]
 	call DMove -87 491 137 3
 	call DMove -26 495 137 3
 	call DMove -2 496 136 3
-	call DMove -7 667 140 3
+	call Ascend 667 TRUE
 	call DMove 19 668 117 3
 	call KBMove "${Me.Name}" 61 668 127 3
 	call KBMove "${Me.Name}" 33 668 164 3
 	call KBMove "${Me.Name}" -32 668 162 3
 	call KBMove "${Me.Name}" -27 668 98 3
 	call KBMove "${Me.Name}" -13 668 209 3
+	call KBMove "${Me.Name}" 5 668 220 3
 	call DMove 0 668 60 3
-	call IsPresent "TO FLOOR BOSS 05"
-	while (${Return})
-	{
-		wait 10
-		call IsPresent "TO FLOOR BOSS 05"
-	}
-	oc !c -Special All
+		
 	while (${Me.Y} > 600)
 	{
+		oc !c -Special ${Me.Name}
 		wait 10
 	}
 	call KBMove "${Me.Name}" 4 356 3 3
@@ -215,10 +202,16 @@ function step005()
 		call DMove -1118 390 786 3
 		call DMove -1117 393 806 3 30 FALSE FALSE 3
 		oc !c -Special "${Me.Name}"
+		wait 50
 		call DMove -1118 390 783 3 30 FALSE FALSE 3
 		call DMove -1154 387 716 3
 		call DMove -1164 386 712 3 30 FALSE FALSE 5
-		oc !c -Special "${Me.Name}"
+		while (${Me.Z} > 600)
+		{
+			oc !c -Special ${Me.Name}
+			wait 10
+		}
+		
 	}
 	
 	call DMove -45 350 30 3
@@ -233,61 +226,6 @@ function step005()
 		wait 200
 	}
 	while (!${Zone.Name.Equal["Myrist, the Great Library"]})
-}
-function FightinMud(string ActorName)
-{
-	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
-	call CountAdds "${ActorName}" 200
-	if (${Return}>0)
-	{
-		Killed:Set[FALSE]
-		do
-		{
-			oc !c -pause
-			call DMove 1263 465 20 3
-			call DMove 1295 465 28 3 30 TRUE 
-			call DMove 1308 465 30 3 30 TRUE FALSE 3
-			call DMove 1310 465 38 3 30 TRUE FALSE 3
-			call DMove 1332 465 32 3 30 TRUE FALSE 3
-			call CountAdds "${ActorName}" 200
-			if (${Return} > 2 && !${Me.InCombat})
-				target "${ActorName}"
-			Killed:Set[FALSE]
-			oc !c -resume
-			do
-			{
-				wait 10
-			}
-			while (!${Killed})
-			Killed:Set[FALSE]
-			oc !c -pause
-			call DMove 1332 465 66 3 30 TRUE FALSE 3
-			oc !c -resume
-			do
-			{
-				wait 10
-			}
-			while (!${Killed})
-			Killed:Set[FALSE]
-			oc !c -pause
-			call DMove 1382 465 64 3 30 TRUE
-			call DMove 1388 465 29 3 30 TRUE FALSE 3
-			oc !c -resume
-			do
-			{
-				wait 10
-			}
-			while (!${Killed})
-			Killed:Set[FALSE]
-			call DMove 1370 465 40 3
-			call DMove 1311 465 38 3
-			call DMove 1282 465 19 3
-	
-			call CountAdds "${ActorName}" 200
-			echo "Return is ${Return}"
-		}
-		while (${Return}>0)
-	}
 }
 atom HandleAllEvents(string Message)
 {
