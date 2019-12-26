@@ -80,6 +80,7 @@ function step001()
 	call IsPresent "${Named}" 5000
 	if (${Return})
 	{
+		echo ${Named} is Present I will loop around the pyramid to kill it
 		eq2execute way ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z}
 		call DMove 866 63 97 3
 		call DMove 1022 63 137 3
@@ -126,6 +127,11 @@ function step002()
 	call DMove 913 63 39 3
 	call ClickOn Door
 	call DMove 940 63 40 3
+	echo I will automatically do the first interaction - shinies may temper with that
+	if ${Script["autoshinies"](exists)}
+		endscript autoshinies
+	
+ 
 	GravelDoor:Set[0]
 	call ClickOn Pedestal
 	call IsPresent "Room Portal 1" 100
@@ -159,7 +165,8 @@ function step002()
 			wait 20
 			call DMove 1000 63 36 3
 		}
-	
+	if (!${NoShiny})
+		run EQ2Ethreayd/autoshinies 50 ${speed} 
 	call DMove 951 63 41 3
 	call DMove 947 63 40 1 30 FALSE FALSE 3
 	call ClickOn Gravel
@@ -181,6 +188,7 @@ function step003()
 	call IsPresent "${Named}" 5000
 	if (${Return})
 	{
+		echo ${Named} is Present I will kill it
 		eq2execute way ${Actor["${Named}"].X} ${Actor["${Named}"].Y} ${Actor["${Named}"].Z}
 		call DMove 1013 275 79 3
 		call check_quest "Elements of Destruction: Layers of Order"
@@ -195,7 +203,7 @@ function step003()
 		}
 		call DMove 1025 275 85 3
 		call DMove 1111 275 97 3
-		call DMove 1107c 275 226 3
+		call DMove 1107 275 226 3
 		call DMove 1113 275 331 3
 		call DMove 1293 275 329 3
 		call DMove 1327 275 345 3
