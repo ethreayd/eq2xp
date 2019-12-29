@@ -125,8 +125,8 @@ function main(bool NoShiny, bool Heroic)
 					oc !c -ZoneResetAll
 					if ${Script["LoopHeroic"](exists)}
 						Script["LoopHeroic"]:Resume
-					else
-						run EQ2Ethreayd/LoopHeroic
+					;else
+					;	run EQ2Ethreayd/LoopHeroic
 				}
 				echo  LDR: if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
 				if ((!${Heroic} && ${Return}>10)||(${Heroic} && ${Restart}<5))
@@ -164,10 +164,10 @@ function main(bool NoShiny, bool Heroic)
 					echo Repair
 					oc !c -RepairGear
 					call goCoV
-					if (!${Script["LoopSolo"](exists)} && !${Heroic})
-						run EQ2Ethreayd/LoopSolo
-					if (!${Script["LoopHeroic"](exists)} && ${Heroic})
-						run EQ2Ethreayd/LoopHeroic
+					;if (!${Script["LoopSolo"](exists)} && !${Heroic})
+						;run EQ2Ethreayd/LoopSolo
+					;if (!${Script["LoopHeroic"](exists)} && ${Heroic})
+						;run EQ2Ethreayd/LoopHeroic
 				}
 			}
 		}

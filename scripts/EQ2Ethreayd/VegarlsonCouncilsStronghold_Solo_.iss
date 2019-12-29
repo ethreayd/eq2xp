@@ -12,8 +12,8 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	variable int laststep=10
 	
 	oc !c -letsgo ${Me.Name}
-	if (!${Script["livedierepeat"](exists)})
-		run EQ2Ethreayd/livedierepeat ${NoShiny}
+	;if (!${Script["livedierepeat"](exists)})
+	;b	run EQ2Ethreayd/livedierepeat ${NoShiny}
 	if (${setspeed}==0)
 	{
 		speed:Set[3]
@@ -233,7 +233,7 @@ function step004()
 	call DMove 1032 275 40 3 30 TRUE
 	call DMove 1083 275 40 3
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
-	Ob_AutoTarget:AddActor["Aggregate Wall",0,!${NoCC},FALSE]
+	; Ob_AutoTarget:AddActor["Aggregate Wall",0,!${NoCC},FALSE]
 	call TanknSpank "${Named}" 50 FALSE FALSE TRUE
 	call DMove 1083 275 40 1
 	wait 100

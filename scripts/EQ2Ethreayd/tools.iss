@@ -2812,6 +2812,16 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
+function SetAscCS(string mytag)
+{
+	;local change only
+	;oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} eth FALSE
+	;oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} elem FALSE
+	;oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} geo FALSE
+	;oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} thaum FALSE
+
+	oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} ${mytag} TOGGLE FALSE FALSE
+}
 function SetAscensionCS()
 {
 	;only needed to run on your main, do not relay
