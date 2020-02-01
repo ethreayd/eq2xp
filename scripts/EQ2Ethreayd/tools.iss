@@ -506,6 +506,8 @@ function Ascend(float Y, bool Swim)
 	variable float loc0 
 	variable int Stucky=0
 	variable int SuperStuck=0
+	variable int YStuck=0
+	variable float Ymax=0
 	call CheckCombat
 	if (!${Swim})
 		call CheckSwimming
@@ -518,8 +520,15 @@ function Ascend(float Y, bool Swim)
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			press -hold FLYUP
 			wait 5
+			if ${Me.Loc.Y}>${Ymax}
+			{
+				Ymax:Set[${Me.Loc.Y}]
+				YStuck:Set[0]
+			}
+			else
+				YStuck:Inc
 			call CheckStuck ${loc0}
-			if (${Return})
+			if (${Return} || ${YStuck}>0)
 				Stucky:Inc
 			if (${Stucky}>5)
 			{	
@@ -531,7 +540,7 @@ function Ascend(float Y, bool Swim)
 				SuperStuck:Inc
 			}
 		}
-		while (${Me.Loc.Y}<${Y} && ${SuperStuck}<10)
+		while (${Me.Loc.Y}<${Y} && ${SuperStuck}<5)
 	}
 	press -release FLYUP
  	eq2execute loc
