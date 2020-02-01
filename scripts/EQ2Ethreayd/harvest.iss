@@ -14,7 +14,7 @@ variable(script) iterator NPCIterator
 variable(script) bool FlyingZone
 variable(script) int Stucky=0
 
-function main(string rtarget, bool Special)
+function main(string rtarget, bool Special, bool GoGpoint)
 {
 	ogre harvestlite
 	radar on
@@ -54,7 +54,7 @@ function main(string rtarget, bool Special)
 		call BaryCenterZ "${rtarget}"
 		Z0:Set[${Return}]
 	}
-	echo "Debug: BaryCenter calculated at ${X0} ${Y0} ${Z0} for ${rtarget}"
+	echo "Debug: BaryCenter calculated at ${X0} ${Y0} ${Z0} for ${rtarget} [${GoGpoint}]"
 	call CheckCombat
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
@@ -68,7 +68,7 @@ function main(string rtarget, bool Special)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_loot","TRUE"]
 	
-	if (${FlyingZone} && !${rtarget.Equal[""]} && ${Actor[Name,"${rtarget}"].Distance}>50)
+	if (${FlyingZone} && !${rtarget.Equal[""]} && ${Actor[Name,"${rtarget}"].Distance}>50 && ${GoGpoint})
 	{
 		echo Barycenter for ${rtarget} is at ${X0},${Y0},${Z0}
 		eq2execute waypoint ${X0} ${Y0} ${Z0}
