@@ -231,7 +231,7 @@ function main(string rtarget, bool Special, bool GoGpoint)
 			else
 			{
 				echo "Searching ressources / Flying up to enjoy the view"
-				if (${FlyingZone})
+				if (${FlyingZone} && ${GoGpoint})
 				{
 					if (!${rtarget.Equal[""]})
 					{
