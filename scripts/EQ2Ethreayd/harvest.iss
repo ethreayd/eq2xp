@@ -335,6 +335,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Equal["Can't see target"]})
 	{
 		Stucky:Inc
+		echo ${Stucky}
 	}
 	if (${Message.Find["ou acquire"]}>0)
 	{

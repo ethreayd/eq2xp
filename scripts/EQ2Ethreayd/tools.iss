@@ -505,6 +505,7 @@ function Ascend(float Y, bool Swim)
 {
 	variable float loc0 
 	variable int Stucky=0
+	variable int SuperStuck=0
 	call CheckCombat
 	if (!${Swim})
 		call CheckSwimming
@@ -527,9 +528,10 @@ function Ascend(float Y, bool Swim)
 				call CheckCombat
 				call UnstuckR
 				Stucky:Set[0]
+				SuperStuck:Inc
 			}
 		}
-		while (${Me.Loc.Y}<${Y})
+		while (${Me.Loc.Y}<${Y} && ${SuperStuck}<10)
 	}
 	press -release FLYUP
  	eq2execute loc
