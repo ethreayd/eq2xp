@@ -2018,9 +2018,9 @@ function goto_House()
 {
 	Actor[name,"Portal to Housing"]:DoubleClick
 	wait 20
-	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnigouse].Child[4].Child[5].Child[7]:AppendText[${Me.Name}]
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:AppendText[${Me.Name}]
 	wait 20
-	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnigouse].Child[4].Child[5].Child[8]:LeftClick
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[8]:LeftClick
 }
 function GuildH()
 {
@@ -2028,7 +2028,7 @@ function GuildH()
 	{
 		echo Starting GH churns
 		wait 100
-		call UnpackItem "A bushel of harvests" 1
+		call AutoPlant
 		echo Repair
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
