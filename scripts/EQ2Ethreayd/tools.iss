@@ -2497,7 +2497,44 @@ function Loot(bool NoRetry)
 	call getChest "Ornate Chest" ${NoRetry} 
 	wait 10
 	echo End of Autoloot
-}	
+}
+function MineTS()
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable string Verb
+	
+	EQ2:QueryActors[Actors, Name  =- "loose" && Distance <= 50]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		
+			
+		do
+		{
+			echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
+			call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 2 30 FALSE FALSE 5
+			do
+			{
+				if  ${ActorIterator.Value.Name.Equal["loose rubble"]}
+				{
+					Me.Inventory["Sturdy Pick"]:Equip
+					Verb:Set["Mine Rock"]
+				}
+				
+				if  ${ActorIterator.Value.Name.Equal["loose dirt"]}
+				{
+					Me.Inventory["Sturdy Shovel"]:Equip
+					Verb:Set["Clear Dirt"]
+				}
+				call ActivateVerbOn "${ActorIterator.Value.Name}" "${Verb}" TRUE
+				wait 20
+			}
+			while (${ActorIterator.Value.ID(exists)})
+		}
+		while (${ActorIterator:Next(exists)})
+	}
+}
 function Move(string ActorName, float X, float Y, float Z, bool is2D)
 {
 	eq2execute waypoint ${X} ${Y} ${Z}
@@ -3302,47 +3339,7 @@ function UseAbility(string MyAbilityName)
 {
 	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
-function MineTS()
-{
-	variable index:actor Actors
-	variable iterator ActorIterator
-	variable string Verb
-	
-	EQ2:QueryActors[Actors, Name  =- "loose" && Distance <= 50]
-	Actors:GetIterator[ActorIterator]
-	if ${ActorIterator:First(exists)}
-	{
-		
-			
-		do
-		{
-			echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
-			call DMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} 2 30 FALSE FALSE 5
-			do
-			{
-				if  ${ActorIterator.Value.Name.Equal["loose rubble"]}
-				{
-					Me.Inventory["Sturdy Pick"]:Equip
-					Verb:Set["Mine Rock"]
-				}
-				
-				if  ${ActorIterator.Value.Name.Equal["loose dirt"]}
-				{
-					Me.Inventory["Sturdy Shovel"]:Equip
-					Verb:Set["Clear Dirt"]
-				}
-				call ActivateVerbOn "${ActorIterator.Value.Name}" "${Verb}" TRUE
-				wait 20
-			}
-			while (${ActorIterator.Value.ID(exists)})
-		}
-		while (${ActorIterator:Next(exists)})
-	}
-}
 
-
-
-	
 function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 {
 	variable index:actor Actors
@@ -3401,7 +3398,7 @@ function waitfor_Combat()
 	while (${Me.InCombatMode})
 }
 
-function WaitforCorpse()
+function waitfor_Corpse()
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
@@ -3420,7 +3417,11 @@ function WaitforCorpse()
 		while ${ActorIterator:Next(exists)}
 	}
 }
-function WaitforGroupDistance(int Distance)
+function WaitforCorpse()
+{
+	call waitfor_Corpse
+}
+function waitfor_GroupDistance(int Distance)
 {
 	variable int Counter
 	echo waiting for group to be in a ${Distance}m radius
@@ -3437,14 +3438,17 @@ function WaitforGroupDistance(int Distance)
 	}
 	while (${Return}>${Distance})
 }
+function WaitforGroupDistance(int Distance)
+{
+	call waitfor_GroupDistance ${Distance}
+}	
 function waitfor_Health(int health)
 {
 	do
 	{
 		wait 5
 	} 
-	while (${Me.Health} <${Health})
-	
+	while (${Me.Health} <${Health})	
 }
 function waitfor_Login()
 {
@@ -3459,7 +3463,7 @@ function waitfor_Login()
 		while (!${Zone.Name.Equal["LoginScene"]})
 		wait 300
 	}
-	while (${Me.Name.Equal[${ToonName})
+	while (${Me.Name.Equal[${ToonName}]})
 }	
 function waitfor_Power(int power)
 {
@@ -3470,8 +3474,6 @@ function waitfor_Power(int power)
 	while (${Me.Power} <${power})
 	
 }
-
-
 function waitfor_NPC(string NPCName)
 {
 	do
