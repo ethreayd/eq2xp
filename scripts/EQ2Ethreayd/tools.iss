@@ -3460,6 +3460,7 @@ function waitfor_Login()
 			LoginScreen:Inc
 		else
 			LoginScreen:Set[0]
+		echo debug:waitfor_Login ${LoginScreen}
 	}
 	while (${LoginScreen}<120)
 }	
