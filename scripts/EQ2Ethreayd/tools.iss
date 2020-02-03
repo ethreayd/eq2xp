@@ -363,27 +363,6 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         while ${ActorIterator:Next(exists)}
     }
 }
-function ActivateMelee()
-{
-	switch ${Me.Archetype}
-	{
-		case fighter
-		{
-			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
-		}
-		break
-		case priest
-		{
-			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
-		}
-		break
-		default
-		{
-			echo no melee configuration change for ${Me.Archetype}
-		}
-		break
-	}
-}
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
 	variable string ItemSwap
@@ -403,6 +382,27 @@ function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffect
 		while ${Me.CastingSpell}
 		wait 20
 		Me.Inventory["${ItemSwap}"]:Equip
+	}
+}
+function ActivateMelee()
+{
+	switch ${Me.Archetype}
+	{
+		case fighter
+		{
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
+		}
+		break
+		case priest
+		{
+			OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
+		}
+		break
+		default
+		{
+			echo no melee configuration change for ${Me.Archetype}
+		}
+		break
 	}
 }
 function ActivateSpecial(string ActorName, float X, float Y, float Z)
