@@ -3452,18 +3452,16 @@ function waitfor_Health(int health)
 }
 function waitfor_Login()
 {
-	variable string ToonName
-	ToonName:Set[${Me.Name}]
+	variable int LoginScreen=0
 	do
 	{
-		do
-		{
-			wait 300
-		}
-		while (!${Zone.Name.Equal["LoginScene"]})
-		wait 300
+		wait 10
+		if (${Zone.Name.Equal["LoginScene"]})
+			LoginScreen:Inc
+		else
+			LoginScreen:Set[0]
 	}
-	while (${Me.Name.Equal[${ToonName}]})
+	while (${LoginScreen}<120)
 }	
 function waitfor_Power(int power)
 {
