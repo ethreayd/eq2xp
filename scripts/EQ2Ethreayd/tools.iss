@@ -635,41 +635,21 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQu
 }
 function AutoPlant()
 {
-	variable string ToonName
-	
-	ToonName:Set[${Me.Name}]
-	echo I am in Zone ${Zone.Name} as ${ToonName} 
-	echo calling Ogre plant for ${Me.Name}
-	ogre plant -t ${Me.Name}
-	wait 20
-	echo I am in Zone ${Zone.Name}
-	UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
-	wait 600
-	echo I am in Zone ${Zone.Name}
-	echo waiting for Login Scene
+	;UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
+	call goto_GH
 	wait 100
+	call goto_House
 	do
 	{
-		wait 5
-	}
-	while (!${Zone.Name.Equal["LoginScene"]} && !${Zone.Name.Right[10].Equal["Guild Hall"]})
-	wait 100
-	echo I am in Zone ${Zone.Name}	
-	wait 50
-	echo logging as ${ToonName}
-	do
-	{
-		ogre ${ToonName}
+		echo I am in zone ${Zone.Name}
 		wait 300
-		echo I am in Zone ${Zone.Name}
+		echo I am in zone ${Zone.Name}
 	}
-	while (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal[""]})
-	echo I am in Zone ${Zone.Name}
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
-		call goto_GH
-	wait 20
-	echo I am in Zone ${Zone.Name} - unpacking "A bushel of harvests" if any
-	call UnpackItem "A bushel of harvests" 1
+	while (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
+	wait 30
+	call UnpackItem "A bushel of harvests" 3
+	call goto_GH
 }	
 function AvoidRedCircles(float Distance, bool IsGroup)
 {
@@ -2033,6 +2013,14 @@ function goto_GH()
 		}
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	}
+}
+function goto_House()
+{
+	Actor[name,"Portal to Housing"]:DoubleClick
+	wait 20
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnigouse].Child[4].Child[5].Child[7]:AppendText[${Me.Name}]
+	wait 20
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnigouse].Child[4].Child[5].Child[8]:LeftClick
 }
 function GuildH()
 {
