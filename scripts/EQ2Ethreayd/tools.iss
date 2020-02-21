@@ -546,6 +546,48 @@ function Ascend(float Y, bool Swim)
  	eq2execute loc
 	return ${Me.Loc.Y}
 }
+function AutoAddAgent()
+{
+	variable index:item Items
+	variable iterator ItemIterator
+    variable int Counter=0
+	variable int Counter2=0
+	variable int Counter3=0
+		
+		Me:QueryInventory[Items, Location == "Inventory"]
+		Items:GetIterator[ItemIterator]
+		if ${ItemIterator:First(exists)}
+		{
+			
+			do
+			{
+				Counter3:Inc
+				if ${ItemIterator.Value.IsAgent}
+				{
+					Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:AddAgent[confirm]
+					Counter:Inc
+				}	
+			}	
+			while ${ItemIterator:Next(exists)}
+		}
+		
+		Me:QueryInventory[Items, Location == "Inventory"]
+		Items:GetIterator[ItemIterator]
+		if ${ItemIterator:First(exists)}
+		{
+			do
+			{
+				if ${ItemIterator.Value.IsAgent}
+				{
+					Counter2:Inc
+				}
+			}	
+			while ${ItemIterator:Next(exists)}
+		}
+		
+	echo found ${Counter} Agents, ${Counter2} seems to be duplicate (scanned ${Counter3} items)
+}
+
 function AutoCraft(string tool, string myrecipe, int quantity)
 {
 	call MoveCloseTo "${tool}"
@@ -1475,29 +1517,30 @@ function DescribeItemInventory(string ItemName)
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
             ;; At this point, the "ToItemInfo" MEMBER of this object will be immediately available.  It should
             ;; remain available until the cache is cleared/reset (which is not very often.)
-            echo "${Counter}. ${ItemIterator.Value.Name} : Index : '${ItemIterator.Value.ToItemInfo.Index}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : ID : '${ItemIterator.Value.ToItemInfo.ID}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : SerialNumber : '${ItemIterator.Value.ToItemInfo.SerialNumber}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : Name : '${ItemIterator.Value.ToItemInfo.Name}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : Location : '${ItemIterator.Value.ToItemInfo.Location}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : ToLink : '${ItemIterator.Value.ToItemInfo.ToLink}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : LinkID : '${ItemIterator.Value.ToItemInfo.LinkID}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IconID : '${ItemIterator.Value.ToItemInfo.IcondID}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : Quantity : '${ItemIterator.Value.ToItemInfo.Quantity}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : EffectiveLevel : '${ItemIterator.Value.ToItemInfo.EffectiveLevel}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : Slot : '${ItemIterator.Value.ToItemInfo.Slot}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsReady : '${ItemIterator.Value.ToItemInfo.IsReady}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : TimeUntilReady : '${ItemIterator.Value.ToItemInfo.TimeUntilReady}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : InInventorySlot : '${ItemIterator.Value.ToItemInfo.InInventorySlot}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsInventoryContainer : '${ItemIterator.Value.ToItemInfo.IsInventoryContainer}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsBankConatainer : '${ItemIterator.Value.ToItemInfo.IsBankContainer}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsSharedBankContainer : '${ItemIterator.Value.ToItemInfo.IsSharedBankContainer}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsAutoConsumeable : '${ItemIterator.Value.ToItemInfo.IsAutoConsumeable}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : AutoConsumeOn : '${ItemIterator.Value.ToItemInfo.AutoConsumeOn}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : CanBeRedeemed : '${ItemIterator.Value.ToItemInfo.CanBeRedeemed}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsFoodOrDrink : '${ItemIterator.Value.ToItemInfo.IsFoodOrDrink}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.ToItemInfo.IsScribeable}'"
-            echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.ToItemInfo.IsUsable}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Index : '${ItemIterator.Value.Index}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : ID : '${ItemIterator.Value.ID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : SerialNumber : '${ItemIterator.Value.SerialNumber}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Name : '${ItemIterator.Value.Name}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Location : '${ItemIterator.Value.Location}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : ToLink : '${ItemIterator.Value.ToLink}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : LinkID : '${ItemIterator.Value.LinkID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IconID : '${ItemIterator.Value.IconID}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Quantity : '${ItemIterator.Value.Quantity}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : EffectiveLevel : '${ItemIterator.Value.EffectiveLevel}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : Slot : '${ItemIterator.Value.Slot}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsReady : '${ItemIterator.Value.IsReady}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : TimeUntilReady : '${ItemIterator.Value.TimeUntilReady}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : InInventorySlot : '${ItemIterator.Value.InInventorySlot}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsInventoryContainer : '${ItemIterator.Value.IsInventoryContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsBankConatainer : '${ItemIterator.Value.IsBankContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsSharedBankContainer : '${ItemIterator.Value.IsSharedBankContainer}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsAutoConsumeable : '${ItemIterator.Value.IsAutoConsumeable}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : AutoConsumeOn : '${ItemIterator.Value.AutoConsumeOn}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : CanBeRedeemed : '${ItemIterator.Value.CanBeRedeemed}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsFoodOrDrink : '${ItemIterator.Value.IsFoodOrDrink}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.IsScribeable}'"
+            echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.IsUsable}'"
+			echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
             Counter:Inc
         }
         while ${ItemIterator:Next(exists)}
