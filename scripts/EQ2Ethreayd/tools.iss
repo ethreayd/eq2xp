@@ -1541,7 +1541,7 @@ function DescribeItemInventory(string ItemName)
             echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.IsScribeable}'"
             echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.IsUsable}'"
 			echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
-			echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${ItemIterator.Value.IsOverseerQuest}'"
+			;echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${ItemIterator.Value.IsOverseerQuest}'"
             Counter:Inc
         }
         while ${ItemIterator:Next(exists)}
