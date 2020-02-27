@@ -630,7 +630,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool QuestCraft, 
 		}
 		else
 		{
-			Quest ${QuestName} not in Journal !
+			echo Quest ${QuestName} not in Journal !
 		}
 	}
 	else
