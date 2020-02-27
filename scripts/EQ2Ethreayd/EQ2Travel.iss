@@ -123,9 +123,9 @@ function goDercin_Marrbrand()
 			wait 100
 		}
 		while (${Me.Y}<410)
-		call DMove 649 411 21 3 30 FALSE FALSE 3
-		echo Dercin Marrbrand reached
 	}
+	call DMove 649 411 21 3 30 FALSE FALSE 3
+	echo Dercin Marrbrand reached
 }
 function goMyrist()
 {
