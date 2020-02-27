@@ -310,7 +310,7 @@ function Abs(float A)
 		absv:Set[${A}]
 	return ${absv}
 }
-function AcceptReward(bool AcceptAll)
+function AcceptReward_(bool AcceptAll)
 {
 	do
 	{
@@ -325,6 +325,11 @@ function AcceptReward(bool AcceptAll)
 	}
 	while (${RewardWindow(exists)} && ${AcceptAll})
 }
+function AcceptReward(bool AcceptAll)
+{
+	oc !c -AcceptReward
+}
+
 function ActivateAggro(string ActorName, string verb, float distance)
 {
 	call MoveCloseTo "${ActorName}" ${distance}
@@ -588,32 +593,74 @@ function AutoAddAgent()
 	echo found ${Counter} Agents, ${Counter2} seems to be duplicate (scanned ${Counter3} items)
 }
 
-function AutoCraft(string tool, string myrecipe, int quantity)
+function AutoCraft(string tool, string myrecipe, int quantity, bool QuestCraft, string QuestName)
 {
-	call MoveCloseTo "${tool}"
-	ogre craft
-	wait 100
-	echo adding recipe
-	OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
-	wait 100
-	if (${OgreCraft.MissingResources})
+	if (${QuestCraft})
 	{
-		echo Missing some ressources ! Something wrong happen on the way :(
+		call CheckQuest "${QuestName}"
+		if (${Return})
+		{
+			call CheckQuestStep
+			if (!${Return})
+			{
+				call MoveCloseTo "${tool}"
+				ogre craft
+				wait 100
+				echo adding recipe
+				OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
+				wait 100
+				if (${OgreCraft.MissingResources})
+				{
+					echo Missing some ressources ! Something wrong happen on the way :(
+				}
+				else
+				{
+					echo Crafting ${quantity} "${myrecipe}"
+					OgreCraft:Start[]
+					do
+					{
+						wait 50
+						call CheckQuestStep
+					}
+					while (!${Return})		
+				}
+				wait 20
+				ogre end craft
+			}
+		}
+		else
+		{
+			Quest ${QuestName} not in Journal !
+		}
 	}
 	else
 	{
-		echo Crafting ${quantity} "${myrecipe}"
-		OgreCraft:Start[]
-		do
+		call MoveCloseTo "${tool}"
+		ogre craft
+		wait 100
+		echo adding recipe
+		OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
+		wait 100
+		if (${OgreCraft.MissingResources})
 		{
-			wait 50
-			call CountItem "${myrecipe}"
+			echo Missing some ressources ! Something wrong happen on the way :(
 		}
-		while (${Return}<${quantity})		
-	}
-	wait 20
-	ogre end craft
+		else
+		{
+			echo Crafting ${quantity} "${myrecipe}"
+			OgreCraft:Start[]
+			do
+			{
+				wait 50
+				call CountItem "${myrecipe}"
+			}
+			while (${Return}<${quantity})		
+		}
+		wait 20
+		ogre end craft
+	}		
 }
+
 function AutoHunt(int distance)
 {
 	
@@ -1381,11 +1428,11 @@ function CountItem(string ItemName)
 		{
 			do
 			{
-				Counter:Set[${ItemIterator.Value.Quantity}]
+				Counter:Set[${Math.Calc64[${Counter}+${ItemIterator.Value.Quantity}]}]
 			}	
-		while ${ActorIterator:Next(exists)}
+			while ${ActorIterator:Next(exists)}
 		}
-	echo found ${Counter} ${ItemName} in Inventory
+	echo found ${Counter} ${ItemName} in Inventory !
 	return ${Counter}
 }
 function CoVMender()
@@ -2077,7 +2124,7 @@ function GuildH()
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
 		wait 100
-		call TransmuteAll "Planar Tranmutation Stone"
+		call TransmuteAll "Planar Transmutation Stone"
 		call TransmuteAll "Celestial Transmutation Stone"
 		echo First Depot
 		ogre depot -allh -hda -llda -cda
@@ -3276,7 +3323,6 @@ function TestArrivalCoord(float X, float Y, float Z, int Precision, bool 2D)
 		return FALSE
 	}
 }
-
 function TestNullCoord(float X, float Y, float Z)
 {
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
@@ -3284,27 +3330,38 @@ function TestNullCoord(float X, float Y, float Z)
 	else
 		return FALSE
 }	
-
 function Transmute(string ItemName)
 {
+	echo in Transmute
 	call UseAbility Transmute
 	wait 5
 	Me.Inventory[Query, Name =- "${ItemName}"]:Transmute
 	wait 5
 	call AcceptReward TRUE
+	echo out Transmute
 }
 function TransmuteAll(string ItemName)
 {
 	variable int i
+	echo in TransmuteAll
 	call CountItem "${ItemName}"
-	echo transmuting ${Return} ${ItemName}
+	echo transmuting ${Return} ${ItemName} (in TransmuteAll)
 	if (${Return}>0)
 	{
-		for (i:Set[0] ; ${i} < ${Return(int)} ; i:Inc)
+		do 
 		{
 			call Transmute "${ItemName}"
 			wait 10
+			call CountItem "${ItemName}"
 		}
+		while (${Return}>0)
+	}
+	echo out of TransmuteAll loop
+	call CountItem "${ItemName}"
+	echo there is ${Return} ${ItemName} (in TransmuteAll)
+	if (${Return}>0)
+	{
+		echo still !!!!!!!
 	}
 }
 function UnpackItem(string ItemName, int RewardID)
