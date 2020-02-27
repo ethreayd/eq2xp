@@ -4,7 +4,6 @@
 
 function main()
 {
-/*
 call goDercin_Marrbrand
 call Converse "Dercin Marrbrand" 4
 wait 20
@@ -23,7 +22,6 @@ call TransmuteAll "A worn pair of boots"
 wait 20
 call Converse "Dercin Marrbrand" 2
 wait 20
-*/
 call DMove 675 412 30 3
 call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE "Daily Adorning"
 wait 20
