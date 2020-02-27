@@ -1430,7 +1430,7 @@ function CountItem(string ItemName)
 			{
 				Counter:Set[${Math.Calc64[${Counter}+${ItemIterator.Value.Quantity}]}]
 			}	
-			while ${ActorIterator:Next(exists)}
+			while ${ItemIterator:Next(exists)}
 		}
 	echo found ${Counter} ${ItemName} in Inventory !
 	return ${Counter}
