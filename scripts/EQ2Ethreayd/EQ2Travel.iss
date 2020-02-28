@@ -124,8 +124,7 @@ function goDercin_Marrbrand()
 		}
 		while (${Me.Y}<410)
 	}
-	call DMove 649 411 21 3 30 FALSE FALSE 3
-	echo Dercin Marrbrand reached
+	call MoveCloseTo "Dercin Marrbrand"
 }
 function goMyrist()
 {
