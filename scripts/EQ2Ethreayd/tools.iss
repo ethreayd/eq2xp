@@ -593,7 +593,7 @@ function AutoAddAgent()
 	echo found ${Counter} Agents, ${Counter2} seems to be duplicate (scanned ${Counter3} items)
 }
 
-function AutoCraft(string tool, string myrecipe, int quantity, bool QuestCraft, string QuestName)
+function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
 {
 	if (${QuestCraft})
 	{
@@ -609,7 +609,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool QuestCraft, 
 				echo adding recipe
 				OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
 				wait 100
-				if (${OgreCraft.MissingResources})
+				if (${OgreCraft.MissingResources} && !${IgnoreRessources})
 				{
 					echo Missing some ressources ! Something wrong happen on the way :(
 				}
@@ -1112,6 +1112,19 @@ function CheckFlyingZone()
 		Flying:Set[FALSE]
 	call GoDown
 	return ${Flying}
+}
+function CheckIfActorGuildPresent(string ActorGuild, float MaxDistance)
+{
+	variable index:actor Actors
+    variable iterator ActorIterator
+    
+    EQ2:QueryActors[Actors, Guild =- "${ActorGuild}" && Distance <= ${MaxDistance} ]
+    Actors:GetIterator[ActorIterator]
+  
+    if ${ActorIterator:First(exists)}
+        return TRUE
+    else
+		return FALSE
 }
 function CheckItem(string ItemName, int Quantity)
 {
