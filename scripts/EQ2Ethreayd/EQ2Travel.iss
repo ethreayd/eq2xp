@@ -94,29 +94,36 @@ function goDercin_Marrbrand()
 		ogre nav "Bottom Lift"
 		do
 		{
-			wait 50
+			wait 10
 			call TestArrivalCoord 414 -5 -14
 		}
 		while (!${Return})
 		call DMove 420 -5 -13 3 30 FALSE FALSE 2
 		do
 		{
+			call DMove 418 -5 -15 3 30 FALSE FALSE 2
 			call ActivateVerbOn "Lift Switch Main Floor" "use"
 			wait 10
 		}
 		while (${Me.Y}<15)
 	}
-	if (${Me.Y}<410)
+	if (${Me.Y}<410 && ${Me.Y}>15)
 	{
 		press F1
-		wait 20
+		wait 5
 		ogre nav "Teleporter to Smiths' Gallery"
 		do
 		{
-			wait 50
+			wait 10
 			call TestArrivalCoord 389 16 170
 		}
-		while (!${Return})
+		while (!${Return} && ${Me.Y}>15)
+		if (${Me.Y}<15)
+		{
+			echo oops I must have gone down again
+			call goDercin_Marrbrand
+		}
+		
 		do
 		{
 			call ActivateVerbOn "Teleporter to Smiths' Gallery" "Touch"
@@ -124,7 +131,10 @@ function goDercin_Marrbrand()
 		}
 		while (${Me.Y}<410)
 	}
-	call MoveCloseTo "Dercin Marrbrand"
+	if (${Me.Y}>410)
+		call MoveCloseTo "Dercin Marrbrand"
+	else 
+		call goDercin_Marrbrand
 }
 function goMyrist()
 {

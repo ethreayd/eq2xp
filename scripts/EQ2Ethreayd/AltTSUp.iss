@@ -32,5 +32,6 @@ call Converse "Dercin Marrbrand" 2
 wait 20
 call Converse "Dercin Marrbrand" 2
 wait 20
+echo go to Guild Hall
 call goto_GH
 }
