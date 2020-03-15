@@ -86,7 +86,10 @@ function getCDQuests()
 }
 function getBoLQuests(string version)
 {
+	variable string NPCName
 	call goZone "The Blinding"
+	call 3DNav 85 400 -184
+	call GoDown
 	call 3DNav -620 58 256
 	call GoDown
 	call DMove -580 60 261 3
@@ -94,8 +97,9 @@ function getBoLQuests(string version)
 	call DMove -545 61 285 3
 	switch ${version}
 	{
-		case default
+		case Solo
 		{
+			echo Getting all Solo Quests
 			NPCName:Set["Sage Ayzuku"]
 			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
 			wait 20
@@ -147,7 +151,7 @@ function getBoLQuests(string version)
 			break
 		}
 	}
-	call DMove -545 62 260 3
+	call DMove -532 62 261 3 30 FALSE FALSE 5
 	call DMove -580 60 260 3
 	call DMove -620 58 256
 }

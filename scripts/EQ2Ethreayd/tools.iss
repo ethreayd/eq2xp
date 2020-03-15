@@ -724,6 +724,7 @@ function AutoPassDoor(string DoorName, float X, float Y, float Z, bool ExecuteQu
 }
 function AutoPlant()
 {
+	echo starting AutoPlant Function
 	;UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
 	call goto_GH
 	wait 100
@@ -2149,8 +2150,8 @@ function goto_House()
 {
 	Actor[name,"Portal to Housing"]:DoubleClick
 	wait 20
-	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:AppendText[${Me.Name}]
-	wait 20
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:SetProperty[text,${Me.Name}]
+	wait 100
 	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[8]:LeftClick
 }
 function GuildH()
@@ -2160,6 +2161,7 @@ function GuildH()
 		echo Starting GH churns
 		wait 100
 		call AutoPlant
+		wait 100
 		echo Repair
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]

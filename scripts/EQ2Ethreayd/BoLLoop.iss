@@ -20,6 +20,7 @@
 
 function main()
 {
+
 	call ReturnEquipmentSlotHealth Primary
 	if (${Me.IsDead} || ${Return}<11)
 	{
@@ -31,7 +32,8 @@ function main()
 		call goto_GH
 	}
 	call GuildH
-	call getBoLQuests
+
+	call getBoLQuests Solo
 	if (!${Script["ISXRIAssistant"](exists)})
 		run EQ2Ethreayd/ISXRIAssistant
 	do
@@ -46,6 +48,7 @@ function main()
 			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
 		}
 		wait 1000
+		call ReturnEquipmentSlotHealth Primary
 		if ((${Me.IsDead}||${Return}<11))
 		{
 			wait 100
