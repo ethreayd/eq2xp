@@ -153,7 +153,7 @@ function getBoLQuests(string version)
 	}
 	call DMove -532 62 261 3 30 FALSE FALSE 5
 	call DMove -580 60 260 3
-	call DMove -620 58 256
+	call DMove -620 58 256 3
 }
 function goDercin_Marrbrand()
 {
