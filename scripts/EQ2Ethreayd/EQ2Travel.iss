@@ -7,7 +7,7 @@
 ;	}
 ;	while (${Zone.Name.Equal["Coliseum of Valor"]})
 ;}
-function getCDQuests(string ZoneName, string version)
+function getCDQuests()
 {
 	variable string NPCName
 	if (${Me.Y}<400 || ${Me.Y}>430)
@@ -84,6 +84,73 @@ function getCDQuests(string ZoneName, string version)
 		break
 	}
 }
+function getBoLQuests(string version)
+{
+	call goZone "The Blinding"
+	call 3DNav -620 58 256
+	call GoDown
+	call DMove -580 60 261 3
+	call DMove -542 62 261 3
+	call DMove -545 61 285 3
+	switch ${version}
+	{
+		case default
+		{
+			NPCName:Set["Sage Ayzuku"]
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",2]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",2]
+			wait 20
+			NPCName:Set["Apprentice Tansya"]
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			OgreBotAPI:ConversationBubble["${Me.Name}",1]
+			wait 20
+			break
+		}
+	}
+	call DMove -545 62 260 3
+	call DMove -580 60 260 3
+	call DMove -620 58 256
+}
 function goDercin_Marrbrand()
 {
 	call goMyrist
@@ -136,26 +203,10 @@ function goDercin_Marrbrand()
 	else 
 		call goDercin_Marrbrand
 }
+
 function goMyrist()
 {
-	variable string ZoneName
-	ZoneName:Set["Myrist, the Great Library"]
-	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
-	{
-		call ActivateSpire
-		wait 50
-		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-		RIMUIObj:TravelMap["${Me.Name}","Myrist",1,2]
-		wait 300
-	}
-	
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[25].Equal["${ZoneName}"]})
-	{
-		call goto_GH
-		wait 600
-		call goMyrist
-	}
-	call waitfor_Zone "${ZoneName}"
+	call goZone "Myrist, the Great Library"
 }
 function goEPG()
 {

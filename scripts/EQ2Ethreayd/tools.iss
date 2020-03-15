@@ -1542,13 +1542,18 @@ function DescribeActor(int ActorID)
 	echo Y					${Actor[${ActorID}].Loc.Y}
 	echo Z					${Actor[${ActorID}].Loc.Z}
 }
+
 function DescribeItemInventory(string ItemName)
 {
-	variable index:item Items
+	call DescribeItem "${ItemName}" "Inventory"
+}
+function DescribeItem(string ItemName, string ItemLocation)
+{
+    variable index:item Items
     variable iterator ItemIterator
     variable int Counter = 1
     
-    Me:QueryInventory[Items, Location == "Inventory" && Name == "${ItemName}"]
+    Me:QueryInventory[Items, Location =- "${ItemLocation}" && Name =- "${ItemName}"]
     Items:GetIterator[ItemIterator]
  
  
@@ -1600,12 +1605,14 @@ function DescribeItemInventory(string ItemName)
             echo "${Counter}. ${ItemIterator.Value.Name} : IsFoodOrDrink : '${ItemIterator.Value.IsFoodOrDrink}'"
             echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.IsScribeable}'"
             echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.IsUsable}'"
-			echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
-			;echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${ItemIterator.Value.IsOverseerQuest}'"
+	    echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
+	   ;echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${ItemIterator.Value.IsOverseerQuest}'"
             Counter:Inc
         }
         while ${ItemIterator:Next(exists)}
     }
+    else
+	echo no item "${ItemName}" in Inventory
 }
 function DetectCircles(float Distance, string Color)
 { 
@@ -2106,6 +2113,26 @@ function goHate()
 	}
 	call waitfor_Zone "Plane of Magic"
 }
+
+function goZone(string ZoneName)
+{
+	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	{
+		call ActivateSpire
+		wait 50
+		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
+		RIMUIObj:TravelMap["${Me.Name}","${ZoneName}",1,2]
+		wait 300
+	}
+	
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[25].Equal["${ZoneName}"]})
+	{
+		call goto_GH
+		wait 600
+		call goZone "${ZoneName}"
+	}
+	call waitfor_Zone "${ZoneName}"
+}
 function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -2139,6 +2166,7 @@ function GuildH()
 		wait 100
 		call TransmuteAll "Planar Transmutation Stone"
 		call TransmuteAll "Celestial Transmutation Stone"
+		call TransmuteAll "Veilwalker's Transmutation Stone"
 		echo First Depot
 		ogre depot -allh -hda -llda -cda
 		wait 50
