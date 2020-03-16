@@ -1159,15 +1159,15 @@ function CheckQuest(string questname)
 	Quests:GetIterator[It]
 	if ${It:First(exists)}
 	{
-        do
-        {
+        	do
+        	{
 			if (${It.Value.Name.Equal["${questname}"]})
 			{
 				echo already on ${questname}
 				return TRUE
-        	}
+        		}
 		}
-        while ${It:Next(exists)}
+        	while ${It:Next(exists)}
 	}
 	return FALSE
 }    	
@@ -2138,7 +2138,14 @@ function goto_GH()
 {
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
-		call CastAbility "Call to Guild Hall"
+		call IsPresent "Magic Door to the Guild Hall"
+		if (${Return})
+		{
+			call MoveCloseTo "Magic Door to the Guild Hall"
+			call ActivateVerbOn "Magic Door to the Guild Hall" "Go to Guild Hall"				
+		}
+		else
+			call CastAbility "Call to Guild Hall"
 		do
 		{
 			wait 5
@@ -2150,17 +2157,19 @@ function goto_House()
 {
 	Actor[name,"Portal to Housing"]:DoubleClick
 	wait 20
-	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:SetProperty[text,${Me.Name}]
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:SetProperty[text,""]
+	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:AppendText[${Me.Name}]
 	wait 100
 	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[8]:LeftClick
 }
-function GuildH()
+function GuildH(bool NoPlant)
 {
 	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
 	{
 		echo Starting GH churns
 		wait 100
-		call AutoPlant
+		if (!${NoPlant})
+			call AutoPlant
 		wait 100
 		echo Repair
 		OgreBotAPI:RepairGear[${Me.Name}]

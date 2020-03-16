@@ -29,17 +29,18 @@ function main()
 		oc !c -Revive ${Me.Name}
 		RIMUIObj:Revive[${Me.Name}]
 		wait 400
-		call goto_GH
 	}
+	call goto_GH
 	call GuildH
 
 	call getBoLQuests Solo
-	if (!${Script["ISXRIAssistant"](exists)})
-		run EQ2Ethreayd/ISXRIAssistant
+	call goAurelianCoast
+ 	if (!${Script["ISXRIAssistant"](exists)})
+		;run EQ2Ethreayd/ISXRIAssistant
+	wait 600
 	do
 	{
 		call ReturnEquipmentSlotHealth Primary
-		
 		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10)
 		{
 			echo starting RZ
@@ -51,13 +52,13 @@ function main()
 		call ReturnEquipmentSlotHealth Primary
 		if ((${Me.IsDead}||${Return}<11))
 		{
+			end Buffer:RZ
 			wait 100
 			echo --- Reviving
 			RIMUIObj:Revive[${Me.Name}]
 			wait 400
 			call goto_GH
-			call GuildH
-			call getBoLQuests
+			call GuildH TRUE 
 		}
 	}
 	while (TRUE)

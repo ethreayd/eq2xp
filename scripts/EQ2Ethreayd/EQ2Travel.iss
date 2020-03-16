@@ -87,10 +87,14 @@ function getCDQuests()
 function getBoLQuests(string version)
 {
 	variable string NPCName
+	variable int MissingQuest
+
 	call goZone "The Blinding"
 	call 3DNav 85 400 -184
 	call GoDown
-	call 3DNav -620 58 256
+	call 3DNav -269 125 132
+	call GoDown
+	call 3DNav -620 125 256
 	call GoDown
 	call DMove -580 60 261 3
 	call DMove -542 62 261 3
@@ -155,6 +159,18 @@ function getBoLQuests(string version)
 	call DMove -580 60 260 3
 	call DMove -620 58 256 3
 }
+function goAurelianCoast()
+{
+	call goZone "The Blinding"
+	call 3DNav 516 120 532
+	call GoDown
+	call DMove 754 37 624 3
+	face 879 590
+	press -hold MOVEFORWARD
+	wait 30
+	press -release MOVEFORWARD
+}
+
 function goDercin_Marrbrand()
 {
 	call goMyrist
@@ -268,6 +284,7 @@ function goCDPublicZone(string ZoneName)
 	call waitfor_Zone "${LongZoneName}"
 	echo in zone ${ZoneName} (${LongZoneName})
 }
+/*
 function ExitCoV()
 {	
 	if (${Zone.Name.Equal["Coliseum of Valor"]})
@@ -781,6 +798,7 @@ function goVarig()
 	call PKey ZOOMOUT 20
 	call MoveCloseTo "Varig Ro"
 }
+*/
 /*
 function MendToon()
 {
