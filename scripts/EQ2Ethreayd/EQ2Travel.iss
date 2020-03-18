@@ -161,16 +161,42 @@ function getBoLQuests(string version)
 }
 function goAurelianCoast()
 {
-	call goZone "The Blinding"
-	call 3DNav 516 120 532
-	call GoDown
-	call DMove 754 37 624 3
-	face 879 590
-	press -hold MOVEFORWARD
-	wait 30
-	press -release MOVEFORWARD
+	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
+	{
+		call goZone "The Blinding"
+		if (${Me.Y}>250)
+		{
+			call 3DNav 85 400 -184
+			call GoDown
+			call 3DNav -269 125 132
+			call GoDown
+		}
+		call 3DNav 516 120 532
+		call GoDown
+		call DMove 754 37 624 3
+		face 879 590
+		press -hold MOVEFORWARD
+		wait 30
+		press -release MOVEFORWARD
+	}
+	else
+		echo already in Aurelian Coast (${Zone.Name})
 }
-
+function goFordelMidst()
+{
+	call goAurelianCoast
+	call DMove 623 99 -512 3
+	call 3DNav 591 110 -386
+	call 3DNav 399 155 -239
+	call 3DNav 219 122 -244
+	call 3DNav 156 144 -449
+	call GoDown
+	call DMove 141 87 -494 3
+	call DMove 119 85 -525 3
+	call DMove 126 85 -540 3 30 FALSE FALSE 5
+	call DMove 89 73 -595 3
+	call DMove 112 68 -616 3 
+}
 function goDercin_Marrbrand()
 {
 	call goMyrist

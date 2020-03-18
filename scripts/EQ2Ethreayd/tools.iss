@@ -15,6 +15,8 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/EQ2Travel.iss"
+
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
 	variable float loc0 
@@ -506,6 +508,41 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 	}	
 	return ${ActorID}
 }
+function AltTSUp()
+{
+	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
+	call goDercin_Marrbrand
+	wait 50
+	call Converse "Dercin Marrbrand" 4
+	wait 20
+	call Converse "Dercin Marrbrand" 4
+	wait 20
+	call Converse "Dercin Marrbrand" 4
+	wait 20
+	Me.Inventory["Box of Tinkering Materials"]:Unpack
+	wait 50
+	Me.Inventory["Box of Adorning Materials"]:Unpack
+	wait 50
+	Me.Inventory["Box of Old Boots"]:Unpack
+	wait 50
+
+	call TransmuteAll "A worn pair of boots"
+	wait 50
+	call Converse "Dercin Marrbrand" 2
+	wait 20
+	call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
+	wait 50
+	call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
+	wait 20
+	call goDercin_Marrbrand
+	call Converse "Dercin Marrbrand" 2
+	wait 20
+	call Converse "Dercin Marrbrand" 2
+	wait 20
+	echo go to Guild Hall
+	call goto_GH
+}
+
 function Ascend(float Y, bool Swim)
 {
 	variable float loc0 
@@ -736,6 +773,7 @@ function AutoPlant()
 		echo I am in zone ${Zone.Name}
 	}
 	while (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	wait 30
 	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
 	wait 30
 	call UnpackItem "A bushel of harvests" 3
@@ -1787,6 +1825,54 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 		while (!${Return} && !${Vanished} )
 	}
 }
+function Gardener()
+{
+   variable string MerchantName
+   MerchantName:Set["Turns Looted Fertilizer into Shines"]
+   if !${Actor["${MerchantName}"](exists)}
+   {
+      echo ${Time}: ${MerchantName} not found.
+      Script:End
+   }
+   if ${Actor["${MerchantName}"].Distance} > 20
+   {
+      echo ${Time}: ${MerchantName} too far away ( ${Actor["${MerchantName}"].Distance} ) > 20.
+      Script:End
+   }
+   else
+   {
+   Actor["${MerchantName}"]:DoFace
+   }
+
+   ;// Make sure we have at least ONE inventory slot available.
+   if ${Me.InventorySlotsFree} <= 0
+   {
+      echo ${Time}: You don't have any inventory slots free! You need at least 1 free slot to continue.
+      Script:End
+   }
+   
+   ;// We we create a loop to buy. It's possible we will only loop once, or we may have to loop more than once.
+   ;// Create a variable, we can stop looping.
+   variable int toCollect=0
+   toCollect:Set[${Me.InventorySlotsFree}]
+   variable int Collected=0
+	
+   
+   ;// Loop as long as we're not suppose to stop (StopLooping) and as long as there are more bags to buy.
+   while ${Collected} <= ${toCollect}
+   {
+      ;// Target the merchant.
+      Actor["${MerchantName}"]:DoTarget
+      Actor["${MerchantName}"]:DoubleClick
+      wait 5
+      EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+      variable int RandomDelay
+      RandomDelay:Set[ ${Math.Rand[3]} ]
+      RandomDelay:Inc[5]
+      wait ${RandomDelay}
+      Collected:Inc[1]
+   }
+}
 function getChest(string ChestName, bool NoRetry)
 {
 	echo in function getChest ${ChestName} ${NoRetry}
@@ -2117,25 +2203,30 @@ function goHate()
 
 function goZone(string ZoneName)
 {
+	echo Going to Zone: ${ZoneName}
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call ActivateSpire
-		wait 50
+		wait 30
 		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-		RIMUIObj:TravelMap["${Me.Name}","${ZoneName}",1,2]
+		;wait 50
+		;RIMUIObj:TravelMap["${Me.Name}","${ZoneName}",1,2]
 		wait 300
 	}
 	
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[25].Equal["${ZoneName}"]})
 	{
 		call goto_GH
-		wait 600
+		wait 300
 		call goZone "${ZoneName}"
 	}
-	call waitfor_Zone "${ZoneName}"
+	if (!${Zone.Name.Left[25].Equal["${ZoneName}"]})
+		call goZone "${ZoneName}"
 }
 function goto_GH()
 {
+	variable int Counter=0
+
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call IsPresent "Magic Door to the Guild Hall"
@@ -2148,9 +2239,12 @@ function goto_GH()
 			call CastAbility "Call to Guild Hall"
 		do
 		{
-			wait 5
+			wait 10
+			Counter:Inc
 		}
-		while (!${Zone.Name.Right[10].Equal["Guild Hall"]})
+		while (!${Zone.Name.Right[10].Equal["Guild Hall"]} && ${Counter}<300)
+		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
+			call goto_GH
 	}
 }
 function goto_House()
@@ -2186,6 +2280,12 @@ function GuildH(bool NoPlant)
 		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
 		call ActivateVerbOn "Arcanna'se Effigy of Rebirth" "Channel Arcanna'se" TRUE
 		echo GH churns finished
+	}
+	else
+	{
+		call goto_GH
+		wait 600
+		call GuildH
 	}
 }
 function GuildHarvest()
@@ -2822,6 +2922,27 @@ function navwrap(float X, float Y, float Z)
 	}
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
+}
+
+function OgreTransmute(int Bag)
+{
+	if (${Bag}<1 || ${Bag}>5)
+	{
+		echo you must precise bag number 1-6
+		return
+	}
+	variable int i
+	echo transmuting content of bag #${Bag}
+	ogre im
+	wait 100
+	for ( i:Set[1] ; ${i} <= 6 ; i:Inc )
+		OgreIMAPI.TSE:Set_Settings["-bag",${i},FALSE]
+	OgreIMAPI.TSE:Set_Settings["-bag",${Bag},TRUE]
+	OgreIMAPI.TSE:Set_Settings["-salvage",FALSE]
+	OgreIMAPI.TSE:Set_Settings["-extract",TRUE]
+	OgreIMAPI.TSE:Set_Settings["-transmute",TRUE]
+	OgreIMAPI.TSE:Start
+
 }
 function OpenDoor(string ActorName)
 {
