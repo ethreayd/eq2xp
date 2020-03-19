@@ -15,7 +15,6 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
-#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/CDZones.iss"
 variable(script) bool RIStart
 variable(script) bool StoneSkin
 variable(script) int RICrashed
@@ -54,8 +53,16 @@ function main(string questname)
 		Else
 			IdleTime:Set[0]
 		ExecuteQueued
-		if ${IdleTime} > 36
+		if (${IdleTime} > 36 && ${Zone.Name.Equal["The Blinding"]})
+		{
+			echo correcting RZ bug that make a toon waiting in the middle of the Blinding for no reason
+			end Buffer:RZ
+			call goFordelMidst
+			IdleTime:Set[0]
+		}
+		if (${IdleTime} > 36 && !${Zone.Name.Equal["The Blinding"]})
 			call RebootLoop
+		
 		wait 1000
 	}
 	while (TRUE)
@@ -535,12 +542,22 @@ function NextBoulder(int Number)
 }
 function RebootLoop()
 {
+	variable string ScriptName
 	echo rebooting loop
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 	if (${Script["CDLoop"](exists)})
-		end CDLoop
+	{
+		ScriptName:Set["CDLoop"]
+		end ${ScriptName}
+	}
+	if (${Script["BoLLoop"](exists)})
+	{
+		ScriptName:Set["BoLLoop"]
+		end ${ScriptName}
+	}
+	
 	if (${Script["Buffer:RZ"](exists)})
 		end Buffer:RZ
 	wait 100
@@ -550,8 +567,8 @@ function RebootLoop()
 	call goto_GH
 	wait 100
 	call GuildH
-	if (!${Script["CDLoop"](exists)})
-		run EQ2Ethreayd/CDLoop
+	if (!${Script["${ScriptName}"](exists)})
+		run EQ2Ethreayd/${ScriptName}
 }
 function ResetMeltingMud()
 {

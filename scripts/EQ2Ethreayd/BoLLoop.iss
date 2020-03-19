@@ -23,6 +23,7 @@ function main()
 	variable index:string ScriptsToRun
 	variable string sQN
 	variable int x
+	variable bool RION=TRUE
 
 	ScriptsToRun:Insert["livedierepeat"]
 	ScriptsToRun:Insert["autoshinies"]
@@ -40,7 +41,7 @@ function main()
 	}
 
 	call ReturnEquipmentSlotHealth Primary
-	if (${Me.IsDead} || ${Return}<11)
+	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
 	{
 		wait 100
 		echo --- Reviving (Case 1) ReturnEquipmentSlotHealth Primary at ${Return} or/and I am ${Me.IsDead} DEAD
@@ -54,10 +55,14 @@ function main()
 	call getBoLQuests Solo
 	call goFordelMidst
  	if (!${Script["ISXRIAssistant"](exists)})
-		;run EQ2Ethreayd/ISXRIAssistant
+		run EQ2Ethreayd/ISXRIAssistant
+	if (!${Script["ToonAssistant"](exists)})
+		run EQ2Ethreayd/ToonAssistant
 	wait 600
+
 	do
 	{
+
 		eq2execute merc resume
 		call ReturnEquipmentSlotHealth Primary
 		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10)
@@ -66,33 +71,43 @@ function main()
 			RZ
 			wait 30
 			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
+			RION:Set[TRUE]
 		}
-		wait 1000
-		call ReturnEquipmentSlotHealth Primary
-		if (${Return}<11)
+		wait 600
+
+		if (${Me.IsDead})
 		{
 			UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
+			RION:Set[FALSE]
+			wait 100
+			echo --- Reviving
+			RIMUIObj:Revive[${Me.Name}]
+			wait 900
+		}
+		call ReturnEquipmentSlotHealth Primary
+		wait 10
+		if (${Return}<11 && ${Return}>0)
+		{
+			UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
+			RION:Set[FALSE]
 			end Buffer:RZ
 			wait 100
-			echo --- Reviving (Case 2)
-			RIMUIObj:Revive[${Me.Name}]
-			wait 400
+			echo --- Need to go to guild to repair gear at ${Return}%
 			call goto_GH
-			call GuildH TRUE 
+			call GuildH TRUE
+			wait 100
+			call goFordelMidst
 		}
 		else
 		{
-			if (${Me.IsDead})
+			if (!${RION})
 			{
-				UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
-				wait 100
-				echo --- Reviving
-				RIMUIObj:Revive[${Me.Name}]
-				wait 900
 				RI
 				wait 50
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RION:Set[TRUE]
 			}
+		
 		}
 
 	}

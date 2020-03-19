@@ -19,10 +19,13 @@
 
 function main(string questname)
 {
+	variable bool Solo
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
+	if (${Me.Group}<3)
+		Solo:Set[TRUE]
 	do
 	{
 		if (${Me.Power}<10 && !${Me.IsDead})
@@ -31,8 +34,10 @@ function main(string questname)
 			eq2execute gsay I really need healing now !
 		if (${Me.IsDead})
 			eq2execute gsay Can I have a rez please ?
+		if (${Solo})
+			call UsePotions
 		ExecuteQueued
-		wait 1000
+		wait 10
 	}
 	while (TRUE)
 }

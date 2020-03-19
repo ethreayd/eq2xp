@@ -2277,6 +2277,9 @@ function GuildH(bool NoPlant)
 		wait 50
 		call DepositAll "Scroll Depot"
 		wait 100
+		ogre im -restock
+		wait 150
+		ogre end im
 		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
 		call ActivateVerbOn "Arcanna'se Effigy of Rebirth" "Channel Arcanna'se" TRUE
 		echo GH churns finished
@@ -2963,6 +2966,12 @@ function OpenDoor(string ActorName)
 		while ${ActorIterator:Next(exists)}
 	}
 }
+function ScriptAction(string ScriptName, string Action)
+{
+	if ${Script[${ScriptName}](exists)}
+		Script[${ScriptName}]:${Action}
+}
+
 function PauseZone(bool Catch22)
 {
 	variable string sQN
@@ -3600,6 +3609,33 @@ function Unstuck_out(bool FlyingZone)
 function UseAbility(string MyAbilityName)
 {
 	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
+}
+function UsePotions()
+{
+	if (${Me.Arcane}>0)
+		call UseCurePotion Arcane
+	if (${Me.Elemental}>0)
+		call UseCurePotion Elemental
+	if (${Me.Noxious}>0)
+		call UseCurePotion Noxious
+	if (${Me.Trauma}>0)
+		call UseCurePotion Trauma
+	if (${Me.Power}<10)
+		Me.Inventory[Query, Name =- "Essence of Power"]:Use
+	if (${Me.Health}<10)
+		Me.Inventory[Query, Name =- "Essence of Health"]:Use
+}
+function UseCurePotion(string Detriment)
+{
+	if (${Me.${Detriment}}>0)
+	{
+		do
+		{
+			Me.Inventory[Query, Name =- "Cure ${Detriment}"]:Use
+			wait 10
+		}
+		while (${Me.${Detriment}}>0)
+	}
 }
 
 function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
