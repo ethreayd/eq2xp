@@ -25,16 +25,23 @@ variable(script) bool DoMiniMud
 variable(script) bool MeltingMud
 variable(script) bool Mudwalker
 variable(script) int Snowball=0
+variable(script) bool CantSeeTarget
+variable(script) int ScriptIdleTime
 
 function main(string questname)
 {
 	variable int IdleTime
+	variable int BlindingStuck
+	variable float loc0 
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	RIStart:Set[TRUE]
+	
 	do
 	{
-		echo Zone is ${Zone.Name}
+		echo Zone is ${Zone.Name} (${BlindingStuck} | ${IdleTime})
+		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+			
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
 			eq2execute merc resume
 		
@@ -48,24 +55,270 @@ function main(string questname)
 			call Zone_EryslaiTheBixelHiveSolo
 		if ${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]}
 			call Zone_VegarlsonRuinsofRatheSolo
-		if ${Me.IsIdle}
+		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]}
+			call Zone_SanctusSeruEchelonofOrderSolo
+		if ${Zone.Name.Equal["Sanctus Seru: Arx Aeturnus \[Solo\]"]}
+			call Zone_SanctusSeruArxAeturnusSolo
+		if ${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]}
+			call Zone_AurelianCoastReishiRumbleSolo
+		if ${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]}
+			call Zone_AurelianCoastMaidensEyeSolo
+		if (${Me.IsIdle} && !${Me.InCombat})
 			IdleTime:Inc
 		Else
 			IdleTime:Set[0]
+		if (${IdleTime} > 60)
+		{
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			IdleTime:Set[0]
+		}
+		if (${Zone.Name.Left[12].Equal["The Blinding"]})
+		{
+			BlindingStuck:Inc
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				echo seems stuck in the Blinding
+				BlindingStuck:Inc
+				BlindingStuck:Inc
+				BlindingStuck:Inc
+				BlindingStuck:Inc
+			}
+		}
+		else
+			BlindingStuck:Set[0]	
 		ExecuteQueued
-		if (${IdleTime} > 36 && ${Zone.Name.Equal["The Blinding"]})
+		if ((${IdleTime} > 100 || ${BlindingStuck}> 100) && ${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo correcting RZ bug that make a toon waiting in the middle of the Blinding for no reason
 			end Buffer:RZ
 			call goFordelMidst
 			IdleTime:Set[0]
 		}
-		if (${IdleTime} > 36 && !${Zone.Name.Equal["The Blinding"]})
+		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
+		{
+			echo Rebooting Loop
 			call RebootLoop
-		
-		wait 1000
+		}	
+		wait 300
 	}
 	while (TRUE)
+}
+
+function Zone_SanctusSeruEchelonofOrderSolo()
+{
+	ScriptIdleTime:Set[0]
+	do
+	{
+		call MainChecks
+		if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 10 && ${Me.Z} > -10)
+		{
+			oc !c ${Me.Name} -Special
+		}
+		if (${Me.InCombatMode} && !${Me.Target(exists)})
+			press Tab 
+		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -345 && ${Me.X} > -365 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 20)
+		{
+			if (${RIStart})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[FALSE]
+			}
+			do
+			{
+				echo fixing Seru stucked
+				eq2execute merc attack
+				press Tab
+				eq2execute autoattack 0
+				wait 20
+				eq2execute autoattack 2
+				call DMove -358 90 39 3 30 TRUE TRUE 3
+				;call DMove -388 88 31 3 30 TRUE TRUE 3
+				;call DMove -397 88 0 3 30 TRUE TRUE 3
+				;call DMove -331 90 24 3 30 TRUE TRUE 3 
+			}
+			while (${Me.InCombatMode} && ${Me.Target.Distance}>10 && ${Me.X} < -345 && ${Me.X} > -365 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 20)	
+			echo fixed for this loop
+			wait 50
+			if (!${RIStart})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[TRUE]
+			}
+			CantSeeTarget:Set[FALSE]
+		}
+		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -235 && ${Me.X} > -255 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 150 && ${Me.Z} > 130)
+		{
+			if (${RIStart})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[FALSE]
+			}
+			echo fixing Seru stucked
+			eq2execute merc backoff
+			call DMove -280 88 152 3 30 TRUE FALSE 5
+			eq2execute merc backoff
+			call DMove -294 88 112 3 30 TRUE FALSE 5
+			eq2execute merc backoff
+			call DMove -267 94 94 3 30 TRUE FALSE 5
+			eq2execute merc backoff
+			call DMove -265 95 117 3 30 TRUE FALSE 
+			eq2execute merc attack
+			echo fixed for this loop
+			wait 50
+			if (!${RIStart})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[TRUE]
+			}
+			CantSeeTarget:Set[FALSE]
+		}
+		if (!${Me.InCombatMode} && ${Me.X} < -270 && ${Me.X} > -290 &&  ${Me.Y} < 95 && ${Me.Y} > 80 && ${Me.Z} < 110 && ${Me.Z} > 95)
+		{
+			if (${RIStart})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[FALSE]
+			}
+				echo fixing Seru stucked
+			call DMove -306 88 96 3 30 TRUE TRUE 3 
+			echo fixed for this loop
+			
+			if (!${RIStart})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[TRUE]
+			}
+			CantSeeTarget:Set[FALSE]
+		}
+		if (!${Me.InCombatMode} && ${Me.X} < -200 && ${Me.X} > -220 &&  ${Me.Y} < 95 && ${Me.Y} > 80 && ${Me.Z} < -215 && ${Me.Z} > -235)
+		{
+			if (${RIStart})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[FALSE]
+			}
+				echo fixing Seru stucked
+				call DMove -205 88 -210 3 30 TRUE TRUE 3 
+			echo fixed for this loop
+			
+			if (!${RIStart})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				RIStart:Set[TRUE]
+			}
+			CantSeeTarget:Set[FALSE]
+		}
+		ExecuteQueued
+		
+	}
+	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
+}
+function Zone_SanctusSeruArxAeturnusSolo()
+{
+	
+	variable int Counter=0
+	do
+	{
+		call MainChecks
+	}
+	while (${Zone.Name.Equal["Sanctus Seru: Arx Aeturnus \[Solo\]"]})
+}
+function Zone_AurelianCoastReishiRumbleSolo()
+{
+	
+	variable int Counter=0
+	ScriptIdleTime:Set[0]
+	do
+	{
+		call MainChecks
+		call IsPresent Nerobahan
+	
+		if (!${Me.InCombatMode} && ${Return})
+		{
+			echo Will autofight at ${Counter}/20
+			Counter:Inc
+			if (${Counter}>19)
+			{
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				call MoveCloseTo Nerobahan
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				do
+				{
+					wait 10
+				}
+				while (!${Me.InCombatMode})
+				call TanknSpank Nerobahan
+			}
+		}
+		else
+			Counter:Set[0]
+		if (!${Me.InCombatMode} && ${Me.X} < 570 && ${Me.X} > 560 &&  ${Me.Y} < 35 && ${Me.Y} > 20 && ${Me.Z} < 520 && ${Me.Z} > 510)
+		{
+			call DMove 568 19 505 3 30 TRUE TRUE 5
+		}
+	}
+	while (${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]})
+}
+function Zone_AurelianCoastMaidensEyeSolo()
+{
+	
+	variable int Counter=0
+	variable int Counter2=0
+	ScriptIdleTime:Set[0]
+	do
+	{
+		call MainChecks
+		echo Zone is ${Zone.Name} (${Counter} | ${Counter2})
+		call IsPresent "Xylox the Poisonous"
+	
+		if (!${Me.InCombatMode} && ${Return})
+		{
+			echo Will autofight at ${Counter}/20
+			Counter:Inc
+			if (${Counter}>19)
+			{
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				call MoveCloseTo "Xylox the Poisonous"
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				do
+				{
+					wait 10
+				}
+				while (!${Me.InCombatMode})
+				call TanknSpank "Xylox the Poisonous"
+				wait 10
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE"]
+				Counter:Set[0]
+			}
+		}
+		else
+			Counter:Set[0]
+		if (!${Me.InCombatMode} && ${Me.X} < -515 && ${Me.X} > -535 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < 20 && ${Me.Z} > 0)
+		{
+			call RebootLoop
+		}
+		if (${Me.InCombatMode} && ${Me.X} < -445 && ${Me.X} > -465 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -90 && ${Me.Z} > -110)
+		{
+			Counter2:Inc
+			if (${Counter2}>19)
+			{
+				call AttackClosest
+				Counter2:Set[0]
+			}
+		}
+		else
+			Counter2:Set[0]
+	}
+	while (${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]})
 }
 function DoMound()
 {
@@ -426,8 +679,8 @@ function gotoSlurpgaloop()
 function MainChecks()
 {
 	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
-		
-	echo in MainChecks Loop
+	
+	echo in MainChecks Loop (${ScriptIdleTime})
 	if (!${Me.Grouped} && !${Me.InCombatMode})
 	{
 		eq2execute merc resume
@@ -494,6 +747,16 @@ function MainChecks()
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
 		call RebootLoop	
+	if (${Me.IsIdle} && !${Me.InCombat})
+		ScriptIdleTime:Inc
+	Else
+		ScriptIdleTime:Set[0]
+	if (${ScriptIdleTime} > 100)
+	{
+		echo I am Idle (${ScriptIdleTime}) and I don't know why
+		;UIElement[RI].FindUsableChild[Start,button]:LeftClick
+		;ScriptIdleTime:Set[0]
+	}
 }
 function NextBoulder(int Number)
 {
@@ -543,8 +806,10 @@ function NextBoulder(int Number)
 function RebootLoop()
 {
 	variable string ScriptName
+	ScriptName:Set["BoLLoop"]
 	echo rebooting loop
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 	if (${Script["CDLoop"](exists)})
@@ -557,7 +822,7 @@ function RebootLoop()
 		ScriptName:Set["BoLLoop"]
 		end ${ScriptName}
 	}
-	
+	I am doing ${ScriptName} after going back to the Guild
 	if (${Script["Buffer:RZ"](exists)})
 		end Buffer:RZ
 	wait 100
@@ -847,7 +1112,8 @@ atom HandleAllEvents(string Message)
 {
 	if (${Message.Equal["Can't see target"]})
 	{
-		 eq2execute gsay ${Message}
+		eq2execute gsay ${Message}
+		CantSeeTarget:Set[TRUE]
 	}
 	if (${Message.Equal["Too far away"]})
 	{
@@ -902,6 +1168,10 @@ atom HandleAllEvents(string Message)
 	{
 		Snowball:Inc
 		echo resuming to part ${Snowball}/5
+	}
+	if (${Message.Find["ve got better things to do"]}>0)
+	{
+		QueueCommand call RebootLoop
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

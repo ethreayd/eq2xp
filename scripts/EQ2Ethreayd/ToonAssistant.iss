@@ -20,6 +20,8 @@
 function main(string questname)
 {
 	variable bool Solo
+	variable int CombatDuration=0
+	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	eq2execute spend_deity_point 2282608707 1
@@ -36,17 +38,39 @@ function main(string questname)
 			eq2execute gsay Can I have a rez please ?
 		if (${Solo})
 			call UsePotions
+		if (${Me.InCombatMode})
+			CombatDuration:Inc
+		else
+			CombatDuration:Set[0]
+		if (${CombatDuration}>120 && !${Global_DONOTATTACK})
+		{
+			call FixCombat
+			CombatDuration:Set[0]
+		}
+		
+			
 		ExecuteQueued
 		wait 10
 	}
 	while (TRUE)
 }
- 
+function FixCombat()
+{
+	echo this fight is taking too much time...
+	if (${Me.Target.Name.Equal["${Me.Name}"]})
+	{
+		eq2execute merc backoff
+		wait 50
+		eq2execute merc attack
+	}
+}
 atom HandleAllEvents(string Message)
 {
 	if (${Message.Equal["Can't see target"]})
 	{
-		 eq2execute gsay ${Message}
+		eq2execute gsay ${Message}
+		if (!${Script["wrap"](exists)})
+			run EQ2Ethreayd/wrap UnstuckR 5
 	}
 	if (${Message.Equal["Too far away"]})
 	{

@@ -156,13 +156,15 @@ function getBoLQuests(string version)
 		}
 	}
 	call DMove -532 62 261 3 30 FALSE FALSE 5
-	call DMove -580 60 260 3
-	call DMove -620 58 256 3
+	call DMove -580 60 260 3 30 FALSE TRUE 5
+	call DMove -620 58 256 3 30
 }
 function goAurelianCoast()
 {
+	
 	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{
+		echo Going to Aurelian Coast
 		call goZone "The Blinding"
 		if (${Me.Y}>250)
 		{
@@ -184,18 +186,21 @@ function goAurelianCoast()
 }
 function goFordelMidst()
 {
+	echo going to Fordel Midst
 	call goAurelianCoast
-	call DMove 623 99 -512 3
+	call DMove 623 99 -512 3 30 TRUE FALSE 5
+	call DMove 643 92 -473 3 30 TRUE FALSE 5
 	call 3DNav 591 110 -386
 	call 3DNav 399 155 -239
 	call 3DNav 219 122 -244
 	call 3DNav 156 144 -449
 	call GoDown
-	call DMove 141 87 -494 3
-	call DMove 119 85 -525 3
-	call DMove 126 85 -540 3 30 FALSE FALSE 5
-	call DMove 89 73 -595 3
-	call DMove 112 68 -616 3 
+	call DMove 141 87 -494 3 30 TRUE FALSE
+	call DMove 119 85 -525 3 30 TRUE FALSE
+	call DMove 126 85 -540 3 30 TRUE FALSE 5
+	call DMove 89 73 -595 3 30 TRUE FALSE
+	call DMove 112 68 -616 3 30 TRUE FALSE 3
+	
 }
 function goDercin_Marrbrand()
 {

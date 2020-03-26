@@ -29,6 +29,7 @@ function main()
 	ScriptsToRun:Insert["autoshinies"]
 	ScriptsToRun:Insert["ZoneUnstuck"]
 	ScriptsToRun:Insert["Buffer:RZ"]
+	ScriptsToRun:Insert["Buffer:RIMovement"]
 	ScriptsToRun:Insert["wrap1"]
 	ScriptsToRun:Insert["wrap2"]
 	ScriptsToRun:Insert["wrap"]
@@ -39,7 +40,17 @@ function main()
 		if ${Script["${ScriptsToRun[${x}]}"](exists)}
 			endscript "${ScriptsToRun[${x}]}"
 	}
-
+	if (!${Script["ISXRIAssistant"](exists)})
+		run EQ2Ethreayd/ISXRIAssistant
+	if (!${Script["ToonAssistant"](exists)})
+		run EQ2Ethreayd/ToonAssistant
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+	
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	
+	call GoDown
 	call ReturnEquipmentSlotHealth Primary
 	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
 	{
@@ -54,10 +65,7 @@ function main()
 
 	call getBoLQuests Solo
 	call goFordelMidst
- 	if (!${Script["ISXRIAssistant"](exists)})
-		run EQ2Ethreayd/ISXRIAssistant
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
+ 	
 	wait 600
 
 	do
@@ -68,6 +76,7 @@ function main()
 		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10)
 		{
 			echo starting RZ
+			oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
 			RZ
 			wait 30
 			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
@@ -78,10 +87,12 @@ function main()
 		if (${Me.IsDead})
 		{
 			UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
+			UIElement[RIM].FindUsableChild["Custom Close Button",button]:LeftClick
 			RION:Set[FALSE]
 			wait 100
-			echo --- Reviving
+			echo --- Reviving - RION at ${RION}
 			RIMUIObj:Revive[${Me.Name}]
+			echo waiting for death sickness to wear off
 			wait 900
 		}
 		call ReturnEquipmentSlotHealth Primary

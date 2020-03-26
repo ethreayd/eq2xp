@@ -540,7 +540,7 @@ function AltTSUp()
 	call Converse "Dercin Marrbrand" 2
 	wait 20
 	echo go to Guild Hall
-	call goto_GH
+	call goto_GH TRUE
 }
 
 function Ascend(float Y, bool Swim)
@@ -587,6 +587,24 @@ function Ascend(float Y, bool Swim)
 	press -release FLYUP
  	eq2execute loc
 	return ${Me.Loc.Y}
+}
+function AttackClosest(float MaxDistance)
+{
+    variable index:actor Actors
+    variable iterator ActorIterator
+
+    if (${MaxDistance}<1)
+		MaxDistance:Set[30]
+
+    EQ2:QueryActors[Actors, Type =- "NPC" && Distance <= ${MaxDistance} ]
+    Actors:GetIterator[ActorIterator]
+  
+    if ${ActorIterator:First(exists)}
+    {
+	echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m)
+	
+        target ${ActorIterator.Value.ID}
+    }
 }
 function AutoAddAgent()
 {
@@ -773,6 +791,10 @@ function AutoPlant()
 		echo I am in zone ${Zone.Name}
 	}
 	while (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	wait 30
+	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
+	wait 30
+	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
 	wait 30
 	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
 	wait 30
@@ -2203,7 +2225,7 @@ function goHate()
 
 function goZone(string ZoneName)
 {
-	echo Going to Zone: ${ZoneName}
+	echo Going to Zone: ${ZoneName} (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call ActivateSpire
@@ -2226,7 +2248,7 @@ function goZone(string ZoneName)
 function goto_GH()
 {
 	variable int Counter=0
-
+	call GoDown
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call IsPresent "Magic Door to the Guild Hall"
@@ -2273,10 +2295,10 @@ function GuildH(bool NoPlant)
 		call TransmuteAll "Celestial Transmutation Stone"
 		call TransmuteAll "Veilwalker's Transmutation Stone"
 		echo First Depot
-		ogre depot -allh -hda -llda -cda
-		wait 50
-		call DepositAll "Scroll Depot"
-		wait 100
+		ogre im -Depot
+		wait 600
+		ogre end im
+		wait 20
 		ogre im -restock
 		wait 150
 		ogre end im
