@@ -783,10 +783,10 @@ function AutoPlant()
 	;UIElement[OgreTaskListTemplateUIXML].FindUsableChild[button_clearerrors,button]:LeftClick
 	call goto_GH
 	wait 100
-	call goto_House
 	do
 	{
 		echo I am in zone ${Zone.Name}
+		call goto_House
 		wait 300
 		echo I am in zone ${Zone.Name}
 	}
@@ -2271,6 +2271,7 @@ function goto_GH()
 }
 function goto_House()
 {
+	echo Going to ${Me.Name}'s first House
 	Actor[name,"Portal to Housing"]:DoubleClick
 	wait 20
 	EQ2UIPage[_HUD,omnihouse].Child[composite,_HUD.omnihouse].Child[4].Child[5].Child[7]:SetProperty[text,""]

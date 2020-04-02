@@ -23,7 +23,6 @@ function main()
 	variable index:string ScriptsToRun
 	variable string sQN
 	variable int x
-	variable bool RION=TRUE
 
 	ScriptsToRun:Insert["livedierepeat"]
 	ScriptsToRun:Insert["autoshinies"]
@@ -42,8 +41,7 @@ function main()
 	}
 	if (!${Script["ISXRIAssistant"](exists)})
 		run EQ2Ethreayd/ISXRIAssistant
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
+	
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
 	
@@ -70,7 +68,8 @@ function main()
 
 	do
 	{
-
+		if (!${Script["ISXRIAssistant"](exists)})
+			run EQ2Ethreayd/ISXRIAssistant
 		eq2execute merc resume
 		call ReturnEquipmentSlotHealth Primary
 		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10)
@@ -86,11 +85,12 @@ function main()
 
 		if (${Me.IsDead})
 		{
-			UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
-			UIElement[RIM].FindUsableChild["Custom Close Button",button]:LeftClick
-			RION:Set[FALSE]
+			if (!${RI_Var_Bool_Paused})
+			{
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
 			wait 100
-			echo --- Reviving - RION at ${RION}
+			echo --- Reviving (from script BoLLoop)
 			RIMUIObj:Revive[${Me.Name}]
 			echo waiting for death sickness to wear off
 			wait 900
@@ -99,9 +99,11 @@ function main()
 		wait 10
 		if (${Return}<11 && ${Return}>0)
 		{
-			UIElement[RI].FindUsableChild["Custom Close Button",button]:LeftClick
-			RION:Set[FALSE]
-			end Buffer:RZ
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+	
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
 			wait 100
 			echo --- Need to go to guild to repair gear at ${Return}%
 			call goto_GH
@@ -111,12 +113,9 @@ function main()
 		}
 		else
 		{
-			if (!${RION})
+			if (${RI_Var_Bool_Paused})
 			{
-				RI
-				wait 50
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-				RION:Set[TRUE]
 			}
 		
 		}

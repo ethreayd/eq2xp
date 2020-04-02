@@ -16,7 +16,6 @@
 #define JUMP Space
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-
 function main(string questname)
 {
 	variable bool Solo
@@ -47,8 +46,6 @@ function main(string questname)
 			call FixCombat
 			CombatDuration:Set[0]
 		}
-		
-			
 		ExecuteQueued
 		wait 10
 	}
@@ -63,12 +60,20 @@ function FixCombat()
 		wait 50
 		eq2execute merc attack
 	}
+	if !${Me.Target(exists)}
+	{
+		eq2execute autoattack 0
+		wait 10
+		eq2execute autoattack 2
+	}
+	
+	
 }
 atom HandleAllEvents(string Message)
 {
 	if (${Message.Equal["Can't see target"]})
 	{
-		eq2execute gsay ${Message}
+		eq2execute gsay ${Message} - Saperlipopette
 		if (!${Script["wrap"](exists)})
 			run EQ2Ethreayd/wrap UnstuckR 5
 	}
