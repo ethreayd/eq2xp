@@ -18,12 +18,12 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 ;#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/BoLZones.iss"
 
-function main()
+function main(bool UseOgreIC)
 {
 	variable index:string ScriptsToRun
 	variable string sQN
 	variable int x
-
+	variable int Counter
 	ScriptsToRun:Insert["livedierepeat"]
 	ScriptsToRun:Insert["autoshinies"]
 	ScriptsToRun:Insert["ZoneUnstuck"]
@@ -32,78 +32,128 @@ function main()
 	ScriptsToRun:Insert["wrap1"]
 	ScriptsToRun:Insert["wrap2"]
 	ScriptsToRun:Insert["wrap"]
-
+	if (${UseOgreIC})
+		ScriptsToRun:Insert["ISXRIAssistant"]
+	else
+		ogre end ic
+		
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{
         echo Killing script ${ScriptsToRun[${x}]}
 		if ${Script["${ScriptsToRun[${x}]}"](exists)}
 			endscript "${ScriptsToRun[${x}]}"
 	}
-	if (!${Script["ISXRIAssistant"](exists)})
-		run EQ2Ethreayd/ISXRIAssistant
 	
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
-	
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	if (${UseOgreIC})
+	{
+		if (!${Script["OgreICAssistant"](exists)})
+			run EQ2Ethreayd/OgreICAssistant
+	}
+	else
+	{
+		if (!${Script["ISXRIAssistant"](exists)})
+			run EQ2Ethreayd/ISXRIAssistant
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	}
 	
 	call GoDown
+	
 	call ReturnEquipmentSlotHealth Primary
 	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
 	{
 		wait 100
 		echo --- Reviving (Case 1) ReturnEquipmentSlotHealth Primary at ${Return} or/and I am ${Me.IsDead} DEAD
-		oc !c -Revive ${Me.Name}
-		RIMUIObj:Revive[${Me.Name}]
+		if (${UseOgreIC})
+			oc !c ${Me.Name} -letsgo 
+			oc !c ${Me.Name} -Revive
+		else
+			RIMUIObj:Revive[${Me.Name}]
 		wait 400
 	}
-	call goto_GH
-	call GuildH TRUE
-
-	call getBoLQuests Solo
-	call goFordelMidst
- 	
-	wait 600
-
+	call IsPresent dungeons
+	if (!${Return})
+	{
+		call goto_GH
+		call GuildH TRUE
+		call getBoLQuests Solo
+		call goFordelMidst
+		wait 120
+	}
 	do
 	{
-		if (!${Script["ISXRIAssistant"](exists)})
-			run EQ2Ethreayd/ISXRIAssistant
+		if (${UseOgreIC})
+		{
+			if (!${Script["OgreICAssistant"](exists)})
+				run EQ2Ethreayd/OgreICAssistant
+		}
+		else
+		{
+			if (!${Script["ISXRIAssistant"](exists)})
+				run EQ2Ethreayd/ISXRIAssistant
+		}
+	
 		eq2execute merc resume
-		call ReturnEquipmentSlotHealth Primary
-		if (!${Script["Buffer:RZ"](exists)} && ${Return}>10)
-		{
-			echo starting RZ
-			oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
-			RZ
-			wait 30
-			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
-			RION:Set[TRUE]
-		}
-		wait 600
-
+		wait 50
 		if (${Me.IsDead})
+			Counter:Inc
+		else
+			Counter:Set[0]
+		if (${Me.IsDead} && ${Counter}>30 )
 		{
-			if (!${RI_Var_Bool_Paused})
+			
+			echo --- Reviving (from script BoLLoop (${UseOgreIC}))
+			if (${UseOgreIC})
 			{
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				ogre end ic
+				oc !c ${Me.Name} -letsgo 
+				oc !c ${Me.Name} -Revive
 			}
-			wait 100
-			echo --- Reviving (from script BoLLoop)
-			RIMUIObj:Revive[${Me.Name}]
-			echo waiting for death sickness to wear off
-			wait 900
+			else
+			{
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+				RIMUIObj:Revive[${Me.Name}]
+			}
+			wait 300
+			call ReturnEquipmentSlotHealth Primary
+			wait 10
+			if (${Return}>10)
+			{
+				echo waiting for death sickness to wear off
+				wait 900
+				if (${UseOgreIC})
+				{
+					call RunIC
+				}
+				else
+				{
+					RI
+					wait 20
+					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				}
+			}
 		}
+		
 		call ReturnEquipmentSlotHealth Primary
 		wait 10
 		if (${Return}<11 && ${Return}>0)
 		{
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
-	
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+			if (${UseOgreIC})
+			{
+				ogre end ic
+				oc !c ${Me.Name} -letsgo 
+			
+			}
+			else
+			{
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+			}
 			wait 100
 			echo --- Need to go to guild to repair gear at ${Return}%
 			call goto_GH
@@ -113,13 +163,50 @@ function main()
 		}
 		else
 		{
-			if (${RI_Var_Bool_Paused})
+			if (${Script["Buffer:RunInstances"](exists)} && ${RI_Var_Bool_Paused})
 			{
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
-		
 		}
-
+		
+		call ReturnEquipmentSlotHealth Primary
+		if (${Return}>10)
+		{
+			oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
+			oc !c ${Me.Name} -resume
+			if (${UseOgreIC})
+			{
+				call RunIC
+			}
+			else
+			{
+				if (!${Script["Buffer:RZ"](exists)})
+				{
+					echo starting RZ
+					RZ
+					wait 30
+					UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
+				}
+			}
+			wait 600
+		}
+		
 	}
 	while (TRUE)
 }
+function RunIC()
+{
+	ogre ic
+	wait 300
+    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Solo"]
+    Obj_FileExplorer:Scan
+    Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Solo.iss"]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+}
+	

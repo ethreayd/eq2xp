@@ -510,6 +510,7 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 }
 function AltTSUp()
 {
+	variable int Counter=0
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
 	call goDercin_Marrbrand
 	wait 50
@@ -539,7 +540,15 @@ function AltTSUp()
 	wait 20
 	call Converse "Dercin Marrbrand" 2
 	wait 20
-	echo go to Guild Hall
+	echo go to Guild Hall (with auto fix of stay forever there bug)
+	do
+	{
+		Counter:Inc	
+		wait 10
+		if (${Counter}>500)
+			echo I should do something about it
+	}
+	while (!${Me.Ability["Call to Guild Hall"].IsReady})
 	call goto_GH TRUE
 }
 
@@ -963,6 +972,7 @@ function CastAbility(string AbilityName, bool NoWait)
 	}
 	call UseAbility "${AbilityName}"
 }
+
 function CastImmunity(string ToonName, int Health, int Pause)
 {
 
@@ -2949,7 +2959,15 @@ function navwrap(float X, float Y, float Z)
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
 }
-
+function OgreICRun(string Dir, string Iss)
+{
+	ogre ic
+	wait 300
+        Obj_FileExplorer:Change_CurrentDirectory["${Dir}"]
+        Obj_FileExplorer:Scan
+        Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["${Iss}"]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+}
 function OgreTransmute(int Bag)
 {
 	if (${Bag}<1 || ${Bag}>5)
@@ -3633,28 +3651,43 @@ function UseAbility(string MyAbilityName)
 {
 	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
-function UsePotions()
+function UseInventory(string ItemName, bool NoWait)
 {
-	if (${Me.Arcane}>0)
-		call UseCurePotion Arcane
-	if (${Me.Elemental}>0)
-		call UseCurePotion Elemental
-	if (${Me.Noxious}>0)
-		call UseCurePotion Noxious
-	if (${Me.Trauma}>0)
-		call UseCurePotion Trauma
-	if (${Me.Power}<10)
-		Me.Inventory[Query, Name =- "Essence of Power"]:Use
-	if (${Me.Health}<10)
-		Me.Inventory[Query, Name =- "Essence of Health"]:Use
+	if (!${NoWait})
+	{
+		do
+		{
+			wait 20
+		}
+		while (!${Me.Inventory["${ItemName}"].IsReady})
+	}
+	Me.Inventory[Query, Name =- "${ItemName}"]:Use"
 }
-function UseCurePotion(string Detriment)
+function UsePotions(bool Everytime, bool NoWait)
+{
+	if (${Me.InCombat} || ${Everytime})
+	{
+		if (${Me.Arcane}>0)
+			call UseCurePotion Arcane ${NoWait}
+		if (${Me.Elemental}>0)
+			call UseCurePotion Elemental ${NoWait}
+		if (${Me.Noxious}>0)
+			call UseCurePotion Noxious ${NoWait}
+		if (${Me.Trauma}>0)
+			call UseCurePotion Trauma ${NoWait}
+		if (${Me.Power}<10)
+			call UseInventory "Essence of Power" ${NoWait}
+		if (${Me.Health}<10)
+			call UseInventory "Essence of Health" ${NoWait}
+	}
+}
+function UseCurePotion(string Detriment, bool NoWait)
 {
 	if (${Me.${Detriment}}>0)
 	{
 		do
 		{
-			Me.Inventory[Query, Name =- "Cure ${Detriment}"]:Use
+			call UseInventory "Cure ${Detriment}" ${NoWait}
 			wait 10
 		}
 		while (${Me.${Detriment}}>0)

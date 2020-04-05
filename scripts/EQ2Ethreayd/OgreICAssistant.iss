@@ -52,6 +52,8 @@ function main(string questname)
 			call Zone_AurelianCoastReishiRumbleSolo
 		if ${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]}
 			call Zone_AurelianCoastMaidensEyeSolo
+		else
+			call MainChecks
 		if (${Me.IsIdle} && !${Me.InCombat})
 			IdleTime:Inc
 		Else
@@ -102,17 +104,24 @@ function MainChecks()
 		eq2execute merc resume
 		wait 100
 	}
+	if (${ScriptIdleTime}>60 && ${Me.IsDead})
+	{
+		eq2execute merc suspend
+		wait 10
+		ChoiceWindow:DoChoice1
+	}
 	if (${Me.IsDead} && !${Me.Grouped})
 	{
 		wait 100
 		echo Dead and Alone --- Reviving
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+		
 		wait 100
-		RIMUIObj:Revive[${Me.Name}]
+		oc !c ${Me.Name} -letsgo 
+		oc !c ${Me.Name} -revive 
+		oc !c ${Me.Name} -pause
 		wait 400
-		RI
+		oc !c ${Me.Name} -resume		
 		wait 100
-		UIElement[RI].FindUsableChild[Start,button]:LeftClick
 	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
@@ -140,19 +149,23 @@ function MainChecks()
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
 	}
-	if (${TimeZone} > 3600)
-		call RebootLoop
+	if (${TimeZone} > 7200)
+	{
+		echo more than 2 hours in the same zone - rebooting loop (from RebootLoop) 
+		echo deactivated until I know what to do here
+		;call RebootLoop
+	}
 }
 function RebootLoop()
 {
 	variable string ScriptName
-	ScriptName:Set["BoLLoopIC"]
+	ScriptName:Set["BoLLoop"]
 	echo rebooting loop
 	ogre end ic
 	
-	if (${Script["BoLLoopIC"](exists)})
+	if (${Script["BoLLoop"](exists)})
 	{
-		ScriptName:Set["BoLLoopIC"]
+		ScriptName:Set["BoLLoop"]
 		end ${ScriptName}
 	}
 	if (${Script["ToonAssistant"](exists)})
@@ -162,14 +175,16 @@ function RebootLoop()
 	I am doing ${ScriptName} after going back to the Guild
 	
 	wait 100
-	echo --- Reviving
+	echo --- Reviving from RebootLoop
+	oc !c ${Me.Name} -letsgo 
 	oc !c ${Me.Name} -revive
 	wait 400
 	call goto_GH
 	wait 100
 	call GuildH
-	;if (!${Script["${ScriptName}"](exists)})
-	;	run EQ2Ethreayd/${ScriptName}
+	if (!${Script["${ScriptName}"](exists)})
+		run EQ2Ethreayd/${ScriptName} TRUE
+	oc !c ${Me.Name} -resume
 	end OgreICAssistant
 }
 function Zone_SanctusSeruEchelonofOrderSolo()

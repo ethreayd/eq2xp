@@ -28,6 +28,7 @@ variable(script) int Snowball=0
 variable(script) bool CantSeeTarget
 variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
+variable(script) bool ManualMode
 
 function main(string questname)
 {
@@ -64,10 +65,14 @@ function main(string questname)
 			call Zone_SanctusSeruEchelonofOrderSolo
 		if ${Zone.Name.Equal["Sanctus Seru: Arx Aeturnus \[Solo\]"]}
 			call Zone_SanctusSeruArxAeturnusSolo
-		if ${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]}
-			call Zone_AurelianCoastReishiRumbleSolo
 		if ${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]}
 			call Zone_AurelianCoastMaidensEyeSolo
+		if ${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]}
+			call Zone_AurelianCoastReishiRumbleSolo
+		if ${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]}
+			call Zone_AurelianCoastSambataVillageSolo
+		else
+			call MainChecks
 		if (${Me.IsIdle} && !${Me.InCombat})
 			IdleTime:Inc
 		Else
@@ -147,8 +152,8 @@ function MainChecks()
 		eq2execute merc resume
 		wait 100
 	}
-	call IsPresent "Lady Najena" 50
-	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode} && !${Return})
+	
+	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode} && !${ManualMode})
 	{
 		RICrashed:Inc
 		echo RI seems crashed (test N=${RICrashed})
@@ -231,7 +236,7 @@ function MainChecks()
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
 	}
-	if (${TimeZone} > 3600)
+	if (${TimeZone} > 7200)
 		call RebootLoop
 }
 function RebootLoop()
@@ -263,6 +268,7 @@ function RebootLoop()
 	wait 100
 	echo --- Reviving
 	RIMUIObj:Revive[${Me.Name}]
+	oc !c ${Me.Name} -Revive
 	wait 400
 	call goto_GH
 	wait 100
@@ -281,7 +287,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		call MainChecks
 		if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 10 && ${Me.Z} > -10)
 		{
-			oc !c ${Me.Name} -Special
+			call ActivateVerbOn "circle" "Access"
 		}
 		if (${Me.InCombatMode} && !${Me.Target(exists)})
 			press Tab 
@@ -402,6 +408,22 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			}
 			CantSeeTarget:Set[FALSE]
 		}
+		if (!${Me.InCombatMode} && ${Me.X} < -340 && ${Me.X} > -360 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -35 && ${Me.Z} > -50)
+		{
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			echo fixing Seru stucked
+			eq2execute merc backoff
+			call DMove 364 90 -34 3 30 TRUE FALSE 5
+			call DMove 389 88 -17 3
+			call DMove -405 88 0 3 30 TRUE FALSE 5
+			wait 50
+			echo should zone out			
+			CantSeeTarget:Set[FALSE]
+		}
 	}
 	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
 }
@@ -433,7 +455,7 @@ function Zone_AurelianCoastReishiRumbleSolo()
 	
 		if (!${Me.InCombatMode} && ${Me.X} < 540 && ${Me.X} > 520 &&  ${Me.Y} < 35 && ${Me.Y} > 20 && ${Me.Z} < 435 && ${Me.Z} > 415)
 		{
-			oc !c ${Me.Name} -Special
+			call ActivateVerbOn "circle" "Access"
 			wait 10
 		}
 		call IsPresent Nerobahan 30
@@ -476,11 +498,40 @@ function Zone_AurelianCoastReishiRumbleSolo()
 	}
 	while (${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]})
 }
+function Zone_AurelianCoastSambataVillageSolo()
+{
+	
+	ScriptIdleTime:Set[0]
+	if (!${Script["ToonAssistant"](exists)})
+		run EQ2Ethreayd/ToonAssistant
+	do
+	{
+		call MainChecks
+		echo Zone is ${Zone.Name} (${Counter} | ${Counter2})
+
+		if (!${Me.InCombatMode} && ${Me.X} < 215 && ${Me.X} > 200 &&  ${Me.Y} < 80 && ${Me.Y} > 65 && ${Me.Z} < -370 && ${Me.Z} > -390)
+		{
+			if (!${RI_Var_Bool_Paused})
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call DMove 213 63 -343 3
+			call DMove 182 66 -338 3			
+			call DMove 130 62 -359 3
+			if (${RI_Var_Bool_Paused})
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 50
+		}
+
+	
+	}
+	while (${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]})
+}
 function Zone_AurelianCoastMaidensEyeSolo()
 {
 	
 	variable int Counter=0
 	variable int Counter2=0
+	variable int Counter3=0
+	
 	ScriptIdleTime:Set[0]
 	if (!${Script["ToonAssistant"](exists)})
 		run EQ2Ethreayd/ToonAssistant
@@ -491,7 +542,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 
 		if (!${Me.InCombatMode} && ${Me.X} < -185 && ${Me.X} > -205 &&  ${Me.Y} < 10 && ${Me.Y} > 0 && ${Me.Z} < 40 && ${Me.Z} > 25)
 		{
-			oc !c ${Me.Name} -Special
+			call ActivateVerbOn "circle" "Access"
 			wait 10
 		}
 
@@ -536,6 +587,23 @@ function Zone_AurelianCoastMaidensEyeSolo()
 		}
 		else
 			Counter2:Set[0]
+		if (!${Me.InCombatMode} && ${Me.X} < -385 && ${Me.X} > -400 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -260 && ${Me.Z} > -280)
+		{
+			Counter3:Inc
+			if (${Counter3}>19)
+			{
+				if (!${RI_Var_Bool_Paused})
+					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				call DMove -390 0 -294 3 30
+				call DMove -346 3 -276 3 30
+				
+				if (${RI_Var_Bool_Paused})
+					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				
+				
+				Counter3:Set[0]
+			}
+		}
 	}
 	while (${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]})
 }
@@ -734,6 +802,7 @@ function FightNajena()
 		call IsPresent "Lady Najena" 30
 	}
 	while (!${Return})
+	ManualMode:Set[TRUE]
 	do
 	{
 		wait 10
@@ -789,7 +858,7 @@ function FightNajena()
 		call ActivateVerbOn Exit Exit TRUE
 	}
 	while (${Zone.Name.Equal["Vegarlson: Ruins of Rathe \[Solo\]"]})
-	
+	ManualMode:Set[FALSE]
 }
 function gotoForrestBarrens()
 {
@@ -1279,7 +1348,7 @@ atom HandleAllEvents(string Message)
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{
-		oc !c ${Me.Name} -Special
+		call ActivateVerbOn "circle" "Access"
 	}
 	if (${Message.Find["Saperlipopette"]}>0 && !${RI_Var_Bool_Paused})
 	{
