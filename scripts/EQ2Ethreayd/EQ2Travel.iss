@@ -202,8 +202,11 @@ function goFordelMidst()
 	call DMove 112 68 -616 3 30 TRUE FALSE 3
 	
 }
-function goDercin_Marrbrand()
+function goDercin_Marrbrand(int Timeout)
 {
+	variable int Counter
+	if (${Timeout}<1)
+		Timeout:Set[600]
 	call goMyrist
 	if (${Me.Y}<15)
 	{
@@ -213,9 +216,14 @@ function goDercin_Marrbrand()
 		do
 		{
 			wait 10
+			Counter:Inc
 			call TestArrivalCoord 414 -5 -14
 		}
-		while (!${Return})
+		while (!${Return} || ${Counter}>${Timeout})
+		if (${Counter}>${Timeout})
+			return TRUE
+		else
+			Counter:Set[0]
 		call DMove 420 -5 -13 3 30 FALSE FALSE 2
 		do
 		{
@@ -223,7 +231,11 @@ function goDercin_Marrbrand()
 			call ActivateVerbOn "Lift Switch Main Floor" "use"
 			wait 10
 		}
-		while (${Me.Y}<15)
+		while (${Me.Y}<15 || ${Counter}>${Timeout})
+		if (${Counter}>${Timeout})
+			return TRUE
+		else
+			Counter:Set[0]
 	}
 	if (${Me.Y}<410 && ${Me.Y}>15)
 	{
@@ -235,11 +247,15 @@ function goDercin_Marrbrand()
 			wait 10
 			call TestArrivalCoord 389 16 170
 		}
-		while (!${Return} && ${Me.Y}>15)
+		while ((!${Return} && ${Me.Y}>15)|| ${Counter}>${Timeout})
+		if (${Counter}>${Timeout})
+			return TRUE
+		else
+			Counter:Set[0]
 		if (${Me.Y}<15)
 		{
 			echo oops I must have gone down again
-			call goDercin_Marrbrand
+			call goDercin_Marrbrand ${Timeout}
 		}
 		
 		do
@@ -247,12 +263,16 @@ function goDercin_Marrbrand()
 			call ActivateVerbOn "Teleporter to Smiths' Gallery" "Touch"
 			wait 100
 		}
-		while (${Me.Y}<410)
+		while (${Me.Y}<410 || ${Counter}>${Timeout} )
+		if (${Counter}>${Timeout})
+			return TRUE
+		else
+			Counter:Set[0]
 	}
 	if (${Me.Y}>410)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 
-		call goDercin_Marrbrand
+		call goDercin_Marrbrand ${Timeout}
 }
 
 function goMyrist()

@@ -508,11 +508,13 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 	}	
 	return ${ActorID}
 }
-function AltTSUp()
+function AltTSUp(int Timeout)
 {
 	variable int Counter=0
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
 	call goDercin_Marrbrand
+	if (${Return})
+		return TRUE
 	wait 50
 	call Converse "Dercin Marrbrand" 4
 	wait 20
@@ -535,7 +537,7 @@ function AltTSUp()
 	wait 50
 	call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
 	wait 20
-	call goDercin_Marrbrand
+	call goDercin_Marrbrand ${Timeout}
 	call Converse "Dercin Marrbrand" 2
 	wait 20
 	call Converse "Dercin Marrbrand" 2
@@ -545,8 +547,8 @@ function AltTSUp()
 	{
 		Counter:Inc	
 		wait 10
-		if (${Counter}>500)
-			echo I should do something about it
+		if (${Counter}>${Timeout})
+			return TRUE
 	}
 	while (!${Me.Ability["Call to Guild Hall"].IsReady})
 	call goto_GH TRUE

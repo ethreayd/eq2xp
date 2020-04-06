@@ -67,10 +67,14 @@ function main(bool UseOgreIC)
 		wait 100
 		echo --- Reviving (Case 1) ReturnEquipmentSlotHealth Primary at ${Return} or/and I am ${Me.IsDead} DEAD
 		if (${UseOgreIC})
+		{
 			oc !c ${Me.Name} -letsgo 
 			oc !c ${Me.Name} -Revive
+		}
 		else
+		{
 			RIMUIObj:Revive[${Me.Name}]
+		}
 		wait 400
 	}
 	call IsPresent dungeons
