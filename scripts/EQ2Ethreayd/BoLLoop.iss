@@ -83,6 +83,9 @@ function main(bool UseOgreIC)
 		call goto_GH
 		call GuildH TRUE
 		call getBoLQuests Solo
+		call CheckQuest "Luclin Landscaping: The Blinding"
+		if (${Return})
+			echo I should do the weekly quest instead !
 		call goFordelMidst
 		wait 120
 	}
@@ -202,15 +205,15 @@ function RunIC()
 {
 	ogre ic
 	wait 300
-    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Solo"]
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Solo"]
     Obj_FileExplorer:Scan
     Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Solo.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Solo.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Solo.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Solo.iss"]
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Solo.iss"]
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Solo.iss"]
-	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Solo.iss"]
+	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Solo.iss"]
+	;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 }
 	

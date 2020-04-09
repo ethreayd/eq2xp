@@ -273,6 +273,7 @@ function goDercin_Marrbrand(int Timeout)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 
 		call goDercin_Marrbrand ${Timeout}
+	return FALSE
 }
 
 function goMyrist()

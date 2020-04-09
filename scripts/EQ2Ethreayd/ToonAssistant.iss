@@ -27,6 +27,7 @@ function main(string questname)
 	eq2execute spend_deity_point 2282608707 1
 	if (${Me.Group}<3)
 		Solo:Set[TRUE]
+	;echo Am I solo ? ${Solo}
 	do
 	{
 		if (${Me.Power}<10 && !${Me.IsDead})
@@ -36,7 +37,7 @@ function main(string questname)
 		if (${Me.IsDead})
 			eq2execute gsay Can I have a rez please ?
 		if (${Solo})
-			call UsePotions
+			call UsePotions FALSE TRUE
 		if (${Me.InCombatMode})
 			CombatDuration:Inc
 		else

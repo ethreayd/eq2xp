@@ -511,8 +511,10 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 function AltTSUp(int Timeout)
 {
 	variable int Counter=0
+	if (${Timeout}<1)
+		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
-	call goDercin_Marrbrand
+	call goDercin_Marrbrand ${Timeout}
 	if (${Return})
 		return TRUE
 	wait 50
@@ -548,9 +550,10 @@ function AltTSUp(int Timeout)
 		Counter:Inc	
 		wait 10
 		if (${Counter}>${Timeout})
-			return TRUE
+			call UseAbility "Call to Guild Hall"
+		;echo if (${Counter}>${Timeout})
 	}
-	while (!${Me.Ability["Call to Guild Hall"].IsReady})
+	while (!${Me.Ability["Call to Guild Hall"].IsReady} || ${Counter}>${Timeout})
 	call goto_GH TRUE
 }
 
@@ -2183,12 +2186,14 @@ function GoDown()
 			press -hold FLYDOWN
 			wait 5
 			call CheckStuck ${loc0}
+			if (${Return})
+				call UnstuckR 20
 		}
-		while (${Me.FlyingUsingMount} && !${Return})
+		while (${Me.FlyingUsingMount})
 		press -release FLYDOWN
 	}
 	wait 10
-	echo "I am down or stuck"
+	echo "I am down"
 }
 function goHate()
 {	
@@ -2681,6 +2686,20 @@ function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 		return FALSE
 	}
 }
+function IsPublicZone()
+{
+	if ${Zone.Name.Right[8].Equal[\[Heroic\]]}
+		return FALSE
+	if ${Zone.Name.Right[8].Equal[\[Expert\]]}
+		return FALSE
+	if ${Zone.Name.Right[13].Equal[\[ExpertEvent\]]}
+		return FALSE
+	if ${Zone.Name.Right[13].Equal[\[EventHeroic\]]}
+		return FALSE
+	if ${Zone.Name.Right[6].Equal[\[Solo\]]}
+		return FALSE
+	return TRUE
+}
 function KBMove(string Who, float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone, int Precision)
 {
 	oc !c -CampSpot ${Who}
@@ -2964,7 +2983,7 @@ function navwrap(float X, float Y, float Z)
 function OgreICRun(string Dir, string Iss)
 {
 	ogre ic
-	wait 300
+	wait 50
         Obj_FileExplorer:Change_CurrentDirectory["${Dir}"]
         Obj_FileExplorer:Scan
         Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["${Iss}"]
@@ -3146,7 +3165,7 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
-function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
+function RunInstance()
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}" TRUE
@@ -3164,6 +3183,19 @@ function RunZone(int qstart, int qstop, int speed, bool NoShiny, bool NoWait)
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
+function RunICZone(bool Heroic)
+{
+	variable string sQN
+	
+	call strip_IC "${Zone.Name}" TRUE
+	sQN:Set[${Return}]
+	echo will clear zone "${Zone.Name}" (${sQN}) Now !
+	if (${Heroic})
+		call OgreICRun "ICEthreayd/Blood_of_Luclin/Heroic" "${sQN}.iss"
+	else
+		call OgreICRun "ICEthreayd/Blood_of_Luclin/Solo" "${sQN}.iss"
+}
+
 function SetAscCS(string mytag)
 {
 	;local change only
@@ -3456,6 +3488,32 @@ function StopHunt()
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
 }
+function strip_IC(string questname, bool HeroicExpert)
+{
+	variable string sQN
+	echo IN:"${questname}"
+	sQN:Set["${questname.Replace["\]",""]}"]
+	sQN:Set["${sQN.Replace["\[",""]}"]
+	sQN:Set["${sQN.Replace[",","_"]}"]
+	sQN:Set["${sQN.Replace[":",""]}"]
+	sQN:Set["${sQN.Replace["'",""]}"]
+	sQN:Set["${sQN.Replace[" ","_"]}"]
+	sQN:Set["${sQN.Replace[" ",""]}"]
+	if (${HeroicExpert})
+	{
+		call ReplaceStr "${sQN}" Expert Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" Heroic Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" GroupEvent Group
+		sQN:Set["${Return}"]
+		call ReplaceStr "${sQN}" EventGroup Group
+		sQN:Set["${Return}"]
+	}	
+	echo OUT:"${sQN}"
+	return "${sQN}"
+}
+
 function strip_QN(string questname, bool HeroicExpert)
 {
 	variable string sQN
@@ -3481,6 +3539,7 @@ function strip_QN(string questname, bool HeroicExpert)
 	echo OUT:"${sQN}"
 	return "${sQN}"
 }
+
 function TanknSpank(string Named, float Distance, bool Queue, bool NoCC, bool Immunity)
 {
 	if (${Distance}<1)
@@ -3655,6 +3714,7 @@ function UseAbility(string MyAbilityName)
 }
 function UseInventory(string ItemName, bool NoWait)
 {
+	;echo in function UseInventory ${ItemName} ${NoWait}
 	if (!${NoWait})
 	{
 		do
@@ -3663,10 +3723,12 @@ function UseInventory(string ItemName, bool NoWait)
 		}
 		while (!${Me.Inventory["${ItemName}"].IsReady})
 	}
-	Me.Inventory[Query, Name =- "${ItemName}"]:Use"
+	;echo should use potion "${ItemName} now !
+	Me.Inventory[Query, Name =- "${ItemName}"]:Use
 }
 function UsePotions(bool Everytime, bool NoWait)
 {
+	;echo in function UsePotions
 	if (${Me.InCombat} || ${Everytime})
 	{
 		if (${Me.Arcane}>0)

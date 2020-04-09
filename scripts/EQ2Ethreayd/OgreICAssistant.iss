@@ -114,7 +114,7 @@ function MainChecks()
 	{
 		wait 100
 		echo Dead and Alone --- Reviving
-		
+		ogre end ic
 		wait 100
 		oc !c ${Me.Name} -letsgo 
 		oc !c ${Me.Name} -revive 
@@ -122,6 +122,7 @@ function MainChecks()
 		wait 400
 		oc !c ${Me.Name} -resume		
 		wait 100
+		call RunICZone FALSE
 	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
@@ -139,7 +140,7 @@ function MainChecks()
 		Stucky:Set[0]
 	}	
 	call ReturnEquipmentSlotHealth Primary
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}<20)
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || ${Return}<20)
 		call RebootLoop	
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
