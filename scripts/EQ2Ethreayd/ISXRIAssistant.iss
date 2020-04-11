@@ -19,6 +19,7 @@
 variable(script) bool StoneSkin
 variable(script) int RICrashed
 variable(script) int Stucky
+variable(script) int SuperStucky
 variable(script) bool DoDrones
 variable(script) bool DoSlurp
 variable(script) bool DoMiniMud
@@ -131,7 +132,7 @@ function main(string questname)
 function MainChecks()
 {
 	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
-	echo in MainChecks Loop (${ScriptIdleTime})
+	echo in MainChecks Loop (${ScriptIdleTime} - ${ZoneTime} - ${SuperStucky})
 	/*
 	if ${Me.Target(exists)}
 		echo target is ${Me.Target.Name}
@@ -174,31 +175,37 @@ function MainChecks()
 	{
 		wait 100
 		echo Dead and Alone --- Reviving
-		oc !c ${Me.Name} -letsgo
-		RZObj:Pause
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-		wait 100
-		RIMUIObj:Revive[${Me.Name}]
-		wait 400
-		RI
-		wait 100
-		UIElement[RI].FindUsableChild[Start,button]:LeftClick
-		RZObj:Resume
+		call RestartRI TRUE
 	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
 	wait 20
+	echo ${loc0}
 	call CheckStuck ${loc0}
 	if (${Return} && !${Me.InCombatMode})
+	{
 		Stucky:Inc
+		SuperStucky:Inc
+	}	
 	else
+	{
 		Stucky:Set[0]
-	
+		SuperStucky:Dec
+		if ${SuperStucky}<0
+		{
+			SuperStucky:Set[0]
+		}
+	}	
 	if ${Stucky}>10
 	{
 		call UnstuckR 10
 		Stucky:Set[0]
+	}
+	if ${SuperStucky}>30
+	{
+		SuperStucky:Set[0]
+		call RestartRI ${Me.IsDead}
 	}	
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
@@ -210,7 +217,7 @@ function MainChecks()
 		ScriptIdleTime:Inc
 	Else
 		ScriptIdleTime:Set[0]
-	if (${ScriptIdleTime} > 100)
+	if (${ScriptIdleTime} > 30)
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
 		if (${RI_Var_Bool_Paused})
@@ -226,6 +233,21 @@ function MainChecks()
 		call RebootLoop
 	}
 	ZoneTime:Inc
+}
+function RestartRI(bool IsDead)
+{
+	RZObj:Pause
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIMUIObj:Revive[${Me.Name}]
+	oc !c ${Me.Name} -letsgo
+	oc !c ${Me.Name} -revive
+	if (!${IsDead})
+		call Evac
+	wait 400
+	RI
+	wait 100
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	RZObj:Resume
 }
 function RebootLoop()
 {
@@ -278,17 +300,18 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		{
 			call ActivateVerbOn "circle" "Access"
 		}
-		if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
+				
+		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
 		{
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
-			call DMove -389 88 -27 3
-			call DMove -378 88 -10 3
-			call DMove -369 91 -28 3
-			call DMove -363 90 -42 3
+			call DMove -389 88 -27 3 30 TRUE
+			call DMove -378 88 -10 3 30 TRUE
+			call DMove -369 91 -28 3 30 TRUE
+			call DMove -363 90 -42 3 30 TRUE
 			if (${RI_Var_Bool_Paused})
 			{
 				echo Resuming ISXRI
@@ -296,15 +319,15 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			}
 			target "an Echelon vigilant"
 		}
-		if (!${Me.InCombatMode} && ${Me.X} < -255 && ${Me.X} > -275 &&  ${Me.Y} < 100 && ${Me.Y} > 85 && ${Me.Z} < 115 && ${Me.Z} > 100)
+		if (!${Me.InCombatMode} && ${Me.X} < -255 && ${Me.X} > -280 &&  ${Me.Y} < 100 && ${Me.Y} > 85 && ${Me.Z} < 120 && ${Me.Z} > 100)
 		{
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
-			call DMove -304 88 96 3
-			call DMove -298 88 134 3
+			call DMove -304 88 96 3 30 TRUE TRUE
+			call DMove -298 88 134 3 30 TRUE TRUE
 			if (${RI_Var_Bool_Paused})
 			{
 				echo Resuming ISXRI
@@ -674,7 +697,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 		if (!${Me.InCombatMode} && ${Me.X} < -425 && ${Me.X} > -435 &&  ${Me.Y} < 15 && ${Me.Y} > -5 && ${Me.Z} < -265 && ${Me.Z} > -285)
 		{
 			if (!${RI_Var_Bool_Paused})
-					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			wait 20
 			call DMove -428 4 -278 3
 			call DMove -349 4 -273 3

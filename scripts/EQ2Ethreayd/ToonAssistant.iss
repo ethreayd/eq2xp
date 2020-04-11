@@ -26,8 +26,10 @@ function main(string questname)
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
 	if (${Me.Group}<3)
+	{
 		Solo:Set[TRUE]
-	;echo Am I solo ? ${Solo}
+		oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
+	}
 	do
 	{
 		if (${Me.Power}<10 && !${Me.IsDead})

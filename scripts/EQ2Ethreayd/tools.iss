@@ -1726,6 +1726,8 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	variable int Stucky
 	variable int SuperStucky=0
 	variable bool LR
+	if (${Me.IsDead})
+		return TRUE
 	
 	if ${Precision}<1
 		Precision:Set[10]
@@ -1807,7 +1809,7 @@ function Evac()
 					echo debug: in druid case
 					Call UseAbility "Verdurous Journey"
 				break
-				
+				default
 					echo debug: in default case
 					Me.Inventory["Totem of Escape"]:Use
 				break
@@ -2268,6 +2270,7 @@ function goto_GH()
 	call GoDown
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
+		call GoDown
 		call IsPresent "Magic Door to the Guild Hall"
 		if (${Return})
 		{
@@ -2276,7 +2279,7 @@ function goto_GH()
 		}
 		else
 			call CastAbility "Call to Guild Hall"
-		do
+		
 		{
 			wait 10
 			Counter:Inc
