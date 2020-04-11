@@ -410,11 +410,11 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			eq2execute merc backoff
 			call DMove -280 88 152 3 30 TRUE FALSE 5
 			eq2execute merc backoff
-			call DMove -294 88 112 3 30 TRUE FALSE 5
+			call DMove -294 88 112 3 30 TRUE TRUE 5
 			eq2execute merc backoff
-			call DMove -267 94 94 3 30 TRUE FALSE 5
+			call DMove -267 94 94 3 30 TRUE TRUE 5
 			eq2execute merc backoff
-			call DMove -265 95 117 3 30 TRUE FALSE 
+			call DMove -265 95 117 3 30 TRUE TRUE 
 			eq2execute merc attack
 			echo fixed for this loop
 			wait 50
