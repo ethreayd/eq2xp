@@ -1,6 +1,17 @@
 # eq2xp
 Lavishscript for ISXE2 and OSXOgre to play EverQuest 2 (EQ2)
 
+# Dependancies
+You will need Innerspace, ISXEQ2 module as well as ISXOgre & ISXRI(optional) to use this code 
+
+# Run Solo Blood of Luclin
+* If you are using ISXRI, type run EQ2Ethreayd/BoLLoop
+You need to have configured ISXRI RZ before launching BoLLoop
+
+* If you want to use Ogre only (ogre ic), type run EQ2Ethreayd/BoLLoop TRUE
+
+For now, BoLLoop works better with ISXRI but I am working on that
+
 # Run Signature Quest (Legacy of Power)
 - type "run EQ2Ethreayd/autopop"
 
