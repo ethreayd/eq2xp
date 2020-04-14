@@ -550,11 +550,15 @@ function AltTSUp(int Timeout)
 		Counter:Inc	
 		wait 10
 		if (${Counter}>${Timeout})
+		{
 			call UseAbility "Call to Guild Hall"
-		;echo if (${Counter}>${Timeout})
+			return
+		}	
+		echo if (${Counter}>${Timeout})
 	}
 	while (!${Me.Ability["Call to Guild Hall"].IsReady} || ${Counter}>${Timeout})
 	call goto_GH TRUE
+	echo AltTSUp done
 }
 
 function Ascend(float Y, bool Swim)
@@ -620,7 +624,7 @@ function AttackClosest(float MaxDistance)
         target ${ActorIterator.Value.ID}
     }
 }
-function AutoAddAgent()
+function AutoAddAgent(bool EraseDuplicate)
 {
 	variable index:item Items
 	variable iterator ItemIterator
@@ -654,12 +658,16 @@ function AutoAddAgent()
 				if ${ItemIterator.Value.IsAgent}
 				{
 					Counter2:Inc
+					if ${EraseDuplicate}
+						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
 				}
 			}	
 			while ${ItemIterator:Next(exists)}
 		}
 		
 	echo found ${Counter} Agents, ${Counter2} seems to be duplicate (scanned ${Counter3} items)
+	if (${Counter2} > 0 && ${EraseDuplicate})
+		call AutoAddAgent TRUE
 }
 
 function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
@@ -969,6 +977,8 @@ function CastAbility(string AbilityName, bool NoWait)
 {
 	if (!${NoWait})
 	{
+		if !${Me.Ability["${AbilityName}"].IsReady}
+			echo Ability ${AbilityName} is not ready, I will wait untill it is
 		do
 		{
 			wait 20
@@ -2279,10 +2289,11 @@ function goto_GH()
 		}
 		else
 			call CastAbility "Call to Guild Hall"
-		
+		do
 		{
 			wait 10
 			Counter:Inc
+			echo waiting to go in GH (${Counter}<300)
 		}
 		while (!${Zone.Name.Right[10].Equal["Guild Hall"]} && ${Counter}<300)
 		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -2305,6 +2316,7 @@ function GuildH(bool NoPlant)
 	{
 		echo Starting GH churns
 		wait 100
+		echo should I skipp Autoplant ? ${NoPlant}
 		if (!${NoPlant})
 			call AutoPlant
 		wait 100
@@ -2312,6 +2324,7 @@ function GuildH(bool NoPlant)
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
 		wait 100
+		echo transmuting stones
 		call TransmuteAll "Planar Transmutation Stone"
 		call TransmuteAll "Celestial Transmutation Stone"
 		call TransmuteAll "Veilwalker's Transmutation Stone"
@@ -2320,9 +2333,11 @@ function GuildH(bool NoPlant)
 		wait 600
 		ogre end im
 		wait 20
+		echo restocking !
 		ogre im -restock
 		wait 150
 		ogre end im
+		echo buffing with altars
 		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
 		call ActivateVerbOn "Arcanna'se Effigy of Rebirth" "Channel Arcanna'se" TRUE
 		echo GH churns finished

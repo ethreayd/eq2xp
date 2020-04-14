@@ -1,12 +1,20 @@
-;function EnterCoVZone(int num)
-;{
-;	do
-;	{
-;		OgreBotAPI:ZoneDoorForWho["${Me.Name}",${num}]
-;		wait 50
-;	}
-;	while (${Zone.Name.Equal["Coliseum of Valor"]})
-;}
+#define AUTORUN "num lock"
+#define CENTER p
+#define MOVEFORWARD w
+#define MOVEBACKWARD s
+#define STRAFELEFT q
+#define STRAFERIGHT e
+#define TURNLEFT a
+#define TURNRIGHT d
+#define FLYUP space
+#define FLYDOWN x
+#define PAGEUP "Page Up"
+#define PAGEDOWN "Page Down"
+#define WALK shift+r
+#define ZOOMIN "Num +"
+#define ZOOMOUT "Num -"
+#define JUMP Space
+
 function getCDQuests()
 {
 	variable string NPCName
@@ -161,7 +169,6 @@ function getBoLQuests(string version)
 }
 function goAurelianCoast()
 {
-	
 	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{
 		echo Going to Aurelian Coast
@@ -182,32 +189,135 @@ function goAurelianCoast()
 		press -release MOVEFORWARD
 	}
 	else
-		echo already in Aurelian Coast (${Zone.Name})
+		echo already in Aurelian Coast (${Zone.Name}) but I should script where I am there and deal with it
 }
+function goSanctusSeru()
+{
+	if (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
+	{
+		if (${Zone.Name.Left[15].Equal["Aurelian Coast"]})
+		{
+			if (${Me.X} < 120 && ${Me.X} > 100 &&  ${Me.Y} < 75 && ${Me.Y} > 45 && ${Me.Z} < -600 && ${Me.Z} > -670)
+			{
+				call DMove 113 67 -622 3
+				call DMove 94 72 -596 3
+				call DMove 120 83 -545 3
+				call DMove 121 85 -526 3 30 FALSE FALSE 3
+				call DMove 162 82 -463 3
+				call 3DNav 160 151 -453
+				call 3DNav 231 151 -329
+				call 3DNav 270 151 -263
+				call 3DNav 402 160 -194
+				call 3DNav 549 160 -377
+				call 3DNav 647 160 -446
+				call GoDown
+				call DMove 633 96 -512 3
+				call DMove 576 119 -533 3
+				call DMove 468 132 -480 3
+				call DMove 453 133 -484 3 30 FALSE FALSE 3
+			}
+			else
+			{
+				call goto_GH
+				call goSanctusSeru
+				return
+			}
+		}
+		else
+		{
+			call goZone "The Blinding"
+			if (${Me.Y}>250)
+			{
+				call 3DNav 85 400 -184
+				call GoDown
+				call 3DNav -269 125 132
+				call GoDown
+			}
+			call 3DNav 516 120 532
+			call GoDown
+			call DMove 616 43 593 3
+			call DMove 722 58 708 3
+			oc !c ${Me.Name} -Zone
+			do
+			{
+				wait 10
+			}
+			while (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
+			call goSanctusSeru
+			return
+		}
+	}
+	else
+	{
+		call TestArrivalCoord -276 181 0
+		if ${Return}
+			echo I am in Sanctus Seru (${Zone.Name})
+		else
+		{
+			call TestArrivalCoord -399 88 2
+			if ${Return}
+			{
+				call DMove -328 90 -16 3
+				call DMove -307 88 -105 3
+				call DMove -322 88 -164 3
+				do
+				{
+					call MoveCloseTo "Teleporter Base"
+					wait 10
+				}
+				while (${Me.Y}<100)
+				call DMove -230 180 -46 3
+				call DMove -258 181 -1 3
+				call DMove -276 181 0 3
+			}
+			else
+			{
+				call Evac
+				wait 300
+				do
+				{
+					wait 10
+				}
+				while (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
+				call goSanctusSeru
+				return
+			}
+		}
+	}	
+}
+
 function goFordelMidst()
 {
 	echo going to Fordel Midst
-	call goAurelianCoast
-	call DMove 623 99 -512 3 30 TRUE FALSE 5
-	call DMove 643 92 -473 3 30 TRUE FALSE 5
-	call 3DNav 591 110 -386
-	call 3DNav 399 155 -239
-	call 3DNav 219 122 -244
-	call 3DNav 156 144 -449
-	call GoDown
-	call DMove 141 87 -494 3 30 TRUE FALSE
-	call DMove 119 85 -525 3 30 TRUE FALSE
-	call DMove 126 85 -540 3 30 TRUE FALSE 5
-	call DMove 89 73 -595 3 30 TRUE FALSE
-	call DMove 112 68 -616 3 30 TRUE FALSE 3
-	
+	if (${Zone.Name.Left[15].Equal["Aurelian Coast"]} && ${Me.X} < 120 && ${Me.X} > 100 &&  ${Me.Y} < 75 && ${Me.Y} > 45 && ${Me.Z} < -600 && ${Me.Z} > -670)
+	{
+		echo Already in Fordel Midst
+	}
+	else
+	{
+		call goAurelianCoast
+		call DMove 623 99 -512 3 30 TRUE FALSE 5
+		call DMove 643 92 -473 3 30 TRUE FALSE 5
+		call 3DNav 591 110 -386
+		call 3DNav 399 155 -239
+		call 3DNav 219 122 -244
+		call 3DNav 156 144 -449
+		call GoDown
+		call DMove 141 87 -494 3 30 TRUE FALSE
+		call DMove 119 85 -525 3 30 TRUE FALSE
+		call DMove 126 85 -540 3 30 TRUE FALSE 5
+		call DMove 89 73 -595 3 30 TRUE FALSE
+		call DMove 112 68 -616 3 30 TRUE FALSE 3
+	}	
 }
 function goDercin_Marrbrand(int Timeout)
 {
 	variable int Counter
+	variable float loc0
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	call goMyrist
+	wait 50
 	if (${Me.Y}<15)
 	{
 		press F1
@@ -215,8 +325,18 @@ function goDercin_Marrbrand(int Timeout)
 		ogre nav "Bottom Lift"
 		do
 		{
+			
+			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 10
 			Counter:Inc
+			
+			call CheckStuck ${loc0}
+			if (${Return})
+			{
+				press F1
+				wait 20
+				ogre nav "Bottom Lift"
+			}
 			call TestArrivalCoord 414 -5 -14
 		}
 		while (!${Return} || ${Counter}>${Timeout})
@@ -279,6 +399,42 @@ function goDercin_Marrbrand(int Timeout)
 function goMyrist()
 {
 	call goZone "Myrist, the Great Library"
+}
+function RunIC(bool Loop)
+{
+	call goFordelMidst
+	call RunACIC TRUE
+	echo I need to wait here for the IC to run !
+	
+	;call goSanctusSeru
+	;call RunSSIC
+	;if ${Loop}
+	;	call RunIC
+}
+function RunACIC(bool Loop)
+{
+	ogre ic
+	wait 50
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Solo"]
+    Obj_FileExplorer:Scan
+    Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Solo.iss"]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",${Loop}]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+}
+function RunSSIC(bool Loop)
+{
+	ogre ic
+	wait 50
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Solo"]
+    Obj_FileExplorer:Scan
+    Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Solo.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Order_Solo.iss"]
+	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Solo.iss"]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",${Loop}]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 }
 function goEPG()
 {

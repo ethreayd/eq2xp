@@ -535,6 +535,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 }
 function Zone_SanctusSeruEchelonofDivinitySolo()
 {
+	variable int Counter
 	if (!${Script["ToonAssistant"](exists)})
 		run EQ2Ethreayd/ToonAssistant
 	do
@@ -547,7 +548,34 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 			wait 100
 			eq2execute merc attack
 		}
+		if (!${Me.InCombatMode} && ${Me.X} < -120 && ${Me.X} > -135 &&  ${Me.Y} < 185 && ${Me.Y} > 165 && ${Me.Z} < -200 && ${Me.Z} > -220)
+		{
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			call DMove -145 179 -211 3
+			call DMove -123 181 -215 3
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+		}
+		if (${Me.InCombatMode} && !${Me.Target.Distance(exists)})
+		{
+			Counter:Inc
+			if (${Counter}>0)
+			{
+				Echo in if (${Me.InCombatMode} && !${Me.Target.Distance(exists)}) with (${Counter}>0)
+				press Tab
+			}
+		}
+		else
+			Counter:Set[0]
 		wait 10
+		
 	}
 	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Divinity \[Solo\]"]})
 }
@@ -759,6 +787,24 @@ function Zone_AurelianCoastMaidensEyeSolo()
 				
 				if (${RI_Var_Bool_Paused})
 					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				Counter:Set[0]
+			}
+		}
+		else
+			Counter:Set[0]
+		if (!${Me.InCombatMode} && ${Me.X} < -485 && ${Me.X} > -510 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -5 && ${Me.Z} > -30)
+		{
+			Counter:Inc
+			if (${Counter}>19)
+			{
+				RZObj:Pause
+				if (!${RI_Var_Bool_Paused})
+					UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				call DMove -178 3 51 3 30
+				oc !c ${Me.Name} -Special
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+				RZObj:Resume
 				Counter:Set[0]
 			}
 		}
