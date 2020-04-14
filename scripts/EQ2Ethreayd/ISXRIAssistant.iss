@@ -120,6 +120,19 @@ function main(string questname)
 			wait 10
 			IdleTime:Set[0]
 		}
+		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 140 && ${Me.X} > 115 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -530 && ${Me.Z} > -545)
+		{
+			echo correcting bug
+			end Buffer:RZ
+			end Buffer:RIMovement
+			wait 50
+			call GoDown
+			call DMove 120 84 -543 3
+			call DMove 87 74 -593 3
+			call DMove 113 57 -658 3
+			wait 10
+			IdleTime:Set[0]
+		}
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
@@ -153,6 +166,7 @@ function MainChecks()
 		if (${RICrashed}>5)
 		{
 			echo RI crashed (${RICrashed}) - restarting zone
+			echo Pausing RZ
 			RZObj:Pause
 			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 			wait 100
@@ -162,6 +176,7 @@ function MainChecks()
 			wait 100
 			RICrashed:Set[0]
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			echo Resuming RZ
 			RZObj:Resume
 		}
 	}
@@ -208,7 +223,7 @@ function MainChecks()
 		call RestartRI ${Me.IsDead}
 	}	
 	call ReturnEquipmentSlotHealth Primary
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 	{
 		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
 		call RebootLoop
@@ -236,17 +251,19 @@ function MainChecks()
 }
 function RestartRI(bool IsDead)
 {
+	echo Pausing RZ
 	RZObj:Pause
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 	RIMUIObj:Revive[${Me.Name}]
-	oc !c ${Me.Name} -letsgo
-	oc !c ${Me.Name} -revive
+	oc !c -letsgo ${Me.Name} 
+	oc !c -revive ${Me.Name}
 	if (!${IsDead})
 		call Evac
 	wait 400
 	RI
 	wait 100
 	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	echo Resuming RZ
 	RZObj:Resume
 }
 function RebootLoop()
@@ -275,10 +292,20 @@ function RebootLoop()
 	I am doing ${ScriptName} after going back to the Guild
 	if (${Script["Buffer:RZ"](exists)})
 		end Buffer:RZ
-	wait 100
+	do
+	{
+		echo Pausing Ogre
+		oc !c -Pause ${Me.Name}
+		eq2execute merc backoff
+		wait 100
+		echo Resuming Ogre
+		oc !c -Resume ${Me.Name}
+	}
+	while (${Me.InCombat})
+	
 	echo --- Reviving (from RebootLoop)
 	RIMUIObj:Revive[${Me.Name}]
-	oc !c ${Me.Name} -Revive
+	oc !c -Revive ${Me.Name}
 	wait 400
 	call goto_GH
 	wait 100
@@ -351,6 +378,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 					UIElement[RI].FindUsableChild[Start,button]:LeftClick
 				}
 				echo fixing Seru stucked
+				echo Pausing RZ
 				RZObj:Pause
 
 				eq2execute merc attack
@@ -394,6 +422,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				echo Resuming ISXRI
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
+			echo Resuming RZ
 			RZObj:Resume
 
 			CantSeeTarget:Set[FALSE]
@@ -801,7 +830,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 				if (!${RI_Var_Bool_Paused})
 					UIElement[RI].FindUsableChild[Start,button]:LeftClick
 				call DMove -178 3 51 3 30
-				oc !c ${Me.Name} -Special
+				oc !c -Special ${Me.Name}
 				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
 				RZObj:Resume
@@ -1495,6 +1524,7 @@ atom HandleAllEvents(string Message)
 		eq2execute gsay ${Message}
 		CantSeeTarget:Set[TRUE]
 	}
+
 	if (${Message.Equal["Too far away"]})
 	{
 		 eq2execute gsay ${Message}

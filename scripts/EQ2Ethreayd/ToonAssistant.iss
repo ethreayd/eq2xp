@@ -23,12 +23,14 @@ function main(string questname)
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	
+	echo Starting ToonAssistant
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
 	if (${Me.Group}<3)
 	{
 		Solo:Set[TRUE]
-		oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
+		oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_forcenamedcatab TRUE
 	}
 	do
 	{
@@ -53,6 +55,8 @@ function main(string questname)
 		wait 10
 	}
 	while (TRUE)
+	echo Ending ToonAssistant
+
 }
 function FixCombat()
 {
@@ -69,6 +73,8 @@ function FixCombat()
 		wait 10
 		eq2execute autoattack 2
 	}
+	else
+		call MoveCloseTo "${Me.Target.Name}"
 	
 	
 }

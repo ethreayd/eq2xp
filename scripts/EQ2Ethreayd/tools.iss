@@ -16,6 +16,7 @@
 #define JUMP Space
 
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/EQ2Travel.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreCommon/EQ2OgreObjects/Object_Get_SpewStats.iss"
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -327,9 +328,12 @@ function AcceptReward_(bool AcceptAll)
 	}
 	while (${RewardWindow(exists)} && ${AcceptAll})
 }
-function AcceptReward(bool AcceptAll)
+function AcceptReward(bool OnlyMe)
 {
-	oc !c -AcceptReward
+	if (${OnlyMe})
+		oc !c {Me.Name} -AcceptReward
+	else
+		oc !c -AcceptReward
 }
 
 function ActivateAggro(string ActorName, string verb, float distance)
@@ -935,7 +939,7 @@ function BelltoZone(string ZoneName)
 function Boost()
 {
 ; from THG snacks script
-	oc !c -pause
+	oc !c -pause ${Me.Name}
 	if ${Me.Inventory[Dolma](exists)}
 	{
 		Me.Inventory[Dolma]:Use
@@ -971,7 +975,7 @@ function Boost()
 		Me.Inventory["Planar Elixir of Intellect"]:Use
 		wait 10
 	}
-	oc !c -resume
+	oc !c -resume ${Me.Name}
 } 
 function CastAbility(string AbilityName, bool NoWait)
 {
