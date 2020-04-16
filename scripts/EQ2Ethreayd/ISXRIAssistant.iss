@@ -39,7 +39,6 @@ function main(string questname)
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
-
 	do
 	{
 		if (${Script["ToonAssistant"](exists)})
@@ -190,7 +189,7 @@ function MainChecks()
 	{
 		wait 100
 		echo Dead and Alone --- Reviving
-		call RestartRI TRUE
+		call RIRestart TRUE
 	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
@@ -220,7 +219,7 @@ function MainChecks()
 	if ${SuperStucky}>30
 	{
 		SuperStucky:Set[0]
-		call RestartRI ${Me.IsDead}
+		call RIRestart ${Me.IsDead}
 	}	
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
@@ -249,71 +248,8 @@ function MainChecks()
 	}
 	ZoneTime:Inc
 }
-function RestartRI(bool IsDead)
-{
-	echo Pausing RZ
-	RZObj:Pause
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	RIMUIObj:Revive[${Me.Name}]
-	oc !c -letsgo ${Me.Name} 
-	oc !c -revive ${Me.Name}
-	if (!${IsDead})
-		call Evac
-	wait 400
-	RI
-	wait 100
-	UIElement[RI].FindUsableChild[Start,button]:LeftClick
-	echo Resuming RZ
-	RZObj:Resume
-}
-function RebootLoop()
-{
-	variable string ScriptName
-	ScriptName:Set["BoLLoop"]
-	echo rebooting loop
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
-	if (${Script["CDLoop"](exists)})
-	{
-		ScriptName:Set["CDLoop"]
-		end ${ScriptName}
-	}
-	if (${Script["BoLLoop"](exists)})
-	{
-		ScriptName:Set["BoLLoop"]
-		end ${ScriptName}
-	}
-	if (${Script["ToonAssistant"](exists)})
-	{
-		end ToonAssistant
-	}
-	I am doing ${ScriptName} after going back to the Guild
-	if (${Script["Buffer:RZ"](exists)})
-		end Buffer:RZ
-	do
-	{
-		echo Pausing Ogre
-		oc !c -Pause ${Me.Name}
-		eq2execute merc backoff
-		wait 100
-		echo Resuming Ogre
-		oc !c -Resume ${Me.Name}
-	}
-	while (${Me.InCombat})
-	
-	echo --- Reviving (from RebootLoop)
-	RIMUIObj:Revive[${Me.Name}]
-	oc !c -Revive ${Me.Name}
-	wait 400
-	call goto_GH
-	wait 100
-	call GuildH
-	if (!${Script["${ScriptName}"](exists)})
-		run EQ2Ethreayd/${ScriptName}
-	end ISXRIAssistant
-}
+
+
 function Zone_SanctusSeruEchelonofOrderSolo()
 {
 	variable int Counter

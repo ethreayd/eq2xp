@@ -662,6 +662,8 @@ function AutoAddAgent(bool EraseDuplicate)
 				if ${ItemIterator.Value.IsAgent}
 				{
 					Counter2:Inc
+					; this method does not exist :(
+					;Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:ConvertAgent[confirm]
 					if ${EraseDuplicate}
 						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
 				}
@@ -676,70 +678,75 @@ function AutoAddAgent(bool EraseDuplicate)
 
 function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
 {
-	if (${QuestCraft})
+	if (${Me.Recipe["${myrecipe}"](exists)})
 	{
-		call CheckQuest "${QuestName}"
-		if (${Return})
+		if (${QuestCraft})
 		{
-			call CheckQuestStep
-			if (!${Return})
+			call CheckQuest "${QuestName}"
+			if (${Return})
 			{
-				call MoveCloseTo "${tool}"
-				ogre craft
-				wait 100
-				echo adding recipe
-				OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
-				wait 100
-				if (${OgreCraft.MissingResources} && !${IgnoreRessources})
+				call CheckQuestStep
+				if (!${Return})
 				{
-					echo Missing some ressources ! Something wrong happen on the way :(
-				}
-				else
-				{
-					echo Crafting ${quantity} "${myrecipe}"
-					OgreCraft:Start[]
-					do
+					call MoveCloseTo "${tool}"
+					ogre craft
+					wait 100
+					echo adding recipe
+					OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
+					wait 100
+					if (${OgreCraft.MissingResources} && !${IgnoreRessources})
 					{
-						wait 50
-						call CheckQuestStep
+						echo Missing some ressources ! Something wrong happen on the way :(
 					}
-					while (!${Return})		
+					else
+					{
+						echo Crafting ${quantity} "${myrecipe}"
+						OgreCraft:Start[]
+						do
+						{
+							wait 50
+							call CheckQuestStep
+						}
+						while (!${Return})		
+					}
+					wait 20
+					ogre end craft
 				}
-				wait 20
-				ogre end craft
+			}
+			else
+			{
+				echo Quest ${QuestName} not in Journal !
 			}
 		}
 		else
 		{
-			echo Quest ${QuestName} not in Journal !
+			call MoveCloseTo "${tool}"
+			ogre craft
+			wait 100
+			echo adding recipe
+			OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
+			wait 100
+			if (${OgreCraft.MissingResources})
+			{
+				echo Missing some ressources ! Something wrong happen on the way :(
+			}
+			else
+			{
+				echo Crafting ${quantity} "${myrecipe}"
+				OgreCraft:Start[]
+				do
+				{
+					wait 50
+					call CountItem "${myrecipe}"
+				}
+				while (${Return}<${quantity})		
+			}
+			wait 20
+			ogre end craft
 		}
 	}
 	else
-	{
-		call MoveCloseTo "${tool}"
-		ogre craft
-		wait 100
-		echo adding recipe
-		OgreCraft:AddRecipeName[${quantity},"${myrecipe}"]
-		wait 100
-		if (${OgreCraft.MissingResources})
-		{
-			echo Missing some ressources ! Something wrong happen on the way :(
-		}
-		else
-		{
-			echo Crafting ${quantity} "${myrecipe}"
-			OgreCraft:Start[]
-			do
-			{
-				wait 50
-				call CountItem "${myrecipe}"
-			}
-			while (${Return}<${quantity})		
-		}
-		wait 20
-		ogre end craft
-	}		
+		echo Error in function AutoCraft ${myrecipe} does not exist
 }
 
 function AutoHunt(int distance)
@@ -3127,6 +3134,56 @@ function PullNamed(string Named)
 		target "${Named}"
 	}
 }
+function RebootLoop(string DefaultScriptName)
+{
+	variable string ScriptName
+	if ${DefaultScriptName.Equal[""]}
+		DefaultScriptName:Set["BoLLoop"]
+	ScriptName:Set["${DefaultScriptName}"]
+	echo rebooting loop
+	call RIStop
+	call RZStop
+	if (${Script["CDLoop"](exists)})
+	{
+		ScriptName:Set["CDLoop"]
+		end ${ScriptName}
+	}
+	if (${Script["BoLLoop"](exists)})
+	{
+		ScriptName:Set["BoLLoop"]
+		end ${ScriptName}
+	}
+	if (${Script["ToonAssistant"](exists)})
+	{
+		end ToonAssistant
+	}
+	I am doing ${ScriptName} after going back to the Guild
+	
+	do
+	{
+		echo Pausing Ogre
+		oc !c -Pause ${Me.Name}
+		eq2execute merc backoff
+		wait 100
+		echo Resuming Ogre
+		oc !c -Resume ${Me.Name}
+	}
+	while (${Me.InCombat})
+	
+	echo --- Reviving (from RebootLoop)
+	RIMUIObj:Revive[${Me.Name}]
+	oc !c -Revive ${Me.Name}
+	wait 400
+	call goto_GH
+	wait 100
+	call GuildH
+	if (!${Script["${ScriptName}"](exists)})
+		run EQ2Ethreayd/${ScriptName}
+	if (${Script["ISXRIAssistant"](exists)})
+		end ISXRIAssistant
+	if (${Script["OgreICAssistant"](exists)})
+		end OgreICAssistant
+}
 function RelayAll(string w0, string w1, string w2, string w3, string w4, string w5, string w6,string w7, string w8, string w9)
 {
 	relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
@@ -3187,6 +3244,32 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	return ${ItemHealth}
 }
+function RIRestart(bool IsDead)
+{
+	echo Pausing RZ
+	RZObj:Pause
+	call RIStop
+	RIMUIObj:Revive[${Me.Name}]
+	oc !c -letsgo ${Me.Name} 
+	oc !c -revive ${Me.Name}
+	if (!${IsDead})
+		call Evac
+	wait 400
+	call RIStart
+	echo Resuming RZ
+	RZObj:Resume
+}
+function RIStart()
+{
+	RI
+	wait 100
+	UIElement[RI].FindUsableChild[Start,button]:LeftClick
+}	
+function RIStop()
+{
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"	
+}
 function RunInstance()
 {
 	variable string sQN
@@ -3217,7 +3300,13 @@ function RunICZone(bool Heroic)
 	else
 		call OgreICRun "ICEthreayd/Blood_of_Luclin/Solo" "${sQN}.iss"
 }
-
+function RZStop()
+{
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+	if (${Script["Buffer:RZ"](exists)})
+		end Buffer:RZ
+}
 function SetAscCS(string mytag)
 {
 	;local change only

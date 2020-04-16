@@ -33,7 +33,10 @@ function main(bool UseOgreIC)
 	ScriptsToRun:Insert["wrap2"]
 	ScriptsToRun:Insert["wrap"]
 	if (${UseOgreIC})
+	{
+		oc !c ${Me.Name} -letsgo 
 		ScriptsToRun:Insert["ISXRIAssistant"]
+	}
 	else
 		ogre end ic
 		

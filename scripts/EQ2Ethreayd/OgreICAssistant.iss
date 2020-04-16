@@ -18,7 +18,7 @@
 
 variable(script) bool StoneSkin
 variable(script) int Stucky
-
+variable(script) int SuperStucky
 variable(script) bool CantSeeTarget
 variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
@@ -139,9 +139,17 @@ function MainChecks()
 		call UnstuckR 10
 		Stucky:Set[0]
 	}	
+	if ${SuperStucky}>30
+	{
+		SuperStucky:Set[0]
+		echo should deal with that
+	}	
 	call ReturnEquipmentSlotHealth Primary
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || ${Return}<20)
-		call RebootLoop	
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
+	{
+		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
+		call RebootLoop
+	}
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
 	Else
@@ -157,37 +165,7 @@ function MainChecks()
 		;call RebootLoop
 	}
 }
-function RebootLoop()
-{
-	variable string ScriptName
-	ScriptName:Set["BoLLoop"]
-	echo rebooting loop
-	ogre end ic
-	
-	if (${Script["BoLLoop"](exists)})
-	{
-		ScriptName:Set["BoLLoop"]
-		end ${ScriptName}
-	}
-	if (${Script["ToonAssistant"](exists)})
-	{
-		end ToonAssistant
-	}
-	I am doing ${ScriptName} after going back to the Guild
-	
-	wait 100
-	echo --- Reviving from RebootLoop
-	oc !c ${Me.Name} -letsgo 
-	oc !c ${Me.Name} -revive
-	wait 400
-	call goto_GH
-	wait 100
-	call GuildH
-	if (!${Script["${ScriptName}"](exists)})
-		run EQ2Ethreayd/${ScriptName} TRUE
-	oc !c ${Me.Name} -resume
-	end OgreICAssistant
-}
+
 function Zone_SanctusSeruEchelonofOrderSolo()
 {
 	ScriptIdleTime:Set[0]
