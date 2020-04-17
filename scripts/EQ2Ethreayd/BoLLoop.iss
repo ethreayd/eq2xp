@@ -91,7 +91,7 @@ function main(bool UseOgreIC)
 		else
 			oc !c ${Me.Name} -Repair
 		call getBoLQuests Solo
-		call LuclinLandscapingTheBlinding
+		call LuclinLandscapingTheBlinding TRUE
 		call goFordelMidst
 		wait 120
 	}

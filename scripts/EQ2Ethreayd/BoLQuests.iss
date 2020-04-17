@@ -16,7 +16,7 @@
 #define JUMP Space
 
 variable(script) string QN
-function LuclinLandscapingTheBlinding()
+function LuclinLandscapingTheBlinding(bool DoNotWait)
 {
 	variable index:string NamedToHunt
 	variable int i
@@ -39,16 +39,15 @@ function LuclinLandscapingTheBlinding()
 			NamedToHunt:Insert["Deathpetal"]
 			for ( i:Set[1] ; ${i} <= ${NamedToHunt.Used} ; i:Inc )
 			{
-					call WhereIs ${NamedToHunt[${x}]} TRUE
+					call WhereIs ${NamedToHunt[${i}]} TRUE
 					wait 10
 					if (${Return})
 					{
-						
-						call Hunt ${NamedToHunt[${x}]}
+						call Hunt ${NamedToHunt[${i}]}
 					}
 			}
 			call CheckQuest "${QN}"
 		}
-		while (${Return})
+		while (${Return} && !${DoNotWait})
 	}
 }

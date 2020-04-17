@@ -2649,8 +2649,9 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 			else
 				call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
-			call CheckPlayer
 			call AutoGroup
+			eq2execute merc resume
+			call CheckPlayer
 			if (!${Return})
 				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 		}	
