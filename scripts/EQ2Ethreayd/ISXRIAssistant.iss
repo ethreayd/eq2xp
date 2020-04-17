@@ -99,7 +99,7 @@ function main(string questname)
 		if ((${IdleTime} > 100 || ${ZoneStuck}> 100) && ${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo correcting RZ bug that make a toon waiting in the middle of the Blinding for no reason
-			end Buffer:RZ
+			call RZStop
 			call goFordelMidst
 			IdleTime:Set[0]
 		}
@@ -111,8 +111,8 @@ function main(string questname)
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 125 && ${Me.X} > 105 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -605 && ${Me.Z} > -630)
 		{
 			echo correcting bug
-			end Buffer:RZ
-			end Buffer:RIMovement
+			call RZStop
+			call RIStop
 			wait 50
 			call GoDown
 			call DMove 113 57 -658 3
@@ -122,8 +122,8 @@ function main(string questname)
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 140 && ${Me.X} > 115 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -530 && ${Me.Z} > -545)
 		{
 			echo correcting bug
-			end Buffer:RZ
-			end Buffer:RIMovement
+			call RZStop
+			call RIStop
 			wait 50
 			call GoDown
 			call DMove 120 84 -543 3

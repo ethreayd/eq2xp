@@ -3342,7 +3342,9 @@ function RIStart()
 function RIStop()
 {
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"	
+	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+	if (${Script["Buffer:RIMovement"](exists)})
+		end Buffer:RIMovement
 }
 function RunInstance()
 {
