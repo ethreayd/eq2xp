@@ -777,7 +777,23 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 	else
 		echo Error in function AutoCraft ${myrecipe} does not exist
 }
-
+function AutoGroup(float Distance)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	if (${Distance}<1)
+		Distance:Set[40]
+	EQ2:QueryActors[Actors, Type  = "PC" && Guild = "${Me.Guild}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			eq2execute invite ${ActorIterator.Value.Name}
+		}	
+		while ${ActorIterator:Next(exists)}
+	}
+}
 function AutoHunt(int distance)
 {
 	
@@ -2634,6 +2650,7 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 			else
 				call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
 			call CheckPlayer
+			call AutoGroup
 			if (!${Return})
 				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 		}	

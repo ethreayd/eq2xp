@@ -43,6 +43,7 @@ function LuclinLandscapingTheBlinding()
 					wait 10
 					if (${Return})
 					{
+						
 						call Hunt ${NamedToHunt[${x}]}
 					}
 			}
