@@ -91,9 +91,7 @@ function main(bool UseOgreIC)
 		else
 			oc !c ${Me.Name} -Repair
 		call getBoLQuests Solo
-		call CheckQuest "Luclin Landscaping: The Blinding"
-		if (${Return})
-			echo I should do the weekly quest instead !
+		call LuclinLandscapingTheBlinding
 		call goFordelMidst
 		wait 120
 	}

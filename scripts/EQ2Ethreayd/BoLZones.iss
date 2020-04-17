@@ -9,6 +9,7 @@ function EnterZone(int num)
 	while (${Zone.Name.Equal["Coliseum of Valor"]})
 */
 }
+
 function getQuests(string ZoneName, string version)
 {
 /*

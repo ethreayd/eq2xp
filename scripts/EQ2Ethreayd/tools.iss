@@ -16,6 +16,7 @@
 #define JUMP Space
 
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/EQ2Travel.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/BoLQuests.iss"
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreCommon/EQ2OgreObjects/Object_Get_SpewStats.iss"
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
@@ -1264,6 +1265,23 @@ function CheckItem(string ItemName, int Quantity)
 	{
 		return 0
 	}
+}
+function CheckPlayer(float Distance)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	if (${Distance}<1)
+		Distance:Set[40]
+	EQ2:QueryActors[Actors, Type  = "PC" && Guild != "${Me.Guild}" && Distance <= ${Distance}]
+	;EQ2:QueryActors[Actors, Type  = "PC" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m found
+		return TRUE
+	}
+	else
+		return FALSE
 }
 function CheckQuest(string questname)
 {
@@ -2601,7 +2619,7 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 	echo "There is ${Count} ${ActorName}/${number}"
 	Ob_AutoTarget:AddActor["${ActorName}",0,FALSE,FALSE]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE","TRUE"]
-    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+    OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","FALSE","FALSE"]
 	if (!${IgnoreFight})
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","TRUE"]
 	if ${ActorIterator:First(exists)}
@@ -2615,6 +2633,9 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
 			else
 				call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
+			call CheckPlayer
+			if (!${Return})
+				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
@@ -3034,9 +3055,15 @@ function navwrap(float X, float Y, float Z)
 		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call GoDown
 		call TestArrivalCoord ${X} ${Y} ${Z}
+		if (!${Return})
+		{
+			call UnstuckR 50
+			call navwrap ${X} ${Y} ${Z}
+		}
 	}
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
+	echo End of navwrap
 }
 function OgreICRun(string Dir, string Iss)
 {
@@ -4086,11 +4113,14 @@ function WalkWithTheWind(float X, float Y, float Z)
 	}
 	while (!${Return})
 }
-function WhereIs(string ActorName)
+function WhereIs(string ActorName, bool Exact)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
-	EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	if (${Exact})
+		EQ2:QueryActors[Actors, Name  = "${ActorName}"]
+	else
+		EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
