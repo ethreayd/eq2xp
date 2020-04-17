@@ -374,6 +374,34 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         while ${ActorIterator:Next(exists)}
     }
 }
+function ActionOnPrimaryAttributeValue(int Value, string Action)
+{
+	variable index:item Items
+    variable iterator ItemIterator
+	variable int i=0
+	
+	Me:QueryInventory[Items, IsInventoryContainer]
+	Items:GetIterator[ItemIterator]
+	if ${ItemIterator:First(exists)}
+	{
+		do
+		{
+			
+			for ( i:Set[0] ; ${i} <  ${ItemIterator.Value.NumSlots} ; i:Inc )
+			{
+				if (${ItemIterator.Value.ItemInSlot[${i}](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1].Value}==${Value})
+				{
+					echo ${ItemIterator.Value.ItemInSlot[${i}].Name} ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1].Value}
+					call UseAbility ${Action}
+					wait 5
+					Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:${Action}
+					wait 5
+				}
+			}		
+		}	
+		while ${ItemIterator:Next(exists)}
+	}	
+}
 function ActivateItemEffect(string EquipSlot, string ItemName, string ItemEffectName)
 {
 	variable string ItemSwap
@@ -1711,6 +1739,7 @@ function DescribeItem(string ItemName, string ItemLocation)
     else
 	echo no item "${ItemName}" in Inventory
 }
+
 function DetectCircles(float Distance, string Color)
 { 
 	variable index:actor Actors

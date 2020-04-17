@@ -220,7 +220,13 @@ function MainChecks()
 	{
 		SuperStucky:Set[0]
 		call RIRestart ${Me.IsDead}
-	}	
+	}
+	do
+	{
+		call ReturnEquipmentSlotHealth Primary
+		wait 10
+	}
+	while (!${Me.IsDead(exists)})
 	call ReturnEquipmentSlotHealth Primary
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 	{
@@ -582,6 +588,7 @@ function Zone_AurelianCoastReishiRumbleSolo()
 			Counter:Inc
 			if (${Counter}>19)
 			{
+				Counter:Set[0]
 				if (!${RI_Var_Bool_Paused})
 					UIElement[RI].FindUsableChild[Start,button]:LeftClick
 				call MoveCloseTo Nerobahan
@@ -590,8 +597,10 @@ function Zone_AurelianCoastReishiRumbleSolo()
 				do
 				{
 					wait 10
+					Counter:Inc
 				}
-				while (!${Me.InCombatMode})
+				while (!${Me.InCombatMode} && ${Counter}<50)
+				Counter:Set[0]
 				call TanknSpank Nerobahan
 			}
 		}

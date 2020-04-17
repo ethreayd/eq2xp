@@ -84,7 +84,12 @@ function main(bool UseOgreIC)
 	if (!${Return})
 	{
 		call goto_GH
-		call GuildH TRUE
+		if (${Me.InventorySlotsFree}<50)
+			call ActionOnPrimaryAttributeValue 1040 Transmute
+		if (${Me.InventorySlotsFree}<50)
+			call GuildH TRUE
+		else
+			oc !c ${Me.Name} -Repair
 		call getBoLQuests Solo
 		call CheckQuest "Luclin Landscaping: The Blinding"
 		if (${Return})
@@ -159,10 +164,8 @@ function main(bool UseOgreIC)
 			}
 			else
 			{
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
+				call RIStop
+				call RZStop
 			}
 			wait 100
 			echo --- Need to go to guild to repair gear at ${Return}%

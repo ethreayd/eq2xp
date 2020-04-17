@@ -89,6 +89,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Equal["Too far away"]})
 	{
 		 eq2execute gsay ${Message}
+		 press MOVEFORWARD
 	}
 	
 	if (${Message.Find["Hurry up please, we have things to do"]} > 0)

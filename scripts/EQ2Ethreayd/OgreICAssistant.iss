@@ -144,10 +144,16 @@ function MainChecks()
 		SuperStucky:Set[0]
 		echo should deal with that
 	}	
-	call ReturnEquipmentSlotHealth Primary
+	do
+	{
+		call ReturnEquipmentSlotHealth Primary
+		echo in while (!${Me.IsDead(exists)})
+		wait 10
+	}
+	while (!${Me.IsDead(exists)})
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 	{
-		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
+		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 		call RebootLoop
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})
