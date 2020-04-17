@@ -637,6 +637,7 @@ function Ascend(float Y, bool Swim)
 	}
 	press -release FLYUP
  	eq2execute loc
+	echo exiting function Ascend
 	return ${Me.Loc.Y}
 }
 function AttackClosest(float MaxDistance)
@@ -1043,7 +1044,29 @@ function CastAbility(string AbilityName, bool NoWait)
 	}
 	call UseAbility "${AbilityName}"
 }
-
+function Campfor_NPC(string NPCName, int Duration)
+{
+	variable int Counter=0
+	if (${Duration}<1)
+		Duration:Set[600]
+	echo Camping ${NPCName} for ${Duration}s 
+	do
+	{
+		wait 10
+		Counter:Inc
+		call WhereIs "${NPCName}" TRUE
+	} 
+	while (!${Return} && ${Counter}<=${Duration})
+	echo Debug: ${NPCName} is spawned
+	call WhereIs "${NPCName}" TRUE
+	if (${Return})
+	{
+		call Hunt "${NPCName}"
+		return TRUE
+	}
+	else
+		return FALSE
+}
 function CastImmunity(string ToonName, int Health, int Pause)
 {
 
@@ -1198,7 +1221,7 @@ function CheckCombat(int MyDistance)
 		ogre harvestlite
 	if ${AntiKB}
 		oc !c -letsgo ${Me.Name}
-	
+	return FALSE
 }
 function CheckDetriment(string EffectName)
 {
@@ -3467,7 +3490,7 @@ function ShinyTrade()
       wait 5
       EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
          variable int RandomDelay
-         RandomDelay:Set[ ${Math.Rand[3]} ]
+         RandomDelay:Set[${Math.Rand[3]}]
          RandomDelay:Inc[5]
          wait ${RandomDelay}
       Collected:Inc[1]
