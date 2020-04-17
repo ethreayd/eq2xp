@@ -39,11 +39,11 @@ function LuclinLandscapingTheBlinding(bool DoNotWait)
 			NamedToHunt:Insert["Deathpetal"]
 			for ( i:Set[1] ; ${i} <= ${NamedToHunt.Used} ; i:Inc )
 			{
-					call WhereIs ${NamedToHunt[${i}]} TRUE
+					call WhereIs "${NamedToHunt[${i}]}" TRUE
 					wait 10
 					if (${Return})
 					{
-						call Hunt ${NamedToHunt[${i}]}
+						call Hunt "${NamedToHunt[${i}]}"
 					}
 			}
 			call CheckQuest "${QN}"
