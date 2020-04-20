@@ -24,6 +24,11 @@ function main(bool UseOgreIC)
 	variable string sQN
 	variable int x
 	variable int Counter
+	variable string Action
+	
+	Action:Set["Transmute"]
+	echo Launching BoLLoop (with ogre ic : ${UseOgreIC})
+	echo killing all running scripts
 	ScriptsToRun:Insert["livedierepeat"]
 	ScriptsToRun:Insert["autoshinies"]
 	ScriptsToRun:Insert["ZoneUnstuck"]
@@ -46,23 +51,15 @@ function main(bool UseOgreIC)
 		if ${Script["${ScriptsToRun[${x}]}"](exists)}
 			endscript "${ScriptsToRun[${x}]}"
 	}
-	
-	if (${UseOgreIC})
-	{
-		if (!${Script["OgreICAssistant"](exists)})
-			run EQ2Ethreayd/OgreICAssistant
-	}
-	else
-	{
-		if (!${Script["ISXRIAssistant"](exists)})
-			run EQ2Ethreayd/ISXRIAssistant
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
-		RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZm.xml"
-	}
+	call RIStop
+	call RZStop
 	
 	call GoDown
+	echo cleaning some stuff in my bags by ${Action} them
+	call ActionOnPrimaryAttributeValue 1040 ${Action}
+	call ActionOnPrimaryAttributeValue 1298 Salvage TRUE
+	call ActionOnPrimaryAttributeValue 1325 Salvage TRUE
+	call ActionOnPrimaryAttributeValue 2650 Salvage TRUE
 	
 	call ReturnEquipmentSlotHealth Primary
 	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
@@ -85,11 +82,8 @@ function main(bool UseOgreIC)
 	{
 		call goto_GH
 		if (${Me.InventorySlotsFree}<50)
-			call ActionOnPrimaryAttributeValue 1040 Transmute
-		if (${Me.InventorySlotsFree}<50)
-			call GuildH TRUE
-		else
-			oc !c ${Me.Name} -Repair
+			call ActionOnPrimaryAttributeValue 1040 ${Action}
+		call GuildH TRUE
 		call getBoLQuests Solo
 		call LuclinLandscapingTheBlinding TRUE
 		call goFordelMidst
@@ -183,6 +177,9 @@ function main(bool UseOgreIC)
 		call ReturnEquipmentSlotHealth Primary
 		if (${Return}>10)
 		{
+			if (${Me.InventorySlotsFree}<50)
+				call ActionOnPrimaryAttributeValue 1040 ${Action}
+		
 			oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
 			oc !c ${Me.Name} -resume
 			if (${UseOgreIC})
@@ -193,6 +190,7 @@ function main(bool UseOgreIC)
 			{
 				if (!${Script["Buffer:RZ"](exists)})
 				{
+				
 					echo starting RZ
 					RZ
 					wait 30
@@ -200,6 +198,16 @@ function main(bool UseOgreIC)
 				}
 			}
 			wait 600
+		}
+		if (${UseOgreIC})
+		{
+			if (!${Script["OgreICAssistant"](exists)})
+				run EQ2Ethreayd/OgreICAssistant
+		}
+		else
+		{
+			if (!${Script["ISXRIAssistant"](exists)})
+				run EQ2Ethreayd/ISXRIAssistant
 		}
 	}
 	while (TRUE)

@@ -107,6 +107,7 @@ function getBoLQuests(string version)
 	call DMove -580 60 261 3
 	call DMove -542 62 261 3
 	call DMove -545 61 285 3
+	call GoDown
 	switch ${version}
 	{
 		case Solo
@@ -191,6 +192,25 @@ function goAurelianCoast()
 	else
 		echo already in Aurelian Coast (${Zone.Name}) but I should script where I am there and deal with it
 }
+function goFreeport()
+{
+	if (!${Zone.Name.Left[8].Equal["Freeport"]})
+	{
+		call goZone "Freeport" "Globe"
+	}
+	else
+		echo already in Freeport (${Zone.Name})
+}
+function goStanley()
+{
+	call goFreeport
+	wait 50
+	call DMove -192 -87 169 3
+	call DMove -188 -57 108 3
+	call DMove -201 -56 78 3
+	call DMove -242 -56 60 3
+}	
+
 function goSanctusSeru()
 {
 	if (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})

@@ -30,6 +30,7 @@ variable(script) bool CantSeeTarget
 variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
 variable(script) bool ManualMode
+variable(script) string Action
 
 function main(string questname)
 {
@@ -106,7 +107,7 @@ function main(string questname)
 		if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 		{
 			echo call reboot because I am stuck in ${Zone.Name} if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
-			call RebootLoop
+			run EQ2Ethreayd/wrap RebootLoop
 		}
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 125 && ${Me.X} > 105 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -605 && ${Me.Z} > -630)
 		{
@@ -135,7 +136,7 @@ function main(string questname)
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
-			call RebootLoop
+			run EQ2Ethreayd/wrap RebootLoop
 		}	
 		wait 300
 	}
@@ -221,17 +222,21 @@ function MainChecks()
 		SuperStucky:Set[0]
 		call RIRestart ${Me.IsDead}
 	}
+	Action:Set["Salvage"]
+	if (${Me.InventorySlotsFree}<5)
+		call ActionOnPrimaryAttributeValue 1040 ${Action}
 	do
 	{
-		call ReturnEquipmentSlotHealth Primary
+		call IsZoning
 		wait 10
 	}
-	while (!${Me.IsDead(exists)})
+	while (${Return})
 	call ReturnEquipmentSlotHealth Primary
+		wait 10	
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 	{
-		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>0))
-		call RebootLoop
+		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
+		run EQ2Ethreayd/wrap RebootLoop
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
@@ -248,9 +253,9 @@ function MainChecks()
 	}
 	if (${ZoneTime} > 7200)
 	{
-		echo RebootLoop if (${ZoneTime} > 7200)
+		echo run EQ2Ethreayd/wrap RebootLoop if (${ZoneTime} > 7200)
 		ZoneTime:Set[0]
-		call RebootLoop
+		run EQ2Ethreayd/wrap RebootLoop
 	}
 	ZoneTime:Inc
 }
@@ -610,12 +615,14 @@ function Zone_AurelianCoastReishiRumbleSolo()
 			echo Nerobohan is not dead so I need to kill it myself
 			if (!${RI_Var_Bool_Paused})
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			RZObj:Pause
 			call DMove 576 17 479 3
-			call DMove 633 20 507 3			
+			call DMove 633 20 507 3	30 TRUE TRUE		
 			call DMove 638 24 582 3 30 TRUE TRUE
 			call TanknSpank Nerobahan
 			if (${RI_Var_Bool_Paused})
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			RZObj:Resume
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < 570 && ${Me.X} > 560 &&  ${Me.Y} < 35 && ${Me.Y} > 20 && ${Me.Z} < 520 && ${Me.Z} > 510)
 		{
@@ -647,33 +654,41 @@ function Zone_AurelianCoastSambataVillageSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			wait 50
 		}
-		
+		; must be the LAST test of the loop
 		if (!${Me.InCombatMode} && ${Me.X} < -130 && ${Me.X} > -150 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < -680 && ${Me.Z} > -700)
 		{
 			if (!${RI_Var_Bool_Paused})
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			call DMove -78 82 -704 3
-			call IsPresent Grrrunk 500
-			if (${Return})
+			RZObj:Pause
+			wait 300
+			if ${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]}
 			{
-				call DMove -46 83 -672 3
-				call DMove -35 89 -635 3
-				call DMove 9 90 -607 3
-				call DMove 16 87 -592 3
-				call DMove 47 79 -576 3
-				call TanknSpank "Grrrunk the Trunk"
-				call DMove 47 79 -576 3
-				call DMove 16 87 -592 3
-				call DMove 9 90 -607 3
-				call DMove -35 89 -635 3
-				call DMove -46 83 -672 3
 				call DMove -78 82 -704 3
+				call IsPresent Grrrunk 500
+				if (${Return})
+				{
+					call DMove -46 83 -672 3
+					call DMove -35 89 -635 3
+					call DMove 9 90 -607 3
+					call DMove 16 87 -592 3
+					call DMove 47 79 -576 3
+					call TanknSpank "Grrrunk the Trunk"
+					call DMove 47 79 -576 3
+					call DMove 16 87 -592 3
+					call DMove 9 90 -607 3
+					call DMove -35 89 -635 3
+					call DMove -46 83 -672 3
+					call DMove -78 82 -704 3
+				}
+				call DMove -136 82 -687 3
 			}
-			call DMove -136 82 -687 3
+			if (${RI_Var_Bool_Paused})
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			wait 30
+			RZObj:Resume
 			wait 600
 		}
 		wait 10
-	
 	}
 	while (${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]})
 }
@@ -736,7 +751,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 			Counter:Set[0]
 		if (!${Me.InCombatMode} && ${Me.InCombatMode(exists)} && ${Me.X} < -515 && ${Me.X} > -535 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < 20 && ${Me.Z} > 0)
 		{
-			call RebootLoop
+			run EQ2Ethreayd/wrap RebootLoop
 		}
 		if (${Me.InCombatMode} && ${Me.X} < -445 && ${Me.X} > -465 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -90 && ${Me.Z} > -110)
 		{
@@ -1527,7 +1542,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["ve got better things to do"]}>0)
 	{
 		echo Merc gone because of inactivity - Rebooting loop
-		QueueCommand call RebootLoop
+		QueueCommand run EQ2Ethreayd/wrap RebootLoop
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{

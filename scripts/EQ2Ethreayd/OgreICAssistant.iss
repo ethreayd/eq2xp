@@ -122,7 +122,7 @@ function MainChecks()
 		wait 400
 		oc !c ${Me.Name} -resume		
 		wait 100
-		call RunICZone FALSE
+		runICZone FALSE
 	}
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
@@ -153,8 +153,8 @@ function MainChecks()
 	while (!${Me.IsDead(exists)})
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
 	{
-		echo RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
-		call RebootLoop
+		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
+		run EQ2Ethreayd/wrap RebootLoop
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
@@ -166,9 +166,9 @@ function MainChecks()
 	}
 	if (${TimeZone} > 7200)
 	{
-		echo more than 2 hours in the same zone - rebooting loop (from RebootLoop) 
+		echo more than 2 hours in the same zone - rebooting loop (from run EQ2Ethreayd/wrap RebootLoop) 
 		echo deactivated until I know what to do here
-		;call RebootLoop
+		;run EQ2Ethreayd/wrap RebootLoop
 	}
 }
 
@@ -232,7 +232,7 @@ atom HandleAllEvents(string Message)
 	}
 	if (${Message.Find["ve got better things to do"]}>0)
 	{
-		QueueCommand call RebootLoop
+		QueueCommand run EQ2Ethreayd/wrap RebootLoop
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{

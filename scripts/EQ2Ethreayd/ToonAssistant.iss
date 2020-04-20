@@ -66,6 +66,7 @@ function FixCombat()
 		eq2execute merc backoff
 		wait 50
 		eq2execute merc attack
+		call AttackClosest
 	}
 	if !${Me.Target(exists)}
 	{

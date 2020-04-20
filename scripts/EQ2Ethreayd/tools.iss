@@ -375,7 +375,7 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         while ${ActorIterator:Next(exists)}
     }
 }
-function ActionOnPrimaryAttributeValue(int Value, string Action)
+function ActionOnPrimaryAttributeValue(int Value, string Action, bool ExtractFirst)
 {
 	variable index:item Items
     variable iterator ItemIterator
@@ -383,18 +383,39 @@ function ActionOnPrimaryAttributeValue(int Value, string Action)
 	
 	Me:QueryInventory[Items, IsInventoryContainer]
 	Items:GetIterator[ItemIterator]
+	echo I will ${Action} everything that has a PA at ${Value}
 	if ${ItemIterator:First(exists)}
 	{
+		echo found some stuff in my bags
 		do
 		{
 			
 			for ( i:Set[0] ; ${i} <  ${ItemIterator.Value.NumSlots} ; i:Inc )
 			{
+				echo ${i} <  ${ItemIterator.Value.NumSlots} (looking into ${ItemIterator.Value.Name} bag) 
 				if (${ItemIterator.Value.ItemInSlot[${i}](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1].Value}==${Value})
 				{
 					echo ${ItemIterator.Value.ItemInSlot[${i}].Name} ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Modifier[1].Value}
+					if (${ExtractFirst})
+					{
+						echo trying extract essence on ${ItemIterator.Value.ItemInSlot[${i}].Name} first (I should optimize that to only do it for primary, secondary or ranged items)
+						Me.Ability[id, 406528868]:Use
+						wait 10
+						do
+						{
+							waitframe
+						}
+						while ${Me.CastingSpell}
+						Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:Salvage
+						wait 5
+					}	
 					call UseAbility ${Action}
-					wait 5
+					wait 10
+					do
+					{
+						waitframe
+					}
+					while ${Me.CastingSpell}
 					Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:${Action}
 					wait 5
 				}
@@ -453,10 +474,14 @@ function ActivateSpecial(string ActorName, float X, float Y, float Z)
 	OgreBotAPI:Special["${Me.Name}"]
 	wait 50
 }
-function ActivateSpire()
+
+function ActivateSpire(string AltName)
 {
 	variable string ActorName
-	call IsPresent Spire 30 FALSE TRUE
+	
+	if (${AltName.Equal[""]})
+		AltName:Set["Spire"]
+	call IsPresent "${AltName}" 30 FALSE TRUE
 	ActorName:Set["${Return}"]
 	if (!${ActorName.Equal["FALSE"]})
 	{
@@ -466,7 +491,7 @@ function ActivateSpire()
 		wait 10
 	}
 	else
-		echo no Spire in 30m reach
+		echo no ${AltName} in 30m reach
 }
 function ActivateVerb(string ActorName, float X, float Y, float Z, string verb, bool is2D, bool triggerFight, bool UseID)
 {
@@ -692,8 +717,8 @@ function AutoAddAgent(bool EraseDuplicate)
 				if ${ItemIterator.Value.IsAgent}
 				{
 					Counter2:Inc
-					; this method does not exist :(
-					;Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:ConvertAgent[confirm]
+					
+					Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:ConvertAgent[confirm]
 					if ${EraseDuplicate}
 						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
 				}
@@ -705,7 +730,100 @@ function AutoAddAgent(bool EraseDuplicate)
 	if (${Counter2} > 0 && ${EraseDuplicate})
 		call AutoAddAgent TRUE
 }
+function AutoAddQuest(bool EraseDuplicate)
+{
+	variable index:item Items
+	variable iterator ItemIterator
+    variable int Counter=0
+	variable int Counter2=0
+	variable int Counter3=0
+		
+		Me:QueryInventory[Items, Location == "Inventory"]
+		Items:GetIterator[ItemIterator]
+		if ${ItemIterator:First(exists)}
+		{
+			
+			do
+			{
+				Counter3:Inc
+				call IsOverseerQuest "${ItemIterator.Value.Name}"
+				if ${Return}
+				{
+					echo adding "${ItemIterator.Value.Name}"
+					Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
+					;[confirm]
+					Counter:Inc
+				}	
+			}	
+			while ${ItemIterator:Next(exists)}
+		}
+		
+		Me:QueryInventory[Items, Location == "Inventory"]
+		Items:GetIterator[ItemIterator]
+		if ${ItemIterator:First(exists)}
+		{
+			do
+			{
+				if ${ItemIterator.Value.IsAgent}
+				{
+					Counter2:Inc
+					if ${EraseDuplicate}
+						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
+				}
+			}	
+			while ${ItemIterator:Next(exists)}
+		}
+		
+	echo found ${Counter} Quests, ${Counter2} seems to be duplicate (scanned ${Counter3} items)
+	if (${Counter2} > 0 && ${EraseDuplicate})
+		call AutoAddQuest TRUE
+}
+function AutoBuyQuest(string OverseerQuestName, string MerchantName)
+{
+	echo this is really crappy code
+	echo the only thing that make sense come from https://forums.ogregaming.com/viewtopic.php?f=15&t=140 (ty Kannkor)
+	
+	variable int HowManyToBuy=10
+	variable bool StopLooping=FALSE
+	variable int Bought=0
+	variable int RandomDelay
+if !${Actor["${MerchantName}"](exists)}
+	if !${Actor["${MerchantName}"](exists)}
+	{
+		echo ${Time}: No city merchant called ${MerchantName} found.
+		return FALSE
+	}
+   if ${Actor["${MerchantName}"].Distance} > 10
+   {
+      echo ${Time}: ${MerchantName} too far away ( ${Actor["${MerchantName}"].Distance} ). Needs to be less than 10 meters away.
+	  call MoveCloserTo "${MerchantName}"
+   }
+   if ${Me.InventorySlotsFree} <= 0
+   {
+      echo ${Time}: You don't have any inventory slots free! You need at least 10 to start
+      return FALSE
+   }
+   
+	while (${Bought} < ${HowManyToBuy})
+	{
+		Actor["${MerchantName}"]:DoTarget
+		Actor["${MerchantName}"]:DoubleClick
+		wait 5
 
+		Vendor.Merchant["${OverseerQuestName}"]:Buy[1]
+		RandomDelay:Set[ ${Math.Rand[3]} ]
+		RandomDelay:Inc[5]
+        wait ${RandomDelay}
+		Bought:Inc
+	}
+	call CountItem "${OverseerQuestName}"
+	echo Bought ${Return}/${Bought} quest ${OverseerQuestName} from ${MerchantName}
+   EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
+   EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
+   wait 5
+   ;all AutoAddQuest TRUE
+   return TRUE
+}
 function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
 {
 	if (${Me.Recipe["${myrecipe}"](exists)})
@@ -1787,8 +1905,12 @@ function DescribeItem(string ItemName, string ItemLocation)
             echo "${Counter}. ${ItemIterator.Value.Name} : IsFoodOrDrink : '${ItemIterator.Value.IsFoodOrDrink}'"
             echo "${Counter}. ${ItemIterator.Value.Name} : IsScribeable : '${ItemIterator.Value.IsScribeable}'"
             echo "${Counter}. ${ItemIterator.Value.Name} : IsUsable : '${ItemIterator.Value.IsUsable}'"
-	    echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
-	   ;echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${ItemIterator.Value.IsOverseerQuest}'"
+			echo "${Counter}. ${ItemIterator.Value.Name} : IsAgent : '${ItemIterator.Value.IsAgent}'"
+			echo "${Counter}. ${ItemIterator.Value.Name} : Tier : '${ItemIterator.Value.ToItemInfo.Tier}'"
+			echo "${Counter}. ${ItemIterator.Value.Name} : Description : '${ItemIterator.Value.ToItemInfo.Description}'"
+			echo "${Counter}. ${ItemIterator.Value.Name} : Type : '${ItemIterator.Value.ToItemInfo.Type}'"
+			call IsOverseerQuest "${ItemIterator.Value.Name}"
+			echo "${Counter}. ${ItemIterator.Value.Name} : IsOverseerQuest : '${Return}'"
             Counter:Inc
         }
         while ${ItemIterator:Next(exists)}
@@ -2349,27 +2471,43 @@ function goHate()
 	call waitfor_Zone "Plane of Magic"
 }
 
-function goZone(string ZoneName)
+function goZone(string ZoneName, string Transport)
 {
-	echo Going to Zone: ${ZoneName} (inside goZone in tools)
+	variable string AltZoneName
+	
+	if (${ZoneName.Equal["Freeport"]})
+		AltZoneName:Set["The City of Freeport"]
+	else
+		AltZoneName:Set["${ZoneName}"]
+	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
-		call ActivateSpire
+		call ActivateSpire "${Transport}"
 		wait 30
 		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
 		;wait 50
 		;RIMUIObj:TravelMap["${Me.Name}","${ZoneName}",1,2]
 		wait 300
+		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
 	}
+	do
+	{
+		wait 10
+		call IsZoning
+	}	
+	while (${Return})
 	
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[25].Equal["${ZoneName}"]})
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
 	{
 		call goto_GH
 		wait 300
-		call goZone "${ZoneName}"
+		call goZone "${ZoneName}" "${Transport}"
 	}
-	if (!${Zone.Name.Left[25].Equal["${ZoneName}"]})
-		call goZone "${ZoneName}"
+	if (!${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
+	{
+		call goZone "${ZoneName}" "${Transport}"
+	}
+	echo I am in ${ZoneName} (${AltZoneName}) (end of goZone)
 }
 function goto_GH()
 {
@@ -2412,7 +2550,7 @@ function GuildH(bool NoPlant)
 	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
 	{
 		echo Starting GH churns
-		wait 100
+		wait 50
 		echo should I skipp Autoplant ? ${NoPlant}
 		if (!${NoPlant})
 			call AutoPlant
@@ -2770,6 +2908,40 @@ function isMobAround(float Distance)
 	else
 		return FALSE
 }
+function IsOverseerQuest(string ItemName, string ItemLocation)
+{
+    variable index:item Items
+    variable iterator ItemIterator
+    
+    Me:QueryInventory[Items, Location =- "${ItemLocation}" && Name =- "${ItemName}"]
+    Items:GetIterator[ItemIterator]
+ 
+ 
+    if ${ItemIterator:First(exists)}
+    {
+        do
+        {
+            if (!${ItemIterator.Value.IsItemInfoAvailable})
+            {
+                do
+                {
+                    waitframe
+                }
+                while (!${ItemIterator.Value.IsItemInfoAvailable})
+            }
+			if (${ItemIterator.Value.ToItemInfo.Description.Find[overseer quest]}>0)
+				return TRUE
+			else
+				return FALSE
+        }
+        while ${ItemIterator:Next(exists)}
+    }
+    else
+	{
+		echo no item "${ItemName}" in Inventory
+		return FALSE
+	}
+}
 function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 {
 	variable index:actor Actors
@@ -2819,6 +2991,13 @@ function IsPublicZone()
 	if ${Zone.Name.Right[6].Equal[\[Solo\]]}
 		return FALSE
 	return TRUE
+}
+function IsZoning()
+{
+	if ${Me.IsIdle(exists)}
+		return FALSE
+	else
+		return TRUE
 }
 function KBMove(string Who, float X, float Y, float Z, int speed, int MyDistance, bool IgnoreFight, bool StuckZone, int Precision)
 {
@@ -3254,6 +3433,14 @@ function RebootLoop(string DefaultScriptName)
 	{
 		end ToonAssistant
 	}
+	if (${Script["ISXRIAssistant"](exists)})
+	{
+		end ISXRIAssistant
+	}
+	if (${Script["OgreICAssistant"](exists)})
+	{
+		end OgreICAssistant
+	}
 	I am doing ${ScriptName} after going back to the Guild
 	
 	do
@@ -3274,12 +3461,9 @@ function RebootLoop(string DefaultScriptName)
 	call goto_GH
 	wait 100
 	call GuildH
+	echo Launching EQ2Ethreayd/${ScriptName}
 	if (!${Script["${ScriptName}"](exists)})
 		run EQ2Ethreayd/${ScriptName}
-	if (${Script["ISXRIAssistant"](exists)})
-		end ISXRIAssistant
-	if (${Script["OgreICAssistant"](exists)})
-		end OgreICAssistant
 }
 function RelayAll(string w0, string w1, string w2, string w3, string w4, string w5, string w6,string w7, string w8, string w9)
 {
@@ -3334,7 +3518,7 @@ function ResumeZone()
 }
 function ReturnEquipmentSlotHealth(string ItemSlot)
 {
-	variable int ItemHealth=0
+	variable int ItemHealth=100
 	
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	wait 10
