@@ -73,6 +73,8 @@ function main(string questname)
 			call Zone_AurelianCoastReishiRumbleSolo
 		if ${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]}
 			call Zone_AurelianCoastSambataVillageSolo
+		if ${Zone.Name.Equal["Fordel Midst: The Listless Spires \[Solo\]"]}
+			call Zone_FordelMidstTheListlessSpiresSolo
 		else
 			call MainChecks
 		if (${Me.IsIdle} && !${Me.InCombat})
@@ -142,6 +144,7 @@ function main(string questname)
 	}
 	while (TRUE)
 }
+
 function MainChecks()
 {
 	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
@@ -168,7 +171,7 @@ function MainChecks()
 			echo RI crashed (${RICrashed}) - restarting zone
 			echo Pausing RZ
 			RZObj:Pause
-			RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
+			call RIStop
 			wait 100
 			call Evac
 			wait 600
@@ -180,6 +183,9 @@ function MainChecks()
 			RZObj:Resume
 		}
 	}
+	else
+		RICrashed:Set[0]
+
 	if (${ScriptIdleTime}>60 && ${Me.IsDead})
 	{
 		eq2execute merc suspend
@@ -233,10 +239,16 @@ function MainChecks()
 	while (${Return})
 	call ReturnEquipmentSlotHealth Primary
 		wait 10	
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
 	{
-		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
-		run EQ2Ethreayd/wrap RebootLoop
+		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
+		wait 600
+		call IsZoning
+		if (!${Return})
+		{
+			echo if (!${Return})
+			run EQ2Ethreayd/wrap RebootLoop
+		}
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
@@ -505,6 +517,29 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 		}
+		if (!${Me.InCombatMode} && ${Me.X} < -340 && ${Me.X} > -360 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -30 && ${Me.Z} > -50)
+		{
+			RZObj:Pause
+			call RIStop
+			
+			wait 100
+			
+			call DMove -360 90 -13 3
+			call DMove -402 88 0 3
+			RI
+			wait 100
+			RICrashed:Set[0]
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			echo Resuming RZ
+			RZObj:Resume
+			
+			
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+		}
 		wait 10
 	}
 	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
@@ -539,6 +574,22 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 		}
+		if (!${Me.InCombatMode} && ${Me.X} < -185 && ${Me.X} > -205 &&  ${Me.Y} < 190 && ${Me.Y} > 175 && ${Me.Z} < 10 && ${Me.Z} > -10)
+		{
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			oc !c -Special ${Me.Name}
+			wait 100
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+		}
+		
 		if (${Me.InCombatMode} && !${Me.Target.Distance(exists)})
 		{
 			Counter:Inc
@@ -781,6 +832,21 @@ function Zone_AurelianCoastMaidensEyeSolo()
 		}
 		else
 			Counter:Set[0]
+		if (!${Me.InCombatMode} && ${Me.X} < -525 && ${Me.X} > -545 &&  ${Me.Y} < 50 && ${Me.Y} > 0 && ${Me.Z} < 25 && ${Me.Z} > 0)
+		{
+			RZObj:Pause
+			if (!${RI_Var_Bool_Paused})
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call DMove -459 7 18 3
+			call DMove -333 3 -117 3
+			call DMove -323 5 -227 3
+			call DMove -432 25 -237 3
+			call DMove -474 33 -208 3
+			call DMove -567 54 -48 3
+			if (${RI_Var_Bool_Paused})
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			RZObj:Resume	
+		}
 		if (!${Me.InCombatMode} && ${Me.X} < -485 && ${Me.X} > -510 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -5 && ${Me.Z} > -30)
 		{
 			Counter:Inc
@@ -791,8 +857,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 					UIElement[RI].FindUsableChild[Start,button]:LeftClick
 				call DMove -178 3 51 3 30
 				oc !c -Special ${Me.Name}
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
-				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+				call RIStop
 				RZObj:Resume
 				Counter:Set[0]
 			}
@@ -803,6 +868,28 @@ function Zone_AurelianCoastMaidensEyeSolo()
 	}
 	while (${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]})
 }
+
+function Zone_FordelMidstTheListlessSpiresSolo()
+{
+	
+	variable int Counter=0
+	
+	ScriptIdleTime:Set[0]
+	if (!${Script["ToonAssistant"](exists)})
+		run EQ2Ethreayd/ToonAssistant
+	do
+	{
+		call MainChecks
+		echo Zone is ${Zone.Name} (${Counter})
+
+		;if (!${Me.InCombatMode} && ${Me.X} < -185 && ${Me.X} > -205 &&  ${Me.Y} < 10 && ${Me.Y} > 0 && ${Me.Z} < 40 && ${Me.Z} > 25)
+		;{
+		;}
+		wait 10
+	}
+	while (${Zone.Name.Equal["Fordel Midst: The Listless Spires \[Solo\]"]})
+}
+
 function DoMound()
 {
 	echo going to mound

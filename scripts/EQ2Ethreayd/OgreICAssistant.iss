@@ -116,11 +116,11 @@ function MainChecks()
 		echo Dead and Alone --- Reviving
 		ogre end ic
 		wait 100
-		oc !c ${Me.Name} -letsgo 
-		oc !c ${Me.Name} -revive 
-		oc !c ${Me.Name} -pause
+		oc !c -letsgo ${Me.Name}
+		oc !c -revive ${Me.Name}
+		oc !c -pause ${Me.Name}
 		wait 400
-		oc !c ${Me.Name} -resume		
+		oc !c -resume ${Me.Name}
 		wait 100
 		runICZone FALSE
 	}
@@ -236,7 +236,7 @@ atom HandleAllEvents(string Message)
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{
-		oc !c ${Me.Name} -Special
+		oc !c -Special ${Me.Name}
 	}
 	if (${Message.Find["Saperlipopette"]}>0 && !${RI_Var_Bool_Paused})
 	{

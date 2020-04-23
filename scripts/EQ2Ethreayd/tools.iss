@@ -19,6 +19,9 @@
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/BoLQuests.iss"
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreCommon/EQ2OgreObjects/Object_Get_SpewStats.iss"
 
+;BoolPoll1 must be used to see if anyone is at TRUE, only one TRUE will put that global variable at TRUE
+variable(globalkeep) bool BoolPoll1
+
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
 	variable float loc0 
@@ -200,7 +203,8 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 
 	eq2execute waypoint ${X} ${Y} ${Z}
 	call Ascend ${Y} ${Swim}
-
+	Y:Set[${Return}]
+	
 	if ${Precision}<1
 		Precision:Set[10]
 	echo Moving on my own to ${X} ${Y} ${Z}
@@ -218,6 +222,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
 			call Ascend ${Y} ${Swim}
+			Y:Set[${Return}]
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -227,6 +232,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 		while (${Me.Loc.X}>${X} && ${Stucky}<10)
 		press -release MOVEFORWARD
 		call Ascend ${Y} ${Swim}
+		Y:Set[${Return}]
 		eq2execute loc
 	}
 	else
@@ -241,6 +247,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			wait 5
 			call Ascend ${Y} ${Swim}
+			Y:Set[${Return}]
 			call CheckStuck ${loc0}
 			if (${Return})
 			{
@@ -250,6 +257,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 		press -release MOVEFORWARD
 		call Ascend ${Y} ${Swim}
+		Y:Set[${Return}]
 		eq2execute loc
 	}
 	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
@@ -267,6 +275,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
 				call Ascend ${Y} ${Swim}
+				Y:Set[${Return}]
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -276,6 +285,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
 			call Ascend ${Y} ${Swim}
+			Y:Set[${Return}]
 			eq2execute loc
 		}
 		else
@@ -290,6 +300,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 				wait 2
 				call Ascend ${Y} ${Swim}
+				Y:Set[${Return}]
 				call CheckStuck ${loc0}
 				if (${Return})
 				{
@@ -299,6 +310,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
 			press -release MOVEFORWARD
 			call Ascend ${Y} ${Swim}
+			Y:Set[${Return}]
 			eq2execute loc
 		}
 	}
@@ -641,6 +653,7 @@ function Ascend(float Y, bool Swim)
 			if ${Me.Loc.Y}>${Ymax}
 			{
 				Ymax:Set[${Me.Loc.Y}]
+				;echo setting Ymax at ${Me.Loc.Y}
 				YStuck:Set[0]
 			}
 			else
@@ -648,14 +661,17 @@ function Ascend(float Y, bool Swim)
 			call CheckStuck ${loc0}
 			if (${Return} || ${YStuck}>0)
 				Stucky:Inc
-			if (${Stucky}>5)
+			if (${Stucky}>2)
 			{	
 				ExecuteQueued
 				echo stucked when ascending
+				press -release FLYUP
 				call CheckCombat
 				call UnstuckR
 				Stucky:Set[0]
 				SuperStuck:Inc
+				Y:Set[${Math.Calc64[${Ymax}-10]}]
+				echo while (${Me.Loc.Y}<${Y} && ${SuperStuck}<5)
 			}
 		}
 		while (${Me.Loc.Y}<${Y} && ${SuperStuck}<5)
@@ -663,7 +679,7 @@ function Ascend(float Y, bool Swim)
 	press -release FLYUP
  	eq2execute loc
 	echo exiting function Ascend
-	return ${Me.Loc.Y}
+	return ${Y}
 }
 function AttackClosest(float MaxDistance)
 {
@@ -751,7 +767,6 @@ function AutoAddQuest(bool EraseDuplicate)
 				{
 					echo adding "${ItemIterator.Value.Name}"
 					Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
-					;[confirm]
 					Counter:Inc
 				}	
 			}	
@@ -764,7 +779,8 @@ function AutoAddQuest(bool EraseDuplicate)
 		{
 			do
 			{
-				if ${ItemIterator.Value.IsAgent}
+				call IsOverseerQuest "${ItemIterator.Value.Name}"
+				if ${Return}
 				{
 					Counter2:Inc
 					if ${EraseDuplicate}
@@ -778,16 +794,23 @@ function AutoAddQuest(bool EraseDuplicate)
 	if (${Counter2} > 0 && ${EraseDuplicate})
 		call AutoAddQuest TRUE
 }
-function AutoBuyQuest(string OverseerQuestName, string MerchantName)
+function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, bool DoNotManageMerchantWindow)
 {
-	echo this is really crappy code
-	echo the only thing that make sense come from https://forums.ogregaming.com/viewtopic.php?f=15&t=140 (ty Kannkor)
+	echo inspired from https://forums.ogregaming.com/viewtopic.php?f=15&t=140 (ty Kannkor)
 	
-	variable int HowManyToBuy=10
 	variable bool StopLooping=FALSE
 	variable int Bought=0
 	variable int RandomDelay
-if !${Actor["${MerchantName}"](exists)}
+	
+	if (${ItemName.Equal[""]})
+		return FALSE
+	
+	if (${MerchantName.Equal[""]})
+		return FALSE
+	
+	if (${Quantity}<1)
+		Quantity:Inc
+		
 	if !${Actor["${MerchantName}"](exists)}
 	{
 		echo ${Time}: No city merchant called ${MerchantName} found.
@@ -796,33 +819,38 @@ if !${Actor["${MerchantName}"](exists)}
    if ${Actor["${MerchantName}"].Distance} > 10
    {
       echo ${Time}: ${MerchantName} too far away ( ${Actor["${MerchantName}"].Distance} ). Needs to be less than 10 meters away.
-	  call MoveCloserTo "${MerchantName}"
+	  call MoveCloseTo "${MerchantName}"
    }
-   if ${Me.InventorySlotsFree} <= 0
-   {
-      echo ${Time}: You don't have any inventory slots free! You need at least 10 to start
-      return FALSE
-   }
-   
-	while (${Bought} < ${HowManyToBuy})
+	if ${Me.InventorySlotsFree} <= 0
+	{
+		echo ${Time}: You don't have any inventory slots free! You need at least 10 to start
+		return FALSE
+	}
+	if (!${DoNotManageMerchantWindow})
 	{
 		Actor["${MerchantName}"]:DoTarget
 		Actor["${MerchantName}"]:DoubleClick
 		wait 5
-
-		Vendor.Merchant["${OverseerQuestName}"]:Buy[1]
+	}
+	while (${Bought} < ${Quantity})
+	{
+		
+		echo Buying 1 "${ItemName}"
+		MerchantWindow.MerchantInventory["${ItemName}"]:Buy[1]
 		RandomDelay:Set[ ${Math.Rand[3]} ]
 		RandomDelay:Inc[5]
         wait ${RandomDelay}
 		Bought:Inc
 	}
-	call CountItem "${OverseerQuestName}"
-	echo Bought ${Return}/${Bought} quest ${OverseerQuestName} from ${MerchantName}
-   EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
-   EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
-   wait 5
-   ;all AutoAddQuest TRUE
-   return TRUE
+	call CountItem "${ItemName}"
+	echo Bought ${Bought}/${Return} ${ItemName} from ${MerchantName}
+	if (!${DoNotManageMerchantWindow})
+	{
+		EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
+		EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
+		wait 5
+	}
+	return TRUE
 }
 function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
 {
@@ -1110,7 +1138,7 @@ function BelltoZone(string ZoneName)
 function Boost()
 {
 ; from THG snacks script
-	oc !c -pause ${Me.Name}
+	oc !c -Pause ${Me.Name}
 	if ${Me.Inventory[Dolma](exists)}
 	{
 		Me.Inventory[Dolma]:Use
@@ -1179,7 +1207,7 @@ function Campfor_NPC(string NPCName, int Duration)
 	call WhereIs "${NPCName}" TRUE
 	if (${Return})
 	{
-		call Hunt "${NPCName}"
+		call Hunt "${NPCName}" 5000
 		return TRUE
 	}
 	else
@@ -1233,7 +1261,44 @@ function CastImmunity(string ToonName, int Health, int Pause)
 			wait $ {Math.Calc64[${Pause}*10]}
 		}
 	}
-
+}
+function ChargeOverseer(bool CleanQuests)
+{
+	variable int i
+	variable int j
+	variable int max=10
+	variable string ItemName
+	variable string MerchantName
+	
+	MerchantName:Set["Stanley Parnem"]
+	call goStanleyParnem
+	wait 5
+	Actor["${MerchantName}"]:DoTarget
+	Actor["${MerchantName}"]:DoubleClick
+	wait 5
+	
+	for ( i:Set[1] ; ${i} <= ${MerchantWindow.NumMerchantItemsForSale} ; i:Inc )
+	{
+		ItemName:Set["${MerchantWindow.MerchantInventory[${i}]}"]
+		call CountItem "${ItemName}"
+		if (${Return}<1)
+			call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${max} TRUE
+		for ( j:Set[1] ; ${j} <= ${Return} ; j:Inc )
+		{
+			Me.Inventory[Query, Name =- "${ItemName}"]:Use
+			wait 5
+		}
+		call CountItem "${ItemName}"
+		for ( j:Set[0] ; ${j} < ${Return} ; j:Inc )
+		{
+			Me.Inventory[Query, Name =- "${ItemName}"]:Destroy
+			wait 5
+		}
+	}
+	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
+	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
+	wait 5
+	call AutoAddQuest ${CleanQuests}
 }
 function check_quest(string questname)
 {
@@ -1440,35 +1505,50 @@ function CheckPlayer(float Distance)
 	else
 		return FALSE
 }
-function CheckQuest(string questname)
+function CheckQuest(string questname, bool ForAll)
 {
 	variable index:quest Quests
 	variable iterator It
 	variable int NumQuests
-
-	NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
-    
-	if (${NumQuests} < 1)
+	
+	if (${ForAll})
 	{
-		echo "No active quests found."
-		return FALSE
+		echo doing CheckQuest ForAll
+		relay all BoolPoll1:Set[FALSE]
+		wait 20
+		if (!${Script["wrap"](exists)})
+			relay all run wrap CheckQuest "${questname}" FALSE
+		else
+			return FALSE
 	}
-	QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
-	QuestJournalWindow:GetActiveQuests[Quests]
-	Quests:GetIterator[It]
-	if ${It:First(exists)}
+	else
 	{
+		NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
+    
+		if (${NumQuests} < 1)
+		{
+			echo "No active quests found."
+			return FALSE
+		}
+		QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
+		QuestJournalWindow:GetActiveQuests[Quests]
+		Quests:GetIterator[It]
+		if ${It:First(exists)}
+		{
         	do
         	{
-			if (${It.Value.Name.Equal["${questname}"]})
-			{
-				echo already on ${questname}
-				return TRUE
-        		}
+				if (${It.Value.Name.Equal["${questname}"]})
+				{
+					echo already on ${questname}
+					relay all BoolPoll1:Set[TRUE]
+					echo BoolPoll1 at ${BoolPoll1}
+				}
+			}
+			while ${It:Next(exists)}
 		}
-        	while ${It:Next(exists)}
 	}
-	return FALSE
+	wait 100
+	return ${BoolPoll1}
 }    	
 function CheckQuestStep(int step)
 {
@@ -1842,7 +1922,23 @@ function DescribeActor(int ActorID)
 	echo Y					${Actor[${ActorID}].Loc.Y}
 	echo Z					${Actor[${ActorID}].Loc.Z}
 }
-
+function DescribeActorbyName(string ActorName, bool Exact)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	if (${Exact})
+		EQ2:QueryActors[Actors, Name  = "${ActorName}"]
+	else
+		EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		call DescribeActor ${ActorIterator.Value.ID}
+		return TRUE
+	}
+	else
+		return FALSE
+}
 function DescribeItemInventory(string ItemName)
 {
 	call DescribeItem "${ItemName}" "Inventory"
@@ -2011,6 +2107,13 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 		call WaitforGroupDistance 30
 	return ${SuperStucky}
 }
+function EndScript(string ScriptName)
+{
+	if ${Script["${ScriptName}"](exists)}
+	{
+		end ${ScriptName}
+	}
+}
 function EndZone()
 {
 	variable string sQN
@@ -2091,6 +2194,27 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 			call TestArrivalCoord ${X} ${Y} ${Z}
 		}	
 		while (!${Return} && !${Vanished} )
+	}
+}
+function FreeportToon()
+{
+; to be implemented with something better
+	switch ${Me.Archetype}
+	{
+		case priest
+			switch ${Me.Class}
+			{
+				case druid
+					return TRUE
+				break
+				default
+					return FALSE
+				break
+			}
+		break
+		default
+			return TRUE
+		break
 	}
 }
 function Gardener()
@@ -2479,6 +2603,11 @@ function goZone(string ZoneName, string Transport)
 		AltZoneName:Set["The City of Freeport"]
 	else
 		AltZoneName:Set["${ZoneName}"]
+	if (${ZoneName.Equal["Aurelian Coast"]})
+	{
+		call goAurelianCoast
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -2560,6 +2689,7 @@ function GuildH(bool NoPlant)
 		RIMUIObj:Repair[${Me.Name}]
 		wait 100
 		echo transmuting stones
+		call AutoAddAgent TRUE
 		call TransmuteAll "Planar Transmutation Stone"
 		call TransmuteAll "Celestial Transmutation Stone"
 		call TransmuteAll "Veilwalker's Transmutation Stone"
@@ -2781,7 +2911,7 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 	variable index:actor Actors
 	variable iterator ActorIterator
 	variable int Count=0
-	
+	call StopHunt
 	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
@@ -2806,10 +2936,14 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 			if (!${IgnoreFight})
 				call waitfor_Health 90
 			echo ${ActorIterator.Value.Name} found at ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-			if (!${nofly})
-				call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
-			else
-				call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
+			call TestArrivalCoord ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+			if (!${Return})
+			{
+				if (!${nofly})
+					call navwrap ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z}
+				else
+					call DMove ${ActorIterator.Value.X}  ${ActorIterator.Value.Y}  ${ActorIterator.Value.Z} 3 30 ${IgnoreFight}
+			}	
 			call AutoGroup
 			eq2execute merc resume
 			call CheckPlayer
@@ -3447,7 +3581,9 @@ function RebootLoop(string DefaultScriptName)
 	{
 		echo Pausing Ogre
 		oc !c -Pause ${Me.Name}
-		eq2execute merc backoff
+		eq2execute merc suspend
+		wait 10
+		ChoiceWindow:DoChoice1
 		wait 100
 		echo Resuming Ogre
 		oc !c -Resume ${Me.Name}
@@ -4233,6 +4369,26 @@ function WaitforCorpse()
 {
 	call waitfor_Corpse
 }
+function waitfor_Group()
+{
+	variable int Counter
+	variable int i
+	
+	do
+	{
+		Counter:Set[0]
+		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
+		{
+			echo  ${i}:${Me.Group[${i}].Distance}
+			if (!${Me.Group[${i}].Distance(exists)})
+				Counter:Inc
+		}
+		wait 50
+		echo in waitfor_Group() loop with ${Counter} missing member
+	}
+	while (${Counter}>0)
+		
+}
 function waitfor_GroupDistance(int Distance)
 {
 	variable int Counter
@@ -4250,6 +4406,7 @@ function waitfor_GroupDistance(int Distance)
 	}
 	while (${Return}>${Distance})
 }
+
 function WaitforGroupDistance(int Distance)
 {
 	call waitfor_GroupDistance ${Distance}
@@ -4358,4 +4515,29 @@ function WhereIs(string ActorName, bool Exact)
 	}
 	else
 		return FALSE
+}
+function IsNamedEngaged(string ActorName, bool Exact)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	if (${Exact})
+		EQ2:QueryActors[Actors, Name  = "${ActorName}"]
+	else
+		EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		if (${ActorIterator.Value.Health}<100)
+		{
+			echo ${ActorName} (${Exact}) at ${ActorIterator.Value.Health}% Health seems engaged
+			return TRUE
+		}
+		else
+			return FALSE
+	}
+	else
+	{
+		echo can't find ${ActorName} (${Exact})
+		return TRUE
+	}
 }

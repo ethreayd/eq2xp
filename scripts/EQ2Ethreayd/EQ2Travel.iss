@@ -201,14 +201,39 @@ function goFreeport()
 	else
 		echo already in Freeport (${Zone.Name})
 }
-function goStanley()
+function goQeynos()
 {
-	call goFreeport
-	wait 50
-	call DMove -192 -87 169 3
-	call DMove -188 -57 108 3
-	call DMove -201 -56 78 3
-	call DMove -242 -56 60 3
+	if (!${Zone.Name.Left[6].Equal["Qeynos"]})
+	{
+		call goZone "Qeynos" "Globe"
+	}
+	else
+		echo already in Qeynos (${Zone.Name})
+}
+
+
+function goStanleyParnem()
+{
+	if (${Actor["Stanley Parnem"].Distance} > 10 || !${Actor["Stanley Parnem"].Distance(exists)})
+	{
+		call FreeportToon
+		if ${Return}
+		{
+			call goZone Freeport Globe
+			wait 50
+			call DMove -192 -57 169 3
+			call DMove -188 -57 108 3
+			call DMove -201 -56 78 3
+			call DMove -242 -56 60 3
+		}
+		else
+		{
+			call goZone Qeynos Globe
+			wait 50
+			call DMove 972 -26 89 3
+		}
+	}
+	call MoveCloseTo "Stanley Parnem"
 }	
 
 function goSanctusSeru()
@@ -257,7 +282,7 @@ function goSanctusSeru()
 			call GoDown
 			call DMove 616 43 593 3
 			call DMove 722 58 708 3
-			oc !c ${Me.Name} -Zone
+			oc !c -Zone ${Me.Name}
 			do
 			{
 				wait 10

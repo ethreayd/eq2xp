@@ -39,7 +39,7 @@ function main(bool UseOgreIC)
 	ScriptsToRun:Insert["wrap"]
 	if (${UseOgreIC})
 	{
-		oc !c ${Me.Name} -letsgo 
+		oc !c -letsgo ${Me.Name}
 		ScriptsToRun:Insert["ISXRIAssistant"]
 	}
 	else
@@ -56,10 +56,15 @@ function main(bool UseOgreIC)
 	
 	call GoDown
 	echo cleaning some stuff in my bags by ${Action} them
+	call ActionOnPrimaryAttributeValue 996 ${Action}
+	call ActionOnPrimaryAttributeValue 1019 ${Action}
 	call ActionOnPrimaryAttributeValue 1040 ${Action}
+	call ActionOnPrimaryAttributeValue 1248 ${Action}
 	call ActionOnPrimaryAttributeValue 1298 Salvage TRUE
 	call ActionOnPrimaryAttributeValue 1325 Salvage TRUE
+	call ActionOnPrimaryAttributeValue 2596 Salvage TRUE
 	call ActionOnPrimaryAttributeValue 2650 Salvage TRUE
+	call ActionOnPrimaryAttributeValue 2706 Salvage TRUE
 	
 	call ReturnEquipmentSlotHealth Primary
 	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
@@ -68,8 +73,8 @@ function main(bool UseOgreIC)
 		echo --- Reviving (Case 1) ReturnEquipmentSlotHealth Primary at ${Return} or/and I am ${Me.IsDead} DEAD
 		if (${UseOgreIC})
 		{
-			oc !c ${Me.Name} -letsgo 
-			oc !c ${Me.Name} -Revive
+			oc !c -letsgo ${Me.Name}
+			oc !c -Revive ${Me.Name}
 		}
 		else
 		{
@@ -115,8 +120,8 @@ function main(bool UseOgreIC)
 			if (${UseOgreIC})
 			{
 				ogre end ic
-				oc !c ${Me.Name} -letsgo 
-				oc !c ${Me.Name} -Revive
+				oc !c -letsgo ${Me.Name} 
+				oc !c -Revive ${Me.Name}
 			}
 			else
 			{
@@ -151,7 +156,7 @@ function main(bool UseOgreIC)
 			if (${UseOgreIC})
 			{
 				ogre end ic
-				oc !c ${Me.Name} -letsgo 
+				oc !c -letsgo ${Me.Name}
 			
 			}
 			else
@@ -180,8 +185,8 @@ function main(bool UseOgreIC)
 			if (${Me.InventorySlotsFree}<50)
 				call ActionOnPrimaryAttributeValue 1040 ${Action}
 		
-			oc !c ${Me.Name} checkbox_settings_forcenamedcatab TRUE
-			oc !c ${Me.Name} -resume
+			oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_forcenamedcatab TRUE
+			oc !c -resume ${Me.Name}
 			if (${UseOgreIC})
 			{
 				call RunIC
