@@ -2199,23 +2199,8 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 function FreeportToon()
 {
 ; to be implemented with something better
-	switch ${Me.Archetype}
-	{
-		case priest
-			switch ${Me.Class}
-			{
-				case druid
-					return TRUE
-				break
-				default
-					return FALSE
-				break
-			}
-		break
-		default
-			return TRUE
-		break
-	}
+	return ${Me.GetGameData[Self.BindLocation].Label.Equal["The City of Freeport"]}
+
 }
 function Gardener()
 {
@@ -4255,6 +4240,19 @@ function UseInventory(string ItemName, bool NoWait)
 	}
 	;echo should use potion "${ItemName} now !
 	Me.Inventory[Query, Name =- "${ItemName}"]:Use
+
+}
+function UseRepairRobot()
+{
+	call CountItem "Mechanized Platinum Repository of Reconstruction"
+	if (${Return}>0)
+	{
+		Me.Inventory[Query, Name =- "Mechanized Platinum Repository of Reconstruction"]:Use
+		wait 50
+		oc !c -Repair ${Me.Name}
+		return TRUE
+	}
+		return FALSE
 }
 function UsePotions(bool Everytime, bool NoWait)
 {

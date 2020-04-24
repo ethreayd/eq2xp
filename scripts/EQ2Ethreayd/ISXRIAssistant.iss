@@ -147,7 +147,10 @@ function main(string questname)
 
 function MainChecks()
 {
-	variable float loc0=${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}
+	variable float loc0
+	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
+	if (!${Script["ToonAssistant"](exists)})
+		run EQ2Ethreayd/ToonAssistant
 	echo in MainChecks Loop (${ScriptIdleTime} - ${ZoneTime} - ${SuperStucky})
 	/*
 	if ${Me.Target(exists)}
@@ -238,7 +241,24 @@ function MainChecks()
 	}
 	while (${Return})
 	call ReturnEquipmentSlotHealth Primary
-		wait 10	
+	wait 10	
+	if (${Me.IsIdle(exists)} && (${Return}<11 && ${Return}>=0))
+	{
+		oc !c -Repair ${Me.Name}
+		wait 100
+	}
+	call ReturnEquipmentSlotHealth Primary
+	wait 10	
+	if (${Me.IsIdle(exists)} && (${Return}<11 && ${Return}>=0))
+	{
+		call UseRepairRobot
+		wait 100
+	}
+	call ReturnEquipmentSlotHealth Primary
+	wait 10
+	Action:Set["Transmute"]
+	if (${Me.InventorySlotsFree}<5)
+		call ActionOnPrimaryAttributeValue 1040 ${Action}
 	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
 	{
 		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
@@ -277,8 +297,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 {
 	variable int Counter
 	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
+	
 	do
 	{
 		call MainChecks
@@ -289,6 +308,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
 		{
+			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -304,9 +324,11 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 			target "an Echelon vigilant"
+			RZObj:Resume
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -255 && ${Me.X} > -280 &&  ${Me.Y} < 100 && ${Me.Y} > 85 && ${Me.Z} < 120 && ${Me.Z} > 100)
 		{
+			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -319,6 +341,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				echo Resuming ISXRI
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
+			RZObj:Resume
 		}
 		if (${Me.InCombatMode} && !${Me.Target(exists)})
 			press Tab 
@@ -388,6 +411,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -235 && ${Me.X} > -255 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 150 && ${Me.Z} > 130)
 		{
+			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -412,6 +436,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 			CantSeeTarget:Set[FALSE]
+			RZObj:Resume
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -270 && ${Me.X} > -290 &&  ${Me.Y} < 95 && ${Me.Y} > 80 && ${Me.Z} < 110 && ${Me.Z} > 95)
 		{
@@ -475,24 +500,11 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			}
 			CantSeeTarget:Set[FALSE]
 		}
-		if (!${Me.InCombatMode} && ${Me.X} < -340 && ${Me.X} > -360 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -35 && ${Me.Z} > -50)
-		{
-			if (!${RI_Var_Bool_Paused})
-			{
-				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
-			echo fixing Seru stucked
-			eq2execute merc backoff
-			call DMove 364 90 -34 3 30 TRUE FALSE 5
-			call DMove 389 88 -17 3
-			call DMove -405 88 0 3 30 TRUE FALSE 5
-			wait 50
-			echo should zone out			
-			CantSeeTarget:Set[FALSE]
-		}
+	
 		if (${Me.X} < -75 && ${Me.X} > -95 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 280 && ${Me.Z} > 260)
 		{
+			RZObj:Pause
+
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -516,6 +528,8 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				echo Resuming ISXRI
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
+			RZObj:Resume
+
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -340 && ${Me.X} > -360 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -30 && ${Me.Z} > -50)
 		{
@@ -547,8 +561,6 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 function Zone_SanctusSeruEchelonofDivinitySolo()
 {
 	variable int Counter
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
 	do
 	{
 		call MainChecks
@@ -576,18 +588,17 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -185 && ${Me.X} > -205 &&  ${Me.Y} < 190 && ${Me.Y} > 175 && ${Me.Z} < 10 && ${Me.Z} > -10)
 		{
-			if (!${RI_Var_Bool_Paused})
-			{
-				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
-			oc !c -Special ${Me.Name}
+			RZObj:Pause
+			call RIStop
+			wait 10
+			call Evac
+			wait 50
+			RI
 			wait 100
-			if (${RI_Var_Bool_Paused})
-			{
-				echo Resuming ISXRI
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
+			RICrashed:Set[0]
+			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			echo Resuming RZ
+			RZObj:Resume
 		}
 		
 		if (${Me.InCombatMode} && !${Me.Target.Distance(exists)})
@@ -608,8 +619,7 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 }
 function Zone_SanctusSeruArxAeturnusSolo()
 {
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
+	
 	do
 	{
 		call MainChecks
@@ -624,8 +634,6 @@ function Zone_AurelianCoastReishiRumbleSolo()
 	
 	variable int Counter=0
 	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
 	do
 	{
 		call MainChecks
@@ -687,8 +695,6 @@ function Zone_AurelianCoastSambataVillageSolo()
 {
 	
 	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
 	do
 	{
 		call MainChecks
@@ -749,8 +755,6 @@ function Zone_AurelianCoastMaidensEyeSolo()
 	variable int Counter=0
 	
 	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
 	do
 	{
 		call MainChecks
@@ -875,8 +879,6 @@ function Zone_FordelMidstTheListlessSpiresSolo()
 	variable int Counter=0
 	
 	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
 	do
 	{
 		call MainChecks

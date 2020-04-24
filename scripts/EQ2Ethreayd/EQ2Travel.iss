@@ -216,7 +216,9 @@ function goStanleyParnem()
 {
 	if (${Actor["Stanley Parnem"].Distance} > 10 || !${Actor["Stanley Parnem"].Distance(exists)})
 	{
+		
 		call FreeportToon
+		wait 50
 		if ${Return}
 		{
 			call goZone Freeport Globe

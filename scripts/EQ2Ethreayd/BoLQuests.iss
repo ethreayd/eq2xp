@@ -21,13 +21,13 @@ variable(script) index:string NamedToHunt
 variable(script) index:string NamedCoordinates
 variable(script) index:bool NamedDone
 
-function LuclinLandscapingTheBlinding(bool DoNotWait)
+function LuclinLandscapingTheBlinding(bool DoNotWait, int Timeout)
 {
 	NamedToHunt:Insert["Novilog"]
 	NamedCoordinates:Insert["-106 307 -811"]
 	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["An Ancient Spectre"]
-	NamedCoordinates:Insert["434 348 -505"]
+	NamedCoordinates:Insert["434.86 347.73 -505.35"]
 	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["A Greater Lightcrawler"]
 	NamedCoordinates:Insert["350 145 927"]
@@ -46,11 +46,11 @@ function LuclinLandscapingTheBlinding(bool DoNotWait)
 	NamedDone:Insert[FALSE]
 	QN:Set["Luclin Landscaping: The Blinding"]
 	QZ:Set["The Blinding"]
-	call TheHunt ${DoNotWait}
+	call TheHunt ${DoNotWait} ${Timeout}
 }
 
 
-function LuclinLandscapingAurelianCoast(bool DoNotWait)
+function LuclinLandscapingAurelianCoast(bool DoNotWait, int Timeout)
 {
 	NamedToHunt:Insert["Glorgan the Hammer"]
 	NamedCoordinates:Insert["-96 82 -709"]
@@ -64,18 +64,18 @@ function LuclinLandscapingAurelianCoast(bool DoNotWait)
 	NamedToHunt:Insert["Rockskin"]
 	NamedCoordinates:Insert["-543 60 65"]
 	NamedDone:Insert[FALSE]
-	NamedToHunt:Insert["The Great Sensate"]
-	NamedCoordinates:Insert["354 43 556"]
-	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["Va Din Ra"]
 	NamedCoordinates:Insert["-559 34 766"]
 	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["Xi Xaui"]
 	NamedCoordinates:Insert["-496 61 946"]
 	NamedDone:Insert[FALSE]
+	NamedToHunt:Insert["The Great Sensate"]
+	NamedCoordinates:Insert["354 43 556"]
+	NamedDone:Insert[FALSE]
 	QN:Set["Luclin Landscaping: Aurelian Coast"]
 	QZ:Set["Aurelian Coast"]
-	call TheHunt ${DoNotWait}
+	call TheHunt ${DoNotWait} ${Timeout}
 }
 function TheHunt(bool DoNotWait, int Timeout)
 {
@@ -85,7 +85,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 	variable bool GoHunt
 	variable bool Grouped
 	if (${Timeout}<1)
-		Timeout:Set[10]
+		Timeout:Set[5]
 	if (${Me.GroupCount}>2)
 		Grouped:Set[TRUE]
 	else
@@ -115,6 +115,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 			call WaitforGroupDistance 20
 			oc !c -letsgo
 			oc !c -OgreFollow All ${Me.Name}
+			relay all run EQ2EThreayd/safescript ToonAssistant
 		}
 		do
 		{
@@ -146,6 +147,11 @@ function TheHunt(bool DoNotWait, int Timeout)
 					else
 						oc !c -Resume ${Me.Name}
 					call navwrap ${NamedCoordinates[${i}]}
+					call GroupDistance
+					if (${Return}>20)
+						eq2execute gsay "Please nav to me now !"
+					call AttackClosest
+					
 					call Campfor_NPC "${NamedToHunt[${i}]}"
 					NamedDone[${i}]:Set[TRUE]
 				}
