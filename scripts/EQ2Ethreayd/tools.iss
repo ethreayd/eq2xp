@@ -1406,6 +1406,37 @@ function CheckCombat(int MyDistance)
 		oc !c -letsgo ${Me.Name}
 	return FALSE
 }
+function CheckAlreadyDone(int timeout, string Filename)
+{
+	variable file File="${LavishScript.HomeDirectory}/Scripts/tmp/${Filename}-${Session}.dat"
+	variable int TimeStamp
+	declare FP filepath "${LavishScript.HomeDirectory}/Scripts"
+	if (!${FP.FileExists["tmp"]})
+		FP:MakeSubdirectory["tmp"]
+	
+	File:Open
+	TimeStamp:Set[${File.Read.Replace[\n,]}]
+	echo TimeStamp : ${TimeStamp}
+	File:Close 
+	TimeStamp:Inc[${timeout}]
+	echo TimeStamp+${timeout} : ${TimeStamp}
+	echo if (${TimeStamp}<${Time.Timestamp}) will answer TRUE
+	if (${TimeStamp}<${Time.Timestamp})
+	{
+		; Not done
+		File:Open
+		File:Write["${Time.Timestamp}"]
+		File:Close
+		return FALSE
+		
+	}
+	else
+	{
+		; Already done
+		return TRUE
+	}
+}
+	
 function CheckDetriment(string EffectName)
 {
 	;on me only
@@ -1488,6 +1519,16 @@ function CheckItem(string ItemName, int Quantity)
 		return 0
 	}
 }
+function CheckIfRepairIsNeeded(int MinCondition)
+{
+	call waitfor_Zoning
+	call ReturnEquipmentSlotHealth Primary
+	wait 10
+	if (${Return}<${MinCondition})
+		return TRUE
+	else
+		return FALSE
+}
 function CheckPlayer(float Distance)
 {
 	variable index:actor Actors
@@ -1548,6 +1589,8 @@ function CheckQuest(string questname, bool ForAll)
 		}
 	}
 	wait 100
+	if (${BoolPoll1})
+	eq2execute guildsay I need to do ${questname} today :p
 	return ${BoolPoll1}
 }    	
 function CheckQuestStep(int step)
@@ -2687,6 +2730,9 @@ function GuildH(bool NoPlant)
 		ogre im -restock
 		wait 150
 		ogre end im
+		call AutoAddAgent TRUE
+		call AutoAddQuest TRUE
+		
 		echo buffing with altars
 		call ActivateVerbOn "Altar of the Ancients" "Channel Arcanna'se" TRUE
 		call ActivateVerbOn "Arcanna'se Effigy of Rebirth" "Channel Arcanna'se" TRUE
@@ -3532,10 +3578,12 @@ function PullNamed(string Named)
 function RebootLoop(string DefaultScriptName)
 {
 	variable string ScriptName
+	echo RebootLoop called...
 	if ${DefaultScriptName.Equal[""]}
 		DefaultScriptName:Set["BoLLoop"]
 	ScriptName:Set["${DefaultScriptName}"]
-	echo rebooting loop
+	
+	echo rebooting loop named ${DefaultScriptName}
 	call RIStop
 	call RZStop
 	if (${Script["CDLoop"](exists)})
@@ -3562,19 +3610,23 @@ function RebootLoop(string DefaultScriptName)
 	}
 	I am doing ${ScriptName} after going back to the Guild
 	
-	do
+	if (${Me.InCombat})
 	{
-		echo Pausing Ogre
+		echo Call for Suicide - Pausing Ogre
 		oc !c -Pause ${Me.Name}
+		do
+		{
+			eq2execute merc attack
+			wait 100
+		}
+		while (!${Me.IsDead} && ${Me.InCombat} )
 		eq2execute merc suspend
 		wait 10
 		ChoiceWindow:DoChoice1
-		wait 100
+		wait 20
 		echo Resuming Ogre
 		oc !c -Resume ${Me.Name}
 	}
-	while (${Me.InCombat})
-	
 	echo --- Reviving (from RebootLoop)
 	RIMUIObj:Revive[${Me.Name}]
 	oc !c -Revive ${Me.Name}
@@ -4471,6 +4523,15 @@ function waitfor_Zone(string ZoneName)
 	while (!${Return})
 	wait 100
 	echo I am in ${ZoneName}
+}
+function waitfor_Zoning()
+{
+	do
+	{
+		wait 10
+		call IsZoning
+	}
+	while (${Return})
 }
 function WalkWithTheWind(float X, float Y, float Z)
 {

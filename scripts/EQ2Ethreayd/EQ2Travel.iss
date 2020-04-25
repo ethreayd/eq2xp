@@ -190,7 +190,7 @@ function goAurelianCoast()
 		press -release MOVEFORWARD
 	}
 	else
-		echo already in Aurelian Coast (${Zone.Name}) but I should script where I am there and deal with it
+		call navwrap 500 145 -591
 }
 function goFreeport()
 {

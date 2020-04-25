@@ -66,8 +66,8 @@ function main(bool UseOgreIC)
 	call ActionOnPrimaryAttributeValue 2650 Salvage TRUE
 	call ActionOnPrimaryAttributeValue 2706 Salvage TRUE
 	
-	call ReturnEquipmentSlotHealth Primary
-	if (${Me.IsDead} || (${Return}<11 && ${Return}>0))
+	call CheckIfRepairIsNeeded 10
+	if (${Me.IsDead} || ${Return})
 	{
 		wait 100
 		echo --- Reviving (Case 1) ReturnEquipmentSlotHealth Primary at ${Return} or/and I am ${Me.IsDead} DEAD
@@ -89,8 +89,9 @@ function main(bool UseOgreIC)
 		if (${Me.InventorySlotsFree}<50)
 			call ActionOnPrimaryAttributeValue 1040 ${Action}
 		call GuildH TRUE
-		call getBoLQuests Solo
-		call LuclinLandscapingTheBlinding TRUE
+		call CheckAlreadyDone 60000 BolQuests
+		if (!${Return})
+			call getBoLQuests Solo
 		call goFordelMidst
 		wait 120
 	}
@@ -149,9 +150,8 @@ function main(bool UseOgreIC)
 			}
 		}
 		
-		call ReturnEquipmentSlotHealth Primary
-		wait 10
-		if (${Return}<11 && ${Return}>0)
+		call CheckIfRepairIsNeeded 10
+		if (${Return})
 		{
 			if (${UseOgreIC})
 			{
@@ -167,6 +167,8 @@ function main(bool UseOgreIC)
 			wait 100
 			echo --- Need to go to guild to repair gear at ${Return}%
 			call goto_GH
+			oc !c -letsgo ${Me.Name}
+			oc !c -Resume ${Me.Name}
 			call GuildH TRUE
 			wait 100
 			call goFordelMidst
@@ -195,7 +197,6 @@ function main(bool UseOgreIC)
 			{
 				if (!${Script["Buffer:RZ"](exists)})
 				{
-				
 					echo starting RZ
 					RZ
 					wait 30

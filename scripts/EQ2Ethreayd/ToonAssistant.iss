@@ -34,6 +34,8 @@ function main(string questname)
 	}
 	do
 	{
+		call waitfor_Zoning
+		
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
 		if (${Me.Health}<10 && !${Me.IsDead})

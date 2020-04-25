@@ -31,14 +31,16 @@ variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
 variable(script) bool ManualMode
 variable(script) string Action
-
+variable(script) int ZoneStuck=0
 function main(string questname)
 {
 	variable int IdleTime=0
-	variable int ZoneStuck=0
 	variable float loc0 
+	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
+	
+	ZoneStuck:Set[0]
 	
 	do
 	{
@@ -111,30 +113,18 @@ function main(string questname)
 			echo call reboot because I am stuck in ${Zone.Name} if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 			run EQ2Ethreayd/wrap RebootLoop
 		}
-		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 125 && ${Me.X} > 105 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -605 && ${Me.Z} > -630)
+		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]})
 		{
 			echo correcting bug
 			call RZStop
 			call RIStop
 			wait 50
 			call GoDown
-			call DMove 113 57 -658 3
+			call navwrap 113 57 -658
 			wait 10
 			IdleTime:Set[0]
 		}
-		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.X} < 140 && ${Me.X} > 115 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < -530 && ${Me.Z} > -545)
-		{
-			echo correcting bug
-			call RZStop
-			call RIStop
-			wait 50
-			call GoDown
-			call DMove 120 84 -543 3
-			call DMove 87 74 -593 3
-			call DMove 113 57 -658 3
-			wait 10
-			IdleTime:Set[0]
-		}
+		
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
@@ -231,43 +221,29 @@ function MainChecks()
 		SuperStucky:Set[0]
 		call RIRestart ${Me.IsDead}
 	}
-	Action:Set["Salvage"]
-	if (${Me.InventorySlotsFree}<5)
-		call ActionOnPrimaryAttributeValue 1040 ${Action}
-	do
-	{
-		call IsZoning
-		wait 10
-	}
-	while (${Return})
-	call ReturnEquipmentSlotHealth Primary
-	wait 10	
-	if (${Me.IsIdle(exists)} && (${Return}<11 && ${Return}>=0))
-	{
-		oc !c -Repair ${Me.Name}
-		wait 100
-	}
-	call ReturnEquipmentSlotHealth Primary
-	wait 10	
-	if (${Me.IsIdle(exists)} && (${Return}<11 && ${Return}>=0))
+	
+	call CheckIfRepairIsNeeded 10
+	if (${Return})
 	{
 		call UseRepairRobot
 		wait 100
+		oc !c -Repair ${Me.Name}
 	}
-	call ReturnEquipmentSlotHealth Primary
-	wait 10
+	
 	Action:Set["Transmute"]
 	if (${Me.InventorySlotsFree}<5)
 		call ActionOnPrimaryAttributeValue 1040 ${Action}
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
+		
+	call CheckIfRepairIsNeeded 10
+	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
 	{
-		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsIdle(exists)} || (${Return}<11 && ${Return}>=0))
+		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
 		wait 600
 		call IsZoning
 		if (!${Return})
 		{
 			echo if (!${Return})
-			run EQ2Ethreayd/wrap RebootLoop
+			call RebootLoop
 		}
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})

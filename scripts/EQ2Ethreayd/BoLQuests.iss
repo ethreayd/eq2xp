@@ -112,10 +112,19 @@ function TheHunt(bool DoNotWait, int Timeout)
 			wait 300
 			call waitfor_Group
 			wait 50
-			call WaitforGroupDistance 20
+			relay all run EQ2EThreayd/safescript ToonAssistant
+			wait 10
+			do
+			{
+				call GroupDistance
+				if (${Return}>20)
+					eq2execute gsay "Please nav to me now !"
+			}
+			while (${Return}>20)
+			wait 100
 			oc !c -letsgo
 			oc !c -OgreFollow All ${Me.Name}
-			relay all run EQ2EThreayd/safescript ToonAssistant
+			
 		}
 		do
 		{
