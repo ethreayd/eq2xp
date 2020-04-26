@@ -68,7 +68,7 @@ function LuclinLandscapingAurelianCoast(bool DoNotWait, int Timeout)
 	NamedCoordinates:Insert["-559 34 766"]
 	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["Xi Xaui"]
-	NamedCoordinates:Insert["-496 61 946"]
+	NamedCoordinates:Insert["-486 7 938"]
 	NamedDone:Insert[FALSE]
 	NamedToHunt:Insert["The Great Sensate"]
 	NamedCoordinates:Insert["354 43 556"]
@@ -80,19 +80,22 @@ function LuclinLandscapingAurelianCoast(bool DoNotWait, int Timeout)
 function TheHunt(bool DoNotWait, int Timeout)
 {
 	variable int i
-	variable int x
 	variable int Counter
 	variable bool GoHunt
 	variable bool Grouped
+
+	echo Launching TheHunt
 	if (${Timeout}<1)
 		Timeout:Set[5]
 	if (${Me.GroupCount}>2)
 		Grouped:Set[TRUE]
 	else
 		Grouped:Set[FALSE]
-		
+	
+	echo Timeout at ${Timeout}
+	echo Grouped at ${Grouped}
+	
 	echo call CheckQuest "${QN}" ${Grouped}
-
 	call CheckQuest "${QN}" ${Grouped}
 	
 	if (${Return})
@@ -100,31 +103,15 @@ function TheHunt(bool DoNotWait, int Timeout)
 		echo Doing "${QN} (Grouped : ${Grouped})"
 		call goZone "${QZ}"
 		wait 50
+		call waitfor_Zoning
+		wait 50
+	
 		if (${Me.GroupCount}>2)
 		{
 			echo I am doing a Group Hunt
 			Grouped:Set[TRUE]
-			Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
-			wait 50
-			echo All group should now come here
-			oc !c -UseFlag
-			echo waiting 30s for the group to zone
-			wait 300
-			call waitfor_Group
-			wait 50
-			relay all run EQ2EThreayd/safescript ToonAssistant
-			wait 10
-			do
-			{
-				call GroupDistance
-				if (${Return}>20)
-					eq2execute gsay "Please nav to me now !"
-			}
-			while (${Return}>20)
-			wait 100
-			oc !c -letsgo
-			oc !c -OgreFollow All ${Me.Name}
 			
+			call GroupToFlag TRUE
 		}
 		do
 		{
@@ -133,9 +120,11 @@ function TheHunt(bool DoNotWait, int Timeout)
 			for ( i:Set[1] ; ${i} <= ${NamedToHunt.Used} ; i:Inc )
 			{
 				call WhereIs "${NamedToHunt[${i}]}" TRUE
+				
 				echo testing "${NamedToHunt[${i}]}" (${NamedDone[${i}]}) : ${Return}
 				if (${Return})
 				{
+					
 					call IsNamedEngaged "${NamedToHunt[${i}]}" TRUE
 					if (${Return})
 					{
@@ -143,12 +132,26 @@ function TheHunt(bool DoNotWait, int Timeout)
 						GoHunt:Set[FALSE]
 					}
 					else
-						GoHunt:Set[TRUE]
+					{
+						call CheckPlayerAtCoordinates ${NamedCoordinates[${i}]}
+						if (${Return})
+						{
+							echo ${NamedToHunt[${i}]} is already camped - avoiding it
+							return FALSE
+						}
+						else
+						{
+							echo hunting ${NamedToHunt[${i}]}
+							GoHunt:Set[TRUE]
+						}
+					}
 				}
 				else
 					GoHunt:Set[FALSE]
 				wait 10
-				if (${GoHunt} && !${NamedDone[${i}]})
+				call CheckQuest "${QN}" ${Grouped}
+				
+				if (${GoHunt} && ${Return} && !${NamedDone[${i}]})
 				{
 					echo Found "${NamedToHunt[${i}]}" at ${NamedCoordinates[${i}]}
 					if (${Grouped})
@@ -160,9 +163,13 @@ function TheHunt(bool DoNotWait, int Timeout)
 					if (${Return}>20)
 						eq2execute gsay "Please nav to me now !"
 					call AttackClosest
-					
-					call Campfor_NPC "${NamedToHunt[${i}]}"
-					NamedDone[${i}]:Set[TRUE]
+					call CheckPlayer
+					if (!${Return})
+					{
+						target "${NamedToHunt[${i}]}"
+						call Campfor_NPC "${NamedToHunt[${i}]}"
+						NamedDone[${i}]:Set[TRUE]
+					}
 				}
 			}
 			
@@ -176,14 +183,41 @@ function TheHunt(bool DoNotWait, int Timeout)
 			call CheckQuest "${QN}" ${Grouped}
 			if (${Return} && !${DoNotWait})
 			{
-				x:Set[${Math.Calc64[${Math.Rand[${NamedToHunt.Used}]}+1]}]
-				echo got ${x}
-				if (!${NamedDone[${x}]})
+				i:Set[${Math.Calc64[${Math.Rand[${NamedToHunt.Used}]}+1]}]
+				echo got ${i}/${NamedToHunt.Used}
+				if (!${NamedDone[${i}]})
 				{
-					echo Going to location of ${NamedToHunt[${x}]} at ${NamedCoordinates[${x}]} for camp 
-					call navwrap ${NamedCoordinates[${x}]}
-					call Campfor_NPC "${NamedToHunt[${x}]}" 1200
-					NamedDone[${x}]:Set[${Return}]
+					echo checking if ${NamedToHunt[${i}]} (${NamedDone[${i}]}) is already camped ?
+					call CheckPlayerAtCoordinates ${NamedCoordinates[${i}]}
+					if (${Return})
+					{
+						echo ${NamedToHunt[${i}]} is already camped - avoiding it
+						return FALSE
+					}
+					else
+					{
+						echo Going to location of ${NamedToHunt[${i}]} at ${NamedCoordinates[${i}]} for camp 
+						call navwrap ${NamedCoordinates[${i}]}
+						if (${Grouped})
+						{
+							do
+							{
+								call GroupDistance
+								if (${Return}>20)
+								{
+									eq2execute gsay "Please nav to me now !"
+									wait 1200
+								}
+							}
+							while (${Return}>20)
+						}
+						call CheckQuest "${QN}" ${Grouped}
+						if (${Return})
+						{	
+							call Campfor_NPC "${NamedToHunt[${i}]}"
+							NamedDone[${i}]:Set[${Return}]
+						}
+					}
 				}
 			}
 			echo checking if in Combat (2)
@@ -206,3 +240,4 @@ function TheHunt(bool DoNotWait, int Timeout)
 		NamedCoordinates:Remove[${i}]
 	}
 }
+

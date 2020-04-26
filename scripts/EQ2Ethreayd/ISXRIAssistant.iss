@@ -233,16 +233,16 @@ function MainChecks()
 	Action:Set["Transmute"]
 	if (${Me.InventorySlotsFree}<5)
 		call ActionOnPrimaryAttributeValue 1040 ${Action}
-		
-	call CheckIfRepairIsNeeded 10
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
+	
+	call waitfor_Zoning
+	
+	call IsZoning
+	if (!${Return})
 	{
-		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
-		wait 600
-		call IsZoning
-		if (!${Return})
+		call CheckIfRepairIsNeeded 10
+		if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
 		{
-			echo if (!${Return})
+			echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
 			call RebootLoop
 		}
 	}

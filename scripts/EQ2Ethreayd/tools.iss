@@ -21,6 +21,7 @@
 
 ;BoolPoll1 must be used to see if anyone is at TRUE, only one TRUE will put that global variable at TRUE
 variable(globalkeep) bool BoolPoll1
+variable(global) bool NoNavWrap 
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -581,6 +582,10 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 function AltTSUp(int Timeout)
 {
 	variable int Counter=0
+	
+	call CheckAlreadyDone 80000 "AltTSUp"
+	if (${Return})
+		return FALSE
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
@@ -1193,8 +1198,10 @@ function CastAbility(string AbilityName, bool NoWait)
 function Campfor_NPC(string NPCName, int Duration)
 {
 	variable int Counter=0
+	
 	if (${Duration}<1)
-		Duration:Set[600]
+		Duration:Set[3600]
+	
 	echo Camping ${NPCName} for ${Duration}s 
 	do
 	{
@@ -1408,7 +1415,7 @@ function CheckCombat(int MyDistance)
 }
 function CheckAlreadyDone(int timeout, string Filename)
 {
-	variable file File="${LavishScript.HomeDirectory}/Scripts/tmp/${Filename}-${Session}.dat"
+	variable file File="${LavishScript.HomeDirectory}/Scripts/tmp/${Filename}-${Me.Name}.dat"
 	variable int TimeStamp
 	declare FP filepath "${LavishScript.HomeDirectory}/Scripts"
 	if (!${FP.FileExists["tmp"]})
@@ -1546,6 +1553,29 @@ function CheckPlayer(float Distance)
 	else
 		return FALSE
 }
+function CheckPlayerAtCoordinates(float X, float Y, float Z, float Distance)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	echo calling CheckPlayerAtCoordinates ${X} ${Y} ${Z} ${Distance}
+	if (${Distance}<1)
+		Distance:Set[30]
+	
+	EQ2:QueryActors[Actors, Type  = "PC" && Guild != "${Me.Guild}"]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			echo Found ${ActorIterator.Value.Name} (${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z})
+			if (${Math.Distance[${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z},${X},${Y},${Z}]}<${Distance})
+				return TRUE
+		}
+		while (${ActorIterator:Next(exists)})
+	}
+	return FALSE
+}
+
 function CheckQuest(string questname, bool ForAll)
 {
 	variable index:quest Quests
@@ -1683,9 +1713,10 @@ function CheckSwimming()
 	{
 		echo I am in the water, going on land
 		face 0 0
-		press -hold MOVEFORWARD 
+		
 		do
-		{	
+		{
+			press -hold MOVEFORWARD 
 			wait 5
 		}
 		while (${Me.IsSwimming})
@@ -2647,12 +2678,7 @@ function goZone(string ZoneName, string Transport)
 		wait 300
 		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
 	}
-	do
-	{
-		wait 10
-		call IsZoning
-	}	
-	while (${Return})
+	call waitfor_Zoning
 	
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
 	{
@@ -3411,7 +3437,18 @@ function navwrap(float X, float Y, float Z)
 	{
 		echo something wrong is happening, cancelling movement
 		return
-	}	
+	}
+	if (${Script["Buffer:OgreNavTest"](exists)} || ${NoNavWrap})
+	{
+		echo ogre navtest is already running
+		return
+	}
+	call TestArrivalCoord ${X} ${Y} ${Z}
+	if (${Return})
+	{
+		echo already there
+		return
+	}
 	echo "moving to location ${X} ${Y} ${Z} (wrapping ogre navtest -loc)"
 	eq2execute waypoint ${X} ${Y} ${Z}
 	do
@@ -3436,7 +3473,11 @@ function navwrap(float X, float Y, float Z)
 	if (${Stucky} > 2)
 	{
 		echo "Seems stuck - Trying to get there anyway"
+		NoNavWrap:Set[TRUE]
 		ExecuteQueued
+		
+		eq2execute loc
+		echo using 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call GoDown
 		call TestArrivalCoord ${X} ${Y} ${Z}
@@ -3448,6 +3489,7 @@ function navwrap(float X, float Y, float Z)
 	}
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
+	NoNavWrap:Set[FALSE]
 	echo End of navwrap
 }
 function OgreICRun(string Dir, string Iss)
@@ -4598,5 +4640,97 @@ function IsNamedEngaged(string ActorName, bool Exact)
 	{
 		echo can't find ${ActorName} (${Exact})
 		return TRUE
+	}
+}
+function WeeklyQuest(string QNw)
+{
+	relay all BoolPoll1:Set[FALSE]
+	call CheckQuest "${QNw}" TRUE
+	wait 100
+	if (${Return})
+	{
+		echo I am on main and must do "${QNw}" Grouped Quest
+		relay is7 exit
+		call strip_QN "${QNw}"
+		run EQ2Ethreayd/DoWeekly "${Return}" Churns
+		wait 10
+		relay all run endscript Churns
+	}
+}
+function DailyQuest()
+{
+	echo I am on main and must do daily ogre ic Grouped Quest
+	relay is7 exit
+	run EQ2Ethreayd/DoDaily Churns
+	wait 10
+	relay all run endscript Churns
+}
+function ForceGroup()
+{
+	variable bool Grouped
+	do
+	{
+		relay all eq2execute merc suspend
+		wait 20
+		relay all ChoiceWindow:DoChoice1
+		oc !c -Disband
+		wait 50
+	}
+	while (${Me.GroupCount}>1)
+	do
+	{
+		relay all ogre
+		wait 200
+		oc !c -Disband
+		wait 100
+		call AutoGroup 500
+		wait 100
+		if (${Me.GroupCount}<6)
+			relay all run wrap goto_GH
+		else
+			Grouped:Set[TRUE]
+		call AutoGroup 500
+		wait 10
+		relay is2 ChoiceWindow:DoChoice1
+		relay is3 ChoiceWindow:DoChoice1
+		relay is4 ChoiceWindow:DoChoice1
+		relay is5 ChoiceWindow:DoChoice1
+		relay is6 ChoiceWindow:DoChoice1
+		wait 100
+		relay all run endscript Churns
+	}
+	while (!${Grouped})
+}
+function HelloWorld()
+{
+	echo Hello World !!!
+}
+function GroupToFlag(bool UseToonAssistant)
+{
+	Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
+	wait 50
+	echo All group should now come here
+	oc !c -UseFlag
+	echo waiting 30s for the group to zone
+	wait 300
+	call waitfor_Group
+	if (${UseToonAssistant})
+	{
+		wait 50
+		relay all run EQ2Ethreayd/safescript ToonAssistant
+		wait 10
+		do
+		{
+			call GroupDistance
+			if (${Return}>20)
+			{
+				eq2execute gsay "Please nav to me now !"
+				wait 300
+			}	
+		}
+		while (${Return}>20)
+		wait 100
+		oc !c -letsgo
+		oc !c -OgreFollow All ${Me.Name}
 	}
 }

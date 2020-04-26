@@ -113,6 +113,9 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	if (${Message.Find["nav to me now"]} > 0)
 	{
 		if (!${Session.Equal["is1"]})
+		{
+			echo 	QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
 			QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
+		}
 	}
 }
