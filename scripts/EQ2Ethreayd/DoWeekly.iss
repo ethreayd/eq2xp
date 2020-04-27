@@ -30,7 +30,7 @@ function main(string QNx, string SNx)
 	wait 10
 	relay all run wrap goto_GH
 	
-	call Waitfor_Zoning
+	call waitfor_Zoning
 	
 	relay all run endscript Churns
 	wait 100
