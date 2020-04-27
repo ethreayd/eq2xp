@@ -26,7 +26,7 @@ function main(bool UseOgreIC)
 	variable int Counter
 	variable string Action
 	
-	Action:Set["Transmute"]
+	Action:Set["Salvage"]
 	echo Launching BoLLoop (with ogre ic : ${UseOgreIC})
 	echo killing all running scripts
 	ScriptsToRun:Insert["livedierepeat"]
@@ -53,8 +53,11 @@ function main(bool UseOgreIC)
 	}
 	call RIStop
 	call RZStop
-	
+	oc !c -letsgo ${Me.Name}
+	oc !c -Revive ${Me.Name}
+	call waitfor_Zoning
 	call GoDown
+	
 	echo cleaning some stuff in my bags by ${Action} them
 	call ActionOnPrimaryAttributeValue 996 ${Action}
 	call ActionOnPrimaryAttributeValue 1019 ${Action}
@@ -65,6 +68,14 @@ function main(bool UseOgreIC)
 	call ActionOnPrimaryAttributeValue 2596 Salvage TRUE
 	call ActionOnPrimaryAttributeValue 2650 Salvage TRUE
 	call ActionOnPrimaryAttributeValue 2706 Salvage TRUE
+	
+	call CheckIfRepairIsNeeded 50
+	if (${Return})
+	{
+		call UseRepairRobot
+		wait 100
+		oc !c -Repair ${Me.Name}
+	}
 	
 	call CheckIfRepairIsNeeded 10
 	if (${Me.IsDead} || ${Return})
@@ -149,7 +160,13 @@ function main(bool UseOgreIC)
 				}
 			}
 		}
-		
+		call CheckIfRepairIsNeeded 50
+		if (${Return})
+		{
+			call UseRepairRobot
+			wait 100
+			oc !c -Repair ${Me.Name}
+		}
 		call CheckIfRepairIsNeeded 10
 		if (${Return})
 		{

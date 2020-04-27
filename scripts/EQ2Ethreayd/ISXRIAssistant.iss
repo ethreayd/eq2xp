@@ -222,7 +222,7 @@ function MainChecks()
 		call RIRestart ${Me.IsDead}
 	}
 	
-	call CheckIfRepairIsNeeded 10
+	call CheckIfRepairIsNeeded 50
 	if (${Return})
 	{
 		call UseRepairRobot
@@ -230,19 +230,25 @@ function MainChecks()
 		oc !c -Repair ${Me.Name}
 	}
 	
-	Action:Set["Transmute"]
+	Action:Set["Salvage"]
 	if (${Me.InventorySlotsFree}<5)
 		call ActionOnPrimaryAttributeValue 1040 ${Action}
 	
 	call waitfor_Zoning
-	
+	call CheckIfRepairIsNeeded 50
+	if (${Return})
+	{
+		call UseRepairRobot
+		wait 100
+		oc !c -Repair ${Me.Name}
+	}
 	call IsZoning
 	if (!${Return})
 	{
 		call CheckIfRepairIsNeeded 10
-		if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
+		if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
 		{
-			echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode} && ${Me.IsIdle(exists)}) || ${Return})
+			echo run EQ2Ethreayd/wrap RebootLoop if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
 			call RebootLoop
 		}
 	}

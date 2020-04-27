@@ -1528,6 +1528,8 @@ function CheckItem(string ItemName, int Quantity)
 }
 function CheckIfRepairIsNeeded(int MinCondition)
 {
+	if (${MinCondition}<1)
+		MinCondition:Set[10]
 	call waitfor_Zoning
 	call ReturnEquipmentSlotHealth Primary
 	wait 10
