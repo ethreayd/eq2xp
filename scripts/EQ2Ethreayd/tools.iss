@@ -430,7 +430,7 @@ function ActionOnPrimaryAttributeValue(int Value, string Action, bool ExtractFir
 					}
 					while ${Me.CastingSpell}
 					Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:${Action}
-					wait 5
+					wait 10
 				}
 			}		
 		}	
@@ -582,15 +582,52 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 function AltTSUp(int Timeout)
 {
 	variable int Counter=0
+	variable bool DoAltTSUp
 	
-	call CheckAlreadyDone 80000 "AltTSUp"
+	echo checking if I am at max Adorning/Tinkering/Transmuting
+	call CheckIfMaxAdorning
 	if (${Return})
+	{
+		echo Adorning at max - skipping
+	}
+	else
+		DoAltTSUp:Set[TRUE]
+	
+	call CheckIfMaxTinkering
+	if (${Return})
+	{
+		echo Tinkering at max - skipping
+	}
+	else
+		DoAltTSUp:Set[TRUE]
+	
+	call CheckIfMaxTransmuting
+	if (${Return})
+	{
+		echo Transmuting at max - skipping
+	}
+	else
+		DoAltTSUp:Set[TRUE]
+	
+	if (!${DoAltTSUp})
 		return FALSE
+	
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
+	echo cleaning Quests journal and related inventory items
+	QuestJournalWindow.ActiveQuest["All Purporse Sprockets"]:Delete
+	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
+	Me.Inventory["Box of Old Boots"]:Destroy
+	Me.Inventory["Box of Tinkering Materials"]:Destroy
+	Me.Inventory["Box of Adorning Materials"]:Destroy
+	Me.Inventory["Metal Sheeting"]:Destroy
+	Me.Inventory["Conducting Diode"]:Destroy
+	Me.Inventory["Crystalline Fillament"]:Destroy
+	Me.Inventory["Protective Fragment"]:Destroy
+	Me.Inventory["Warding Powder"]:Destroy
 	call goDercin_Marrbrand ${Timeout}
-	if (${Return})
+	if (!${Return})
 		return TRUE
 	wait 50
 	call Converse "Dercin Marrbrand" 4
@@ -599,26 +636,44 @@ function AltTSUp(int Timeout)
 	wait 20
 	call Converse "Dercin Marrbrand" 4
 	wait 20
-	Me.Inventory["Box of Tinkering Materials"]:Unpack
-	wait 50
-	Me.Inventory["Box of Adorning Materials"]:Unpack
-	wait 50
-	Me.Inventory["Box of Old Boots"]:Unpack
-	wait 50
 
-	call TransmuteAll "A worn pair of boots"
-	wait 50
-	call Converse "Dercin Marrbrand" 2
-	wait 20
-	call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
-	wait 50
-	call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
-	wait 20
-	call goDercin_Marrbrand ${Timeout}
-	call Converse "Dercin Marrbrand" 2
-	wait 20
-	call Converse "Dercin Marrbrand" 2
-	wait 20
+	call CheckIfMaxTransmuting
+	if (!${Return})
+	{
+		Me.Inventory["Box of Old Boots"]:Unpack
+		wait 50
+		call TransmuteAll "A worn pair of boots"
+		wait 50
+		call Converse "Dercin Marrbrand" 2
+		wait 20
+	}
+	
+	call CheckIfMaxAdorning
+	if (!${Return})
+	{
+		Me.Inventory["Box of Adorning Materials"]:Unpack
+		wait 50
+		call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
+		wait 20
+		call goDercin_Marrbrand ${Timeout}
+		wait 20
+		call Converse "Dercin Marrbrand" 2
+		wait 20
+	}
+	
+	call CheckIfMaxTinkering
+	if (!${Return})
+	{
+		Me.Inventory["Box of Tinkering Materials"]:Unpack
+		wait 50
+		call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
+		wait 20
+		call goDercin_Marrbrand ${Timeout}
+		wait 20
+		call Converse "Dercin Marrbrand" 2
+		wait 20
+	}
+	
 	echo go to Guild Hall (with auto fix of stay forever there bug)
 	do
 	{
@@ -634,6 +689,7 @@ function AltTSUp(int Timeout)
 	while (!${Me.Ability["Call to Guild Hall"].IsReady} || ${Counter}>${Timeout})
 	call goto_GH TRUE
 	echo AltTSUp done
+	return TRUE
 }
 
 function Ascend(float Y, bool Swim)
@@ -699,7 +755,7 @@ function AttackClosest(float MaxDistance)
   
     if ${ActorIterator:First(exists)}
     {
-	echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m)
+		echo targetting "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m) (from AttackClosest)
 	
         target ${ActorIterator.Value.ID}
     }
@@ -767,13 +823,17 @@ function AutoAddQuest(bool EraseDuplicate)
 			do
 			{
 				Counter3:Inc
-				call IsOverseerQuest "${ItemIterator.Value.Name}"
-				if ${Return}
+				if (${ItemIterator.Value.Name(exists)})
 				{
-					echo adding "${ItemIterator.Value.Name}"
-					Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
-					Counter:Inc
-				}	
+					call IsOverseerQuest "${ItemIterator.Value.Name}"
+					if ${Return}
+					{
+						echo adding "${ItemIterator.Value.Name}"
+						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
+						Counter:Inc
+						wait 10
+					}
+				}
 			}	
 			while ${ItemIterator:Next(exists)}
 		}
@@ -789,7 +849,10 @@ function AutoAddQuest(bool EraseDuplicate)
 				{
 					Counter2:Inc
 					if ${EraseDuplicate}
+					{
 						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
+						wait 10
+					}
 				}
 			}	
 			while ${ItemIterator:Next(exists)}
@@ -1208,6 +1271,7 @@ function Campfor_NPC(string NPCName, int Duration)
 		wait 10
 		Counter:Inc
 		call WhereIs "${NPCName}" TRUE
+		echo We are in Campfor_NPC "${NPCName}" loop, he is ${Return} spawn - (${Counter}<=${Duration})
 	} 
 	while (!${Return} && ${Counter}<=${Duration})
 	echo Debug: ${NPCName} is spawned
@@ -1269,7 +1333,7 @@ function CastImmunity(string ToonName, int Health, int Pause)
 		}
 	}
 }
-function ChargeOverseer(bool CleanQuests)
+function ChargeOverseer(bool NoCleanQuests)
 {
 	variable int i
 	variable int j
@@ -1287,25 +1351,17 @@ function ChargeOverseer(bool CleanQuests)
 	for ( i:Set[1] ; ${i} <= ${MerchantWindow.NumMerchantItemsForSale} ; i:Inc )
 	{
 		ItemName:Set["${MerchantWindow.MerchantInventory[${i}]}"]
+		echo counting number of "${ItemName}" in bags
 		call CountItem "${ItemName}"
-		if (${Return}<1)
-			call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${max} TRUE
-		for ( j:Set[1] ; ${j} <= ${Return} ; j:Inc )
-		{
-			Me.Inventory[Query, Name =- "${ItemName}"]:Use
-			wait 5
-		}
-		call CountItem "${ItemName}"
-		for ( j:Set[0] ; ${j} < ${Return} ; j:Inc )
-		{
-			Me.Inventory[Query, Name =- "${ItemName}"]:Destroy
-			wait 5
-		}
+		
+		if (${Return}<${max})
+			call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${Math.Calc64[${max}-${Return}]} TRUE
+		call AutoAddQuest !${NoCleanQuests}
 	}
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
 	wait 5
-	call AutoAddQuest ${CleanQuests}
+	call AutoAddQuest !${NoCleanQuests}
 }
 function check_quest(string questname)
 {
@@ -1413,6 +1469,13 @@ function CheckCombat(int MyDistance)
 		oc !c -letsgo ${Me.Name}
 	return FALSE
 }
+function MarkAsNotDone(string Filename)
+{
+	variable file File="${LavishScript.HomeDirectory}/Scripts/tmp/${Filename}-${Me.Name}.dat"
+	File:Open
+	File:Write[0]
+	File:Close
+}
 function CheckAlreadyDone(int timeout, string Filename)
 {
 	variable file File="${LavishScript.HomeDirectory}/Scripts/tmp/${Filename}-${Me.Name}.dat"
@@ -1443,22 +1506,27 @@ function CheckAlreadyDone(int timeout, string Filename)
 		return TRUE
 	}
 }
-	
-function CheckDetriment(string EffectName)
+function WardValue(string WardName, int timeout)
 {
-	;on me only
-    variable index:effect MyEffects
-    variable iterator MyEffectsIterator
-    
-    Me:RequestEffectsInfo
-    
-    Me:QueryEffects[MyEffects, Type == "Detrimental", Name == "${EffectName}"]
-    MyEffects:GetIterator[MyEffectsIterator]
- 
-    if ${MyEffectsIterator:First(exists)}
-		return TRUE
-	else
-		return FALSE
+	variable int Counter
+	do
+	{
+		echo ${Me.Maintained["${WardName}"].DamageRemaining} 
+		wait 10
+		Counter:Inc
+	}
+	while (${Counter}<${timeout})
+}
+function MysticWardValue(int timeout)
+{
+	variable int Counter
+	do
+	{
+		echo ${Math.Calc64[${Me.Maintained["Ancestral Balm VI"].DamageRemaining}+${Me.Maintained["Ancestral Savior VIII"].DamageRemaining}+${Me.Maintained["Ancestral Ward XI"].DamageRemaining}+${Me.Maintained["Ebbing Spirit IV"].DamageRemaining}+${Me.Maintained["Eidolic Ward"].DamageRemaining}+${Me.Maintained["Oberon VII"].DamageRemaining}+${Me.Maintained["Prophetic Ward VIII"].DamageRemaining}+${Me.Maintained["Runic Armor X"].DamageRemaining}+${Me.Maintained["Spirit Aegis"].DamageRemaining}+${Me.Maintained["Torpor VI"].DamageRemaining}+${Me.Maintained["Umbral Barrier"].DamageRemaining}+${Me.Maintained["Wards of the Eidolon"].DamageRemaining}]}
+		wait 10
+		Counter:Inc
+	}
+	while (${Counter}<${timeout})
 }
 function CheckEffectOnTarget(string EffectName)
 {
@@ -1538,6 +1606,22 @@ function CheckIfRepairIsNeeded(int MinCondition)
 	else
 		return FALSE
 }
+function AutoRepair()
+{
+	call CheckIfRepairIsNeeded 10
+	if (${Return})
+	{
+		oc !c -Repair ${Me.Name}
+		wait 100
+	}
+	call CheckIfRepairIsNeeded 10
+	if (${Return})
+	{	
+		call UseRepairRobot
+	}
+	call CheckIfRepairIsNeeded 10
+	return !${Return}
+}
 function CheckPlayer(float Distance)
 {
 	variable index:actor Actors
@@ -1590,9 +1674,18 @@ function CheckQuest(string questname, bool ForAll)
 		relay all BoolPoll1:Set[FALSE]
 		wait 20
 		if (!${Script["wrap"](exists)})
-			relay all run wrap CheckQuest "${questname}" FALSE
+			relay all run EQ2Ethreayd/wrap CheckQuest "${questname}" FALSE
 		else
-			return FALSE
+		{
+			echo wrap already used... trying with wrap2
+			if (!${Script["wrap2"](exists)})
+				relay all run EQ2Ethreayd/wrap2 CheckQuest "${questname}" FALSE
+			else
+			{
+				echo CheckQuest use wrap or wrap2 as function relay wrapper - Do not use them in parallel
+				return FALSE
+			}
+		}
 	}
 	else
 	{
@@ -1622,7 +1715,7 @@ function CheckQuest(string questname, bool ForAll)
 	}
 	wait 100
 	if (${BoolPoll1})
-	eq2execute guildsay I need to do ${questname} today :p
+	eq2execute g I need to do ${questname} today :p
 	return ${BoolPoll1}
 }    	
 function CheckQuestStep(int step)
@@ -1897,7 +1990,8 @@ function CountItem(string ItemName)
 		{
 			do
 			{
-				Counter:Set[${Math.Calc64[${Counter}+${ItemIterator.Value.Quantity}]}]
+				call Abs ${ItemIterator.Value.Quantity}]
+				Counter:Inc[${Return}]
 			}	
 			while ${ItemIterator:Next(exists)}
 		}
@@ -2275,8 +2369,8 @@ function Follow2D(string ActorName,float X, float Y, float Z, float RespectDista
 function FreeportToon()
 {
 ; to be implemented with something better
+	call waitfor_Zoning
 	return ${Me.GetGameData[Self.BindLocation].Label.Equal["The City of Freeport"]}
-
 }
 function Gardener()
 {
@@ -2744,11 +2838,17 @@ function GuildH(bool NoPlant)
 		OgreBotAPI:RepairGear[${Me.Name}]
 		RIMUIObj:Repair[${Me.Name}]
 		wait 100
+		call GetHarvest
+		wait 30
 		echo transmuting stones
 		call AutoAddAgent TRUE
 		call TransmuteAll "Planar Transmutation Stone"
 		call TransmuteAll "Celestial Transmutation Stone"
 		call TransmuteAll "Veilwalker's Transmutation Stone"
+		wait 50
+		call Hireling Hunter
+		call Hireling Gatherer
+		call Hireling Miner
 		echo First Depot
 		ogre im -Depot
 		wait 600
@@ -2773,15 +2873,15 @@ function GuildH(bool NoPlant)
 		call GuildH
 	}
 }
-function GuildHarvest()
+function GetHarvest()
 {
 	if ${Zone.Name.Right[10].Equal["Guild Hall"]}
 	{
 		echo getting harvest and harvest quests
 	
-		call Converse Gatherer 3
-		call Converse Hunter 3
-		call Converse Miner 3
+		call Converse Gatherer 0
+		call Converse Hunter 0
+		call Converse Miner 0
 	}
 }
 function GroupDistance(bool Debug)
@@ -3005,9 +3105,28 @@ function Hunt(string ActorName, int distance, int number, bool nofly, bool Ignor
 			}	
 			call AutoGroup
 			eq2execute merc resume
+			
+			do
+			{
+				call CheckPlayer
+				echo in Hunt loop - CheckPlayer at ${Return} - Waiting for ${ActorName} to spawn here (${ActorIterator.Value.Name(exists)})
+				wait 10
+			}
+			while (${Return} && ${ActorIterator.Value.Name(exists)})
 			call CheckPlayer
-			if (!${Return})
+			if (!${Return} && ${ActorIterator.Value.Name(exists)})
+			{
 				OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_outofcombatscanning","TRUE","TRUE"]
+				oc !c -CampSpot ${Me.Name}
+				wait 200
+				do
+				{
+					wait 10
+					call CheckCombat
+				}
+				while (${Return})
+				oc !c -Letsgo ${Me.Name}
+			}
 		}	
 		while ${ActorIterator:Next(exists)}
 	}
@@ -3106,7 +3225,7 @@ function IsOverseerQuest(string ItemName, string ItemLocation)
     variable index:item Items
     variable iterator ItemIterator
     
-    Me:QueryInventory[Items, Location =- "${ItemLocation}" && Name =- "${ItemName}"]
+    Me:QueryInventory[Items, Location =- "${ItemLocation}" && Name == "${ItemName}"]
     Items:GetIterator[ItemIterator]
  
  
@@ -3131,7 +3250,7 @@ function IsOverseerQuest(string ItemName, string ItemLocation)
     }
     else
 	{
-		echo no item "${ItemName}" in Inventory
+		echo no item "${ItemName}" in Inventory (from function IsOverseerQuest)
 		return FALSE
 	}
 }
@@ -3435,6 +3554,7 @@ function navwrap(float X, float Y, float Z)
 	variable float loc0=0
 	variable int Stucky=0
 	wait 10
+	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
 		echo something wrong is happening, cancelling movement
@@ -3459,7 +3579,9 @@ function navwrap(float X, float Y, float Z)
 		Stucky:Inc
 		echo "launching ogre navtest (${Stucky}/3)"
 		call CheckCombat
+		oc !c -HoldUp ${Me.Name}
 		target ${Me.Name}
+		
 		ogre navtest -loc ${X} ${Y} ${Z}
 		wait 100
 		do
@@ -3477,7 +3599,7 @@ function navwrap(float X, float Y, float Z)
 		echo "Seems stuck - Trying to get there anyway"
 		NoNavWrap:Set[TRUE]
 		ExecuteQueued
-		
+		echo NoNavWrap is set as ${NoNavWrap}
 		eq2execute loc
 		echo using 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
 		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
@@ -3492,6 +3614,7 @@ function navwrap(float X, float Y, float Z)
 	OgreBotAPI:NoTarget[${Me.Name}]
 	eq2execute loc
 	NoNavWrap:Set[FALSE]
+	oc !c -Letsgo ${Me.Name}
 	echo End of navwrap
 }
 function OgreICRun(string Dir, string Iss)
@@ -3622,6 +3745,7 @@ function PullNamed(string Named)
 function RebootLoop(string DefaultScriptName)
 {
 	variable string ScriptName
+	variable int Counter
 	echo RebootLoop called...
 	if ${DefaultScriptName.Equal[""]}
 		DefaultScriptName:Set["BoLLoop"]
@@ -3661,9 +3785,13 @@ function RebootLoop(string DefaultScriptName)
 		do
 		{
 			eq2execute merc attack
+			eq2execute autoattack 0
 			wait 100
+			Counter:Inc
+			echo (!${Me.IsDead} && ${Me.InCombat} && ${Counter} < 60) in function RebootLoop
 		}
-		while (!${Me.IsDead} && ${Me.InCombat} )
+		while (!${Me.IsDead} && ${Me.InCombat} && ${Counter} < 60)
+		
 		eq2execute merc suspend
 		wait 10
 		ChoiceWindow:DoChoice1
@@ -4644,7 +4772,7 @@ function IsNamedEngaged(string ActorName, bool Exact)
 		return TRUE
 	}
 }
-function WeeklyQuest(string QNw)
+function WeeklyQuest(string QNw, string SNw)
 {
 	relay all BoolPoll1:Set[FALSE]
 	call CheckQuest "${QNw}" TRUE
@@ -4654,9 +4782,9 @@ function WeeklyQuest(string QNw)
 		echo I am on main and must do "${QNw}" Grouped Quest
 		relay is7 exit
 		call strip_QN "${QNw}"
-		run EQ2Ethreayd/DoWeekly "${Return}" Churns
+		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}"
 		wait 10
-		relay all run endscript Churns
+		relay all run endscript "${SNw}" 
 	}
 }
 function DailyQuest()
@@ -4735,4 +4863,71 @@ function GroupToFlag(bool UseToonAssistant)
 		oc !c -letsgo
 		oc !c -OgreFollow All ${Me.Name}
 	}
+}
+function EquipHeroic()
+{
+	if (${Me.Archetype.Equal["fighter"]} || ${Me.Archetype.Equal["priest"]})
+	{
+		Me.Inventory[Query, Name =- "Stonesgrabber"]:Equip
+		Me.Inventory[Query, Name =- "Grimling Gumbo"]:Equip
+	}
+	else
+	{
+		Me.Inventory[Query, Name =- "Sambata Sangria"]:Equip
+		Me.Inventory[Query, Name =- "Festering Mushroom Mash"]:Equip
+	}
+}
+function PotPotion()
+{
+	Me.Inventory[Query, Name =- "Elixir of Intellect"]:Use
+}
+function CheckIfMaxAdorning()
+{
+	if (${OgreBotAPI.SpewStat[currentadorning]}<${OgreBotAPI.SpewStat[maxadorning]})
+		return FALSE
+	else
+		return TRUE
+}
+function CheckIfMaxTinkering()
+{
+	if (${OgreBotAPI.SpewStat[currenttinkering]}<${OgreBotAPI.SpewStat[maxtinkering]})
+		return FALSE
+	else
+		return TRUE
+}
+function CheckIfMaxTransmuting()
+{
+	if (${OgreBotAPI.SpewStat[currenttransmuting]}<${OgreBotAPI.SpewStat[maxtransmuting]})
+		return FALSE
+	else
+		return TRUE
+}
+function Hireling(string NPCName)
+{
+	;NPC should be Miner, Gatherer or Hunter	
+	echo Hireling script for ${NPCName}
+	call MoveCloseTo "${NPCName}"
+	
+	target "${NPCName}"
+	eq2execute hail "${NPCName}"
+	wait 50
+	OgreBotAPI:ConversationBubble["${Me.Name}",3]
+	wait 50
+	OgreBotAPI:ConversationBubble["${Me.Name}",3]	
+	wait 50
+}
+function CleanBags()
+{
+	call AutoAddAgent TRUE
+	call AutoAddQuest TRUE
+	call ActionOnPrimaryAttributeValue 897 Salvage
+	call ActionOnPrimaryAttributeValue 996 Salvage
+	call ActionOnPrimaryAttributeValue 1040 Salvage
+	call ActionOnPrimaryAttributeValue 1142 Salvage
+	call ActionOnPrimaryAttributeValue 1195 Salvage
+	call ActionOnPrimaryAttributeValue 1248 Salvage
+	call ActionOnPrimaryAttributeValue 1325 Salvage
+	call ActionOnPrimaryAttributeValue 1446 Salvage
+	call ActionOnPrimaryAttributeValue 2650 Salvage
+	call ActionOnPrimaryAttributeValue 2706 Salvage
 }

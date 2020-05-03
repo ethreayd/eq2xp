@@ -482,7 +482,75 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			}
 			CantSeeTarget:Set[FALSE]
 		}
-	
+		if (${Me.InCombatMode} && ${Me.X} < -140 && ${Me.X} > -160 &&  ${Me.Y} < 90 && ${Me.Y} > 75 && ${Me.Z} < -290 && ${Me.Z} > -310)
+		{
+			press Tab
+			wait 300
+		}
+		if (${Me.X} < -170 && ${Me.X} > -190 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < 230 && ${Me.Z} > 210)
+		{
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			
+			call DMove -190 83 221 3
+			call DMove -213 88 202 3
+			call DMove -173 88 196 3
+			call DMove -163 83 239 3
+			call AttackClosest
+			call Waitfor_Combat
+			call DMove -233 88 200 3
+			call DMove -172 88 193 3
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+		}
+		if (${Me.X} < -205 && ${Me.X} > -225 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -170 && ${Me.Z} > -190)
+		{
+			RZObj:Pause
+
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			
+			echo fixing Seru stucked
+			call DMove -241 88 -198 3
+			
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			RZObj:Resume
+
+		}
+		if (${Me.X} < -250 && ${Me.X} > -275 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -80 && ${Me.Z} > -110)
+		{
+			RZObj:Pause
+
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			
+			echo fixing Seru stucked
+			call DMove -307 88 -114 3
+			
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			RZObj:Resume
+
+		}
 		if (${Me.X} < -75 && ${Me.X} > -95 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 280 && ${Me.Z} > 260)
 		{
 			RZObj:Pause

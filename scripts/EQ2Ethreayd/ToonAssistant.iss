@@ -75,10 +75,18 @@ function FixCombat()
 		eq2execute autoattack 0
 		wait 10
 		eq2execute autoattack 2
+		press Tab
+	}
+	if !${Me.Target.IsAggro}
+	{
+		press Tab
 	}
 	else
+	{
+		call AttackClosest
+		wait 20
 		call MoveCloseTo "${Me.Target.Name}"
-	
+	}
 	
 }
 atom HandleAllEvents(string Message)
@@ -117,5 +125,9 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 			echo 	QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
 			QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
 		}
+	}
+	if (${Message.Find["your equipment is broken"]} > 0)
+	{
+		QueueCommand call AutoRepair
 	}
 }

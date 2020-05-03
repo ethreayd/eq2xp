@@ -388,7 +388,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (!${Return} || ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 		call DMove 420 -5 -13 3 30 FALSE FALSE 2
@@ -400,7 +400,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (${Me.Y}<15 || ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 	}
@@ -416,7 +416,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while ((!${Return} && ${Me.Y}>15)|| ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 		if (${Me.Y}<15)
@@ -432,7 +432,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (${Me.Y}<410 || ${Counter}>${Timeout} )
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 	}
@@ -440,7 +440,7 @@ function goDercin_Marrbrand(int Timeout)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 
 		call goDercin_Marrbrand ${Timeout}
-	return FALSE
+	return TRUE
 }
 
 function goMyrist()

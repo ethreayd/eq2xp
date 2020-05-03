@@ -130,6 +130,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 					{
 						echo Aborting...
 						GoHunt:Set[FALSE]
+						call StopHunt
 					}
 					else
 					{
@@ -138,6 +139,8 @@ function TheHunt(bool DoNotWait, int Timeout)
 						{
 							echo ${NamedToHunt[${i}]} is already camped - avoiding it
 							return FALSE
+							GoHunt:Set[FALSE]
+							call StopHunt
 						}
 						else
 						{
@@ -147,7 +150,10 @@ function TheHunt(bool DoNotWait, int Timeout)
 					}
 				}
 				else
+				{
 					GoHunt:Set[FALSE]
+					call StopHunt
+				}
 				wait 10
 				call CheckQuest "${QN}" ${Grouped}
 				
@@ -170,6 +176,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 						call Campfor_NPC "${NamedToHunt[${i}]}"
 						NamedDone[${i}]:Set[TRUE]
 					}
+					call StopHunt
 				}
 			}
 			
@@ -192,6 +199,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 					if (${Return})
 					{
 						echo ${NamedToHunt[${i}]} is already camped - avoiding it
+						call StopHunt
 						return FALSE
 					}
 					else
@@ -214,8 +222,24 @@ function TheHunt(bool DoNotWait, int Timeout)
 						call CheckQuest "${QN}" ${Grouped}
 						if (${Return})
 						{	
-							call Campfor_NPC "${NamedToHunt[${i}]}"
+							if (${Grouped})
+								oc !c -CampSpot
+							else
+								oc !c -CampSpot ${Me.Name}
+								
+							call Campfor_NPC "${NamedToHunt[${i}]}" 1200
 							NamedDone[${i}]:Set[${Return}]
+							do
+							{
+								wait 10
+								call CheckCombat
+							}
+							while (${Return})
+							if (${Grouped})
+								oc !c -letsgo
+							else
+								oc !c -letsgo ${Me.Name}
+							call StopHunt
 						}
 					}
 				}
@@ -239,5 +263,6 @@ function TheHunt(bool DoNotWait, int Timeout)
 		NamedToHunt:Remove[${i}]
 		NamedCoordinates:Remove[${i}]
 	}
+	echo TheHunt terminated
 }
 
