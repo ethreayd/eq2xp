@@ -2830,6 +2830,8 @@ function GuildH(bool NoPlant)
 	{
 		echo Starting GH churns
 		wait 50
+		call AutoAddAgent TRUE
+		call AutoAddQuest TRUE
 		echo should I skipp Autoplant ? ${NoPlant}
 		if (!${NoPlant})
 			call AutoPlant
