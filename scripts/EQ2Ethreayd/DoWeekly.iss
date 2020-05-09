@@ -22,21 +22,25 @@ function main(string QNx, string SNx)
 	variable bool Grouped
 	wait 100
 	relay all run endscript Churns
+	relay all run endscript BoLLoop
 	oc !c -Revive
 	wait 100
 	relay all run endscript Churns
+	relay all run endscript BoLLoop
 	wait 10
 	relay all run endscript wrap
 	wait 10
+	relay all run endscript BoLLoop
 	relay all run wrap goto_GH
 	
-	call Waitfor_Zoning
+	call waitfor_Zoning
 	
 	relay all run endscript Churns
 	wait 100
 	oc !c -Repair
 	wait 100
 	relay all run endscript Churns
+
 	oc !c -GetFlag
 	echo waiting for all toons to log in
 	wait 300

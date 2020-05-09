@@ -92,18 +92,65 @@ function getCDQuests()
 		break
 	}
 }
+function goRecusoTor(bool Force)
+{
+	call goZone "The Blinding"	
+	call TestArrivalCoord -584 34 363
+	if (!${Return})
+	{
+		call TestArrivalCoord 623 428 -582
+		if (!${Return})
+		{
+			I am somewhere in the middle of the Blinding...
+			if (!${Force})
+				call navwrap -584 34 363
+			else
+			{
+				call goto_GH
+				call goRecusoTor
+			}
+		}
+		else
+		{
+			call DMove 594 429 -582 3
+			call ActivateVerbOn "a tamed Shik'Nar drone" "Ride Shik'Nar To Recuso Tor"
+			do
+			{
+				wait 10
+				call TestArrivalCoord -584 34 363
+			}
+			while (${Return})
+		}
+	}
+	echo I am already in Recuso Tor
+}
+function goDainitheWright(bool Force)
+{
+
+	call goRecusoTor ${Force}
+	call DMove -601 32 393 3
+	call DMove -605 38 463 3
+	call DMove -586 38 463 3
+	call DMove -585 38 453 3 30 FALSE FALSE 5
+}	
+function getBoLTSQuests(string version)
+{
+	variable string NPCName
+	NPCName:Set["Daini the Wright"]
+	call goDainitheWright
+	wait 50
+	call Converse "${NPCName}" 1
+}	
+
 function getBoLQuests(string version)
 {
 	variable string NPCName
 	variable int MissingQuest
 
-	call goZone "The Blinding"
-	call 3DNav 85 400 -184
-	call GoDown
-	call 3DNav -269 125 132
-	call GoDown
-	call 3DNav -620 125 256
-	call GoDown
+	call goRecusoTor TRUE
+	call DMove -644 47 353 3
+	call DMove -689 45 362 3
+	call DMove -638 58 258 3
 	call DMove -580 60 261 3
 	call DMove -542 62 261 3
 	call DMove -545 61 285 3
@@ -388,7 +435,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (!${Return} || ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 		call DMove 420 -5 -13 3 30 FALSE FALSE 2
@@ -400,7 +447,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (${Me.Y}<15 || ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 	}
@@ -416,7 +463,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while ((!${Return} && ${Me.Y}>15)|| ${Counter}>${Timeout})
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 		if (${Me.Y}<15)
@@ -432,7 +479,7 @@ function goDercin_Marrbrand(int Timeout)
 		}
 		while (${Me.Y}<410 || ${Counter}>${Timeout} )
 		if (${Counter}>${Timeout})
-			return TRUE
+			return FALSE
 		else
 			Counter:Set[0]
 	}
@@ -440,7 +487,7 @@ function goDercin_Marrbrand(int Timeout)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 
 		call goDercin_Marrbrand ${Timeout}
-	return FALSE
+	return TRUE
 }
 
 function goMyrist()

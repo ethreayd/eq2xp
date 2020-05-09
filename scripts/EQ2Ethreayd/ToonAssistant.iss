@@ -21,6 +21,7 @@ function main(string questname)
 	variable bool Solo
 	variable int CombatDuration=0
 	
+	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
@@ -45,16 +46,27 @@ function main(string questname)
 		if (${Solo})
 			call UsePotions FALSE TRUE
 		if (${Me.InCombatMode})
+		{
 			CombatDuration:Inc
+			echo CombatDuration at ${CombatDuration}/120
+		}
 		else
+		{
 			CombatDuration:Set[0]
+			echo CombatDuration at ${CombatDuration}/120
+		}
 		if (${CombatDuration}>120 && !${Global_DONOTATTACK})
 		{
 			call FixCombat
 			CombatDuration:Set[0]
 		}
+		
+		call AutoRepair 30
+			
 		ExecuteQueued
 		wait 10
+		if (${Zone.Name.Right[10].Equal["Guild Hall"]} && ${Me.Y}>-100)
+			call GHStuck
 	}
 	while (TRUE)
 	echo Ending ToonAssistant
@@ -75,11 +87,60 @@ function FixCombat()
 		eq2execute autoattack 0
 		wait 10
 		eq2execute autoattack 2
+		press Tab
+		wait 10
+	}
+	if !${Me.Target.IsAggro}
+	{
+		press Tab
+		wait 10
 	}
 	else
+	{
+		call AttackClosest
+		wait 20
 		call MoveCloseTo "${Me.Target.Name}"
-	
-	
+	}
+	wait 10
+}
+function GHStuck()
+{
+
+		variable index:string ScriptsToRun
+		variable string ScriptName
+		variable int x
+
+		echo I am flying in the guild like Dumbo
+		ScriptsToRun:Insert["livedierepeat"]
+		ScriptsToRun:Insert["autoshinies"]
+		ScriptsToRun:Insert["ZoneUnstuck"]
+		ScriptsToRun:Insert["Buffer:RZ"]
+		ScriptsToRun:Insert["Buffer:RIMovement"]
+		ScriptsToRun:Insert["ISXRIAssistant"]
+		ScriptsToRun:Insert["OgreICAssistant"]
+		ScriptsToRun:Insert["wrap1"]
+		ScriptsToRun:Insert["wrap2"]
+		ScriptsToRun:Insert["wrap"]
+		ScriptsToRun:Insert["Churns"]
+		ScriptsToRun:Insert["DoWeekly"]
+		ScriptsToRun:Insert["BoLLoop"]
+		ScriptName:Set["BoLLoop"]
+
+		for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
+		{
+			echo Killing script ${ScriptsToRun[${x}]}
+			if ${Script["${ScriptsToRun[${x}]}"](exists)}
+				endscript "${ScriptsToRun[${x}]}"
+		}
+		
+		if ${Script["CDLoop"](exists)}
+		{
+			endscript CDLoop
+			ScriptName:Set["CDLoop"]
+		}
+		call goDown
+		call CastAbility "Call to Guild Hall"
+		run EQ2Ethreayd/${ScriptName}
 }
 atom HandleAllEvents(string Message)
 {
@@ -114,8 +175,12 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		if (!${Session.Equal["is1"]})
 		{
-			echo 	QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
+			echo QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
 			QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
 		}
+	}
+	if (${Message.Find["your equipment is broken"]} > 0)
+	{
+		QueueCommand call AutoRepair
 	}
 }

@@ -58,6 +58,9 @@ function main(bool UseOgreIC)
 	call waitfor_Zoning
 	call GoDown
 	
+	echo cleaning Overseer Agents and Quests in my bags
+	call AutoAddAgent TRUE
+	call AutoAddQuest TRUE
 	echo cleaning some stuff in my bags by ${Action} them
 	call ActionOnPrimaryAttributeValue 996 ${Action}
 	call ActionOnPrimaryAttributeValue 1019 ${Action}
