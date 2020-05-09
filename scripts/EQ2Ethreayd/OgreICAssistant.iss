@@ -16,7 +16,6 @@
 #define JUMP Space
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-variable(script) bool StoneSkin
 variable(script) int Stucky
 variable(script) int SuperStucky
 variable(script) bool CantSeeTarget
@@ -26,69 +25,31 @@ variable(script) int ZoneTime
 function main(string questname)
 {
 	variable int IdleTime
-	variable int BlindingStuck
-	variable int AurelianCoastStuck
 	variable float loc0 
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
+	if (!${Script["ToonAssistant"](exists)})
+		relay all run EQ2Ethreayd/ToonAssistant
 
 	do
 	{
-		if (${Script["ToonAssistant"](exists)})
-			end ToonAssistant
-		echo Zone is ${Zone.Name} (${BlindingStuck} | ${AurelianCoastStuck} | ${IdleTime} | ${ZoneTime})
+		
+		echo Zone is ${Zone.Name} (${IdleTime} | ${ZoneTime})
 		ZoneTime:Set[0]
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
 			eq2execute merc resume
 		
-		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]}
-			call Zone_SanctusSeruEchelonofOrderSolo
-		if ${Zone.Name.Equal["Sanctus Seru: Arx Aeturnus \[Solo\]"]}
-			call Zone_SanctusSeruArxAeturnusSolo
-		if ${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]}
-			call Zone_AurelianCoastReishiRumbleSolo
-		if ${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]}
-			call Zone_AurelianCoastMaidensEyeSolo
-		else
-			call MainChecks
+		call MainChecks
+		if (${Zone.Name.Find["Heroic"]}>0)
+			call InHeroicZone
 		if (${Me.IsIdle} && !${Me.InCombat})
 			IdleTime:Inc
 		Else
 			IdleTime:Set[0]
 		
-		if (${Zone.Name.Left[12].Equal["The Blinding"]})
-		{
-			BlindingStuck:Inc
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				echo seems stuck in the Blinding
-				BlindingStuck:Inc
-				BlindingStuck:Inc
-				BlindingStuck:Inc
-				BlindingStuck:Inc
-			}
-		}
-		else
-			BlindingStuck:Set[0]
-		if (${Zone.Name.Left[14].Equal["Aurelian Coast"]})
-		{
-			AurelianCoastStuck:Inc
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				echo seems stuck in ${Zone.Name}
-				AurelianCoastStuck:Inc
-				AurelianCoastStuck:Inc
-				AurelianCoastStuck:Inc
-				AurelianCoastStuck:Inc
-			}
-		}
-		else
-			AurelianCoastStuck:Set[0]	
 		ExecuteQueued
 		wait 300
 	}
@@ -110,6 +71,7 @@ function MainChecks()
 		wait 10
 		ChoiceWindow:DoChoice1
 	}
+
 	if (${Me.IsDead} && !${Me.Grouped})
 	{
 		wait 100
@@ -124,6 +86,27 @@ function MainChecks()
 		wait 100
 		runICZone FALSE
 	}
+	
+	call waitfor_Zoning
+	call isGroupDead
+	if (${Return})
+	{
+		wait 100
+		echo Group wiped --- Reviving
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",FALSE]
+		wait 10
+		oc !c -letsgo
+		oc !c -revive
+		oc !c -pause
+		wait 400
+		relay all run safescript AutoRepair 50
+		wait 50
+		oc !c -repair
+		oc !c -resume
+		wait 100
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+	}
+	
 	call CheckS
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
@@ -151,74 +134,41 @@ function MainChecks()
 		wait 10
 	}
 	while (!${Me.IsDead(exists)})
-	if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
-	{
-		echo run EQ2Ethreayd/wrap RebootLoop if ((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) && ${Me.IsDead(exists)} || (${Return}<11 && ${Return}>=0))
-		run EQ2Ethreayd/wrap RebootLoop
-	}
+	
 	if (${Me.IsIdle} && !${Me.InCombat})
 		ScriptIdleTime:Inc
-	Else
+	else
 		ScriptIdleTime:Set[0]
 	if (${ScriptIdleTime} > 100)
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
 	}
-	if (${TimeZone} > 7200)
+	if (${ZoneTime} > 7200)
 	{
 		echo more than 2 hours in the same zone - rebooting loop (from run EQ2Ethreayd/wrap RebootLoop) 
 		echo deactivated until I know what to do here
 		;run EQ2Ethreayd/wrap RebootLoop
 	}
 }
-
-function Zone_SanctusSeruEchelonofOrderSolo()
+function InHeroicZone()
 {
-	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
-	do
+	echo in Heroic Zone
+	ZoneTime:Inc
+	call MainChecks
+	if (${Ogre_Instance_Controller.Status.Equal["Idle_NotRunning"]} && !${Me.InCombat})
 	{
-		call MainChecks
+		I got into the ${Ogre_Instance_Controller.Status} condition !
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",FALSE]
+		oc !c -letsgo
+		oc !c -evac
+		oc !c -revive
+		relay all run EQ2Ethreayd/safescript AutoRepair 50
+		wait 50
+		oc !c -repair
+		wait 100
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 	}
-	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
 }
-function Zone_SanctusSeruArxAeturnusSolo()
-{
-	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
-	do
-	{
-		call MainChecks
-	}
-	while (${Zone.Name.Equal["Sanctus Seru: Arx Aeturnus \[Solo\]"]})
-}
-function Zone_AurelianCoastReishiRumbleSolo()
-{
-	ScriptIdleTime:Set[0]
-	
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
-	do
-	{
-		call MainChecks
-	}
-	while (${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]})
-}
-function Zone_AurelianCoastMaidensEyeSolo()
-{
-	
-	ScriptIdleTime:Set[0]
-	if (!${Script["ToonAssistant"](exists)})
-		run EQ2Ethreayd/ToonAssistant
-	do
-	{
-		call MainChecks
-	}
-	while (${Zone.Name.Equal["Aurelian Coast: Maiden's Eye \[Solo\]"]})
-}
-
 atom HandleAllEvents(string Message)
 {
 	if (${Message.Equal["Can't see target"]})
@@ -229,19 +179,6 @@ atom HandleAllEvents(string Message)
 	if (${Message.Equal["Too far away"]})
 	{
 		 eq2execute gsay ${Message}
-	}
-	if (${Message.Find["ve got better things to do"]}>0)
-	{
-		QueueCommand run EQ2Ethreayd/wrap RebootLoop
-	}
-	if (${Message.Find["must first be taken down"]}>0)
-	{
-		oc !c -Special ${Me.Name}
-	}
-	if (${Message.Find["Saperlipopette"]}>0 && !${RI_Var_Bool_Paused})
-	{
-		UIElement[RI].FindUsableChild[Start,button]:LeftClick
-		QueueCommand UIElement[RI].FindUsableChild[Start,button]:LeftClick
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

@@ -21,6 +21,20 @@ variable(script) index:string NamedToHunt
 variable(script) index:string NamedCoordinates
 variable(script) index:bool NamedDone
 
+function HarvestQuest(string HarvestQ)
+{
+	call CheckQuest "${HarvestQ}" FALSE TRUE
+	if (${Return})
+	{
+		call goZone "The Blinding"
+		do
+		{
+			call Harvest
+			call CheckQuest "Recuso Tor: Stocking Up" FALSE TRUE
+		}
+		while (${Return})
+	}
+}
 function LuclinLandscapingTheBlinding(bool DoNotWait, int Timeout)
 {
 	NamedToHunt:Insert["Novilog"]
@@ -264,5 +278,9 @@ function TheHunt(bool DoNotWait, int Timeout)
 		NamedCoordinates:Remove[${i}]
 	}
 	echo TheHunt terminated
+}
+function TheHarvest(string QuestName, int Timeout)
+{
+
 }
 

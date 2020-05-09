@@ -1333,7 +1333,7 @@ function CastImmunity(string ToonName, int Health, int Pause)
 		}
 	}
 }
-function ChargeOverseer(bool NoCleanQuests)
+function ChargeOverseer()
 {
 	variable int i
 	variable int j
@@ -1356,12 +1356,13 @@ function ChargeOverseer(bool NoCleanQuests)
 		
 		if (${Return}<${max})
 			call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${Math.Calc64[${max}-${Return}]} TRUE
-		call AutoAddQuest !${NoCleanQuests}
+		echo AutoAddQuest Now !
+		call AutoAddQuest TRUE
 	}
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
 	wait 5
-	call AutoAddQuest !${NoCleanQuests}
+	call AutoAddQuest TRUE
 }
 function check_quest(string questname)
 {
@@ -1519,14 +1520,35 @@ function WardValue(string WardName, int timeout)
 }
 function MysticWardValue(int timeout)
 {
-	variable int Counter
-	do
-	{
-		echo ${Math.Calc64[${Me.Maintained["Ancestral Balm VI"].DamageRemaining}+${Me.Maintained["Ancestral Savior VIII"].DamageRemaining}+${Me.Maintained["Ancestral Ward XI"].DamageRemaining}+${Me.Maintained["Ebbing Spirit IV"].DamageRemaining}+${Me.Maintained["Eidolic Ward"].DamageRemaining}+${Me.Maintained["Oberon VII"].DamageRemaining}+${Me.Maintained["Prophetic Ward VIII"].DamageRemaining}+${Me.Maintained["Runic Armor X"].DamageRemaining}+${Me.Maintained["Spirit Aegis"].DamageRemaining}+${Me.Maintained["Torpor VI"].DamageRemaining}+${Me.Maintained["Umbral Barrier"].DamageRemaining}+${Me.Maintained["Wards of the Eidolon"].DamageRemaining}]}
-		wait 10
-		Counter:Inc
-	}
-	while (${Counter}<${timeout})
+	variable index:string AbilityNames
+    variable int iCounter
+    variable int64 WardValue
+    AbilityNames:Insert["Ancestral Balm VI"]
+    AbilityNames:Insert["Ancestral Savior VIII"]
+    AbilityNames:Insert["Ancestral Ward XI"]
+    AbilityNames:Insert["Ebbing Spirit IV"]
+	AbilityNames:Insert["Eidolic Ward"]
+	AbilityNames:Insert["Oberon VII"]
+	AbilityNames:Insert["Prophetic Ward VIII"]
+	AbilityNames:Insert["Runic Armor X"]
+	AbilityNames:Insert["Spirit Aegis"]
+	AbilityNames:Insert["Torpor VI"]
+	AbilityNames:Insert["Umbral Barrier"]
+	AbilityNames:Insert["Wards of the Eidolon"]		
+
+    while ${timeout:Dec} > 0
+    {
+        WardValue:Set[0]
+        for ( iCounter:Set[1] ; ${iCounter} <= ${AbilityNames.Used} ; iCounter:Inc )
+        {
+            if ${Me.Maintained["${AbilityNames[${iCounter}]}"](exists)}
+                WardValue:Inc[${Me.Maintained["${AbilityNames[${iCounter}]}"].DamageRemaining}]
+        }
+        echo Ward value: ${WardValue}
+        wait 10
+    }
+	
+	
 }
 function CheckEffectOnTarget(string EffectName)
 {
@@ -1606,21 +1628,33 @@ function CheckIfRepairIsNeeded(int MinCondition)
 	else
 		return FALSE
 }
-function AutoRepair()
+function AutoRepair(int Damaged)
 {
-	call CheckIfRepairIsNeeded 10
+	if ${Damaged}<10
+		Damaged:Set[10]
+	call CheckIfRepairIsNeeded ${Damaged}
 	if (${Return})
 	{
 		oc !c -Repair ${Me.Name}
 		wait 100
 	}
-	call CheckIfRepairIsNeeded 10
+	call CheckIfRepairIsNeeded ${Damaged}
 	if (${Return})
 	{	
 		call UseRepairRobot
 	}
-	call CheckIfRepairIsNeeded 10
+	call CheckIfRepairIsNeeded ${Damaged}
 	return !${Return}
+}
+function AutoGetFlag()
+{
+	do
+	{
+		oc !c -GetFlag
+		wait 30
+		call CountItem "Tactical Rally Banner"
+	}
+	while (${Return}<1 && ${Zone.Name.Right[10].Equal["Guild Hall"]})
 }
 function CheckPlayer(float Distance)
 {
@@ -1662,7 +1696,7 @@ function CheckPlayerAtCoordinates(float X, float Y, float Z, float Distance)
 	return FALSE
 }
 
-function CheckQuest(string questname, bool ForAll)
+function CheckQuest(string questname, bool ForAll, bool Approximate)
 {
 	variable index:quest Quests
 	variable iterator It
@@ -1703,11 +1737,23 @@ function CheckQuest(string questname, bool ForAll)
 		{
         	do
         	{
-				if (${It.Value.Name.Equal["${questname}"]})
+				if (${Approximate})
 				{
-					echo already on ${questname}
-					relay all BoolPoll1:Set[TRUE]
-					echo BoolPoll1 at ${BoolPoll1}
+					if (${It.Value.Name.Find["${questname}"]}>0)
+					{
+						echo already on ${questname} (${Approximate} : it's ${It.Value.Name})
+						relay all BoolPoll1:Set[TRUE]
+						echo BoolPoll1 at ${BoolPoll1}
+					}
+				}
+				else
+				{
+					if (${It.Value.Name.Equal["${questname}"]})
+					{
+						echo already on ${questname}
+						relay all BoolPoll1:Set[TRUE]
+						echo BoolPoll1 at ${BoolPoll1}
+					}
 				}
 			}
 			while ${It:Next(exists)}
@@ -1715,7 +1761,7 @@ function CheckQuest(string questname, bool ForAll)
 	}
 	wait 100
 	if (${BoolPoll1})
-	eq2execute g I need to do ${questname} today :p
+		eq2execute g I need to do ${questname} today :p
 	return ${BoolPoll1}
 }    	
 function CheckQuestStep(int step)
@@ -2684,7 +2730,7 @@ function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 		press JUMP
 	echo exit function go2D
 }
-function GoDown()
+function goDown()
 {
 	variable float loc0=0
 	echo "Going Down : 5 5 5"
@@ -2704,6 +2750,10 @@ function GoDown()
 	}
 	wait 10
 	echo "I am down"
+}
+function GoDown()
+{
+	call goDown
 }
 function goHate()
 {	
@@ -2918,7 +2968,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 	if (${speed}<1)
 		speed:Set[1]
 	echo entering Harvest function ${ItemName} ${Distance} ${speed} ${is2D} ${GoBack}
-	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Distance <= ${Distance}]
+	EQ2:QueryActors[Actors, Name  =- "${ItemName}" && Type == "Resource" && Distance <= ${Distance}]
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
@@ -2949,7 +2999,7 @@ function Harvest(string ItemName, float Distance, int speed, bool is2D, bool GoB
 					if (!${is2D})
 					{
 						echo moving in 3D
-						call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+200]} ${ActorIterator.Value.Z}
+						call 3DNav ${ActorIterator.Value.X} ${Math.Calc64[${ActorIterator.Value.Y}+50]} ${ActorIterator.Value.Z}
 						wait 10
 						call GoDown
 					}
@@ -3623,9 +3673,9 @@ function OgreICRun(string Dir, string Iss)
 {
 	ogre ic
 	wait 50
-        Obj_FileExplorer:Change_CurrentDirectory["${Dir}"]
-        Obj_FileExplorer:Scan
-        Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["${Iss}"]
+    Obj_FileExplorer:Change_CurrentDirectory["${Dir}"]
+    Obj_FileExplorer:Scan
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["${Iss}"]
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 }
 function OgreTransmute(int Bag)
