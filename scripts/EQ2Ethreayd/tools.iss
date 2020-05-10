@@ -3372,7 +3372,11 @@ function IsPublicZone()
 		return FALSE
 	if ${Zone.Name.Right[13].Equal[\[ExpertEvent\]]}
 		return FALSE
+	if ${Zone.Name.Right[14].Equal[\[Expert Event\]]}
+		return FALSE
 	if ${Zone.Name.Right[13].Equal[\[EventHeroic\]]}
+		return FALSE
+	if ${Zone.Name.Right[14].Equal[\[Event Heroic\]]}
 		return FALSE
 	if ${Zone.Name.Right[6].Equal[\[Solo\]]}
 		return FALSE
