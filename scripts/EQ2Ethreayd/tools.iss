@@ -1392,6 +1392,27 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 	else
 		return TRUE
 }
+
+function GetNodeType(string ActorName)
+{
+	if ${ActorName.Find["school"]}>0
+		return "Fish"
+	if ${ActorName.Find["mass"]}>0
+		return "Ore"
+	if ${ActorName.Find["lair"]}>0
+		return "Den"
+	if ${ActorName.Find["cluster"]}>0
+		return "Gemstone"
+	if ${ActorName.Find["wood"]}>0
+		return "Wood"
+	if ${ActorName.Find["branch"]}>0
+		return "Wood"
+	if (${ActorName.Equal["!"]} || ${ActorName.Equal["?"]})
+		return "Shiny"
+	else
+		return "Unknown"
+}
+
 function CheckCombat(int MyDistance)
 {
 	
