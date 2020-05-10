@@ -45,15 +45,24 @@ function main(string questname)
 			eq2execute gsay Can I have a rez please ?
 		if (${Solo})
 			call UsePotions FALSE TRUE
+		else
+		{
+			call IsPublicZone
+			echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
+			if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
+			{
+				call PotPotion
+				wait 50
+			}
+		}
 		if (${Me.InCombatMode})
 		{
 			CombatDuration:Inc
-			echo CombatDuration at ${CombatDuration}/120
+			;echo CombatDuration at ${CombatDuration}/120
 		}
 		else
 		{
 			CombatDuration:Set[0]
-			echo CombatDuration at ${CombatDuration}/120
 		}
 		if (${CombatDuration}>120 && !${Global_DONOTATTACK})
 		{
