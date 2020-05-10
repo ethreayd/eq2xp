@@ -1394,7 +1394,7 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 }
 function CheckCombat(int MyDistance)
 {
-	echo Debug: in function CheckCombat
+	
 	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
@@ -1402,6 +1402,7 @@ function CheckCombat(int MyDistance)
 	if (${Me.InCombatMode})
 	{
 		OgreBotAPI:NoTarget[${Me.Name}]
+		echo In CheckCombat (TRUE)
 		if ${Script["Buffer:OgreHarvestLite"](exists)}
 		{
 			ogre end harvestlite
