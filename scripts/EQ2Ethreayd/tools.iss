@@ -1249,7 +1249,7 @@ function CastAbility(string AbilityName, bool NoWait)
 	if (!${NoWait})
 	{
 		if !${Me.Ability["${AbilityName}"].IsReady}
-			echo Ability ${AbilityName} is not ready, I will wait untill it is
+			echo Ability ${AbilityName} is not ready, I will wait until it is
 		do
 		{
 			wait 20
