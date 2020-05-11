@@ -265,9 +265,9 @@ function MainChecks()
 			UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		}
 	}
-	if (${ZoneTime} > 7200)
+	if (${ZoneTime} > 600)
 	{
-		echo run EQ2Ethreayd/wrap RebootLoop if (${ZoneTime} > 7200)
+		echo run EQ2Ethreayd/wrap RebootLoop if (${ZoneTime} > 600)
 		ZoneTime:Set[0]
 		run EQ2Ethreayd/wrap RebootLoop
 	}
