@@ -1392,9 +1392,92 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 	else
 		return TRUE
 }
+
+function GetNodeType(string ActorName)
+{
+	if ${ActorName.Find["bed of "]}>0
+		return "Bush"
+	if ${ActorName.Find["brambles"]}>0
+		return "Bush"
+	if ${ActorName.Find[" briar"]}>0
+		return "Bush"
+	if ${ActorName.Find["bush"]}>0
+		return "Bush"
+	if ${ActorName.Find["foliage"]}>0
+		return "Bush"
+	if ${ActorName.Find["fungal"]}>0
+		return "Bush"
+	if ${ActorName.Find["garden"]}>0
+		return "Bush"
+	if ${ActorName.Find["nettle"]}>0
+		return "Bush"
+	if ${ActorName.Find["nursery"]}>0
+		return "Bush"
+	if ${ActorName.Find["patch"]}>0
+		return "Bush"
+	if ${ActorName.Find["shrub"]}>0
+		return "Bush"
+	if ${ActorName.Find["thistle"]}>0
+		return "Bush"
+	if ${ActorName.Find["burrow"]}>0
+		return "Den"
+	if ${ActorName.Find[" den"]}>0
+		return "Den"
+	if ${ActorName.Find["lair"]}>0
+		return "Den"
+	if ${ActorName.Find["nest"]}>0
+		return "Den"
+	if ${ActorName.Find["carp"]}>0
+		return "Fish"
+	if ${ActorName.Find["catch"]}>0
+		return "Fish"
+	if ${ActorName.Find["coral"]}>0
+		return "Fish"
+	if ${ActorName.Find["fish"]}>0
+		return "Fish"
+	if ${ActorName.Find["school"]}>0
+		return "Fish"
+	if ${ActorName.Find["shiver"]}>0
+		return "Fish"
+	if ${ActorName.Find["shoal"]}>0
+		return "Fish"
+	if ${ActorName.Find["trout"]}>0
+		return "Fish"
+	if ${ActorName.Find["reef"]}>0
+		return "Gemstone"
+	if ${ActorName.Find["cluster"]}>0
+		return "Gemstone"
+	if ${ActorName.Find["lode"]}>0
+		return "Ore"
+	if ${ActorName.Find["mass"]}>0
+		return "Ore"
+	if ${ActorName.Find["ore"]}>0
+		return "Ore"
+	if ${ActorName.Find["rock"]}>0
+		return "Ore"
+	if ${ActorName.Find["stone"]}>0
+		return "Ore"
+	if ${ActorName.Find[" foot"]}>0
+		return "Root"
+	if ${ActorName.Find["root"]}>0
+		return "Root"
+	if ${ActorName.Find["sprout"]}>0
+		return "Root"
+	if ${ActorName.Find["weed"]}>0
+		return "Root"
+	if (${ActorName.Equal["!"]} || ${ActorName.Equal["?"]})
+		return "Shiny"
+	if ${ActorName.Find["wood"]}>0
+		return "Wood"
+	if ${ActorName.Find["branch"]}>0
+		return "Wood"
+	else
+		return "Unknown"
+}
+
 function CheckCombat(int MyDistance)
 {
-	echo Debug: in function CheckCombat
+	
 	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
@@ -1402,6 +1485,7 @@ function CheckCombat(int MyDistance)
 	if (${Me.InCombatMode})
 	{
 		OgreBotAPI:NoTarget[${Me.Name}]
+		echo In CheckCombat (TRUE)
 		if ${Script["Buffer:OgreHarvestLite"](exists)}
 		{
 			ogre end harvestlite
