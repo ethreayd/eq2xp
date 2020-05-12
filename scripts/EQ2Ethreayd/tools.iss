@@ -1395,6 +1395,10 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 
 function GetNodeType(string ActorName)
 {
+	if ${ActorName.Find["Glacier Shrub"]}>0
+		return "Quest"
+	if ${ActorName.Find["Ellia's Sul Sphere"]}>0
+		return "Quest"
 	if ${ActorName.Find["bed of "]}>0
 		return "Bush"
 	if ${ActorName.Find["brambles"]}>0
@@ -1471,6 +1475,9 @@ function GetNodeType(string ActorName)
 		return "Wood"
 	if ${ActorName.Find["branch"]}>0
 		return "Wood"
+	if ${ActorName.Find["Tizmak"]}>0
+		return "Quest"
+	
 	else
 		return "Unknown"
 }
@@ -5070,4 +5077,46 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 1446 Salvage
 	call ActionOnPrimaryAttributeValue 2650 Salvage
 	call ActionOnPrimaryAttributeValue 2706 Salvage
+}
+
+function WikiaLookup(string QuestName)
+{
+	variable webrequest WR
+	variable uint lastState
+    variable string QN
+	
+	call strip_QN "${QuestName}"
+	
+	QN:Set[${Return}]
+	
+    lastState:Set[${WR.State.Value}]
+    echo WR.State=${lastState(ewebrequeststate)}
+	
+    WR:SetURL["https://eq2.fandom.com/wiki/${QN}"]
+	
+    WR:InterpretAs[file,'C:/Program Files (x86)/InnerSpace/Scripts/AAAA.html']
+
+    WR:Begin
+    lastState:Set[${WR.State.Value}]
+    echo WR.State=${lastState(ewebrequeststate)}
+    echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
+
+    while 1
+    {
+        if ${WR.State.Value}!=${lastState}
+        {
+            lastState:Set[${WR.State.Value}]
+            echo WR.State=${lastState(ewebrequeststate)}
+
+            if ${WR.Result(exists)}            
+            {
+				echo WR.Result=${WR.Result}
+				echo WR.Filename=${WR.Filename}
+			}
+            if ${WR.State.Name.Equal[Completed]}
+                break
+        }
+        waitframe
+    }
+    echo Script ending.
 }
