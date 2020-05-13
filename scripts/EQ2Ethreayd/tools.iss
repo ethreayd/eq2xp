@@ -1395,6 +1395,23 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 
 function GetNodeType(string ActorName)
 {
+	if ${ActorName.Find["blooded mushroom"]}>0
+		return "Quest"
+	if ${ActorName.Find["bracket fungus"]}>0
+		return "Quest"
+	if ${ActorName.Find["excavated debris"]}>0
+		return "Quest"	
+	if ${ActorName.Find["Glacier Shrub"]}>0
+		return "Quest"
+	if ${ActorName.Find["Sul Sphere"]}>0
+		return "Quest"
+	if ${ActorName.Find["Klixie"]}>0
+		return "Quest"
+	
+	if ${ActorName.Find["tortoise egg"]}>0
+		return "Quest"
+	if ${ActorName.Find["curious ore"]}>0
+		return "Quest"
 	if ${ActorName.Find["bed of "]}>0
 		return "Bush"
 	if ${ActorName.Find["brambles"]}>0
@@ -1444,19 +1461,19 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["trout"]}>0
 		return "Fish"
 	if ${ActorName.Find["reef"]}>0
-		return "Gemstone"
+		return "Stone"
 	if ${ActorName.Find["cluster"]}>0
-		return "Gemstone"
+		return "Stone"
 	if ${ActorName.Find["lode"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["mass"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["ore"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["rock"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["stone"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find[" foot"]}>0
 		return "Root"
 	if ${ActorName.Find["root"]}>0
@@ -1471,13 +1488,15 @@ function GetNodeType(string ActorName)
 		return "Wood"
 	if ${ActorName.Find["branch"]}>0
 		return "Wood"
+	if ${ActorName.Find["Tizmak"]}>0
+		return "Quest"
+	
 	else
 		return "Unknown"
 }
 
 function CheckCombat(int MyDistance)
 {
-	
 	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
@@ -4868,10 +4887,11 @@ function WalkWithTheWind(float X, float Y, float Z)
 	}
 	while (!${Return})
 }
-function WhereIs(string ActorName, bool Exact)
+function WhereIs(string ActorName, bool Exact, bool ReturnActorLoc)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
+	variable string ActorLoc
 	if (${Exact})
 		EQ2:QueryActors[Actors, Name  = "${ActorName}"]
 	else
@@ -4882,7 +4902,11 @@ function WhereIs(string ActorName, bool Exact)
 		echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
 		echo I am at ${Me.Loc.X} ${Me.Loc.Y} ${Me.Loc.Z}
 		eq2execute way ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
-		return TRUE
+		ActorLoc:Set[${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}]
+		if ${ReturnActorLoc}
+			return ${ActorLoc}
+		else
+			return TRUE
 	}
 	else
 		return FALSE
@@ -5070,4 +5094,46 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 1446 Salvage
 	call ActionOnPrimaryAttributeValue 2650 Salvage
 	call ActionOnPrimaryAttributeValue 2706 Salvage
+}
+
+function WikiaLookup(string QuestName)
+{
+	variable webrequest WR
+	variable uint lastState
+    variable string QN
+	
+	call strip_QN "${QuestName}"
+	
+	QN:Set[${Return}]
+	
+    lastState:Set[${WR.State.Value}]
+    echo WR.State=${lastState(ewebrequeststate)}
+	
+    WR:SetURL["https://eq2.fandom.com/wiki/${QN}"]
+	
+    WR:InterpretAs[file,'C:/Program Files (x86)/InnerSpace/Scripts/AAAA.html']
+
+    WR:Begin
+    lastState:Set[${WR.State.Value}]
+    echo WR.State=${lastState(ewebrequeststate)}
+    echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
+
+    while 1
+    {
+        if ${WR.State.Value}!=${lastState}
+        {
+            lastState:Set[${WR.State.Value}]
+            echo WR.State=${lastState(ewebrequeststate)}
+
+            if ${WR.Result(exists)}            
+            {
+				echo WR.Result=${WR.Result}
+				echo WR.Filename=${WR.Filename}
+			}
+            if ${WR.State.Name.Equal[Completed]}
+                break
+        }
+        waitframe
+    }
+    echo Script ending.
 }
