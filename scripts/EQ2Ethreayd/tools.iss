@@ -1395,14 +1395,19 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 
 function GetNodeType(string ActorName)
 {
+	if ${ActorName.Find["blooded mushroom"]}>0
+		return "Quest"
+	if ${ActorName.Find["bracket fungus"]}>0
+		return "Quest"
+	if ${ActorName.Find["excavated debris"]}>0
+		return "Quest"	
 	if ${ActorName.Find["Glacier Shrub"]}>0
 		return "Quest"
 	if ${ActorName.Find["Sul Sphere"]}>0
 		return "Quest"
 	if ${ActorName.Find["Klixie"]}>0
 		return "Quest"
-	if ${ActorName.Find["bracket fungus"]}>0
-		return "Quest"
+	
 	if ${ActorName.Find["tortoise egg"]}>0
 		return "Quest"
 	if ${ActorName.Find["curious ore"]}>0
@@ -1492,7 +1497,6 @@ function GetNodeType(string ActorName)
 
 function CheckCombat(int MyDistance)
 {
-	
 	variable bool WasHarvesting
 	if (${MyDistance}<1)
 		MyDistance:Set[30]
@@ -4883,10 +4887,11 @@ function WalkWithTheWind(float X, float Y, float Z)
 	}
 	while (!${Return})
 }
-function WhereIs(string ActorName, bool Exact)
+function WhereIs(string ActorName, bool Exact, bool ReturnActorLoc)
 {
 	variable index:actor Actors
 	variable iterator ActorIterator
+	variable string ActorLoc
 	if (${Exact})
 		EQ2:QueryActors[Actors, Name  = "${ActorName}"]
 	else
@@ -4897,7 +4902,11 @@ function WhereIs(string ActorName, bool Exact)
 		echo ${ActorIterator.Value.Name} (${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}) at ${ActorIterator.Value.Distance}m
 		echo I am at ${Me.Loc.X} ${Me.Loc.Y} ${Me.Loc.Z}
 		eq2execute way ${ActorIterator.Value.X},${ActorIterator.Value.Y},${ActorIterator.Value.Z}
-		return TRUE
+		ActorLoc:Set[${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}]
+		if ${ReturnActorLoc}
+			return ${ActorLoc}
+		else
+			return TRUE
 	}
 	else
 		return FALSE
