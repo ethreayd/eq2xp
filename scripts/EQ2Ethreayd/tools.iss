@@ -1401,6 +1401,8 @@ function GetNodeType(string ActorName)
 		return "Quest"
 	if ${ActorName.Find["Klixie"]}>0
 		return "Quest"
+	if ${ActorName.Find["bracket fungus"]}>0
+		return "Quest"
 	if ${ActorName.Find["bed of "]}>0
 		return "Bush"
 	if ${ActorName.Find["brambles"]}>0
@@ -1450,19 +1452,19 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["trout"]}>0
 		return "Fish"
 	if ${ActorName.Find["reef"]}>0
-		return "Gemstone"
+		return "Stone"
 	if ${ActorName.Find["cluster"]}>0
-		return "Gemstone"
+		return "Stone"
 	if ${ActorName.Find["lode"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["mass"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["ore"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["rock"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find["stone"]}>0
-		return "Ore"
+		return "Stone"
 	if ${ActorName.Find[" foot"]}>0
 		return "Root"
 	if ${ActorName.Find["root"]}>0
