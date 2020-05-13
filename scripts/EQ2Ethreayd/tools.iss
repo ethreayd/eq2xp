@@ -5098,7 +5098,8 @@ function CleanBags()
 
 function WikiaLookup(string QuestName)
 {
-	variable webrequest WR
+	variable webrequest QD
+	variable webrequest QI
 	variable uint lastState
     variable string QN
 	
@@ -5106,34 +5107,72 @@ function WikiaLookup(string QuestName)
 	
 	QN:Set[${Return}]
 	
-    lastState:Set[${WR.State.Value}]
-    echo WR.State=${lastState(ewebrequeststate)}
+    lastState:Set[${QD.State.Value}]
+    ;echo QD.State=${lastState(ewebrequeststate)}
 	
-    WR:SetURL["https://eq2.fandom.com/wiki/${QN}"]
-	
-    WR:InterpretAs[file,'C:/Program Files (x86)/InnerSpace/Scripts/AAAA.html']
-
-    WR:Begin
-    lastState:Set[${WR.State.Value}]
-    echo WR.State=${lastState(ewebrequeststate)}
-    echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
+    QD:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/eq2json.py?${QN}"]
+	QD:InterpretAs[json]
+    QD:Begin
+    lastState:Set[${QD.State.Value}]
+    ;echo WR.State=${lastState(ewebrequeststate)}
+    ;echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
 
     while 1
     {
-        if ${WR.State.Value}!=${lastState}
+        if ${QD.State.Value}!=${lastState}
         {
-            lastState:Set[${WR.State.Value}]
-            echo WR.State=${lastState(ewebrequeststate)}
+            lastState:Set[${QD.State.Value}]
+           ;echo WR.State=${lastState(ewebrequeststate)}
 
-            if ${WR.Result(exists)}            
+            if ${QD.Result(exists)}            
             {
-				echo WR.Result=${WR.Result}
-				echo WR.Filename=${WR.Filename}
+				echo QD.Result=${QD.Result}
 			}
-            if ${WR.State.Name.Equal[Completed]}
+            if ${QD.State.Name.Equal[Completed]}
                 break
         }
         waitframe
     }
-    echo Script ending.
+    lastState:Set[${QI.State.Value}]
+	QI:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/table2json.py?${QN}"]
+	QI:InterpretAs[json]
+    QI:Begin
+    lastState:Set[${QI.State.Value}]
+	while 1
+    {
+        if ${QI.State.Value}!=${lastState}
+        {
+            lastState:Set[${QI.State.Value}]
+           ;echo WR.State=${lastState(ewebrequeststate)}
+
+            if ${QI.Result(exists)}            
+            {
+				echo QI.Result=${QI.Result}
+			}
+            if ${QI.State.Name.Equal[Completed]}
+                break
+        }
+        waitframe
+    }
+}
+
+function ListActors(float MaxDistance, bool Detail)
+{
+    variable index:actor Actors
+    variable iterator ActorIterator
+    
+    EQ2:QueryActors[Actors, Distance <= ${MaxDistance} ]
+    Actors:GetIterator[ActorIterator]
+  
+    if ${ActorIterator:First(exists)}
+    {
+        do
+        {
+            echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m)
+			if ${Detail}
+				call DescribeActor ${ActorIterator.Value.ID}
+
+        }
+        while ${ActorIterator:Next(exists)}
+    }
 }
