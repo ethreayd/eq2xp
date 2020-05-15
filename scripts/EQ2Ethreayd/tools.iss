@@ -5313,3 +5313,10 @@ objectdef WikiaQuest
 			Status:Set[FALSE]
 	}
 }
+function AutoQuest(string questname)
+{
+	echo Doing automatically Quest ${questname} !
+	echo I am kidding ! But this will be a great feature !!!
+	variable WikiaQuest WQ="${questname}"
+	WQ:Describe
+}
