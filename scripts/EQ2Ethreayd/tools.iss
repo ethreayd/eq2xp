@@ -1399,18 +1399,25 @@ function GetNodeType(string ActorName)
 		return "Quest"
 	if ${ActorName.Find["bracket fungus"]}>0
 		return "Quest"
+	if ${ActorName.Find["curious ore"]}>0
+		return "Quest"
 	if ${ActorName.Find["excavated debris"]}>0
 		return "Quest"	
 	if ${ActorName.Find["Glacier Shrub"]}>0
 		return "Quest"
-	if ${ActorName.Find["Sul Sphere"]}>0
+	if ${ActorName.Find["gnoll supplies"]}>0
+		return "Quest"
+	if ${ActorName.Find["grub-rich soil"]}>0
 		return "Quest"
 	if ${ActorName.Find["Klixie"]}>0
 		return "Quest"
-	
+	if ${ActorName.Find["owlbear egg"]}>0
+		return "Quest"
+	if ${ActorName.Find["Sul Sphere"]}>0
+		return "Quest"
 	if ${ActorName.Find["tortoise egg"]}>0
 		return "Quest"
-	if ${ActorName.Find["curious ore"]}>0
+	if ${ActorName.Find["Trythec"]}>0
 		return "Quest"
 	if ${ActorName.Find["bed of "]}>0
 		return "Bush"
@@ -1446,6 +1453,8 @@ function GetNodeType(string ActorName)
 		return "Den"
 	if ${ActorName.Find["carp"]}>0
 		return "Fish"
+	if ${ActorName.Find["catch weed"]}>0
+		return "Root"
 	if ${ActorName.Find["catch"]}>0
 		return "Fish"
 	if ${ActorName.Find["coral"]}>0
@@ -1650,8 +1659,6 @@ function MysticWardValue(int timeout)
         echo Ward value: ${WardValue}
         wait 10
     }
-	
-	
 }
 function CheckEffectOnTarget(string EffectName)
 {
@@ -1804,17 +1811,18 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 	variable index:quest Quests
 	variable iterator It
 	variable int NumQuests
+	BoolPoll1:Set[FALSE]
 	
 	if (${ForAll})
 	{
-		echo doing CheckQuest ForAll
+		;echo doing CheckQuest ForAll
 		relay all BoolPoll1:Set[FALSE]
 		wait 20
 		if (!${Script["wrap"](exists)})
 			relay all run EQ2Ethreayd/wrap CheckQuest "${questname}" FALSE
 		else
 		{
-			echo wrap already used... trying with wrap2
+		;	echo wrap already used... trying with wrap2
 			if (!${Script["wrap2"](exists)})
 				relay all run EQ2Ethreayd/wrap2 CheckQuest "${questname}" FALSE
 			else
@@ -1844,18 +1852,22 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 				{
 					if (${It.Value.Name.Find["${questname}"]}>0)
 					{
-						echo already on ${questname} (${Approximate} : it's ${It.Value.Name})
-						relay all BoolPoll1:Set[TRUE]
-						echo BoolPoll1 at ${BoolPoll1}
+		;				echo already on ${questname} (${Approximate} : it's ${It.Value.Name})
+						if (${ForAll})
+							relay all BoolPoll1:Set[TRUE]
+						else
+							BoolPoll1:Set[TRUE]
 					}
 				}
 				else
 				{
 					if (${It.Value.Name.Equal["${questname}"]})
 					{
-						echo already on ${questname}
-						relay all BoolPoll1:Set[TRUE]
-						echo BoolPoll1 at ${BoolPoll1}
+		;				echo already on ${questname}
+						if (${ForAll})
+							relay all BoolPoll1:Set[TRUE]
+						else
+							BoolPoll1:Set[TRUE]
 					}
 				}
 			}
@@ -1863,10 +1875,20 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 		}
 	}
 	wait 100
-	if (${BoolPoll1})
+	
+	if (${BoolPoll1} && ${ForAll})
 		eq2execute g I need to do ${questname} today :p
 	return ${BoolPoll1}
-}    	
+}
+function CheckQuestDone(string questname)
+{ 
+	;Thanks to Pork for the quest check
+
+	if (${QuestJournalWindow.CompletedQuest["${questname}"](exists)})
+		return TRUE
+	else
+		return FALSE
+}	
 function CheckQuestStep(int step)
 {
 	variable index:collection:string Details    
@@ -2902,15 +2924,25 @@ function goHate()
 	}
 	call waitfor_Zone "Plane of Magic"
 }
+function CorrectZone(string ZoneName)
+{
+	
+	
+	if (${ZoneName.Equal["Freeport"]})
+		return "The City of Freeport"
+	
+	
+	return "${ZoneName}"
+}
+
 
 function goZone(string ZoneName, string Transport)
 {
 	variable string AltZoneName
 	
-	if (${ZoneName.Equal["Freeport"]})
-		AltZoneName:Set["The City of Freeport"]
-	else
-		AltZoneName:Set["${ZoneName}"]
+	call CorrectZone "${ZoneName}"
+	AltZoneName:Set["${Return}"]
+	
 	if (${ZoneName.Equal["Aurelian Coast"]})
 	{
 		call goAurelianCoast
@@ -5096,66 +5128,6 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 2706 Salvage
 }
 
-function WikiaLookup(string QuestName)
-{
-	variable webrequest QD
-	variable webrequest QI
-	variable uint lastState
-    variable string QN
-	
-	call strip_QN "${QuestName}"
-	
-	QN:Set[${Return}]
-	
-    lastState:Set[${QD.State.Value}]
-    ;echo QD.State=${lastState(ewebrequeststate)}
-	
-    QD:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/eq2json.py?${QN}"]
-	QD:InterpretAs[json]
-    QD:Begin
-    lastState:Set[${QD.State.Value}]
-    ;echo WR.State=${lastState(ewebrequeststate)}
-    ;echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
-
-    while 1
-    {
-        if ${QD.State.Value}!=${lastState}
-        {
-            lastState:Set[${QD.State.Value}]
-           ;echo WR.State=${lastState(ewebrequeststate)}
-
-            if ${QD.Result(exists)}            
-            {
-				echo QD.Result=${QD.Result}
-			}
-            if ${QD.State.Name.Equal[Completed]}
-                break
-        }
-        waitframe
-    }
-    lastState:Set[${QI.State.Value}]
-	QI:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/table2json.py?${QN}"]
-	QI:InterpretAs[json]
-    QI:Begin
-    lastState:Set[${QI.State.Value}]
-	while 1
-    {
-        if ${QI.State.Value}!=${lastState}
-        {
-            lastState:Set[${QI.State.Value}]
-           ;echo WR.State=${lastState(ewebrequeststate)}
-
-            if ${QI.Result(exists)}            
-            {
-				echo QI.Result=${QI.Result}
-			}
-            if ${QI.State.Name.Equal[Completed]}
-                break
-        }
-        waitframe
-    }
-}
-
 function ListActors(float MaxDistance, bool Detail)
 {
     variable index:actor Actors
@@ -5175,4 +5147,169 @@ function ListActors(float MaxDistance, bool Detail)
         }
         while ${ActorIterator:Next(exists)}
     }
+}
+
+objectdef WikiaQuest
+{
+	variable string OriginalName=""
+	variable string QuestName=""
+	variable string JournalCategory=""
+	variable string QuestCategory=""
+	variable string JournalDifficulty=""
+	variable string StartingZone=""
+	variable string QuestCurrentZone=""
+	variable string HowtoStart=""
+	variable string StartLoc=""
+	variable string PartOf=""
+	variable string PrecededBy=""
+	variable string FollowedBy=""
+	variable int QuestID
+	variable int QuestLevel
+	variable bool RequestDone
+	variable bool Status
+	variable webrequest QD
+	variable webrequest QI
+	
+	method Initialize(string newName)
+	{
+		if ${newName.Length}>0
+		{
+			OriginalName:Set["${newName}"]
+			This:SetName["${newName}"]
+		}
+	}
+	method Lookup()
+	{
+		variable uint lastState
+		RequestDone:Set[FALSE]
+
+		lastState:Set[${QD.State.Value}]
+			
+		QD:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/eq2json.py?${QuestName}"]
+		QD:InterpretAs[json]
+		QD:Begin
+		lastState:Set[${QD.State.Value}]
+		while 1
+		{
+			if ${QD.State.Value}!=${lastState}
+			{
+				lastState:Set[${QD.State.Value}]
+				if ${QD.Result(exists)}            
+				{
+					;echo QD.Result=${QD.Result}
+				}
+				if ${QD.State.Name.Equal[Completed]}
+					break
+			}
+;			waitframe
+		}
+		lastState:Set[${QI.State.Value}]
+		QI:SetURL["http://ows-171-33-87-167.eu-west-2.compute.outscale.com/cgi-bin/table2json.py?${QuestName}"]
+		;echo ${QI.URL}
+		QI:InterpretAs[json]
+		QI:Begin
+		lastState:Set[${QI.State.Value}]
+		while 1
+		{
+			if ${QI.State.Value}!=${lastState}
+			{
+				lastState:Set[${QI.State.Value}]
+				if ${QI.Result(exists)}            
+				{
+					;echo QI.Result=${QI.Result}
+				}
+				if ${QI.State.Name.Equal[Completed]}
+				{
+					
+					break
+				}	
+			}
+;			waitframe
+		}
+		RequestDone:Set[TRUE]
+		This:Populate
+	}
+	method SetName(string newName)
+    {
+        QuestName:Set["${newName.Replace[" ","_"]}"]
+		;QueueCommand call WikiaLookup "${QuestName}"
+		This:Lookup
+    }
+	method Populate()
+	{
+		variable jsonvalue QDResults=${QD.Result.Get["jsonResult"]}
+		variable jsonvalue QIResults=${QI.Result.Get["jsonResult"]}
+		
+		JournalCategory:Set["${QIResults.Get["Journal Category"]}"]
+		JournalDifficulty:Set["${QIResults.Get["Journal Difficulty"]}"]
+		StartingZone:Set["${QIResults.Get["Starting Zone"]}"]
+		if (${StartingZone.Right[5].Equal[" more"]})
+			StartingZone:Set["${StartingZone.Left[${Math.Calc64[${StartingZone.Length}-5]}]}"]
+		HowtoStart:Set["${QIResults.Get["How to Start"]}"]
+		StartLoc:Set["${QIResults.Get["waypoint"].Replace[","," "]}"]
+		PartOf:Set["${QIResults.Get["part of"]}"]
+		PrecededBy:Set["${QIResults.Get["Preceded by"]}"]
+		FollowedBy:Set["${QIResults.Get["Followed by"]}"]
+	}
+	method NextQuest()
+	{
+		return ${FollowedBy}
+	}
+	method PreviousQuest()
+	{
+		return ${PrecededBy}
+	}
+	method Describe()
+	{
+		This:UpdateStatus
+		echo Quest "${OriginalName}" [${QuestID}]
+		echo -------------------- FROM EQ2 WIKIA WITH LOVE --------------------
+		echo Category : ${JournalCategory}
+		echo Difficulty : ${JournalDifficulty}
+		echo Level : ${QuestLevel}
+		echo Starting Zone : ${StartingZone}
+		echo How to Start : ${HowtoStart}
+		echo Start Location : ${StartLoc}
+		echo Part of ${PartOf} sigline
+		echo TBD after ${PrecededBy}
+		echo Required by ${FollowedBy}
+		echo Ongoing : ${Status}
+		
+	}
+	method UpdateStatus()
+	{
+		variable index:quest Quests
+		variable iterator It
+		variable int NumQuests
+		
+		NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
+    
+		if (${NumQuests} > 0)
+		{
+			QuestJournalWindow.ActiveQuest["${OriginalName}"]:MakeCurrentActiveQuest
+			QuestJournalWindow:GetActiveQuests[Quests]
+			Quests:GetIterator[It]
+			if ${It:First(exists)}
+			{
+				do
+				{
+					if (${It.Value.Name.Equal["${OriginalName}"]})
+					{
+						Status:Set[TRUE]
+						QuestID:Set[${It.Value.ID}]
+						QuestLevel:Set[${It.Value.Level}]
+						QuestCategory:Set["${It.Value.Category}"]
+						QuestCurrentZone:Set["${It.Value.CurrentZone}"]
+						break
+					}
+					else
+						Status:Set[FALSE]
+
+				}
+				while ${It:Next(exists)}
+			}
+		}
+		else
+			Status:Set[FALSE]
+	}
 }

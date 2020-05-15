@@ -29,8 +29,8 @@ function main(int stepstart, int stepstop, int speed)
 	for ( x:Set[1] ; ${x} <= ${ScriptsToRun.Used} ; x:Inc )
 	{
         	echo Running script ${ScriptsToRun[${x}]}
-		;Thanks to Pork for the quest check
-		if (${QuestJournalWindow.CompletedQuest["${ScriptsToRun[${x}]}"](exists)})
+		call CheckQuestDone "${ScriptsToRun[${x}]}"
+		if (${Return})
 		{
 			echo "Quest ${ScriptsToRun[${x}]} already done"
 		}
