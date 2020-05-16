@@ -1409,6 +1409,8 @@ function GetNodeType(string ActorName)
 		return "Quest"
 	if ${ActorName.Find["grub-rich soil"]}>0
 		return "Quest"
+	if ${ActorName.Find["Karana"]}>0
+		return "Quest"
 	if ${ActorName.Find["Klixie"]}>0
 		return "Quest"
 	if ${ActorName.Find["owlbear egg"]}>0
@@ -1493,6 +1495,8 @@ function GetNodeType(string ActorName)
 		return "Root"
 	if (${ActorName.Equal["!"]} || ${ActorName.Equal["?"]})
 		return "Shiny"
+	if ${ActorName.Find["arbor"]}>0
+		return "Wood"
 	if ${ActorName.Find["wood"]}>0
 		return "Wood"
 	if ${ActorName.Find["branch"]}>0
