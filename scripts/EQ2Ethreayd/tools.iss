@@ -767,7 +767,7 @@ function AutoAddAgent(bool EraseDuplicate)
     variable int Counter=0
 	variable int Counter2=0
 	variable int Counter3=0
-		
+		echo Auto Adding Agent (${EraseDuplicate})
 		Me:QueryInventory[Items, Location == "Inventory"]
 		Items:GetIterator[ItemIterator]
 		if ${ItemIterator:First(exists)}
@@ -814,7 +814,7 @@ function AutoAddQuest(bool EraseDuplicate)
     variable int Counter=0
 	variable int Counter2=0
 	variable int Counter3=0
-		
+		echo Auto Adding Quest (${EraseDuplicate})
 		Me:QueryInventory[Items, Location == "Inventory"]
 		Items:GetIterator[ItemIterator]
 		if ${ItemIterator:First(exists)}
@@ -4092,6 +4092,32 @@ function RIStop()
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
 	if (${Script["Buffer:RIMovement"](exists)})
 		end Buffer:RIMovement
+}
+function ISXRIPause()
+{
+	if (${Script["Buffer:RI"](exists)})
+		Script["Buffer:RI"]:Pause
+	if (${Script["Buffer:RIMovement"](exists)})
+		Script["Buffer:RIMovement"]:Pause
+	if (${Script["Buffer:RZ"](exists)})
+		Script["Buffer:RZ"]:Pause
+	if (${Script["Buffer:RunInstances"](exists)})
+		Script["Buffer:RunInstances"]:Pause
+	if (!${RI_Var_Bool_Paused})
+		UIElement[RI].FindUsableChild[Start,button]:LeftClick
+}
+function ISXRIResume()
+{
+	if (${Script["Buffer:RI"](exists)})
+		Script["Buffer:RI"]:Resume
+	if (${Script["Buffer:RIMovement"](exists)})
+		Script["Buffer:RIMovement"]:Resume
+	if (${Script["Buffer:RZ"](exists)})
+		Script["Buffer:RZ"]:Resume
+	if (${Script["Buffer:RunInstances"](exists)})
+		Script["Buffer:RunInstances"]:Resume
+	if (${RI_Var_Bool_Paused})
+		UIElement[RI].FindUsableChild[Start,button]:LeftClick
 }
 function RunInstance()
 {

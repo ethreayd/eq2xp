@@ -36,7 +36,7 @@ function main(string questname)
 	do
 	{
 		call waitfor_Zoning
-		
+		echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
 		if (${Me.Health}<10 && !${Me.IsDead})
@@ -47,6 +47,7 @@ function main(string questname)
 			call UsePotions FALSE TRUE
 		else
 		{
+			echo not in Solo instance --> Heroic
 			if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
 				run EQ2Ethreayd/OgreICAssistant
 			call IsPublicZone
@@ -68,6 +69,11 @@ function main(string questname)
 		else
 		{
 			CombatDuration:Set[0]
+		}
+		if (!${Me.Target.IsAggro} && ${CombatDuration}>20)
+		{
+			press Tab
+			wait 10
 		}
 		if (${CombatDuration}>120 && !${Global_DONOTATTACK})
 		{
