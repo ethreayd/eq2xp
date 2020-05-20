@@ -174,6 +174,7 @@ atom HandleAllEvents(string Message)
 	{
 		 eq2execute gsay ${Message}
 		 press MOVEFORWARD
+		 eq2execute merc attack
 	}
 	
 	if (${Message.Find["Hurry up please, we have things to do"]} > 0)

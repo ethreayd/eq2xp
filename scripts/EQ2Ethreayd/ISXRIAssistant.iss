@@ -551,18 +551,10 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -250 && ${Me.X} > -275 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -80 && ${Me.Z} > -110)
 		{
-			RZObj:Pause
-
 			call ISXRIPause
 			
 			echo fixing Seru stucked
-			call DMove -307 88 -114 3
-			
-			if (${RI_Var_Bool_Paused})
-			{
-				echo Resuming ISXRI
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
+			call DMove -307 88 -114 3 30 TRUE
 			call ISXRIResume
 
 		}
