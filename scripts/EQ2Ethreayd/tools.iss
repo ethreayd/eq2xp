@@ -1399,6 +1399,8 @@ function GetNodeType(string ActorName)
 		return "Quest"
 	if ${ActorName.Find["bracket fungus"]}>0
 		return "Quest"
+	if ${ActorName.Find["cargo crate"]}>0
+		return "Quest"
 	if ${ActorName.Find["curious ore"]}>0
 		return "Quest"
 	if ${ActorName.Find["excavated debris"]}>0
