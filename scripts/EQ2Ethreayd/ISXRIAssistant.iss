@@ -83,7 +83,9 @@ function main(string questname)
 			IdleTime:Inc
 		Else
 			IdleTime:Set[0]
-		
+		call IsPublicZone
+		if (${Me.IsIdle} && !${Me.InCombat} && ${Return})
+			oc !c -ZoneResetAll ${Me.Name}
 		if (${Zone.Name.Left[12].Equal["The Blinding"]} || ${Zone.Name.Left[14].Equal["Aurelian Coast"]} || ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 		{
 			ZoneStuck:Inc
@@ -287,7 +289,24 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		{
 			call ActivateVerbOn "circle" "Access"
 		}
-				
+		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 25)
+		{
+			RZObj:Pause
+			if (!${RI_Var_Bool_Paused})
+			{
+				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			call DMove -389 88 13 3 30 TRUE
+			if (${RI_Var_Bool_Paused})
+			{
+				echo Resuming ISXRI
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			}
+			target "an Echelon vigilant"
+			RZObj:Resume
+		}
+			
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
 		{
 			RZObj:Pause
@@ -532,23 +551,11 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -250 && ${Me.X} > -275 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -80 && ${Me.Z} > -110)
 		{
-			RZObj:Pause
-
-			if (!${RI_Var_Bool_Paused})
-			{
-				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
+			call ISXRIPause
 			
 			echo fixing Seru stucked
-			call DMove -307 88 -114 3
-			
-			if (${RI_Var_Bool_Paused})
-			{
-				echo Resuming ISXRI
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
-			RZObj:Resume
+			call DMove -307 88 -114 3 30 TRUE
+			call ISXRIResume
 
 		}
 		if (${Me.X} < -75 && ${Me.X} > -95 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 280 && ${Me.Z} > 260)
@@ -788,6 +795,8 @@ function Zone_AurelianCoastSambataVillageSolo()
 					call DMove -78 82 -704 3
 				}
 				call DMove -136 82 -687 3
+				call TanknSpank "Mrokor"
+				call TanknSpank "Purpyron"
 			}
 			if (${RI_Var_Bool_Paused})
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick

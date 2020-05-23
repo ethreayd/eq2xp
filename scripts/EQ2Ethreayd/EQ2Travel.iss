@@ -122,6 +122,7 @@ function goRecusoTor(bool Force)
 			while (${Return})
 		}
 	}
+	call GoDown
 	echo I am already in Recuso Tor
 }
 function goDainitheWright(bool Force)
@@ -148,7 +149,8 @@ function getBoLQuests(string version)
 	variable int MissingQuest
 
 	call goRecusoTor TRUE
-	call DMove -644 47 353 3
+	
+	call 3DNav -644 47 353
 	call DMove -689 45 362 3
 	call DMove -638 58 258 3
 	call DMove -580 60 261 3
