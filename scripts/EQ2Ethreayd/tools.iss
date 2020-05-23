@@ -1395,17 +1395,29 @@ function CheckAuraLoc(float X, float Z, float R, string AuraColor)
 
 function GetNodeType(string ActorName)
 {
+	if ${ActorName.Find["Blight Blossom"]}>0
+		return "Quest"
 	if ${ActorName.Find["blooded mushroom"]}>0
 		return "Quest"
 	if ${ActorName.Find["bracket fungus"]}>0
 		return "Quest"
 	if ${ActorName.Find["cargo crate"]}>0
 		return "Quest"
+	if ${ActorName.Find["churnfish"]}>0
+		return "Quest"
 	if ${ActorName.Find["curious ore"]}>0
 		return "Quest"
+	if ${ActorName.Find["Danak"]}>0
+		return "Quest"
+	if ${ActorName.Find["draconic idol"]}>0
+		return "Quest"
 	if ${ActorName.Find["excavated debris"]}>0
+		return "Quest"
+	if ${ActorName.Find["fetidthorn spore"]}>0
 		return "Quest"	
 	if ${ActorName.Find["Glacier Shrub"]}>0
+		return "Quest"
+	if ${ActorName.Find["Growzzat"]}>0
 		return "Quest"
 	if ${ActorName.Find["gnoll supplies"]}>0
 		return "Quest"
@@ -1415,11 +1427,17 @@ function GetNodeType(string ActorName)
 		return "Quest"
 	if ${ActorName.Find["Klixie"]}>0
 		return "Quest"
+	if ${ActorName.Find["Mudcorpse"]}>0
+		return "Quest"
 	if ${ActorName.Find["owlbear egg"]}>0
+		return "Quest"
+	if ${ActorName.Find["pipe reed"]}>0
 		return "Quest"
 	if ${ActorName.Find["Sul Sphere"]}>0
 		return "Quest"
 	if ${ActorName.Find["tortoise egg"]}>0
+		return "Quest"
+	if ${ActorName.Find["Teren"]}>0
 		return "Quest"
 	if ${ActorName.Find["Trythec"]}>0
 		return "Quest"
@@ -1428,6 +1446,8 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["brambles"]}>0
 		return "Bush"
 	if ${ActorName.Find[" briar"]}>0
+		return "Bush"
+	if ${ActorName.Find["brush"]}>0
 		return "Bush"
 	if ${ActorName.Find["bush"]}>0
 		return "Bush"
@@ -1477,6 +1497,8 @@ function GetNodeType(string ActorName)
 		return "Stone"
 	if ${ActorName.Find["cluster"]}>0
 		return "Stone"
+	if ${ActorName.Find["geode"]}>0
+		return "Stone"
 	if ${ActorName.Find["lode"]}>0
 		return "Stone"
 	if ${ActorName.Find["mass"]}>0
@@ -1497,15 +1519,20 @@ function GetNodeType(string ActorName)
 		return "Root"
 	if (${ActorName.Equal["!"]} || ${ActorName.Equal["?"]})
 		return "Shiny"
+	if ${ActorName.Find["page"]}>0
+		return "Shiny"
 	if ${ActorName.Find["arbor"]}>0
 		return "Wood"
 	if ${ActorName.Find["wood"]}>0
 		return "Wood"
 	if ${ActorName.Find["branch"]}>0
 		return "Wood"
+	if ${ActorName.Find["timber"]}>0
+		return "Wood"
 	if ${ActorName.Find["Tizmak"]}>0
 		return "Quest"
-	
+	if !${ActorName.Equal["NULL"]}
+		return "Buggy"
 	else
 		return "Unknown"
 }
