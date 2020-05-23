@@ -109,6 +109,11 @@ function main(bool UseOgreIC)
 		call goFordelMidst
 		wait 120
 	}
+	else
+	{
+		call DMove 110 63 -640 3 30 TRUE TRUE
+		call DMove 123 65 -624 3 30 TRUE TRUE
+	}
 	do
 	{
 		if (${UseOgreIC})

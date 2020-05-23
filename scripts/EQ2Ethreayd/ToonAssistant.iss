@@ -75,10 +75,10 @@ function main(string questname)
 			press Tab
 			wait 10
 		}
-		if (${CombatDuration}>120 && !${Global_DONOTATTACK})
+		if (${CombatDuration}>30 && !${Global_DONOTATTACK})
 		{
 			call FixCombat
-			CombatDuration:Set[0]
+			CombatDuration:Set[25]
 		}
 		
 		call AutoRepair 30

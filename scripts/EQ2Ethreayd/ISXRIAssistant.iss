@@ -506,7 +506,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			press Tab
 			wait 300
 		}
-		if (${Me.X} < -170 && ${Me.X} > -190 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < 230 && ${Me.Z} > 210)
+		if (${Me.X} < -160 && ${Me.X} > -190 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < 235 && ${Me.Z} > 210)
 		{
 			if (!${RI_Var_Bool_Paused})
 			{
@@ -539,7 +539,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			}
 			
 			echo fixing Seru stucked
-			call DMove -241 88 -198 3
+			call DMove -241 88 -198 3 30 TRUE TRUE
 			
 			if (${RI_Var_Bool_Paused})
 			{
@@ -555,6 +555,17 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			
 			echo fixing Seru stucked
 			call DMove -307 88 -114 3 30 TRUE
+			call ISXRIResume
+
+		}
+		if (${Me.X} < -170 && ${Me.X} > -195 &&  ${Me.Y} < 100 && ${Me.Y} > 75 && ${Me.Z} < -220 && ${Me.Z} > -240)
+		{
+			call ISXRIPause
+			
+			echo fixing Seru stucked
+			call DMove -224 88 -207 3 30 TRUE TRUE
+			call DMove -197 88 -200 3 30 TRUE TRUE
+			call DMove -166 88 -226 3 30 TRUE TRUE
 			call ISXRIResume
 
 		}
