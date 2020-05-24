@@ -5187,6 +5187,9 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 1446 Salvage
 	call ActionOnPrimaryAttributeValue 2650 Salvage
 	call ActionOnPrimaryAttributeValue 2706 Salvage
+	call TransmuteAll "Planar Transmutation Stone"
+	call TransmuteAll "Celestial Transmutation Stone"
+	call TransmuteAll "Veilwalker's Transmutation Stone"
 }
 
 function ListActors(float MaxDistance, bool Detail)
