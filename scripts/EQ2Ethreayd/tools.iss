@@ -1509,6 +1509,8 @@ function GetNodeType(string ActorName)
 		return "Stone"
 	if ${ActorName.Find["stone"]}>0
 		return "Stone"
+	if ${ActorName.Find["ryjesium"]}>0
+		return "Stone"	
 	if ${ActorName.Find[" foot"]}>0
 		return "Root"
 	if ${ActorName.Find["root"]}>0
@@ -1531,7 +1533,7 @@ function GetNodeType(string ActorName)
 		return "Wood"
 	if ${ActorName.Find["Tizmak"]}>0
 		return "Quest"
-	if !${ActorName.Equal["NULL"]}
+	if ${ActorName.Equal["NULL"]}
 		return "Buggy"
 	else
 		return "Unknown"
@@ -3501,7 +3503,7 @@ function IsPresent(string ActorName, int Distance, bool Exact, bool ReturnName)
 	if (${Count}>0)
 	{
 		if (${ReturnName})
-			return ${FullActorName}
+			return "${FullActorName}"
 		else
 			return TRUE
 	}
@@ -5207,7 +5209,6 @@ function ListActors(float MaxDistance, bool Detail)
         while ${ActorIterator:Next(exists)}
     }
 }
-
 objectdef WikiaQuest
 {
 	variable string OriginalName=""
@@ -5222,13 +5223,18 @@ objectdef WikiaQuest
 	variable string PartOf=""
 	variable string PrecededBy=""
 	variable string FollowedBy=""
+	variable string StartAction=""
+	variable string StartActor=""
+	variable jsonvalue QuestSteps
 	variable int QuestID
 	variable int QuestLevel
 	variable bool RequestDone
-	variable bool Status
+	variable bool QuestStatus
+	variable bool QuestDone
 	variable webrequest QD
 	variable webrequest QI
 	
+	; This method is called automatically, hence I put it here first
 	method Initialize(string newName)
 	{
 		if ${newName.Length}>0
@@ -5236,6 +5242,38 @@ objectdef WikiaQuest
 			OriginalName:Set["${newName}"]
 			This:SetName["${newName}"]
 		}
+	}
+	
+	; Other Public Methods are here alphabetically
+	method Describe()
+	{
+		This:UpdateStatus
+		echo Quest "${OriginalName}" [${QuestID}]
+		echo -------------------- FROM EQ2 WIKIA WITH LOVE --------------------
+		echo Category : ${JournalCategory}
+		echo Difficulty : ${JournalDifficulty}
+		echo Level : ${QuestLevel}
+		echo Starting Zone : ${StartingZone}
+		echo How to Start : ${HowtoStart}
+		echo Start Location : ${StartLoc}
+		echo Part of ${PartOf} sigline
+		echo TBD after ${PrecededBy}
+		echo Required by ${FollowedBy}
+		echo Already done : ${QuestDone}
+		echo Ongoing : ${QuestStatus}
+	}
+	method DescribeDetails()
+	{
+		variable jsonvalue QDResults=${QD.Result.Get["jsonResult"].Get["sections"]}
+		
+		This:Describe
+		echo ------------------------ QUEST DETAILS ---------------------------
+		echo ${QuestSteps}
+	}
+	method FindStartAction()
+	{
+		if ${HowtoStart.Find["Talk to"]} > 0
+			StartAction:Set["Talk"]
 	}
 	method Lookup()
 	{
@@ -5288,16 +5326,15 @@ objectdef WikiaQuest
 		RequestDone:Set[TRUE]
 		This:Populate
 	}
-	method SetName(string newName)
-    {
-        QuestName:Set["${newName.Replace[" ","_"]}"]
-		;QueueCommand call WikiaLookup "${QuestName}"
-		This:Lookup
-    }
+	method NextQuest()
+	{
+		return ${FollowedBy}
+	}
 	method Populate()
 	{
-		variable jsonvalue QDResults=${QD.Result.Get["jsonResult"]}
+		variable jsonvalue QDResults=${QD.Result.Get["jsonResult"].Get["sections"]}
 		variable jsonvalue QIResults=${QI.Result.Get["jsonResult"]}
+		variable int i=1
 		
 		JournalCategory:Set["${QIResults.Get["Journal Category"]}"]
 		JournalDifficulty:Set["${QIResults.Get["Journal Difficulty"]}"]
@@ -5309,31 +5346,42 @@ objectdef WikiaQuest
 		PartOf:Set["${QIResults.Get["part of"]}"]
 		PrecededBy:Set["${QIResults.Get["Preceded by"]}"]
 		FollowedBy:Set["${QIResults.Get["Followed by"]}"]
-	}
-	method NextQuest()
-	{
-		return ${FollowedBy}
+		
+		do
+		{
+			if (${QDResults[${i}].Get["title"].Equal["Steps"]})
+			{
+				QuestSteps:SetValue["${QDResults[${i}]~}"]
+				break
+			}
+			else
+				i:Inc
+		}
+		while (${i}<20)	
+		This:UpdateStatus
+		This:FindStartAction
+		This:UpdateStartActor
 	}
 	method PreviousQuest()
 	{
 		return ${PrecededBy}
 	}
-	method Describe()
+	method SetName(string newName)
+    {
+        QuestName:Set["${newName.Replace[" ","_"]}"]
+		;QueueCommand call WikiaLookup "${QuestName}"
+		This:Lookup
+    }
+	method UpdateStartActor(string ActorName)
 	{
-		This:UpdateStatus
-		echo Quest "${OriginalName}" [${QuestID}]
-		echo -------------------- FROM EQ2 WIKIA WITH LOVE --------------------
-		echo Category : ${JournalCategory}
-		echo Difficulty : ${JournalDifficulty}
-		echo Level : ${QuestLevel}
-		echo Starting Zone : ${StartingZone}
-		echo How to Start : ${HowtoStart}
-		echo Start Location : ${StartLoc}
-		echo Part of ${PartOf} sigline
-		echo TBD after ${PrecededBy}
-		echo Required by ${FollowedBy}
-		echo Ongoing : ${Status}
-		
+		if ${ActorName.Length}>0
+		{
+			StartActor:Set["${ActorName}"]
+		}
+		else
+		{
+			StartActor:Set[${HowtoStart.Replace["(",","].ReplaceSubstring["Talk to",""]}]
+		}
 	}
 	method UpdateStatus()
 	{
@@ -5354,7 +5402,7 @@ objectdef WikiaQuest
 				{
 					if (${It.Value.Name.Equal["${OriginalName}"]})
 					{
-						Status:Set[TRUE]
+						QuestStatus:Set[TRUE]
 						QuestID:Set[${It.Value.ID}]
 						QuestLevel:Set[${It.Value.Level}]
 						QuestCategory:Set["${It.Value.Category}"]
@@ -5362,20 +5410,94 @@ objectdef WikiaQuest
 						break
 					}
 					else
-						Status:Set[FALSE]
+						QuestStatus:Set[FALSE]
 
 				}
 				while ${It:Next(exists)}
 			}
 		}
 		else
-			Status:Set[FALSE]
+			QuestStatus:Set[FALSE]
+			
+		if (${QuestJournalWindow.CompletedQuest["${OriginalName}"](exists)})
+			QuestDone:Set[TRUE]
+		else
+			QuestDone:Set[FALSE]
 	}
 }
-function AutoQuest(string questname)
+function AutoQuest(string questname, bool ForceAlreadyDone, bool DoNotContinue)
 {
 	echo Doing automatically Quest ${questname} !
 	echo I am kidding ! But this will be a great feature !!!
 	variable WikiaQuest WQ="${questname}"
-	WQ:Describe
+	variable int i=3
+	WQ:DescribeDetails
+	if (!${WQ.QuestDone} || ${ForceAlreadyDone})
+	{
+		if (!${WQ.QuestStatus})
+		{
+			
+			echo I must go to ${WQ.StartingZone}
+			call goZone "${WQ.StartingZone}"
+			
+			if (${OgreBotAPI.KWAble})
+				call KannkorRulez ${WQ.StartLoc}
+			else
+				call navwrap ${WQ.StartLoc}
+			echo I must ${WQ.HowtoStart} Action is ${WQ.StartAction} on Actor ${WQ.StartActor}
+			
+			call FindActor ${WQ.HowtoStart}
+			WQ:UpdateStartActor["${Return}"]
+			echo need to ${WQ.StartAction} to ${WQ.StartActor}
+			do
+			{
+				if (${WQ.StartAction.Equal["Talk"]})
+					call Converse "${WQ.StartActor}" ${i}
+				else
+					oc !c -Special ${Me.Name}
+				i:Inc
+				call CheckQuest "${questname}"
+			}
+			while (!${Return} && ${i} < 25) 
+		}
+		echo doing steps : TO BE IMPLEMENTED
+	}
+	else
+	{
+		if (!${DoNotContinue} && ${WQ.FollowedBy(exists)})
+			call AutoQuest "${WQ.FollowedBy}" ${ForceAlreadyDone} ${DoNotContinue}
+	}
+}
+function FindActor(string x1, string x2, string x3, string x4, string x5, string x6, string x7, string x8, string x9)
+{
+	variable int i
+	for ( i:Set[1] ; ${i} <= 9 ; i:Inc )
+	{
+		if (!${x${i}.Equal[""]})
+			call IsPresent "${x${i}}" 10 FALSE TRUE
+		if (!${Return.Equal[FALSE]})
+			return ${Return}
+	}
+}
+function DoEpic(weakref Quests)
+{
+	variable int i
+	for ( i:Set[1] ; ${i} <= ${Quests.Used} ; i:Inc )
+	{
+		call CheckQuest "${Quests[${i}]}"
+		if (${Return})
+		{
+			call AutoQuest "${Quests[${i}]}"
+			break
+		}
+		else
+		{
+			call CheckQuestDone "${Quests[${i}]}"
+			if (!${Return})
+			{
+				call AutoQuest "${Quests[${i}]}"
+				break
+			}
+		}
+	}
 }
