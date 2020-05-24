@@ -345,7 +345,7 @@ function AcceptReward_(bool AcceptAll)
 function AcceptReward(bool OnlyMe)
 {
 	if (${OnlyMe})
-		oc !c {Me.Name} -AcceptReward
+		oc !c -AcceptReward ${Me.Name}
 	else
 		oc !c -AcceptReward
 }
@@ -3896,7 +3896,34 @@ function ScriptAction(string ScriptName, string Action)
 	if ${Script[${ScriptName}](exists)}
 		Script[${ScriptName}]:${Action}
 }
-
+function PauseIC()
+{
+	variable string sQN
+	call strip_IC "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+	{
+		Script[${sQN}]:Pause
+		oc !c -Pause
+		echo Clearing of zone "${Zone.Name}" is paused (${sQN})
+	}
+	else
+		echo can't find IC running iss file...
+}
+function ResumeIC()
+{
+	variable string sQN
+	call strip_IC "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+	{
+		Script[${sQN}]:Resume
+		oc !c -Resume
+		echo Clearing of zone "${Zone.Name}" is resumed (${sQN})
+	}
+	else
+		echo can't find IC running iss file...
+}
 function PauseZone(bool Catch22)
 {
 	variable string sQN
@@ -3911,6 +3938,7 @@ function PauseZone(bool Catch22)
 	press -release MOVEFORWARD
 	echo Clearing of zone "${Zone.Name}" is paused (${sQN})
 }
+
 function PetitPas(float X, float Y, float Z, float Precision, bool Modified)
 {
 	variable float Ax

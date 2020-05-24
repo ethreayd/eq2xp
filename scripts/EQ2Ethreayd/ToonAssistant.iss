@@ -51,16 +51,16 @@ function main(string questname)
 			if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
 				run EQ2Ethreayd/OgreICAssistant
 			call IsPublicZone
-			echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
+			echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
 			if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
 			{
 				call PotPotion
 				wait 50
 			}
 		}
-		call IsPublicZone
-		if (${Me.IsIdle} && ${Return})
-			call CleanBags
+		;call IsPublicZone
+		;if (${Me.IsIdle} && ${Return})
+		;	call CleanBags
 		if (${Me.InCombatMode})
 		{
 			CombatDuration:Inc

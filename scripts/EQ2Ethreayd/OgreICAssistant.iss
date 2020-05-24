@@ -99,7 +99,7 @@ function MainChecks()
 		oc !c -revive
 		oc !c -pause
 		wait 400
-		relay all run safescript AutoRepair 50
+		relay all run EQ2Ethreayd/safescript AutoRepair 50
 		wait 50
 		oc !c -repair
 		oc !c -resume
