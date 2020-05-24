@@ -157,7 +157,7 @@ function InHeroicZone()
 	call MainChecks
 	if (${Ogre_Instance_Controller.Status.Equal["Idle_NotRunning"]} && !${Me.InCombat})
 	{
-		I got into the ${Ogre_Instance_Controller.Status} condition !
+		echo I got into the ${Ogre_Instance_Controller.Status} condition !
 		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",FALSE]
 		oc !c -letsgo
 		oc !c -evac
