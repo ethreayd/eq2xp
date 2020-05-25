@@ -283,4 +283,48 @@ function TheHarvest(string QuestName, int Timeout)
 {
 
 }
+function TheHeroics_FM()
+{
+	variable int i
+	variable int Counter
+	variable bool GoHunt
+	variable bool Grouped
 
+	echo Launching The Heroics of Fordel Midst
+	
+	call goFordelMidst
+	wait 50
+	call waitfor_Zoning
+	wait 50
+	if (${Me.GroupCount}<6)
+	{
+		echo This is not a full Group. ABORTING 
+		return FALSE
+	}	
+	Grouped:Set[TRUE]
+	call GroupToFlag TRUE
+	ogre ic
+	wait 50
+	oc !c -ZoneResetAll
+    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Heroic"]
+    Obj_FileExplorer:Scan
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
+	wait 50
+	oc !c -LoadProfile Bol_Heroic
+	wait 50
+	relay all run EQ2Ethreayd/wrap EquipHeroic
+	wait 20
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+	wait 50
+	while (${Script["Buffer:OgreInstanceController"](exists)})
+	{
+		wait 10
+	}
+	echo The Heroics of Fordel Midst has ended
+	return TRUE
+}

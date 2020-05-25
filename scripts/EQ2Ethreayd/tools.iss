@@ -5069,7 +5069,7 @@ function WeeklyQuest(string QNw, string SNw)
 		call strip_QN "${QNw}"
 		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}"
 		wait 10
-		relay all run endscript "${SNw}" 
+		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
 }
 function DailyQuest()
@@ -5122,13 +5122,28 @@ function HelloWorld()
 }
 function GroupToFlag(bool UseToonAssistant)
 {
+	variable int Counter
+	variable int i
+	
 	Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
 	wait 50
 	echo All group should now come here
-	oc !c -UseFlag
-	echo waiting 30s for the group to zone
-	wait 300
-	call waitfor_Group
+	echo waiting for the group to zone
+	do
+	{
+		oc !c -UseFlag
+		Counter:Set[0]
+		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
+		{
+			echo  ${i}:${Me.Group[${i}].Distance}
+			if (!${Me.Group[${i}].Distance(exists)})
+				Counter:Inc
+		}
+		wait 50
+		echo in waiting for group ready loop with ${Counter} missing member
+	}
+	while (${Counter}>0)
+
 	if (${UseToonAssistant})
 	{
 		wait 50
