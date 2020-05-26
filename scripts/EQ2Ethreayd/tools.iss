@@ -5074,10 +5074,12 @@ function WeeklyQuest(string QNw, string SNw)
 }
 function KillIS(int lastis)
 {
+	variable int i
 	for ( i:Set[2] ; ${i} <= ${lastis} ; i:Inc )
-		{
-			relay is${i} run killall
-		}
+	{
+		echo relay is${i} run killall
+		relay is${i} run killall
+	}
 }
 function DailyQuest()
 {

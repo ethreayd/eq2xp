@@ -29,8 +29,12 @@ function main(string QNx, string SNx)
 	oc !c -Repair
 	wait 50
 	oc !c -GetFlag
-	echo waiting for all toons to log in
-	wait 300
+	call GroupDistance
+	if (${Return}>10)
+	{
+		echo waiting for all toons to log in
+		wait 300
+	}
 	oc !c -Disband
 	wait 20
 	call ForceGroup
