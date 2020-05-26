@@ -5072,6 +5072,13 @@ function WeeklyQuest(string QNw, string SNw)
 		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
 }
+function KillIS(int lastis)
+{
+	for ( i:Set[2] ; ${i} <= ${lastis} ; i:Inc )
+		{
+			relay is${i} run killall
+		}
+}
 function DailyQuest()
 {
 	echo I am on main and must do daily ogre ic Grouped Quest
