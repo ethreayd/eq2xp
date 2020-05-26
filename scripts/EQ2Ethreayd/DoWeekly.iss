@@ -20,31 +20,21 @@
 function main(string QNx, string SNx)
 {
 	variable bool Grouped
-	wait 100
-	relay all run EQ2Ethreayd/endsafe Churns
-	relay all run EQ2Ethreayd/endsafe BoLLoop
+	wait 10
 	oc !c -Revive
 	wait 100
-	relay all run EQ2Ethreayd/endsafe Churns
-	relay all run EQ2Ethreayd/endsafe BoLLoop
-	wait 10
-	relay all run EQ2Ethreayd/endsafe wrap
-	wait 10
-	relay all run EQ2Ethreayd/endsafe BoLLoop
 	relay all run wrap goto_GH
-	
 	call waitfor_Zoning
-	
-	relay all run EQ2Ethreayd/endsafe Churns
-	wait 100
+	wait 10
 	oc !c -Repair
-	wait 100
-	relay all run EQ2Ethreayd/endsafe Churns
-
+	wait 50
 	oc !c -GetFlag
-	echo waiting for all toons to log in
-	wait 300
-	relay all run EQ2Ethreayd/endsafe Churns
+	call GroupDistance
+	if (${Return}>10)
+	{
+		echo waiting for all toons to log in
+		wait 300
+	}
 	oc !c -Disband
 	wait 20
 	call ForceGroup
