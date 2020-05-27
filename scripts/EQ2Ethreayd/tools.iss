@@ -5067,12 +5067,13 @@ function WeeklyQuest(string QNw, string SNw)
 	if (${Return})
 	{
 		echo I am on main and must do "${QNw}" Grouped Quest
-		relay is7 exit
 		call strip_QN "${QNw}"
 		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}"
 		wait 10
 		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
+	else
+		relay all run EQ2Ethreayd/Churns
 }
 function KillIS(int lastis)
 {
