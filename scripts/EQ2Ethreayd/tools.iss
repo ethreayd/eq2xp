@@ -21,7 +21,18 @@
 
 ;BoolPoll1 must be used to see if anyone is at TRUE, only one TRUE will put that global variable at TRUE
 variable(globalkeep) bool BoolPoll1
+variable(globalkeep) int PollCounter
+variable(globalkeep) int ISNotLogged
 variable(global) bool NoNavWrap 
+
+function Check_ISLogged()
+{
+	if (${Zone.Name.Equal[LoginScene]})
+		ISNotLogged:Set[${Session.Right[1]}]
+	else
+		ISNotLogged:Set[0]
+	return ${ISNotLogged}
+}
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -1333,6 +1344,30 @@ function CastImmunity(string ToonName, int Health, int Pause)
 		}
 	}
 }
+function AutoLogin(string ScriptName, string T1, string T2,string T3, string T4,string T5, string T6)
+{
+	variable int i=0
+	variable index:string ToonName
+	;echo ZoneName is ${Zone.Name}
+	for ( i:Set[1] ; ${i} <= 6 ; i:Inc )
+	{
+		if ${T${i}(exists)}
+		{
+			ToonName:Insert["${T${i}}"]
+			relay is${i} ogre -noredirect ${ToonName[${i}]}
+			wait 100
+		}
+	}
+	if (${ScriptName(exists)})
+	{
+		for ( i:Set[1] ; ${i} <= ${ToonName.Used}; i:Inc )
+		{
+			relay is${i} run ${ScriptName}
+			wait 100
+		}
+	}
+}
+
 function ChargeOverseer()
 {
 	variable int i
@@ -1853,6 +1888,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 	if (${ForAll})
 	{
 		;echo doing CheckQuest ForAll
+		PollCounter:Set[0]
 		relay all BoolPoll1:Set[FALSE]
 		wait 20
 		if (!${Script["wrap"](exists)})
@@ -1865,6 +1901,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 			else
 			{
 				echo CheckQuest use wrap or wrap2 as function relay wrapper - Do not use them in parallel
+				PollCounter:Inc
 				return FALSE
 			}
 		}
@@ -1876,6 +1913,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 		if (${NumQuests} < 1)
 		{
 			echo "No active quests found."
+			PollCounter:Inc
 			return FALSE
 		}
 		QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
@@ -1891,9 +1929,13 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 					{
 		;				echo already on ${questname} (${Approximate} : it's ${It.Value.Name})
 						if (${ForAll})
+						{
 							relay all BoolPoll1:Set[TRUE]
+						}
 						else
+						{
 							BoolPoll1:Set[TRUE]
+						}
 					}
 				}
 				else
@@ -1914,7 +1956,8 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 	wait 100
 	
 	if (${BoolPoll1} && ${ForAll})
-		eq2execute g I need to do ${questname} today :p
+		eq2execute g I need to do ${questname} today (${PollCounter}) :p
+	PollCounter:Inc
 	return ${BoolPoll1}
 }
 function CheckQuestDone(string questname)
@@ -5062,8 +5105,13 @@ function IsNamedEngaged(string ActorName, bool Exact)
 function WeeklyQuest(string QNw, string SNw)
 {
 	relay all BoolPoll1:Set[FALSE]
+	PollCounter:Set[0]
 	call CheckQuest "${QNw}" TRUE
-	wait 100
+	while (${PollCounter}<6)
+	{
+		wait 10
+		echo Waiting for PollCounter at ${PollCounter}/6
+	}	
 	if (${Return})
 	{
 		echo I am on main and must do "${QNw}" Grouped Quest
@@ -5073,7 +5121,7 @@ function WeeklyQuest(string QNw, string SNw)
 		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
 	else
-		relay all run EQ2Ethreayd/Churns
+		relay all run "${SNw}"
 }
 function KillIS(int lastis)
 {
