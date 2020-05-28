@@ -1887,7 +1887,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 	
 	if (${ForAll})
 	{
-		;echo doing CheckQuest ForAll
+		echo doing CheckQuest ForAll
 		PollCounter:Set[0]
 		relay all BoolPoll1:Set[FALSE]
 		wait 20
@@ -1895,25 +1895,28 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 			relay all run EQ2Ethreayd/wrap CheckQuest "${questname}" FALSE
 		else
 		{
-		;	echo wrap already used... trying with wrap2
+			echo wrap already used... trying with wrap2
 			if (!${Script["wrap2"](exists)})
 				relay all run EQ2Ethreayd/wrap2 CheckQuest "${questname}" FALSE
 			else
 			{
 				echo CheckQuest use wrap or wrap2 as function relay wrapper - Do not use them in parallel
-				PollCounter:Inc
+				relay all PollCounter:Inc
+				echo Can't RUN CheckQuest : PollCounter at ${PollCounter}
 				return FALSE
 			}
 		}
 	}
 	else
 	{
+		echo Starting CheckQuest : PollCounter at ${PollCounter}
 		NumQuests:Set[${QuestJournalWindow.NumActiveQuests}]
     
 		if (${NumQuests} < 1)
 		{
 			echo "No active quests found."
-			PollCounter:Inc
+			relay all PollCounter:Inc
+			echo No active Quest in CheckQuest : PollCounter at ${PollCounter}
 			return FALSE
 		}
 		QuestJournalWindow.ActiveQuest["${questname}"]:MakeCurrentActiveQuest
@@ -1928,6 +1931,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 					if (${It.Value.Name.Find["${questname}"]}>0)
 					{
 		;				echo already on ${questname} (${Approximate} : it's ${It.Value.Name})
+						
 						if (${ForAll})
 						{
 							relay all BoolPoll1:Set[TRUE]
@@ -1943,6 +1947,7 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 					if (${It.Value.Name.Equal["${questname}"]})
 					{
 		;				echo already on ${questname}
+						
 						if (${ForAll})
 							relay all BoolPoll1:Set[TRUE]
 						else
@@ -1952,12 +1957,13 @@ function CheckQuest(string questname, bool ForAll, bool Approximate)
 			}
 			while ${It:Next(exists)}
 		}
+		relay all PollCounter:Inc
 	}
 	wait 100
-	
+	echo End of CheckQuest : PollCounter at ${PollCounter}
 	if (${BoolPoll1} && ${ForAll})
 		eq2execute g I need to do ${questname} today (${PollCounter}) :p
-	PollCounter:Inc
+	
 	return ${BoolPoll1}
 }
 function CheckQuestDone(string questname)
@@ -5104,13 +5110,15 @@ function IsNamedEngaged(string ActorName, bool Exact)
 }
 function WeeklyQuest(string QNw, string SNw)
 {
+	variable int Counter=0
 	relay all BoolPoll1:Set[FALSE]
 	PollCounter:Set[0]
 	call CheckQuest "${QNw}" TRUE
-	while (${PollCounter}<6)
+	while (${PollCounter}<6 && ${Counter}<60)
 	{
 		wait 10
-		echo Waiting for PollCounter at ${PollCounter}/6
+		Counter:Inc
+		echo Waiting for PollCounter at ${PollCounter}/6 (${Counter})
 	}	
 	if (${Return})
 	{
@@ -5315,6 +5323,7 @@ function ListActors(float MaxDistance, bool Detail)
         while ${ActorIterator:Next(exists)}
     }
 }
+
 objectdef WikiaQuest
 {
 	variable string OriginalName=""
