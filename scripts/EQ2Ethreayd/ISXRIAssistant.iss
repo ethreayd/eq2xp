@@ -623,6 +623,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 		}
+		
 		wait 10
 	}
 	while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
@@ -669,7 +670,13 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 			echo Resuming RZ
 			RZObj:Resume
 		}
-		
+		if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} < 170 && ${Me.Y} > 190 && ${Me.Z} < 10 && ${Me.Z} > -10)
+		{
+			call ISXRIPause
+			oc !c -Special ${Me.Name}
+			call ClickOn Door
+			call ISXRIResume
+		}
 		if (${Me.InCombatMode} && !${Me.Target.Distance(exists)})
 		{
 			Counter:Inc
