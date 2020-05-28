@@ -113,7 +113,7 @@ function main(string questname)
 		if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 		{
 			echo call reboot because I am stuck in ${Zone.Name} if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
-			run EQ2Ethreayd/wrap RebootLoop
+			call RebootLoop
 		}
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]})
 		{
@@ -130,7 +130,7 @@ function main(string questname)
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
-			run EQ2Ethreayd/wrap RebootLoop
+			call RebootLoop
 		}	
 		wait 300
 	}
@@ -248,9 +248,10 @@ function MainChecks()
 	if (!${Return})
 	{
 		call CheckIfRepairIsNeeded 10
+		
 		if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
 		{
-			echo run EQ2Ethreayd/wrap RebootLoop if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
+			echo call RebootLoop if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)}) - ${Me.Equipment["Primary"].ToItemInfo.Condition}
 			call RebootLoop
 		}
 	}
@@ -269,9 +270,9 @@ function MainChecks()
 	}
 	if (${ZoneTime} > 600)
 	{
-		echo run EQ2Ethreayd/wrap RebootLoop if (${ZoneTime} > 600)
+		echo call RebootLoop if (${ZoneTime} > 600)
 		ZoneTime:Set[0]
-		run EQ2Ethreayd/wrap RebootLoop
+		call RebootLoop
 	}
 	ZoneTime:Inc
 }
@@ -876,7 +877,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 			Counter:Set[0]
 		if (!${Me.InCombatMode} && ${Me.InCombatMode(exists)} && ${Me.X} < -515 && ${Me.X} > -535 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < 20 && ${Me.Z} > 0)
 		{
-			run EQ2Ethreayd/wrap RebootLoop
+			call RebootLoop
 		}
 		if (${Me.InCombatMode} && ${Me.X} < -445 && ${Me.X} > -465 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -90 && ${Me.Z} > -110)
 		{
@@ -1701,7 +1702,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["ve got better things to do"]}>0)
 	{
 		echo Merc gone because of inactivity - Rebooting loop
-		QueueCommand run EQ2Ethreayd/wrap RebootLoop
+		QueueCommand call RebootLoop
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{

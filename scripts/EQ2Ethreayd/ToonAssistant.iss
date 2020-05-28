@@ -36,7 +36,7 @@ function main(string questname)
 	do
 	{
 		call waitfor_Zoning
-		echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
+		;echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
 		if (${Me.Health}<10 && !${Me.IsDead})

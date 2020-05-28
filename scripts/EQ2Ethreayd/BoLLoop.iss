@@ -37,9 +37,11 @@ function main(bool UseOgreIC)
 	ScriptsToRun:Insert["wrap1"]
 	ScriptsToRun:Insert["wrap2"]
 	ScriptsToRun:Insert["wrap"]
+	
+	oc !c -ZoneResetAll ${Me.Name}
+	oc !c -letsgo ${Me.Name}
 	if (${UseOgreIC})
 	{
-		oc !c -letsgo ${Me.Name}
 		ScriptsToRun:Insert["ISXRIAssistant"]
 	}
 	else
@@ -78,6 +80,7 @@ function main(bool UseOgreIC)
 		call UseRepairRobot
 		wait 100
 		oc !c -Repair ${Me.Name}
+		wait 100
 	}
 	
 	call CheckIfRepairIsNeeded 10
@@ -147,6 +150,8 @@ function main(bool UseOgreIC)
 			{
 				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RI.xml"
 				RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RIMovement.xml"
+				oc !c -letsgo ${Me.Name} 
+				oc !c -Revive ${Me.Name}
 				RIMUIObj:Revive[${Me.Name}]
 			}
 			wait 300
@@ -171,18 +176,23 @@ function main(bool UseOgreIC)
 		call CheckIfRepairIsNeeded 50
 		if (${Return})
 		{
+			echo Trying to use Repair Robot
 			call UseRepairRobot
 			wait 100
 			oc !c -Repair ${Me.Name}
+			wait 100
 		}
 		call CheckIfRepairIsNeeded 10
 		if (${Return})
 		{
+			echo --- Need to go to guild to repair gear (${Return})
+			if (${Script["ToonAssistant"}](exists)})
+				endscript ToonAssistant
+			oc !c -letsgo ${Me.Name}
+			
 			if (${UseOgreIC})
 			{
 				ogre end ic
-				oc !c -letsgo ${Me.Name}
-			
 			}
 			else
 			{
@@ -190,13 +200,7 @@ function main(bool UseOgreIC)
 				call RZStop
 			}
 			wait 100
-			echo --- Need to go to guild to repair gear at ${Return}%
-			call goto_GH
-			oc !c -letsgo ${Me.Name}
-			oc !c -Resume ${Me.Name}
-			call GuildH TRUE
-			wait 100
-			call goFordelMidst
+			call RebootLoop BoLLoop
 		}
 		else
 		{
@@ -222,6 +226,12 @@ function main(bool UseOgreIC)
 			{
 				if (!${Script["Buffer:RZ"](exists)})
 				{
+					call IsPresent dungeons
+					if (${Return})
+					{
+						call DMove 110 63 -640 3 30 TRUE TRUE
+						call DMove 123 65 -624 3 30 TRUE TRUE
+					}
 					echo starting RZ
 					RZ
 					wait 30
@@ -242,6 +252,7 @@ function main(bool UseOgreIC)
 		}
 	}
 	while (TRUE)
+	echo BoLLoop has exited its infinite loop properly which should not happen...
 }
 
 	

@@ -145,9 +145,9 @@ function MainChecks()
 	}
 	if (${ZoneTime} > 7200)
 	{
-		echo more than 2 hours in the same zone - rebooting loop (from run EQ2Ethreayd/wrap RebootLoop) 
+		echo more than 2 hours in the same zone - rebooting loop (call RebootLoop from OgreICAssistant) 
 		echo deactivated until I know what to do here
-		;run EQ2Ethreayd/wrap RebootLoop
+		;call RebootLoop
 	}
 }
 function InHeroicZone()

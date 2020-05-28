@@ -1804,6 +1804,7 @@ function CheckIfRepairIsNeeded(int MinCondition)
 		MinCondition:Set[10]
 	call waitfor_Zoning
 	call ReturnEquipmentSlotHealth Primary
+	echo Gear at ${Return}% (min is ${MinCondition})
 	wait 10
 	if (${Return}<${MinCondition})
 		return TRUE
@@ -4169,10 +4170,20 @@ function ResumeZone()
 function ReturnEquipmentSlotHealth(string ItemSlot)
 {
 	variable int ItemHealth=100
+	call waitfor_Zoning
 	
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
-	wait 10
+	waitframe
 	ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	if ${ItemHealth}<1
+	{
+		wait 600
+		call waitfor_Zoning
+		ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+		wait 100
+		ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
+	}	
+	echo checking ${ItemSlot} gear at ${ItemHealth}%
 	return ${ItemHealth}
 }
 function RIRestart(bool IsDead)
