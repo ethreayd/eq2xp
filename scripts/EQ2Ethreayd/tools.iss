@@ -5210,6 +5210,9 @@ function GroupToFlag(bool UseToonAssistant)
 	echo waiting for the group to zone
 	do
 	{
+		relay all press -hold ZOOMOUT
+		wait 25
+		relay all press -release ZOOMOUT
 		oc !c -UseFlag
 		Counter:Set[0]
 		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )

@@ -151,7 +151,7 @@ function getBoLQuests(string version)
 	call goRecusoTor TRUE
 	
 	call 3DNav -644 47 353
-	call DMove -689 45 362 3
+	call navwrap -689 45 362 3
 	call DMove -638 58 258 3
 	call DMove -580 60 261 3
 	call DMove -542 62 261 3
