@@ -1344,7 +1344,7 @@ function CastImmunity(string ToonName, int Health, int Pause)
 		}
 	}
 }
-function AutoLogin(string ScriptName, string T1, string T2,string T3, string T4,string T5, string T6)
+function AutoLogin(string T1, string T2,string T3, string T4,string T5, string T6,string ScriptName)
 {
 	variable int i=0
 	variable index:string ToonName
@@ -1354,16 +1354,17 @@ function AutoLogin(string ScriptName, string T1, string T2,string T3, string T4,
 		if ${T${i}(exists)}
 		{
 			ToonName:Insert["${T${i}}"]
-			relay is${i} ogre -noredirect ${ToonName[${i}]}
+			relay is${i} ogre -noredirect "${ToonName[${i}]}"
 			wait 100
+			;relay is${i} run EQ2Ethreayd/Watchdog "${ToonName[${i}]}"
+			;wait 100
 		}
 	}
 	if (${ScriptName(exists)})
 	{
 		for ( i:Set[1] ; ${i} <= ${ToonName.Used}; i:Inc )
 		{
-			relay is${i} run ${ScriptName}
-			wait 100
+			relay is${i} run "${ScriptName}" "${ToonName[${i}]}"
 		}
 	}
 }
