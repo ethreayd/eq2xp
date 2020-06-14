@@ -15,7 +15,7 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function getCDQuests()
+function GetCDQuests()
 {
 	variable string NPCName
 	if (${Me.Y}<400 || ${Me.Y}>430)
@@ -51,10 +51,12 @@ function getCDQuests()
 			wait 10
 			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
 			wait 10
+			call MoveCloseTo "Vazgron the Loremonger"
 			target "Vazgron the Loremonger"
 			eq2execute hail
 			wait 10
 			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
 			target "a Planar Chronicler Vol. 2"
 			call MoveCloseTo "a Planar Chronicler Vol. 2"
 			eq2execute hail

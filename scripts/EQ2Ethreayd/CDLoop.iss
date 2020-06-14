@@ -52,7 +52,7 @@ function main()
 			wait 400
 			call goto_GH
 			call GuildH
-			call getQuests
+			call GetCDQuests
 		}
 	}
 	while (TRUE)

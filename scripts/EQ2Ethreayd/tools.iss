@@ -1432,6 +1432,10 @@ function GetNodeType(string ActorName)
 {
 	if ${ActorName.Find["Blight Blossom"]}>0
 		return "Quest"
+	if ${ActorName.Find["blightbloom blossom"]}>0
+		return "Quest"
+	if ${ActorName.Find["kaboritic tephra"]}>0
+		return "Quest"
 	if ${ActorName.Find["blooded mushroom"]}>0
 		return "Quest"
 	if ${ActorName.Find["bracket fungus"]}>0
@@ -1449,7 +1453,9 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["excavated debris"]}>0
 		return "Quest"
 	if ${ActorName.Find["fetidthorn spore"]}>0
-		return "Quest"	
+		return "Quest"
+	if ${ActorName.Find["frostberry bush"]}>0
+		return "Quest"
 	if ${ActorName.Find["Glacier Shrub"]}>0
 		return "Quest"
 	if ${ActorName.Find["Growzzat"]}>0
@@ -1467,6 +1473,8 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["owlbear egg"]}>0
 		return "Quest"
 	if ${ActorName.Find["pipe reed"]}>0
+		return "Quest"
+	if ${ActorName.Find["Ryjesium Leek"]}>0
 		return "Quest"
 	if ${ActorName.Find["Sul Sphere"]}>0
 		return "Quest"
@@ -1543,6 +1551,10 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["ore"]}>0
 		return "Stone"
 	if ${ActorName.Find["rock"]}>0
+		return "Stone"
+	if ${ActorName.Find["deposit"]}>0
+		return "Stone"
+	if ${ActorName.Find["formation"]}>0
 		return "Stone"
 	if ${ActorName.Find["stone"]}>0
 		return "Stone"
