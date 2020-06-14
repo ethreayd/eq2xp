@@ -197,7 +197,7 @@ function MainChecks()
 	if (!${Return} && !${Me.IsDead})
 		echo must be stunned or stifled
 	wait 20
-	echo ${loc0}
+	;echo ${loc0}
 	call CheckStuck ${loc0}
 	if (${Return} && !${Me.InCombatMode})
 	{
@@ -292,20 +292,11 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 25)
 		{
-			RZObj:Pause
-			if (!${RI_Var_Bool_Paused})
-			{
-				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
-			call DMove -389 88 13 3 30 TRUE
-			if (${RI_Var_Bool_Paused})
-			{
-				echo Resuming ISXRI
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			}
+			call ISXRIPause
+			call DMove -389 88 13 3 30 TRUE TRUE
 			target "an Echelon vigilant"
-			RZObj:Resume
+			call ISXRIResume
+
 		}
 			
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
@@ -373,9 +364,9 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				eq2execute autoattack 2
 				call DMove -358 90 39 3 30 TRUE TRUE 3
 				Counter:Inc
-				echo if (${Counter}>9)
+				echo if (${Counter}>5)
 				wait 50
-				if (${Counter}>9)
+				if (${Counter}>5)
 				{
 					call DMove -388 88 31 3 30 TRUE TRUE 3
 					call DMove -397 88 0 3 30 TRUE TRUE 3
@@ -515,14 +506,14 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
 			
-			call DMove -190 83 221 3
-			call DMove -213 88 202 3
-			call DMove -173 88 196 3
-			call DMove -163 83 239 3
+			call DMove -190 83 221 3 30 TRUE TRUE
+			call DMove -213 88 202 3 30 TRUE TRUE
+			call DMove -173 88 196 3 30 TRUE TRUE
+			call DMove -163 83 239 3 30 TRUE TRUE
 			call AttackClosest
-			call Waitfor_Combat
-			call DMove -233 88 200 3
-			call DMove -172 88 193 3
+			call waitfor_Combat
+			call DMove -233 88 200 3 30 TRUE TRUE
+			call DMove -172 88 193 3 30 TRUE TRUE
 			if (${RI_Var_Bool_Paused})
 			{
 				echo Resuming ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -813,7 +804,7 @@ function Zone_AurelianCoastSambataVillageSolo()
 					call DMove -46 83 -672 3
 					call DMove -78 82 -704 3
 				}
-				call DMove -136 82 -687 3
+				call DMove -136 82 -687 3 30 TRUE TRUE
 				call TanknSpank "Mrokor"
 				call TanknSpank "Purpyron"
 			}

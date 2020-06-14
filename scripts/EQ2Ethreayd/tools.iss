@@ -1344,7 +1344,7 @@ function CastImmunity(string ToonName, int Health, int Pause)
 		}
 	}
 }
-function AutoLogin(string ScriptName, string T1, string T2,string T3, string T4,string T5, string T6)
+function AutoLogin(string T1, string T2,string T3, string T4,string T5, string T6,string ScriptName)
 {
 	variable int i=0
 	variable index:string ToonName
@@ -1354,16 +1354,17 @@ function AutoLogin(string ScriptName, string T1, string T2,string T3, string T4,
 		if ${T${i}(exists)}
 		{
 			ToonName:Insert["${T${i}}"]
-			relay is${i} ogre -noredirect ${ToonName[${i}]}
+			relay is${i} ogre -noredirect "${ToonName[${i}]}"
 			wait 100
+			;relay is${i} run EQ2Ethreayd/Watchdog "${ToonName[${i}]}"
+			;wait 100
 		}
 	}
 	if (${ScriptName(exists)})
 	{
 		for ( i:Set[1] ; ${i} <= ${ToonName.Used}; i:Inc )
 		{
-			relay is${i} run ${ScriptName}
-			wait 100
+			relay is${i} run "${ScriptName}" "${ToonName[${i}]}"
 		}
 	}
 }
@@ -1816,7 +1817,7 @@ function CheckIfRepairIsNeeded(int MinCondition)
 		MinCondition:Set[10]
 	call waitfor_Zoning
 	call ReturnEquipmentSlotHealth Primary
-	echo Gear at ${Return}% (min is ${MinCondition})
+	;echo Gear at ${Return}% (min is ${MinCondition})
 	wait 10
 	if (${Return}<${MinCondition})
 		return TRUE
@@ -3047,6 +3048,11 @@ function goZone(string ZoneName, string Transport)
 		call goAurelianCoast
 		return TRUE
 	}
+	if (${ZoneName.Right[12].Equal["Sanctus Seru"]})
+	{
+		call goSanctusSeru
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -4195,7 +4201,7 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 		wait 100
 		ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	}	
-	echo checking ${ItemSlot} gear at ${ItemHealth}%
+	;echo checking ${ItemSlot} gear at ${ItemHealth}%
 	return ${ItemHealth}
 }
 function RIRestart(bool IsDead)
@@ -4914,6 +4920,10 @@ function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 }
 function waitfor_Combat()
 {
+	call Waitfor_Combat
+}
+function Waitfor_Combat()
+{
 	wait 50
 	do
 	{
@@ -5174,6 +5184,7 @@ function DailyQuest()
 function ForceGroup()
 {
 	variable bool Grouped
+	variable int Counter
 	do
 	{
 		relay all eq2execute merc suspend
@@ -5182,10 +5193,9 @@ function ForceGroup()
 		oc !c -Disband
 		wait 50
 	}
-	while (${Me.GroupCount}>1)
+	while (${Me.GroupCount}>1 && ${Counter}<50)
 	do
 	{
-		relay all ogre
 		wait 200
 		oc !c -Disband
 		wait 100
@@ -5204,6 +5214,7 @@ function ForceGroup()
 		relay is6 ChoiceWindow:DoChoice1
 		wait 100
 		relay all run endscript Churns
+		Counter:Inc
 	}
 	while (!${Grouped})
 }
@@ -5222,6 +5233,9 @@ function GroupToFlag(bool UseToonAssistant)
 	echo waiting for the group to zone
 	do
 	{
+		relay all press -hold ZOOMOUT
+		wait 25
+		relay all press -release ZOOMOUT
 		oc !c -UseFlag
 		Counter:Set[0]
 		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
