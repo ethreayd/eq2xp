@@ -1805,7 +1805,7 @@ function CheckIfRepairIsNeeded(int MinCondition)
 		MinCondition:Set[10]
 	call waitfor_Zoning
 	call ReturnEquipmentSlotHealth Primary
-	echo Gear at ${Return}% (min is ${MinCondition})
+	;echo Gear at ${Return}% (min is ${MinCondition})
 	wait 10
 	if (${Return}<${MinCondition})
 		return TRUE
@@ -3036,6 +3036,11 @@ function goZone(string ZoneName, string Transport)
 		call goAurelianCoast
 		return TRUE
 	}
+	if (${ZoneName.Right[12].Equal["Sanctus Seru"]})
+	{
+		call goSanctusSeru
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -4184,7 +4189,7 @@ function ReturnEquipmentSlotHealth(string ItemSlot)
 		wait 100
 		ItemHealth:Set[${Me.Equipment["${ItemSlot}"].ToItemInfo.Condition}]
 	}	
-	echo checking ${ItemSlot} gear at ${ItemHealth}%
+	;echo checking ${ItemSlot} gear at ${ItemHealth}%
 	return ${ItemHealth}
 }
 function RIRestart(bool IsDead)
@@ -4903,6 +4908,10 @@ function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 }
 function waitfor_Combat()
 {
+	call Waitfor_Combat
+}
+function Waitfor_Combat()
+{
 	wait 50
 	do
 	{
@@ -5163,6 +5172,7 @@ function DailyQuest()
 function ForceGroup()
 {
 	variable bool Grouped
+	variable int Counter
 	do
 	{
 		relay all eq2execute merc suspend
@@ -5171,10 +5181,9 @@ function ForceGroup()
 		oc !c -Disband
 		wait 50
 	}
-	while (${Me.GroupCount}>1)
+	while (${Me.GroupCount}>1 && ${Counter}<50)
 	do
 	{
-		relay all ogre
 		wait 200
 		oc !c -Disband
 		wait 100
@@ -5193,6 +5202,7 @@ function ForceGroup()
 		relay is6 ChoiceWindow:DoChoice1
 		wait 100
 		relay all run endscript Churns
+		Counter:Inc
 	}
 	while (!${Grouped})
 }
