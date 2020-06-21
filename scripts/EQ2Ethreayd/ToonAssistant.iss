@@ -185,6 +185,12 @@ atom HandleAllEvents(string Message)
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
+	echo ChatType : ${ChatType}
+	echo Message : ${Message}
+	echo Speaker : ${Speaker}
+	echo TargetName : ${TargetName}
+	echo SpeakerIsNPC : ${SpeakerIsNPC}
+	echo ChannelName : ${ChannelName}
 	if (${Message.Find["Can I have a rez please"]} > 0)
 	{
 		if (!${Me.InCombatMode})
@@ -204,4 +210,5 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		QueueCommand call AutoRepair
 	}
+	
 }

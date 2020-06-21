@@ -399,6 +399,55 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         while ${ActorIterator:Next(exists)}
     }
 }
+function ActionOnItemTier(string Tier, string Action, bool ExtractFirst)
+{
+	variable index:item Items
+    variable iterator ItemIterator
+	variable int i=0
+	
+	Me:QueryInventory[Items, IsInventoryContainer]
+	Items:GetIterator[ItemIterator]
+	echo I will ${Action} everything that has a ${Tier} Tier
+	if ${ItemIterator:First(exists)}
+	{
+		echo found some stuff in my bags
+		do
+		{
+			
+			for ( i:Set[0] ; ${i} <  ${ItemIterator.Value.NumSlots} ; i:Inc )
+			{
+				echo ${i} <  ${ItemIterator.Value.NumSlots} (looking into ${ItemIterator.Value.Name} bag) '${ItemIterator.Value.ToItemInfo.Type}'
+				if (${ItemIterator.Value.ItemInSlot[${i}](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Tier.Equal[${Tier}]} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Type.Equal["Armor"]})
+				{
+					echo ${ItemIterator.Value.ItemInSlot[${i}].Name} ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Tier}
+					if (${ExtractFirst})
+					{
+						echo trying extract essence on ${ItemIterator.Value.ItemInSlot[${i}].Name} first (I should optimize that to only do it for primary, secondary or ranged items)
+						Me.Ability[id, 406528868]:Use
+						wait 10
+						do
+						{
+							waitframe
+						}
+						while ${Me.CastingSpell}
+						echo Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:Salvage
+						wait 5
+					}	
+					call UseAbility ${Action}
+					;wait 10
+					do
+					{
+						waitframe
+					}
+					while ${Me.CastingSpell}
+					echo Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:${Action}
+					;wait 10
+				}
+			}		
+		}	
+		while ${ItemIterator:Next(exists)}
+	}	
+}
 function ActionOnPrimaryAttributeValue(int Value, string Action, bool ExtractFirst)
 {
 	variable index:item Items
@@ -5316,10 +5365,13 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 897 Salvage
 	call ActionOnPrimaryAttributeValue 996 Salvage
 	call ActionOnPrimaryAttributeValue 1040 Salvage
+	call ActionOnPrimaryAttributeValue 1062 Salvage
 	call ActionOnPrimaryAttributeValue 1142 Salvage
 	call ActionOnPrimaryAttributeValue 1195 Salvage
 	call ActionOnPrimaryAttributeValue 1248 Salvage
 	call ActionOnPrimaryAttributeValue 1325 Salvage
+	call ActionOnPrimaryAttributeValue 1353 Salvage
+	call ActionOnPrimaryAttributeValue 1381 Salvage
 	call ActionOnPrimaryAttributeValue 1446 Salvage
 	call ActionOnPrimaryAttributeValue 2650 Salvage
 	call ActionOnPrimaryAttributeValue 2706 Salvage
