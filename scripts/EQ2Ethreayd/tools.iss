@@ -3090,6 +3090,11 @@ function goZone(string ZoneName, string Transport)
 		call goSanctusSeru
 		return TRUE
 	}
+	if (${ZoneName.Equal["Wracklands"]})
+	{
+		call goWracklands
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -4313,17 +4318,27 @@ function RunInstance()
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-function RunICZone(bool Heroic)
+
+function EndICZone()
 {
 	variable string sQN
 	
-	call strip_IC "${Zone.Name}" TRUE
+	call strip_IC "${Zone.Name}"
+	sQN:Set[${Return}]
+	echo ending "${Zone.Name}" (${sQN})
+	end "${sQN}"
+}
+function RunICZone()
+{
+	variable string sQN
+	
+	call strip_IC "${Zone.Name}"
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" (${sQN}) Now !
-	if (${Heroic})
-		call OgreICRun "ICEthreayd/Blood_of_Luclin/Heroic" "${sQN}.iss"
+	if (${sQN.Right[6].Equal["Heroic"]})
+		run "EQ2Ethreayd/IC/Blood_of_Luclin/Heroic/${sQN}.iss"
 	else
-		call OgreICRun "ICEthreayd/Blood_of_Luclin/Solo" "${sQN}.iss"
+		run "EQ2Ethreayd/IC/Blood_of_Luclin/Solo/${sQN}.iss"
 }
 function RZStop()
 {
@@ -5323,6 +5338,48 @@ function PotPotion()
 {
 	Me.Inventory[Query, Name =- "Elixir of Intellect"]:Use
 }
+function CheckIfLeader(string ActorName)
+{
+    variable int GroupCounter = 1
+    variable int NumChildren
+    variable string GMName
+    variable string GMType
+    variable string RBGAColor
+    
+    ; Thanks to Amadeus documentation that I have adapted to my need : https://forge.isxgames.com/projects/isxeq2/knowledgebase/articles/19
+    if (${Me.Name.Equal[${ActorName}]} && ${Me.IsGroupLeader})
+        return TRUE
+       
+    do
+    {
+        ; If the MemberInfo page doesn't have 8 children, then it's not valid (i.e., there is no group member in this slot or the structure of the file has changed.)
+        NumChildren:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].NumChildren}]
+        if (${NumChildren} < 8)
+            continue
+        
+        ; Sanity Check (if this fails, then the structure of the xml file has changed)
+        if (!${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember1.MemberInfoPage.MemberInfo].ChildType[2].Equal["Text"]})
+        {
+            echo "CRITICAL ERROR - the eq2ui_mainhud_groupmembers.xml file must have changed."
+            return
+        }
+        
+        ; We should ignore mercenaries
+        GMType:Set[${Me.Group[${GroupCounter}].Type}]
+        if (${GMType.Equal["Mercenary"]})
+            continue
+            
+        GMName:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].Child[Text,2].GetProperty[Text]}]
+        RBGAColor:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].Child[Text,2].GetProperty[TextColor].Right[6]}]
+        
+        ; if the TexTColor is ffff (bright yellow) or 7f7f (faded yellow or olive) then the player is the group leader
+        if ((${RBGAColor.Equal["ffff00"]} || ${RBGAColor.Equal["7f7f00"]}) && ${GMName.Equal[${ActorName}]}) 
+            return TRUE
+    }
+    while ${GroupCounter:Inc} <= 5
+	return FALSE
+}
+
 function CheckIfMaxAdorning()
 {
 	if (${OgreBotAPI.SpewStat[currentadorning]}<${OgreBotAPI.SpewStat[maxadorning]})

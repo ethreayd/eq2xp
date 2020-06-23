@@ -286,6 +286,27 @@ function goStanleyParnem()
 	}
 	call MoveCloseTo "Stanley Parnem"
 }	
+function goWracklands()
+{
+	if (${Zone.Name.Left[10].Equal["Wracklands"]})
+		return
+	else
+	{
+		call goto_GH
+		call goZone "The Blinding"
+		call navwrap -275 219 -825
+		call DMove -285 218 -900 3
+		face -290 -920
+		press -hold MOVEFORWARD
+		wait 30
+		press -release MOVEFORWARD
+	}
+}
+function goSsraeshzaPortal()
+{
+	call goWracklands
+	call navwrap 724 77 679
+}
 
 function goSanctusSeru()
 {

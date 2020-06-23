@@ -35,7 +35,9 @@ function main(string questname)
 	}
 	do
 	{
+		ExecuteQueued
 		call waitfor_Zoning
+		
 		;echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
@@ -43,19 +45,22 @@ function main(string questname)
 			eq2execute gsay I really need healing now !
 		if (${Me.IsDead})
 			eq2execute gsay Can I have a rez please ?
-		if (${Solo})
-			call UsePotions FALSE TRUE
-		else
+		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 		{
-			echo not in Solo instance --> Heroic
-			if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
-				run EQ2Ethreayd/OgreICAssistant
-			call IsPublicZone
-			echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
-			if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
+			if (${Solo})
+				call UsePotions FALSE TRUE
+			else
 			{
-				call PotPotion
-				wait 50
+				echo not in Solo instance --> Heroic
+				if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
+					run EQ2Ethreayd/OgreICAssistant
+				call IsPublicZone
+				echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
+				if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
+				{
+					call PotPotion
+					wait 50
+				}
 			}
 		}
 		;call IsPublicZone
@@ -185,12 +190,15 @@ atom HandleAllEvents(string Message)
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)
 {
-	echo ChatType : ${ChatType}
-	echo Message : ${Message}
-	echo Speaker : ${Speaker}
-	echo TargetName : ${TargetName}
-	echo SpeakerIsNPC : ${SpeakerIsNPC}
-	echo ChannelName : ${ChannelName}
+	;echo ChatType : ${ChatType}
+	;echo Message : ${Message}
+	;echo Speaker : ${Speaker}
+	;echo TargetName : ${TargetName}
+	;echo SpeakerIsNPC : ${SpeakerIsNPC}
+	;echo ChannelName : ${ChannelName}
+	call CheckIfLeader "${Speaker}"
+	if (${Return} && ${Me.Name.Equal["${TargetName}"]} && ${Message.Left[7].Equal["execute"]})
+		QueueCommand ${Message.Right[${Math.Calc64[${Message.Length}-8]}]}
 	if (${Message.Find["Can I have a rez please"]} > 0)
 	{
 		if (!${Me.InCombatMode})

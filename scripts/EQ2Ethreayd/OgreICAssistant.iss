@@ -21,6 +21,7 @@ variable(script) int SuperStucky
 variable(script) bool CantSeeTarget
 variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
+variable(script) bool GiveUp
 
 function main(string questname)
 {
@@ -67,9 +68,9 @@ function MainChecks()
 	}
 	if (${ScriptIdleTime}>60 && ${Me.IsDead})
 	{
-		eq2execute merc suspend
-		wait 10
-		ChoiceWindow:DoChoice1
+		end Buffer:OgreInstanceController
+		end ToonAssistant
+		end OgreICAssistant
 	}
 
 	if (${Me.IsDead} && !${Me.Grouped})
@@ -99,7 +100,7 @@ function MainChecks()
 		oc !c -revive
 		oc !c -pause
 		wait 400
-		relay all run EQ2Ethreayd/safescript AutoRepair 50
+		call AutoRepair 90
 		wait 50
 		oc !c -repair
 		oc !c -resume
@@ -162,11 +163,19 @@ function InHeroicZone()
 		oc !c -letsgo
 		oc !c -evac
 		oc !c -revive
-		relay all run EQ2Ethreayd/safescript AutoRepair 50
+		call AutoRepair 90
 		wait 50
 		oc !c -repair
 		wait 100
-		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		if (!${GiveUp})
+			Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		else
+		{
+			oc !c -Zone
+			wait 600
+			GiveUp:Set[FALSE]
+			Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		}
 	}
 }
 atom HandleAllEvents(string Message)
