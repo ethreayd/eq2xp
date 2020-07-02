@@ -140,9 +140,13 @@ function MainChecks()
 		ScriptIdleTime:Inc
 	else
 		ScriptIdleTime:Set[0]
+	
 	if (${ScriptIdleTime} > 100)
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
+		call IsPublicZone
+		if ${Return}
+			call RebootLoop
 	}
 	if (${ZoneTime} > 7200)
 	{

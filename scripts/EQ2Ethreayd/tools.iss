@@ -21,9 +21,44 @@
 
 ;BoolPoll1 must be used to see if anyone is at TRUE, only one TRUE will put that global variable at TRUE
 variable(globalkeep) bool BoolPoll1
+variable(globalkeep) bool ExpertZone
 variable(globalkeep) int PollCounter
 variable(globalkeep) int ISNotLogged
+variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
+variable(globalkeep) bool NODEBUG
+
 variable(global) bool NoNavWrap 
+
+function NavCamp()
+{
+	variable float GlobalX0
+	variable float GlobalY0
+	variable float GlobalZ0
+	GlobalX0:Set[${Me.X}]
+	GlobalY0:Set[${Me.Y}]
+	GlobalZ0:Set[${Me.Z}]
+	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavCamp coordinates
+	while (1)
+	{
+		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>25 && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
+		{
+			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Pause ${Me.Name}
+			press F1
+			wait 10
+			ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Resume ${Me.Name}
+			press F2
+		}
+	}
+}
+function Toggle_FORCEPOTIONS()
+{
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+	relay all FORCEPOTIONS:Set[!${FORCEPOTIONS}]
+	wait 10
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+}
 
 function Check_ISLogged()
 {
@@ -338,6 +373,7 @@ function Abs(float A)
 		absv:Set[${A}]
 	return ${absv}
 }
+/* OBSOLETE
 function AcceptReward_(bool AcceptAll)
 {
 	do
@@ -348,14 +384,15 @@ function AcceptReward_(bool AcceptAll)
 	wait 750 ${RewardWindow(exists)}
 	do
 	{
-		RewardWindow:Receive
+		;RewardWindow:Receive
 		wait 10
 	}
 	while (${RewardWindow(exists)} && ${AcceptAll})
 }
+*/
 function AcceptReward(bool OnlyMe)
 {
-	if (${OnlyMe})
+ 	if (${OnlyMe})
 		oc !c -AcceptReward ${Me.Name}
 	else
 		oc !c -AcceptReward
@@ -1152,6 +1189,7 @@ function AutoPlant()
 	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
 	wait 30
 	call UnpackItem "A bushel of harvests" 3
+	wait 30
 	call goto_GH
 }	
 function AvoidRedCircles(float Distance, bool IsGroup)
@@ -1725,7 +1763,7 @@ function CheckAlreadyDone(int timeout, string Filename)
 	File:Close 
 	TimeStamp:Inc[${timeout}]
 	echo TimeStamp+${timeout} : ${TimeStamp}
-	echo if (${TimeStamp}<${Time.Timestamp}) will answer TRUE
+	echo if (${TimeStamp}<${Time.Timestamp}) will answer TRUE for ${Filename}
 	if (${TimeStamp}<${Time.Timestamp})
 	{
 		; Not done
@@ -3164,7 +3202,7 @@ function GuildH(bool NoPlant)
 		wait 50
 		call AutoAddAgent TRUE
 		call AutoAddQuest TRUE
-		echo should I skipp Autoplant ? ${NoPlant}
+		echo should I skip Autoplant ? ${NoPlant}
 		if (!${NoPlant})
 			call AutoPlant
 		wait 100
@@ -3183,6 +3221,8 @@ function GuildH(bool NoPlant)
 		call Hireling Hunter
 		call Hireling Gatherer
 		call Hireling Miner
+		call UnpackItem "A bushel of harvests" 3
+		wait 30
 		echo First Depot
 		ogre im -Depot
 		wait 600
@@ -3670,7 +3710,7 @@ function JoustOut(int ActorID, float Distance, bool IsGroup)
 	variable float Slope
 	variable float JoustDistance
 	
-	echo calling function JoustOut with ActorID:${Actor[${ActorID}]} and Distance ${Distance} m
+	echo calling function JoustOut with ActorID:${Actor[${ActorID}]} (at ${Actor[${ActorID}].Distance} m and Distance ${Distance} m)
 	if (${Distance}<1)
 		AvoidDistance:Set[30]
 	else
@@ -3708,6 +3748,9 @@ function JoustOut(int ActorID, float Distance, bool IsGroup)
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}
 	else
 		oc !c -CS_Set_ChangeCampSpotBy All ${X2} 0 ${Z2}
+	wait 10
+	if (${Actor[${ActorID}].Distance}<${Distance})
+		call JoustOut ${ActorID} ${Distance} ${IsGroup}
 		
 }
 function logout_login(int secs)
@@ -4764,7 +4807,13 @@ function TestNullCoord(float X, float Y, float Z)
 		return TRUE
 	else
 		return FALSE
-}	
+}
+function Destroy(string ItemName)
+{
+	echo in Destroy
+	Me.Inventory[Query, Name =- "${ItemName}"]:Destroy[confirm]	
+	echo out Destroy
+}
 function Transmute(string ItemName)
 {
 	echo in Transmute
@@ -4806,8 +4855,6 @@ function UnpackItem(string ItemName, int RewardID)
 		eq2execute inventory unpack ${Me.Inventory["${ItemName}"].Index}
 		wait 5
 		RewardWindow:AcceptReward[${RewardWindow.Reward[${RewardID}].LinkID}]
-		wait 5
-		RewardWindow:Receive
 		wait 5
    }
 }
@@ -4916,6 +4963,7 @@ function UseCurePotion(string Detriment, bool NoWait)
 		do
 		{
 			call UseInventory "Cure ${Detriment}" ${NoWait}
+			eq2execute gsay "glou glou ${Detriment} Potion"
 			wait 10
 		}
 		while (${Me.${Detriment}}>0)
@@ -5193,7 +5241,7 @@ function IsNamedEngaged(string ActorName, bool Exact)
 		return TRUE
 	}
 }
-function WeeklyQuest(string QNw, string SNw)
+function WeeklyQuest(string QNw, string SNw, bool Expert)
 {
 	variable int Counter=0
 	relay all BoolPoll1:Set[FALSE]
@@ -5209,7 +5257,7 @@ function WeeklyQuest(string QNw, string SNw)
 	{
 		echo I am on main and must do "${QNw}" Grouped Quest
 		call strip_QN "${QNw}"
-		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}"
+		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}" ${Expert}
 		wait 10
 		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
@@ -5268,7 +5316,7 @@ function ForceGroup()
 		relay all run endscript Churns
 		Counter:Inc
 	}
-	while (!${Grouped})
+	while (!${Grouped} && ${Counter}<50)
 }
 function HelloWorld()
 {
@@ -5458,6 +5506,72 @@ function ListActors(float MaxDistance, bool Detail)
     }
 }
 
+objectdef WebLog
+{
+	variable webrequest WR
+
+	method Initialize()
+	{
+		WR:SetURL["${SERVERLOG}"]
+	}
+	method Send()
+	{
+		variable uint lastState
+		lastState:Set[${WR.State.Value}]
+		;echo WR.State=${lastState(ewebrequeststate)}
+		WR:InterpretAs[json]
+		WR:Begin
+		lastState:Set[${WR.State.Value}]
+		;echo WR.State=${lastState(ewebrequeststate)}
+		;echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
+		;echo WR.POST=${WR.POST}
+		while 1
+		{
+			if ${WR.State.Value}!=${lastState}
+			{
+				lastState:Set[${WR.State.Value}]
+		;		echo WR.State=${lastState(ewebrequeststate)}
+
+				if ${WR.Result(exists)}
+				{
+		;			echo Result=${WR.Result.AsJSON}
+					WR:Reset
+					This:Initialize
+					break
+				}
+			}
+		}	
+	}
+	method Add(string Criticity, string Message)
+	{
+		; WR.POST:Add["$$[{"${Criticity}":"${Message}"}]$$"]
+		;WR.POST:Add["$$[{"name":"post_param_1","value":"post_param_1 value"}]$$"]
+		WR.POST:Add["$$>
+		{
+			"name":"criticity",
+			"value":"${Criticity}"
+		}
+		<$$"]
+		WR.POST:Add["$$>
+		{
+			"name":"message",
+			"value":"${Message}"
+		}
+		<$$"]
+	}
+}
+function Log(string Message,string Criticity)
+{
+	variable WebLog WL
+	Message:Set["${Message.Replace["\,",""]}"]
+	if (${NODEBUG})
+		return
+	if (${Criticity.Length}==0)
+		Criticity:Set["DEBUG"]
+	WL:Add["${Criticity}","${Message}"]
+	WL:Send
+	echo "${Message}"
+}
 objectdef WikiaQuest
 {
 	variable string OriginalName=""

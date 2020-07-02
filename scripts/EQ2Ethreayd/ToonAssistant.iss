@@ -25,7 +25,7 @@ function main(string questname)
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
-	echo Starting ToonAssistant
+	echo Starting ToonAssistant (Force Potions : ${FORCEPOTIONS})
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
 	if (${Me.Group}<3)
@@ -47,19 +47,26 @@ function main(string questname)
 			eq2execute gsay Can I have a rez please ?
 		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 		{
-			if (${Solo})
+			if (${Solo} || ${FORCEPOTIONS})
 				call UsePotions FALSE TRUE
-			else
+			if (!${Solo})
 			{
 				echo not in Solo instance --> Heroic
 				if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
 					run EQ2Ethreayd/OgreICAssistant
 				call IsPublicZone
+				echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
 				echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
 				if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
 				{
 					call PotPotion
-					wait 50
+					wait 300
+					echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
+					while (!${Me.Effect["Elixir of Intellect"].Duration(exists)})
+					{
+						wait 50
+						echo ${Me.Effect["Elixir of Intellect"].Duration} 
+					}	
 				}
 			}
 		}
@@ -201,9 +208,9 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 		QueueCommand ${Message.Right[${Math.Calc64[${Message.Length}-8]}]}
 	if (${Message.Find["Can I have a rez please"]} > 0)
 	{
-		if (!${Me.InCombatMode})
+		if (!${Me.InCombatMode} && ${Me.Archetype.Equal["priest"]} && !${Me.IsDead})
 		{
-			oc !c -CastAbilityOnPlayer ${Me.Name} "Gather Remains" ${Speaker} 
+			oc !c -CastAbilityOnPlayer ${Me.Name} "Gather Remains" ${Actor[Name,${Speaker}].ID}
 		}
 	}
 	if (${Message.Find["nav to me now"]} > 0)

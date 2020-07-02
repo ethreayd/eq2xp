@@ -302,6 +302,11 @@ function goWracklands()
 		press -release MOVEFORWARD
 	}
 }
+function goSs()
+{
+	call goSsraeshzaPortal
+}
+
 function goSsraeshzaPortal()
 {
 	call goWracklands
