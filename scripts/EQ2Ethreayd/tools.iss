@@ -5333,6 +5333,7 @@ function GroupToFlag(bool UseToonAssistant)
 	echo waiting for the group to zone
 	do
 	{
+		echo relay all press -hold ZOOMOUT
 		relay all press -hold ZOOMOUT
 		wait 25
 		relay all press -release ZOOMOUT
@@ -5357,7 +5358,7 @@ function GroupToFlag(bool UseToonAssistant)
 		do
 		{
 			call GroupDistance
-			if (${Return}>20)
+			if (${Return}>20 && !${Me.FlyingUsingMount})
 			{
 				eq2execute gsay "Please nav to me now !"
 				wait 300

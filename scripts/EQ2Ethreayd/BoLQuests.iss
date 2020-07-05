@@ -180,7 +180,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 						oc !c -Resume ${Me.Name}
 					call navwrap ${NamedCoordinates[${i}]}
 					call GroupDistance
-					if (${Return}>20)
+					if (${Return}>20 && !${Me.FlyingUsingMount})
 						eq2execute gsay "Please nav to me now !"
 					call AttackClosest
 					call CheckPlayer
@@ -225,7 +225,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 							do
 							{
 								call GroupDistance
-								if (${Return}>20)
+								if (${Return}>20 && !${Me.FlyingUsingMount})
 								{
 									eq2execute gsay "Please nav to me now !"
 									wait 1200

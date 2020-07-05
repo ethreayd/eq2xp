@@ -145,8 +145,8 @@ function MainChecks()
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
 		call IsPublicZone
-		if ${Return}
-			call RebootLoop
+		if (${Return} && ${Script["Buffer:OgreInstanceController"](exists)} && ${Me.GroupCount}>2)
+			end Buffer:OgreInstanceController
 	}
 	if (${ZoneTime} > 7200)
 	{

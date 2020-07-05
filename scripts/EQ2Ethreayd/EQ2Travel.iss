@@ -143,7 +143,7 @@ function getBoLTSQuests(string version)
 	call Converse "${NPCName}" 1
 }	
 
-function getBoLQuests(string version)
+function getBoLQuests()
 {
 	variable string NPCName
 	variable int MissingQuest
@@ -157,62 +157,101 @@ function getBoLQuests(string version)
 	call DMove -542 62 261 3
 	call DMove -545 61 285 3
 	call GoDown
-	switch ${version}
-	{
-		case Solo
-		{
-			echo Getting all Solo Quests
-			NPCName:Set["Sage Ayzuku"]
-			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",2]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",2]
-			wait 20
-			NPCName:Set["Apprentice Tansya"]
-			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			OgreBotAPI:ConversationBubble["${Me.Name}",1]
-			wait 20
-			break
-		}
-	}
+	echo Getting all Solo Quests
+	NPCName:Set["Sage Ayzuku"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Sage Ayzuku"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Master Enzelan"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Master Enzelan"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Apprentice Tansya"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	NPCName:Set["Researcher Felquist"]
+	call MoveCloseTo "${NPCName}"
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	
 	call DMove -532 62 261 3 30 FALSE FALSE 5
 	call DMove -580 60 260 3 30 FALSE TRUE 5
 	call DMove -620 58 256 3 30

@@ -99,8 +99,9 @@ function main(bool UseOgreIC)
 		}
 		wait 400
 	}
+	
 	call IsPresent dungeons
-	if (!${Return})
+	if (!${Return} || !${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{
 		call goto_GH
 		if (${Me.InventorySlotsFree}<50)

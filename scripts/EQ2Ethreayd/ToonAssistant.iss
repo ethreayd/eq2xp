@@ -20,6 +20,7 @@ function main(string questname)
 {
 	variable bool Solo
 	variable int CombatDuration=0
+	variable int Counter
 	
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
@@ -59,13 +60,15 @@ function main(string questname)
 				echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
 				if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
 				{
+					Counter:Set[0]
 					call PotPotion
 					wait 300
 					echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
-					while (!${Me.Effect["Elixir of Intellect"].Duration(exists)})
+					while (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && ${Counter}<10)
 					{
-						wait 50
-						echo ${Me.Effect["Elixir of Intellect"].Duration} 
+						wait 30
+						Counter:Inc
+						echo ${Me.Effect["Elixir of Intellect"].Duration} (${Counter}/10)
 					}	
 				}
 			}
@@ -213,7 +216,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 			oc !c -CastAbilityOnPlayer ${Me.Name} "Gather Remains" ${Actor[Name,${Speaker}].ID}
 		}
 	}
-	if (${Message.Find["nav to me now"]} > 0)
+	if (${Message.Find["nav to me now"]} > 0 && !${Me.IsIdle})
 	{
 		if (!${Session.Equal["is1"]})
 		{
