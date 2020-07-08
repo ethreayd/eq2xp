@@ -309,13 +309,13 @@ function TheHeroics_FM(bool Expert)
 	if (!${Expert})
     {
 		relay all ExpertZone:Set[FALSE]
-		Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Heroic"]
+		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
 		Obj_FileExplorer:Scan
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
-		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
 		wait 50
 		oc !c -LoadProfile Bol_Heroic
 		wait 50
@@ -373,7 +373,7 @@ function TheHeroics_SS()
 	ogre ic
 	wait 50
 	oc !c -ZoneResetAll
-    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Heroic"]
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
     Obj_FileExplorer:Scan
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Order_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Divinity_Heroic.iss"]

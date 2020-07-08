@@ -3214,9 +3214,7 @@ function GuildH(bool NoPlant)
 		wait 30
 		echo transmuting stones
 		call AutoAddAgent TRUE
-		call TransmuteAll "Planar Transmutation Stone"
-		call TransmuteAll "Celestial Transmutation Stone"
-		call TransmuteAll "Veilwalker's Transmutation Stone"
+		call TransmuteAll "Transmutation Stone"
 		wait 50
 		call Hireling Hunter
 		call Hireling Gatherer
