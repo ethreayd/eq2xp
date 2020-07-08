@@ -180,7 +180,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 						oc !c -Resume ${Me.Name}
 					call navwrap ${NamedCoordinates[${i}]}
 					call GroupDistance
-					if (${Return}>20)
+					if (${Return}>20 && !${Me.FlyingUsingMount})
 						eq2execute gsay "Please nav to me now !"
 					call AttackClosest
 					call CheckPlayer
@@ -225,7 +225,7 @@ function TheHunt(bool DoNotWait, int Timeout)
 							do
 							{
 								call GroupDistance
-								if (${Return}>20)
+								if (${Return}>20 && !${Me.FlyingUsingMount})
 								{
 									eq2execute gsay "Please nav to me now !"
 									wait 1200
@@ -283,7 +283,7 @@ function TheHarvest(string QuestName, int Timeout)
 {
 
 }
-function TheHeroics_FM()
+function TheHeroics_FM(bool Expert)
 {
 	variable int i
 	variable int Counter
@@ -306,19 +306,40 @@ function TheHeroics_FM()
 	ogre ic
 	wait 50
 	oc !c -ZoneResetAll
-    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Heroic"]
-    Obj_FileExplorer:Scan
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
-	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
-	wait 50
-	oc !c -LoadProfile Bol_Heroic
-	wait 50
-	relay all run EQ2Ethreayd/wrap EquipHeroic
-	wait 20
-	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	if (!${Expert})
+    {
+		relay all ExpertZone:Set[FALSE]
+		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+		Obj_FileExplorer:Scan
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
+		wait 50
+		oc !c -LoadProfile Bol_Heroic
+		wait 50
+		relay all run EQ2Ethreayd/wrap EquipHeroic
+		wait 20
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	}
+	else
+	 {
+		relay all ExpertZone:Set[TRUE]
+		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+		Obj_FileExplorer:Scan
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Expert.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
+		wait 50
+		oc !c -LoadProfile Bol_Heroic
+		wait 50
+		relay all run EQ2Ethreayd/wrap EquipHeroic
+		wait 20
+		;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	}
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 	wait 50
 	while (${Script["Buffer:OgreInstanceController"](exists)})
@@ -326,6 +347,7 @@ function TheHeroics_FM()
 		wait 10
 	}
 	echo The Heroics of Fordel Midst has ended
+	relay all ExpertZone:Set[FALSE]
 	return TRUE
 }
 function TheHeroics_SS()
@@ -351,7 +373,7 @@ function TheHeroics_SS()
 	ogre ic
 	wait 50
 	oc !c -ZoneResetAll
-    Obj_FileExplorer:Change_CurrentDirectory["Default/Blood_of_Luclin/Heroic"]
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
     Obj_FileExplorer:Scan
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Order_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Divinity_Heroic.iss"]
@@ -370,4 +392,44 @@ function TheHeroics_SS()
 	}
 	echo The Heroics of Sanctus Seru has ended
 	return TRUE
+}
+
+function KorVaXian(string ActorName)
+{
+	Event[EQ2_onIncomingText]:AttachAtom[HandleKorVaXianEvents]
+	oc !c -Letsgo
+	call DMove -95 -150 -66 3
+	wait 5
+	oc !c -UplinkOptionChange All checkbox_settings_movemelee FALSE
+	wait 5
+	oc !c -CampSpot
+	wait 5
+	oc !c -CS_Set_Formation_MonkeyInMiddle All 8 ${Me.X} ${Me.Y} ${Me.Z}
+	wait 5
+	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} 15 0 0
+	wait 20
+	target "Kor Va Xian"
+	wait 20
+	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -15 0 0
+	wait 20
+	relay all run wrap NavCamp
+	do
+	{
+		ExecuteQueued
+		wait 10
+		call IsPresent "Kor Va Xian" 100
+	}
+	while (${Return})
+	eq2execute gsay gg
+}
+atom HandleKorVaXianEvents(string Message)
+{
+	if (${Message.Find["prepares to knock back everyone within"]} > 0)
+	{
+		QueueCommand call JoustOut ${Actor[Name,"Kor Va Xian"].ID} 13 TRUE
+	}
+	if (${Message.Find["arms a bomb"]} > 0)
+	{
+		eq2execute gsay execute Me.Inventory[Query, Name =- "luclinite bomb"]:Destroy[confirm]
+	}
 }

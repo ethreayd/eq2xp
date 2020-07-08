@@ -99,9 +99,11 @@ function main(bool UseOgreIC)
 		}
 		wait 400
 	}
+	
 	call IsPresent dungeons
-	if (!${Return})
+	if (!${Return} || !${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{
+		call Log " Starting BoL Loop
 		call goto_GH
 		if (${Me.InventorySlotsFree}<50)
 			call ActionOnPrimaryAttributeValue 1040 ${Action}
@@ -139,7 +141,7 @@ function main(bool UseOgreIC)
 		if (${Me.IsDead} && ${Counter}>30 )
 		{
 			
-			echo --- Reviving (from script BoLLoop (${UseOgreIC}))
+			call Log "--- Reviving (from script BoLLoop (${UseOgreIC}))" INFO
 			if (${UseOgreIC})
 			{
 				ogre end ic

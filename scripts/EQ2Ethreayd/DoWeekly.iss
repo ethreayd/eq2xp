@@ -17,7 +17,7 @@
 
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
-function main(string QNx, string SNx)
+function main(string QNx, string SNx, bool Expert)
 {
 	variable bool Grouped
 	wait 10
@@ -38,9 +38,17 @@ function main(string QNx, string SNx)
 	oc !c -Disband
 	wait 20
 	call ForceGroup
+	
 	wait 100
-	call "${QNx}"
-	echo ${QNx} must be done - doing ${SNx} in 30s
+	if (${Me.GroupCount}>5)
+	{
+		call "${QNx}" ${Expert}
+		echo ${QNx} must be done - doing ${SNx} in 30s
+	}
+	else
+	{
+		echo can't got a full group
+	}
 	wait 300
 	relay all run "${SNx}"
 }

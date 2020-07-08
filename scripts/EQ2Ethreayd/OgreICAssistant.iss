@@ -15,12 +15,15 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreBot/InstanceController/Ogre_Instance_Include.iss"
 
 variable(script) int Stucky
 variable(script) int SuperStucky
 variable(script) bool CantSeeTarget
 variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
+variable(script) bool GiveUp
+variable(script) string ZoneName
 
 function main(string questname)
 {
@@ -33,10 +36,16 @@ function main(string questname)
 		relay all run EQ2Ethreayd/ToonAssistant
 
 	do
-	{
-		
+	{	
 		echo Zone is ${Zone.Name} (${IdleTime} | ${ZoneTime})
-		ZoneTime:Set[0]
+		if (!${Zone.Name.Equal["${ZoneName}"]}) 
+		{
+			echo if (!${Zone.Name.Equal["${ZoneName}"]})
+			ZoneTime:Set[0]
+			ZoneName:Set["${Zone.Name}"]
+		}
+		else
+			ZoneTime:Inc
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 			
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
@@ -49,7 +58,13 @@ function main(string questname)
 			IdleTime:Inc
 		Else
 			IdleTime:Set[0]
-		
+		ExecuteQueued
+		if (${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Event Heroic\]"]})
+			call AurelianCoastReishiRumbleEventHeroic
+		if (${Zone.Name.Equal["Fordel Midst: The Listless Spires \[Event Heroic\]"]})
+			call FordelMidstTheListlessSpiresEventHeroic
+		if (${Zone.Name.Equal["Fordel Midst: Bizarre Bazaar \[Heroic\]"]})
+			call FordelMidstBizarreBazaarHeroic
 		ExecuteQueued
 		wait 300
 	}
@@ -67,9 +82,9 @@ function MainChecks()
 	}
 	if (${ScriptIdleTime}>60 && ${Me.IsDead})
 	{
-		eq2execute merc suspend
-		wait 10
-		ChoiceWindow:DoChoice1
+		end Buffer:OgreInstanceController
+		end ToonAssistant
+		end OgreICAssistant
 	}
 
 	if (${Me.IsDead} && !${Me.Grouped})
@@ -99,7 +114,7 @@ function MainChecks()
 		oc !c -revive
 		oc !c -pause
 		wait 400
-		relay all run EQ2Ethreayd/safescript AutoRepair 50
+		call AutoRepair 90
 		wait 50
 		oc !c -repair
 		oc !c -resume
@@ -139,9 +154,13 @@ function MainChecks()
 		ScriptIdleTime:Inc
 	else
 		ScriptIdleTime:Set[0]
+	
 	if (${ScriptIdleTime} > 100)
 	{
 		echo I am Idle (${ScriptIdleTime}) and I don't know why
+		call IsPublicZone
+		if (${Return} && ${Script["Buffer:OgreInstanceController"](exists)} && ${Me.GroupCount}>2)
+			end Buffer:OgreInstanceController
 	}
 	if (${ZoneTime} > 7200)
 	{
@@ -153,7 +172,7 @@ function MainChecks()
 function InHeroicZone()
 {
 	echo in Heroic Zone
-	ZoneTime:Inc
+	call SelectDifficulty
 	call MainChecks
 	if (${Ogre_Instance_Controller.Status.Equal["Idle_NotRunning"]} && !${Me.InCombat})
 	{
@@ -162,11 +181,46 @@ function InHeroicZone()
 		oc !c -letsgo
 		oc !c -evac
 		oc !c -revive
-		relay all run EQ2Ethreayd/safescript AutoRepair 50
+		call AutoRepair 90
 		wait 50
 		oc !c -repair
 		wait 100
-		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		if (!${GiveUp})
+			Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		else
+		{
+			oc !c -Zone
+			wait 600
+			GiveUp:Set[FALSE]
+			Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		}
+	}
+}
+function FordelMidstTheListlessSpiresEventHeroic()
+{
+	echo in function FordelMidstTheListlessSpiresEventHeroic (${ZoneTime})
+}
+function AurelianCoastReishiRumbleEventHeroic()
+{
+	echo in function AurelianCoastReishiRumbleEventHeroic (${ZoneTime})
+}
+function FordelMidstBizarreBazaarHeroic()
+{
+	echo in function FordelMidstBizarreBazaarHeroic (${ZoneTime})
+}
+function SelectDifficulty()
+{
+	call IsPresent "door entrance - difficulty setting" 10
+	if (!${Me.InCombatMode} && ${Return} && ${ZoneTime}>0)
+	{
+		
+		call ActivateVerbOn "door entrance - difficulty setting" "Open"
+		wait 20
+		OgreBotAPI:ReplyDialog[${Me.Name},1]
+		wait 20
+		OgreBotAPI:Select_Zone_Version["All"]
+		wait 10
+		oc !c -Select_Zone_Version all
 	}
 }
 atom HandleAllEvents(string Message)
@@ -178,7 +232,11 @@ atom HandleAllEvents(string Message)
 	}
 	if (${Message.Equal["Too far away"]})
 	{
-		 eq2execute gsay ${Message}
+		eq2execute gsay ${Message}
+	}
+	if (${Message.Equal["I'm bored"]})
+	{
+		ZoneTime:Inc
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

@@ -21,9 +21,44 @@
 
 ;BoolPoll1 must be used to see if anyone is at TRUE, only one TRUE will put that global variable at TRUE
 variable(globalkeep) bool BoolPoll1
+variable(globalkeep) bool ExpertZone
 variable(globalkeep) int PollCounter
 variable(globalkeep) int ISNotLogged
+variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
+variable(globalkeep) bool NODEBUG
+
 variable(global) bool NoNavWrap 
+
+function NavCamp()
+{
+	variable float GlobalX0
+	variable float GlobalY0
+	variable float GlobalZ0
+	GlobalX0:Set[${Me.X}]
+	GlobalY0:Set[${Me.Y}]
+	GlobalZ0:Set[${Me.Z}]
+	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavCamp coordinates
+	while (1)
+	{
+		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>25 && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
+		{
+			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Pause ${Me.Name}
+			press F1
+			wait 10
+			ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Resume ${Me.Name}
+			press F2
+		}
+	}
+}
+function Toggle_FORCEPOTIONS()
+{
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+	relay all FORCEPOTIONS:Set[!${FORCEPOTIONS}]
+	wait 10
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+}
 
 function Check_ISLogged()
 {
@@ -338,6 +373,7 @@ function Abs(float A)
 		absv:Set[${A}]
 	return ${absv}
 }
+/* OBSOLETE
 function AcceptReward_(bool AcceptAll)
 {
 	do
@@ -348,14 +384,15 @@ function AcceptReward_(bool AcceptAll)
 	wait 750 ${RewardWindow(exists)}
 	do
 	{
-		RewardWindow:Receive
+		;RewardWindow:Receive
 		wait 10
 	}
 	while (${RewardWindow(exists)} && ${AcceptAll})
 }
+*/
 function AcceptReward(bool OnlyMe)
 {
-	if (${OnlyMe})
+ 	if (${OnlyMe})
 		oc !c -AcceptReward ${Me.Name}
 	else
 		oc !c -AcceptReward
@@ -398,6 +435,55 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         }
         while ${ActorIterator:Next(exists)}
     }
+}
+function ActionOnItemTier(string Tier, string Action, bool ExtractFirst)
+{
+	variable index:item Items
+    variable iterator ItemIterator
+	variable int i=0
+	
+	Me:QueryInventory[Items, IsInventoryContainer]
+	Items:GetIterator[ItemIterator]
+	echo I will ${Action} everything that has a ${Tier} Tier
+	if ${ItemIterator:First(exists)}
+	{
+		echo found some stuff in my bags
+		do
+		{
+			
+			for ( i:Set[0] ; ${i} <  ${ItemIterator.Value.NumSlots} ; i:Inc )
+			{
+				echo ${i} <  ${ItemIterator.Value.NumSlots} (looking into ${ItemIterator.Value.Name} bag) '${ItemIterator.Value.ToItemInfo.Type}'
+				if (${ItemIterator.Value.ItemInSlot[${i}](exists)} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Tier.Equal[${Tier}]} && ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Type.Equal["Armor"]})
+				{
+					echo ${ItemIterator.Value.ItemInSlot[${i}].Name} ${Me.Inventory["${ItemIterator.Value.ItemInSlot[${i}].Name}"].ToItemInfo.Tier}
+					if (${ExtractFirst})
+					{
+						echo trying extract essence on ${ItemIterator.Value.ItemInSlot[${i}].Name} first (I should optimize that to only do it for primary, secondary or ranged items)
+						Me.Ability[id, 406528868]:Use
+						wait 10
+						do
+						{
+							waitframe
+						}
+						while ${Me.CastingSpell}
+						echo Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:Salvage
+						wait 5
+					}	
+					call UseAbility ${Action}
+					;wait 10
+					do
+					{
+						waitframe
+					}
+					while ${Me.CastingSpell}
+					echo Me.Inventory[Query, Name =- "${ItemIterator.Value.ItemInSlot[${i}].Name}"]:${Action}
+					;wait 10
+				}
+			}		
+		}	
+		while ${ItemIterator:Next(exists)}
+	}	
 }
 function ActionOnPrimaryAttributeValue(int Value, string Action, bool ExtractFirst)
 {
@@ -1103,6 +1189,7 @@ function AutoPlant()
 	Actor[name,"An Obulus Frontier Garden"]:DoubleClick
 	wait 30
 	call UnpackItem "A bushel of harvests" 3
+	wait 30
 	call goto_GH
 }	
 function AvoidRedCircles(float Distance, bool IsGroup)
@@ -1688,7 +1775,7 @@ function CheckAlreadyDone(int timeout, string Filename)
 	File:Close 
 	TimeStamp:Inc[${timeout}]
 	echo TimeStamp+${timeout} : ${TimeStamp}
-	echo if (${TimeStamp}<${Time.Timestamp}) will answer TRUE
+	echo if (${TimeStamp}<${Time.Timestamp}) will answer TRUE for ${Filename}
 	if (${TimeStamp}<${Time.Timestamp})
 	{
 		; Not done
@@ -3053,6 +3140,11 @@ function goZone(string ZoneName, string Transport)
 		call goSanctusSeru
 		return TRUE
 	}
+	if (${ZoneName.Equal["Wracklands"]})
+	{
+		call goWracklands
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -3122,7 +3214,7 @@ function GuildH(bool NoPlant)
 		wait 50
 		call AutoAddAgent TRUE
 		call AutoAddQuest TRUE
-		echo should I skipp Autoplant ? ${NoPlant}
+		echo should I skip Autoplant ? ${NoPlant}
 		if (!${NoPlant})
 			call AutoPlant
 		wait 100
@@ -3134,13 +3226,13 @@ function GuildH(bool NoPlant)
 		wait 30
 		echo transmuting stones
 		call AutoAddAgent TRUE
-		call TransmuteAll "Planar Transmutation Stone"
-		call TransmuteAll "Celestial Transmutation Stone"
-		call TransmuteAll "Veilwalker's Transmutation Stone"
+		call TransmuteAll "Transmutation Stone"
 		wait 50
 		call Hireling Hunter
 		call Hireling Gatherer
 		call Hireling Miner
+		call UnpackItem "A bushel of harvests" 3
+		wait 30
 		echo First Depot
 		ogre im -Depot
 		wait 600
@@ -3628,7 +3720,7 @@ function JoustOut(int ActorID, float Distance, bool IsGroup)
 	variable float Slope
 	variable float JoustDistance
 	
-	echo calling function JoustOut with ActorID:${Actor[${ActorID}]} and Distance ${Distance} m
+	echo calling function JoustOut with ActorID:${Actor[${ActorID}]} (at ${Actor[${ActorID}].Distance} m and Distance ${Distance} m)
 	if (${Distance}<1)
 		AvoidDistance:Set[30]
 	else
@@ -3666,6 +3758,9 @@ function JoustOut(int ActorID, float Distance, bool IsGroup)
 		oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} ${X2} 0 ${Z2}
 	else
 		oc !c -CS_Set_ChangeCampSpotBy All ${X2} 0 ${Z2}
+	wait 10
+	if (${Actor[${ActorID}].Distance}<${Distance})
+		call JoustOut ${ActorID} ${Distance} ${IsGroup}
 		
 }
 function logout_login(int secs)
@@ -4276,17 +4371,27 @@ function RunInstance()
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-function RunICZone(bool Heroic)
+
+function EndICZone()
 {
 	variable string sQN
 	
-	call strip_IC "${Zone.Name}" TRUE
+	call strip_IC "${Zone.Name}"
+	sQN:Set[${Return}]
+	echo ending "${Zone.Name}" (${sQN})
+	end "${sQN}"
+}
+function RunICZone()
+{
+	variable string sQN
+	
+	call strip_IC "${Zone.Name}"
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" (${sQN}) Now !
-	if (${Heroic})
-		call OgreICRun "ICEthreayd/Blood_of_Luclin/Heroic" "${sQN}.iss"
+	if (${sQN.Right[6].Equal["Heroic"]})
+		run "EQ2Ethreayd/IC/Blood_of_Luclin/Heroic/${sQN}.iss"
 	else
-		call OgreICRun "ICEthreayd/Blood_of_Luclin/Solo" "${sQN}.iss"
+		run "EQ2Ethreayd/IC/Blood_of_Luclin/Solo/${sQN}.iss"
 }
 function RZStop()
 {
@@ -4712,7 +4817,13 @@ function TestNullCoord(float X, float Y, float Z)
 		return TRUE
 	else
 		return FALSE
-}	
+}
+function Destroy(string ItemName)
+{
+	echo in Destroy
+	Me.Inventory[Query, Name =- "${ItemName}"]:Destroy[confirm]	
+	echo out Destroy
+}
 function Transmute(string ItemName)
 {
 	echo in Transmute
@@ -4754,8 +4865,6 @@ function UnpackItem(string ItemName, int RewardID)
 		eq2execute inventory unpack ${Me.Inventory["${ItemName}"].Index}
 		wait 5
 		RewardWindow:AcceptReward[${RewardWindow.Reward[${RewardID}].LinkID}]
-		wait 5
-		RewardWindow:Receive
 		wait 5
    }
 }
@@ -4864,6 +4973,7 @@ function UseCurePotion(string Detriment, bool NoWait)
 		do
 		{
 			call UseInventory "Cure ${Detriment}" ${NoWait}
+			eq2execute gsay "glou glou ${Detriment} Potion"
 			wait 10
 		}
 		while (${Me.${Detriment}}>0)
@@ -5141,7 +5251,7 @@ function IsNamedEngaged(string ActorName, bool Exact)
 		return TRUE
 	}
 }
-function WeeklyQuest(string QNw, string SNw)
+function WeeklyQuest(string QNw, string SNw, bool Expert)
 {
 	variable int Counter=0
 	relay all BoolPoll1:Set[FALSE]
@@ -5157,7 +5267,7 @@ function WeeklyQuest(string QNw, string SNw)
 	{
 		echo I am on main and must do "${QNw}" Grouped Quest
 		call strip_QN "${QNw}"
-		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}"
+		run EQ2Ethreayd/DoWeekly "${Return}" "${SNw}" ${Expert}
 		wait 10
 		relay all run EQ2Ethreayd/endsafe "${SNw}" 
 	}
@@ -5216,7 +5326,7 @@ function ForceGroup()
 		relay all run endscript Churns
 		Counter:Inc
 	}
-	while (!${Grouped})
+	while (!${Grouped} && ${Counter}<50)
 }
 function HelloWorld()
 {
@@ -5233,6 +5343,7 @@ function GroupToFlag(bool UseToonAssistant)
 	echo waiting for the group to zone
 	do
 	{
+		echo relay all press -hold ZOOMOUT
 		relay all press -hold ZOOMOUT
 		wait 25
 		relay all press -release ZOOMOUT
@@ -5257,7 +5368,7 @@ function GroupToFlag(bool UseToonAssistant)
 		do
 		{
 			call GroupDistance
-			if (${Return}>20)
+			if (${Return}>20 && !${Me.FlyingUsingMount})
 			{
 				eq2execute gsay "Please nav to me now !"
 				wait 300
@@ -5286,6 +5397,48 @@ function PotPotion()
 {
 	Me.Inventory[Query, Name =- "Elixir of Intellect"]:Use
 }
+function CheckIfLeader(string ActorName)
+{
+    variable int GroupCounter = 1
+    variable int NumChildren
+    variable string GMName
+    variable string GMType
+    variable string RBGAColor
+    
+    ; Thanks to Amadeus documentation that I have adapted to my need : https://forge.isxgames.com/projects/isxeq2/knowledgebase/articles/19
+    if (${Me.Name.Equal[${ActorName}]} && ${Me.IsGroupLeader})
+        return TRUE
+       
+    do
+    {
+        ; If the MemberInfo page doesn't have 8 children, then it's not valid (i.e., there is no group member in this slot or the structure of the file has changed.)
+        NumChildren:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].NumChildren}]
+        if (${NumChildren} < 8)
+            continue
+        
+        ; Sanity Check (if this fails, then the structure of the xml file has changed)
+        if (!${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember1.MemberInfoPage.MemberInfo].ChildType[2].Equal["Text"]})
+        {
+            echo "CRITICAL ERROR - the eq2ui_mainhud_groupmembers.xml file must have changed."
+            return
+        }
+        
+        ; We should ignore mercenaries
+        GMType:Set[${Me.Group[${GroupCounter}].Type}]
+        if (${GMType.Equal["Mercenary"]})
+            continue
+            
+        GMName:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].Child[Text,2].GetProperty[Text]}]
+        RBGAColor:Set[${EQ2UIPage[MainHUD,GroupMembers].Child[Page,GroupMember${GroupCounter}.MemberInfoPage.MemberInfo].Child[Text,2].GetProperty[TextColor].Right[6]}]
+        
+        ; if the TexTColor is ffff (bright yellow) or 7f7f (faded yellow or olive) then the player is the group leader
+        if ((${RBGAColor.Equal["ffff00"]} || ${RBGAColor.Equal["7f7f00"]}) && ${GMName.Equal[${ActorName}]}) 
+            return TRUE
+    }
+    while ${GroupCounter:Inc} <= 5
+	return FALSE
+}
+
 function CheckIfMaxAdorning()
 {
 	if (${OgreBotAPI.SpewStat[currentadorning]}<${OgreBotAPI.SpewStat[maxadorning]})
@@ -5328,10 +5481,13 @@ function CleanBags()
 	call ActionOnPrimaryAttributeValue 897 Salvage
 	call ActionOnPrimaryAttributeValue 996 Salvage
 	call ActionOnPrimaryAttributeValue 1040 Salvage
+	call ActionOnPrimaryAttributeValue 1062 Salvage
 	call ActionOnPrimaryAttributeValue 1142 Salvage
 	call ActionOnPrimaryAttributeValue 1195 Salvage
 	call ActionOnPrimaryAttributeValue 1248 Salvage
 	call ActionOnPrimaryAttributeValue 1325 Salvage
+	call ActionOnPrimaryAttributeValue 1353 Salvage
+	call ActionOnPrimaryAttributeValue 1381 Salvage
 	call ActionOnPrimaryAttributeValue 1446 Salvage
 	call ActionOnPrimaryAttributeValue 2650 Salvage
 	call ActionOnPrimaryAttributeValue 2706 Salvage
@@ -5361,6 +5517,72 @@ function ListActors(float MaxDistance, bool Detail)
     }
 }
 
+objectdef WebLog
+{
+	variable webrequest WR
+
+	method Initialize()
+	{
+		WR:SetURL["${SERVERLOG}"]
+	}
+	method Send()
+	{
+		variable uint lastState
+		lastState:Set[${WR.State.Value}]
+		;echo WR.State=${lastState(ewebrequeststate)}
+		WR:InterpretAs[json]
+		WR:Begin
+		lastState:Set[${WR.State.Value}]
+		;echo WR.State=${lastState(ewebrequeststate)}
+		;echo WR.URL=${WR.URL}  WR.InterpretAs=${WR.InterpretAs}
+		;echo WR.POST=${WR.POST}
+		while 1
+		{
+			if ${WR.State.Value}!=${lastState}
+			{
+				lastState:Set[${WR.State.Value}]
+		;		echo WR.State=${lastState(ewebrequeststate)}
+
+				if ${WR.Result(exists)}
+				{
+		;			echo Result=${WR.Result.AsJSON}
+					WR:Reset
+					This:Initialize
+					break
+				}
+			}
+		}	
+	}
+	method Add(string Criticity, string Message)
+	{
+		; WR.POST:Add["$$[{"${Criticity}":"${Message}"}]$$"]
+		;WR.POST:Add["$$[{"name":"post_param_1","value":"post_param_1 value"}]$$"]
+		WR.POST:Add["$$>
+		{
+			"name":"criticity",
+			"value":"${Criticity}"
+		}
+		<$$"]
+		WR.POST:Add["$$>
+		{
+			"name":"message",
+			"value":"${Message}"
+		}
+		<$$"]
+	}
+}
+function Log(string Message,string Criticity)
+{
+	variable WebLog WL
+	Message:Set["${Message.Replace["\,",""]}"]
+	if (${NODEBUG})
+		return
+	if (${Criticity.Length}==0)
+		Criticity:Set["DEBUG"]
+	WL:Add["${Criticity}","${Message}"]
+	WL:Send
+	echo "${Message}"
+}
 objectdef WikiaQuest
 {
 	variable string OriginalName=""

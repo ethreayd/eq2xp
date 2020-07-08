@@ -113,7 +113,7 @@ function main(string questname)
 		if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 		{
 			echo call reboot because I am stuck in ${Zone.Name} if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
-			call RebootLoop
+			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]})
 		{
@@ -130,7 +130,7 @@ function main(string questname)
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
-			call RebootLoop
+			run EQ2Ethreayd/safescript wrap RebootLoop
 		}	
 		wait 300
 	}
@@ -252,7 +252,7 @@ function MainChecks()
 		if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
 		{
 			echo call RebootLoop if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)}) - ${Me.Equipment["Primary"].ToItemInfo.Condition}
-			call RebootLoop
+			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 	}
 	if (${Me.IsIdle} && !${Me.InCombat})
@@ -272,7 +272,7 @@ function MainChecks()
 	{
 		echo call RebootLoop if (${ZoneTime} > 600)
 		ZoneTime:Set[0]
-		call RebootLoop
+		run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 	ZoneTime:Inc
 }
@@ -875,7 +875,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 			Counter:Set[0]
 		if (!${Me.InCombatMode} && ${Me.InCombatMode(exists)} && ${Me.X} < -515 && ${Me.X} > -535 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < 20 && ${Me.Z} > 0)
 		{
-			call RebootLoop
+			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 		if (${Me.InCombatMode} && ${Me.X} < -445 && ${Me.X} > -465 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -90 && ${Me.Z} > -110)
 		{
@@ -1700,7 +1700,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["ve got better things to do"]}>0)
 	{
 		echo Merc gone because of inactivity - Rebooting loop
-		QueueCommand call RebootLoop
+		QueueCommand run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 	if (${Message.Find["must first be taken down"]}>0)
 	{
