@@ -26,48 +26,7 @@ variable(globalkeep) int PollCounter
 variable(globalkeep) int ISNotLogged
 variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
 variable(globalkeep) bool NODEBUG
-
 variable(global) bool NoNavWrap 
-
-function NavCamp()
-{
-	variable float GlobalX0
-	variable float GlobalY0
-	variable float GlobalZ0
-	GlobalX0:Set[${Me.X}]
-	GlobalY0:Set[${Me.Y}]
-	GlobalZ0:Set[${Me.Z}]
-	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavCamp coordinates
-	while (1)
-	{
-		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>25 && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
-		{
-			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
-			oc !c -Pause ${Me.Name}
-			press F1
-			wait 10
-			ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
-			oc !c -Resume ${Me.Name}
-			press F2
-		}
-	}
-}
-function Toggle_FORCEPOTIONS()
-{
-	echo FORCEPOTIONS set at ${FORCEPOTIONS}
-	relay all FORCEPOTIONS:Set[!${FORCEPOTIONS}]
-	wait 10
-	echo FORCEPOTIONS set at ${FORCEPOTIONS}
-}
-
-function Check_ISLogged()
-{
-	if (${Zone.Name.Equal[LoginScene]})
-		ISNotLogged:Set[${Session.Right[1]}]
-	else
-		ISNotLogged:Set[0]
-	return ${ISNotLogged}
-}
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -363,7 +322,6 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 	}
 	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
 }
-
 function Abs(float A)
 {
 	variable float absv
@@ -373,23 +331,6 @@ function Abs(float A)
 		absv:Set[${A}]
 	return ${absv}
 }
-/* OBSOLETE
-function AcceptReward_(bool AcceptAll)
-{
-	do
-	{
-		waitframe
-	}
-	while ${Me.CastingSpell}
-	wait 750 ${RewardWindow(exists)}
-	do
-	{
-		;RewardWindow:Receive
-		wait 10
-	}
-	while (${RewardWindow(exists)} && ${AcceptAll})
-}
-*/
 function AcceptReward(bool OnlyMe)
 {
  	if (${OnlyMe})
@@ -397,7 +338,6 @@ function AcceptReward(bool OnlyMe)
 	else
 		oc !c -AcceptReward
 }
-
 function ActivateAggro(string ActorName, string verb, float distance)
 {
 	call MoveCloseTo "${ActorName}" ${distance}
@@ -744,7 +684,6 @@ function AltTSUp(int Timeout)
 		call Converse "Dercin Marrbrand" 2
 		wait 20
 	}
-	
 	call CheckIfMaxAdorning
 	if (!${Return})
 	{
@@ -757,7 +696,6 @@ function AltTSUp(int Timeout)
 		call Converse "Dercin Marrbrand" 2
 		wait 20
 	}
-	
 	call CheckIfMaxTinkering
 	if (!${Return})
 	{
@@ -770,7 +708,6 @@ function AltTSUp(int Timeout)
 		call Converse "Dercin Marrbrand" 2
 		wait 20
 	}
-	
 	echo go to Guild Hall (with auto fix of stay forever there bug)
 	do
 	{
@@ -788,7 +725,6 @@ function AltTSUp(int Timeout)
 	echo AltTSUp done
 	return TRUE
 }
-
 function Ascend(float Y, bool Swim)
 {
 	variable float loc0 
@@ -1223,7 +1159,6 @@ function BaryCenterX(string ActorName)
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
-		
 		do
 		{
 			Sigma:Set[${Math.Calc64[${Sigma}+${ActorIterator.Value.X}]}]
@@ -1246,7 +1181,6 @@ function BaryCenterY(string ActorName)
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
-		
 		do
 		{
 			if ${Sigma}<${ActorIterator.Value.Y}
@@ -1273,7 +1207,6 @@ function BaryCenterZ(string ActorName)
 	Actors:GetIterator[ActorIterator]
 	if ${ActorIterator:First(exists)}
 	{
-		
 		do
 		{
 			Sigma:Set[${Math.Calc64[${Sigma}+${ActorIterator.Value.Z}]}]
@@ -2542,7 +2475,12 @@ function DescribeItem(string ItemName, string ItemLocation)
     else
 	echo no item "${ItemName}" in Inventory
 }
-
+function Destroy(string ItemName)
+{
+	echo in Destroy
+	Me.Inventory[Query, Name =- "${ItemName}"]:Destroy[confirm]	
+	echo out Destroy
+}
 function DetectCircles(float Distance, string Color)
 { 
 	variable index:actor Actors
@@ -3113,16 +3051,10 @@ function goHate()
 }
 function CorrectZone(string ZoneName)
 {
-	
-	
 	if (${ZoneName.Equal["Freeport"]})
-		return "The City of Freeport"
-	
-	
+		return "The City of Freeport"	
 	return "${ZoneName}"
 }
-
-
 function goZone(string ZoneName, string Transport)
 {
 	variable string AltZoneName
@@ -3130,6 +3062,23 @@ function goZone(string ZoneName, string Transport)
 	call CorrectZone "${ZoneName}"
 	AltZoneName:Set["${Return}"]
 	
+	if (!${Transport(exists)})
+		Transport:Set["Globe"]
+	call IsPresent ${Transport}
+	if (!${Return})
+	{
+		if (${Transport.Equal["Globe"]})
+		{
+			call IsPresent "Pirate Captain"
+			if (${Return})
+			{
+				call goZone "${ZoneName}" "Pirate Captain"
+				return
+			}	
+		}
+		call Log "Can't find ${Transport} in ${Zone.Name} to go to ${ZoneName}" WARNING
+		return
+	}
 	if (${ZoneName.Equal["Aurelian Coast"]})
 	{
 		call goAurelianCoast
@@ -3940,6 +3889,39 @@ function MyTarget(string ActorName)
 		target "${ActorIterator.Value.Name}" 
 	}
 }
+function NavCamp()
+{
+	variable float GlobalX0
+	variable float GlobalY0
+	variable float GlobalZ0
+	GlobalX0:Set[${Me.X}]
+	GlobalY0:Set[${Me.Y}]
+	GlobalZ0:Set[${Me.Z}]
+	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavCamp coordinates
+	while (1)
+	{
+		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>25 && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
+		{
+			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Pause ${Me.Name}
+			press F1
+			wait 10
+			ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			oc !c -Resume ${Me.Name}
+			press F2
+		}
+	}
+}
+
+function Check_ISLogged()
+{
+	if (${Zone.Name.Equal[LoginScene]})
+		ISNotLogged:Set[${Session.Right[1]}]
+	else
+		ISNotLogged:Set[0]
+	return ${ISNotLogged}
+}
+
 function navwrap(string XS, string YS, string ZS)
 {
 	variable float loc0=0
@@ -4753,7 +4735,6 @@ function strip_QN(string questname, bool HeroicExpert)
 	echo OUT:"${sQN}"
 	return "${sQN}"
 }
-
 function TanknSpank(string Named, float Distance, bool Queue, bool NoCC, bool Immunity)
 {
 	if (${Distance}<1)
@@ -4828,12 +4809,14 @@ function TestNullCoord(float X, float Y, float Z)
 	else
 		return FALSE
 }
-function Destroy(string ItemName)
+function Toggle_FORCEPOTIONS()
 {
-	echo in Destroy
-	Me.Inventory[Query, Name =- "${ItemName}"]:Destroy[confirm]	
-	echo out Destroy
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+	relay all FORCEPOTIONS:Set[!${FORCEPOTIONS}]
+	wait 10
+	echo FORCEPOTIONS set at ${FORCEPOTIONS}
 }
+
 function Transmute(string ItemName)
 {
 	echo in Transmute
