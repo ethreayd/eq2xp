@@ -3928,17 +3928,27 @@ function MyTarget(string ActorName)
 		target "${ActorIterator.Value.Name}" 
 	}
 }
-function navwrap(float X, float Y, float Z)
+function navwrap(string XS, string YS, string ZS)
 {
 	variable float loc0=0
 	variable int Stucky=0
-	wait 10
+	variable float X=${XS}
+	variable float Y=${YS}
+	variable float Z=${ZS}
 	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
 		echo something wrong is happening, cancelling movement
 		return
 	}
+	if (${XS.Find[","]}>0)
+	{	
+		call main ${XS.Replace[","," "]}
+		return
+	}
+	
+	wait 10
+	
 	if (${Script["Buffer:OgreNavTest"](exists)} || ${NoNavWrap})
 	{
 		echo ogre navtest is already running
@@ -5160,12 +5170,14 @@ function waitfor_Zone(string ZoneName)
 }
 function waitfor_Zoning()
 {
+	echo pausing if Zoning
 	do
 	{
 		wait 10
 		call IsZoning
 	}
 	while (${Return})
+	echo not Zoning (anymore)
 }
 function WalkWithTheWind(float X, float Y, float Z)
 {
