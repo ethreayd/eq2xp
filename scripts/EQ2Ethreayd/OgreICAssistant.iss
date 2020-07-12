@@ -210,11 +210,23 @@ function FordelMidstBizarreBazaarHeroic()
 }
 function SelectDifficulty()
 {
-	call IsPresent "door entrance - difficulty setting" 10
-	if (!${Me.InCombatMode} && ${Return} && ${ZoneTime}>0)
+	variable string Selector="door entrance - difficulty setting"
+	variable string SelectAction="Open"
+	variable bool MustSelect
+	echo in SelectDifficulty function
+	call IsPresent "difficulty setting" 15
+	if (${Return})
+		MustSelect:Set[TRUE]
+	call IsPresent "starting circle - difficulty setting" 15
+	if (${Return})
 	{
-		
-		call ActivateVerbOn "door entrance - difficulty setting" "Open"
+		Selector:Set["starting circle - difficulty setting"]
+		SelectAction:Set["Access"]
+	}	
+	echo if (!${Me.InCombatMode} && ${MustSelect} && ${ZoneTime}>0)
+	if (!${Me.InCombatMode} && ${MustSelect} && ${ZoneTime}>0)
+	{
+		call ActivateVerbOn "${Selector}" "${SelectAction}"
 		wait 20
 		OgreBotAPI:ReplyDialog[${Me.Name},1]
 		wait 20

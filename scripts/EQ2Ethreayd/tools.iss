@@ -725,6 +725,23 @@ function AltTSUp(int Timeout)
 	echo AltTSUp done
 	return TRUE
 }
+function NavRegroup(bool Force)
+{
+	call GroupDistance
+	if (${Return}>20)
+	{
+		do
+		{
+			if (${Force})
+				relay all ogre navtest -loc ${Me.X} ${Me.Y} ${Me.Z}
+			else
+				eq2execute gsay "Please nav to me now !"
+			wait 600
+			call GroupDistance
+		}
+		while (${Return}>20)
+	}
+}
 function Ascend(float Y, bool Swim)
 {
 	variable float loc0 
@@ -733,6 +750,12 @@ function Ascend(float Y, bool Swim)
 	variable int YStuck=0
 	variable float Ymax=0
 	call CheckCombat
+	call CheckFlyingZone
+	if (!${Return})
+	{
+		echo Not a flying zone
+		return
+	}
 	if (!${Swim})
 		call CheckSwimming
 	echo Beginning Ascension... to ${Y}
@@ -1793,6 +1816,8 @@ function CheckEffectOnTarget(string EffectName)
 function CheckFlyingZone()
 {
 	variable bool Flying
+	if ${Me.FlyingUsingMount}
+		return TRUE
 	call CheckCombat 30
 	press -hold FLYUP
 	wait 20
@@ -3825,6 +3850,152 @@ function MoveCloseTo(string ActorName, float Distance)
 		call Unstuck ${strafe}
 	echo quitting MoveCloseTo function
 }
+function NavPull(string ActorName, float Distance)
+{
+	variable float loc0=0
+	variable int Stucky=0
+	variable string strafe
+	variable float GlobalX0
+	variable float GlobalY0
+	variable float GlobalZ0
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	GlobalX0:Set[${Me.X}]
+	GlobalY0:Set[${Me.Y}]
+	GlobalZ0:Set[${Me.Z}]
+	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavPull coordinates
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
+	if (${Distance}<1)
+		Distance:Set[50]
+	
+	echo looking for "${ActorName}" 
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}" && Distance <= ${Distance}]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		echo Pulling ${ActorIterator.Value.Name} (${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}) [${Distance}]
+		;oc !c -Pause ${Me.Name}
+		press F1
+		wait 10
+		ogre navtest -loc ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}
+		do
+		{
+			wait 10
+			target "${ActorIterator.Value.Name}"
+		}
+		while (!${Me.InCombatMode})
+
+		do
+		{
+			if (!${Script["Buffer:OgreNavTest"](exists)})
+			{
+				echo going back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+				press F1
+				wait 10
+				ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			}
+			wait 10
+			call TestArrivalCoord ${GlobalX0} ${GlobalY0} ${GlobalZ0} 5
+		}
+		while (!${Return})
+		;oc !c -Resume ${Me.Name}
+		target "${ActorName}"
+		do
+		{
+			wait 10
+		}
+		while (${Me.InCombatMode})
+		do
+		{
+			if (${Me.IsIdle} && !${Script["Buffer:OgreNavTest"](exists)})
+			{
+				echo going back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+				press F1
+				wait 10
+				ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			}
+			wait 10
+			call TestArrivalCoord ${GlobalX0} ${GlobalY0} ${GlobalZ0} 5
+		}
+		while (!${Return})
+	}
+}
+function NavPullAll(string ActorName)
+{
+	variable float loc0=0
+	variable int Stucky=0
+	variable string strafe
+	variable float GlobalX0
+	variable float GlobalY0
+	variable float GlobalZ0
+	variable index:actor Actors
+	variable iterator ActorIterator
+	
+	GlobalX0:Set[${Me.X}]
+	GlobalY0:Set[${Me.Y}]
+	GlobalZ0:Set[${Me.Z}]
+	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavPull coordinates
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_settings_movemelee","FALSE"]
+	if (${Distance}<1)
+		Distance:Set[50]
+	
+	echo looking for "${ActorName}" 
+	EQ2:QueryActors[Actors, Name  =- "${ActorName}"]
+	Actors:GetIterator[ActorIterator]
+	if ${ActorIterator:First(exists)}
+	{
+		do
+		{
+			echo Pulling ${ActorIterator.Value.Name} (${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}) [${Distance}]
+			press F1
+			wait 10
+			ogre navtest -loc ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}
+			do
+			{
+				wait 10
+				target "${ActorIterator.Value.Name}"
+			}
+			while (!${Me.InCombatMode})
+		}	
+		while ${ActorIterator:Next(exists)}
+		do
+		{
+			if (!${Script["Buffer:OgreNavTest"](exists)})
+			{
+				echo going back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+				press F1
+				wait 10
+				ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			}
+			wait 10
+			call TestArrivalCoord ${GlobalX0} ${GlobalY0} ${GlobalZ0} 5
+		}
+		while (!${Return})
+		target "${ActorName}"
+		do
+		{
+			wait 10
+		}
+		while (${Me.InCombatMode})
+		do
+		{
+			if (${Me.IsIdle} && !${Script["Buffer:OgreNavTest"](exists)})
+			{
+				echo going back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+				press F1
+				wait 10
+				ogre navtest -loc ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			}
+			wait 10
+			call TestArrivalCoord ${GlobalX0} ${GlobalY0} ${GlobalZ0} 5
+		}
+		while (!${Return})
+	}
+}
+
 function MoveJump(float X, float Y, float Z, float X0, float Y0, float Z0)
 {
 	variable bool jumped
@@ -3929,6 +4100,10 @@ function navwrap(string XS, string YS, string ZS)
 	variable float X=${XS}
 	variable float Y=${YS}
 	variable float Z=${ZS}
+	variable float FlyingZone
+	
+	call CheckFlyingZone
+	FlyingZone:Set[${Return}]
 	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
@@ -3937,7 +4112,7 @@ function navwrap(string XS, string YS, string ZS)
 	}
 	if (${XS.Find[","]}>0)
 	{	
-		call main ${XS.Replace[","," "]}
+		call navwrap ${XS.Replace[","," "]}
 		return
 	}
 	
@@ -3984,14 +4159,21 @@ function navwrap(string XS, string YS, string ZS)
 		ExecuteQueued
 		echo NoNavWrap is set as ${NoNavWrap}
 		eq2execute loc
-		echo using 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
-		call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
-		call GoDown
-		call TestArrivalCoord ${X} ${Y} ${Z}
-		if (!${Return})
+		if (${FlyingZone})
 		{
-			call UnstuckR 50
-			call navwrap ${X} ${Y} ${Z}
+			echo using 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
+			call 3DNav ${X} ${Math.Calc64[${Y}+200]} ${Z}
+			call GoDown
+		}
+		else
+		{
+			call DMove ${X} ${Y} ${Z} 3 30 TRUE TRUE
+			call TestArrivalCoord ${X} ${Y} ${Z}
+			if (!${Return})
+			{
+				call UnstuckR 50
+				call navwrap ${X} ${Y} ${Z}
+			}
 		}
 	}
 	OgreBotAPI:NoTarget[${Me.Name}]
@@ -5165,14 +5347,14 @@ function waitfor_Zone(string ZoneName)
 }
 function waitfor_Zoning()
 {
-	echo pausing if Zoning
+	;echo pausing if Zoning
 	do
 	{
 		wait 10
 		call IsZoning
 	}
 	while (${Return})
-	echo not Zoning (anymore)
+	;echo not Zoning (anymore)
 }
 function WalkWithTheWind(float X, float Y, float Z)
 {

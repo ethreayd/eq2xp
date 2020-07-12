@@ -394,7 +394,7 @@ function TheHeroics_SS()
 	return TRUE
 }
 
-function KorVaXian(string ActorName)
+function KorVaXian()
 {
 	Event[EQ2_onIncomingText]:AttachAtom[HandleKorVaXianEvents]
 	oc !c -Letsgo
@@ -422,6 +422,27 @@ function KorVaXian(string ActorName)
 	while (${Return})
 	eq2execute gsay gg
 }
+function EegutStonegut()
+{
+	Ob_AutoTarget:AddActor["stone-worked trap",0,FALSE,FALSE]
+	
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autotarget_enabled","TRUE"]
+	do
+	{
+		oc !c -cs-jo-ji All Casters
+		call NavPull "a muck digger"
+		wait 100
+		do
+		{
+			wait 10
+		}
+		while (${Me.InCombatMode})
+		call IsPresent "Eegut Stonegut" 50
+	}
+	while (!${Return})
+	oc !c -letsgo
+}
+
 atom HandleKorVaXianEvents(string Message)
 {
 	if (${Message.Find["prepares to knock back everyone within"]} > 0)

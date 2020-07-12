@@ -216,7 +216,7 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 			oc !c -CastAbilityOnPlayer ${Me.Name} "Gather Remains" ${Actor[Name,${Speaker}].ID}
 		}
 	}
-	if (${Message.Find["nav to me now"]} > 0 && !${Me.IsIdle})
+	if (${Message.Find["nav to me now"]} > 0)
 	{
 		if (!${Session.Equal["is1"]})
 		{
