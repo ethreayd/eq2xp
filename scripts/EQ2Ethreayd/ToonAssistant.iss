@@ -21,7 +21,7 @@ function main(string questname)
 	variable bool Solo
 	variable int CombatDuration=0
 	variable int Counter
-	
+	variable int GroupCounter=0
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
@@ -34,6 +34,13 @@ function main(string questname)
 		Solo:Set[TRUE]
 		oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_forcenamedcatab TRUE
 	}
+	if (${Me.Group}>2 && ${Me.Group}<5)
+	{	
+		echo Incomplete Group (${GroupCounter})
+		GroupCounter:Inc
+	}
+	else
+		GroupCounter:Set[0]
 	do
 	{
 		ExecuteQueued
@@ -95,13 +102,16 @@ function main(string questname)
 			call FixCombat
 			CombatDuration:Set[25]
 		}
-		
-		call AutoRepair 30
-			
+		if (${GroupCounter}>300)
+		{
+			oc !c -Disband
+			relay all run wrap RebootLoop
+		}	
 		ExecuteQueued
 		wait 10
 		if (${Zone.Name.Right[10].Equal["Guild Hall"]} && ${Me.Y}>-100)
 			call GHStuck
+		
 	}
 	while (TRUE)
 	echo Ending ToonAssistant

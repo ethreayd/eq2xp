@@ -326,9 +326,9 @@ function TheHeroics_FM(bool Expert)
 	else
 	 {
 		relay all ExpertZone:Set[TRUE]
-		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Expert"]
 		Obj_FileExplorer:Scan
-		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Expert.iss"]
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]

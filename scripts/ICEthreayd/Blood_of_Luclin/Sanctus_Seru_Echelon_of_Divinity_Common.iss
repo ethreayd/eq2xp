@@ -36,7 +36,7 @@ objectdef Object_Instance
 		; Obj_OgreIH:Set_Debug_Mode
 		if ${_StartingPoint} == 0
 		{
-			call Obj_OgreIH.ZoneNavigation.GetIntoZone "${sZoneName}"
+			call Obj_OgreIH.ZoneNavigation.GetIntoZone "${sZoneName}" "${sDifficulty}"
 			if !${Return}
 			{
 				Obj_OgreIH:Message_FailedZone

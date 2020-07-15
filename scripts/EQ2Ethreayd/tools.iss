@@ -1891,6 +1891,7 @@ function AutoGetFlag()
 {
 	do
 	{
+		call PKey ZOOMOUT 25
 		oc !c -GetFlag
 		wait 30
 		call CountItem "Tactical Rally Banner"

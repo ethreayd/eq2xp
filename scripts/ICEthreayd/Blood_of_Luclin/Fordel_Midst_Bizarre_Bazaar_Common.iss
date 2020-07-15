@@ -15,6 +15,8 @@ objectdef Object_Instance
 {
 	function:bool RunInstance(int _StartingPoint=0)
 	{
+	
+		OgreBotAPI:ChangeLootOptions["all","LeaderOnlyLoot"] 
 		if ${_StartingPoint} == 0
 		{
 			
