@@ -1392,6 +1392,10 @@ function AutoLogin(string T1, string T2,string T3, string T4,string T5, string T
 	variable int i=0
 	variable index:string ToonName
 	;echo ZoneName is ${Zone.Name}
+	while (!${ISXEQ2.IsReady})
+	{
+		wait 10
+	}
 	for ( i:Set[1] ; ${i} <= 6 ; i:Inc )
 	{
 		if ${T${i}(exists)}
@@ -1842,8 +1846,9 @@ function CheckIfActorGuildPresent(string ActorGuild, float MaxDistance)
     else
 		return FALSE
 }
-function CheckItem(string ItemName, int Quantity)
+function CheckItem(string ItemName, int Quantity, bool ForAll)
 {
+	PollCounter:Set[0]
 	call CountItem "${ItemName}"
 	if (${Return}<${Quantity})
 	{
@@ -1937,7 +1942,31 @@ function CheckPlayerAtCoordinates(float X, float Y, float Z, float Distance)
 	}
 	return FALSE
 }
-
+function Poll(string ToolFunction, string arg1, string arg2, string arg3)
+{
+/*
+	BoolPoll1:Set[FALSE]
+	echo Polling for ${ToolFunction} ${arg1}
+		PollCounter:Set[0]
+		relay all BoolPoll1:Set[FALSE]
+		wait 20
+		if (!${Script["wrap"](exists)})
+			relay all run EQ2Ethreayd/wrap CheckQuest "${questname}" FALSE
+		else
+		{
+			echo wrap already used... trying with wrap2
+			if (!${Script["wrap2"](exists)})
+				relay all run EQ2Ethreayd/wrap2 CheckQuest "${questname}" FALSE
+			else
+			{
+				echo CheckQuest use wrap or wrap2 as function relay wrapper - Do not use them in parallel
+				relay all PollCounter:Inc
+				echo Can't RUN CheckQuest : PollCounter at ${PollCounter}
+				return FALSE
+			}
+		}
+		*/
+}
 function CheckQuest(string questname, bool ForAll, bool Approximate)
 {
 	variable index:quest Quests
@@ -3683,6 +3712,56 @@ function KBMove(string Who, float X, float Y, float Z, int speed, int MyDistance
 	oc !c -letsgo ${Who}
 	call DMove ${X} ${Y} ${Z} ${speed} ${MyDistance} ${IgnoreFight} ${StuckZone} ${Precision}
 }
+function JoustWaitBack(int ActorID, float Distance, bool IsGroup, int towait)
+{
+	variable float X0=${Me.X}
+	variable float Y0=${Me.Y}
+	variable float Z0=${Me.Z}
+	
+	call JoustOut ${ActorID} ${Distance} ${IsGroup}
+	wait ${towait}
+	oc !c -letsgo
+	call DMove ${X0} ${Y0} ${Z0} 3 30 TRUE TRUE
+	oc !c -CampSpot
+	
+}
+function ForceLogin(string ToonName)
+{
+	while (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal["Unknown"]})
+	{
+		wait 600
+		if (${Zone.Name.Equal["LoginScene"]} || ${Zone.Name.Equal["Unknown"]})
+		{
+			call Log "Seems to be stuck at ${Zone.Name} - Restarting Ogre for ${ToonName} (${Me.Name})" PROBLEM
+			if (!${Script["ogreconsole"](exists)})
+			{
+				do
+				{
+					call Log "ISXOgre not loaded for ${ToonName} - looping it" PROBLEM
+					ext ISXOgre
+					wait 1200
+				}
+				while (!${Script["ogreconsole"](exists)})
+			}
+			ogre -noredirect "${ToonName}"
+		}
+	}
+	wait 600
+	do
+	{
+		if (!${Script["Buffer:OgreBot"](exists)})
+		{
+			call Log "--- Starting Ogre (should be started but it is not, why ?)" PROBLEM
+			call waitfor_Zoning
+			ogre
+			wait 300
+		}
+	}
+	while (!${Script["Buffer:OgreBot"](exists)})
+	call waitfor_Zoning
+}	
+
+	
 function JoustOut(int ActorID, float Distance, bool IsGroup)
 {
 	variable float AvoidDistance
@@ -3736,8 +3815,9 @@ function JoustOut(int ActorID, float Distance, bool IsGroup)
 	wait 10
 	if (${Actor[${ActorID}].Distance}<${Distance})
 		call JoustOut ${ActorID} ${Distance} ${IsGroup}
-		
 }
+
+
 function logout_login(int secs)
 {
 	variable string ToonName
@@ -4061,7 +4141,7 @@ function MyTarget(string ActorName)
 		target "${ActorIterator.Value.Name}" 
 	}
 }
-function NavCamp()
+function NavCamp(float MaxDistance)
 {
 	variable float GlobalX0
 	variable float GlobalY0
@@ -4069,12 +4149,15 @@ function NavCamp()
 	GlobalX0:Set[${Me.X}]
 	GlobalY0:Set[${Me.Y}]
 	GlobalZ0:Set[${Me.Z}]
+	if (${MaxDistance}<1)
+	MaxDistance:Set[25]
 	echo registering ${GlobalX0} ${GlobalY0} ${GlobalZ0} as my NavCamp coordinates
+	
 	while (1)
 	{
-		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>25 && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
+		if (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>${MaxDistance} && !${Me.IsDead} && !${Script["Buffer:OgreNavTest"](exists)})
 		{
-			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0}
+			eq2execute gsay coming back to ${GlobalX0} ${GlobalY0} ${GlobalZ0} (${Math.Distance[${Me.X},${Me.Y},${Me.Z},${GlobalX0},${GlobalY0},${GlobalZ0}]}>${MaxDistance})
 			oc !c -Pause ${Me.Name}
 			press F1
 			wait 10
@@ -4998,6 +5081,8 @@ function Toggle_FORCEPOTIONS()
 	relay all FORCEPOTIONS:Set[!${FORCEPOTIONS}]
 	wait 10
 	echo FORCEPOTIONS set at ${FORCEPOTIONS}
+	if ${FORCEPOTIONS}
+		eq2execute gsay Use your Potions when needed !
 }
 
 function Transmute(string ItemName)

@@ -22,6 +22,8 @@ function main(string questname)
 	variable int CombatDuration=0
 	variable int Counter
 	variable int GroupCounter=0
+	variable int ZoneCounter=0
+	variable string ToonName=${Me.Name}
 	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
@@ -29,6 +31,18 @@ function main(string questname)
 	echo Starting ToonAssistant (Force Potions : ${FORCEPOTIONS})
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
+	if (${Zone.Name.Equal["Unknown"]})
+	{
+		ZoneCounter:Inc
+	}
+	else
+		ZoneCounter:Set[0]
+	if (${Zone.Name.Equal["Unknown"]} && ${ZoneCounter}>120)
+	{
+		call Log "back on login screen - trying to log on" WARNING
+		ZoneCounter:Set[0]
+		call ForceLogin ${ToonName}
+	}		
 	if (${Me.Group}<3)
 	{
 		Solo:Set[TRUE]
@@ -59,12 +73,12 @@ function main(string questname)
 				call UsePotions FALSE TRUE
 			if (!${Solo})
 			{
-				echo not in Solo instance --> Heroic
+				;echo not in Solo instance --> Heroic
 				if (${Session.Equal["is1"]} && ${Script["Buffer:OgreInstanceController"](exists)} && !${Script["OgreICAssistant"](exists)})
 					run EQ2Ethreayd/OgreICAssistant
 				call IsPublicZone
-				echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
-				echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
+				;echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
+				;echo if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return}) --> PotPotion
 				if (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && !${Return})
 				{
 					Counter:Set[0]

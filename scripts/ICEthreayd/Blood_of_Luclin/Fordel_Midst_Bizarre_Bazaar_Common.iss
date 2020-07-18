@@ -1,6 +1,7 @@
 variable string sZoneShortName="exp16_dun_fordel_midst_01"
 
 #include "${LavishScript.HomeDirectory}/Scripts/EQ2OgreBot/InstanceController/Ogre_Instance_Include.iss"
+#include "${LavishScript.HomeDirectory}/Scripts/EQ2Ethreayd/tools.iss"
 
 function main(int _StartingPoint=0)
 {
@@ -395,11 +396,13 @@ objectdef Object_Instance
             Obj_OgreIH:Message_FailedToKill["${_NamedNPC}"]
             return FALSE
         }
+		echo ${_NamedNPC} done
+		eq2execute summon
 		wait 30
 		call Obj_OgreIH.Get_Chest
 		wait 30
 
-        Echo Changing Loot Options to Round Robin...hopefully.
+        Echo Changing Loot Options to Free For All...hopefully.
         OgreBotAPI:ChangeLootOptions["all","FreeForAll"] 
 		
 		wait 30
@@ -558,7 +561,13 @@ function Named5(string _NamedNPC)
 		;//Pre=Pull spot for final Named
 		Ob_AutoTarget:AddActor["Bazaar Baron Brixwald",0,FALSE,FALSE]
         Obj_OgreIH:ChangeCampSpot["258.774048,-33.059879,-19.956154"]
-		
+		wait 600
+		do
+		{
+			call IsPresent "${_NamedNPC}" 5000
+			target "${_NamedNPC}"
+		}
+		while (${Return} && !${Me.InCombatMode})
         if !${Actor[exactname,"${_NamedNPC}"].ID(exists)}
 		{
 			Obj_OgreIH:Message_NamedDoesNotExistSkipping["${_NamedNPC}"]

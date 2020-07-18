@@ -398,7 +398,7 @@ function KorVaXian()
 {
 	Event[EQ2_onIncomingText]:AttachAtom[HandleKorVaXianEvents]
 	oc !c -Letsgo
-	call DMove -95 -150 -66 3
+	call DMove -101 -150 -67 3
 	wait 5
 	oc !c -UplinkOptionChange All checkbox_settings_movemelee FALSE
 	wait 5
@@ -412,12 +412,12 @@ function KorVaXian()
 	wait 20
 	oc !c -CS_Set_ChangeCampSpotBy ${Me.Name} -15 0 0
 	wait 20
-	relay all run wrap NavCamp
+	relay all run wrap NavCamp 50
 	do
 	{
 		ExecuteQueued
 		wait 10
-		call IsPresent "Kor Va Xian" 100
+		call IsPresent "Kor Va Xian" 5000
 	}
 	while (${Return})
 	eq2execute gsay gg
@@ -447,10 +447,6 @@ atom HandleKorVaXianEvents(string Message)
 {
 	if (${Message.Find["prepares to knock back everyone within"]} > 0)
 	{
-		QueueCommand call JoustOut ${Actor[Name,"Kor Va Xian"].ID} 13 TRUE
-	}
-	if (${Message.Find["arms a bomb"]} > 0)
-	{
-		eq2execute gsay execute Me.Inventory[Query, Name =- "luclinite bomb"]:Destroy[confirm]
+		QueueCommand call JoustWaitBack ${Actor[Name,"Kor Va Xian"].ID} 15 TRUE 300
 	}
 }
