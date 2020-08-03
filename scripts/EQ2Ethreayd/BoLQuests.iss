@@ -63,7 +63,25 @@ function LuclinLandscapingTheBlinding(bool DoNotWait, int Timeout)
 	call TheHunt ${DoNotWait} ${Timeout}
 }
 
-
+function CheckBlindingNamed()
+{
+	variable index:string Named
+	variable int i
+	Named:Insert["Novilog"]
+	Named:Insert["An Ancient Spectre"]
+	Named:Insert["A Greater Lightcrawler"]
+	Named:Insert["Cluster"]
+	Named:Insert["Cobblerock"]
+	Named:Insert["Ripperback"]
+	Named:Insert["Deathpetal"]
+	
+	for ( i:Set[1] ; ${i} <= ${Named.Used} ; i:Inc )
+	{
+		call WhereIs "${Named[${i}]}" TRUE
+		echo testing "${Named[${i}]} : ${Return}"
+	}
+}
+	
 function LuclinLandscapingAurelianCoast(bool DoNotWait, int Timeout)
 {
 	NamedToHunt:Insert["Glorgan the Hammer"]

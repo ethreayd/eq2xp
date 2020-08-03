@@ -290,15 +290,30 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		{
 			call ActivateVerbOn "circle" "Access"
 		}
-		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 25)
+		if (${Me.X} < -355 && ${Me.X} > -385 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 25)
 		{
 			call ISXRIPause
 			call DMove -389 88 13 3 30 TRUE TRUE
-			target "an Echelon vigilant"
+			call IsPresent "an Echelon vigilant"
+			if ${Return}
+				target "an Echelon vigilant"
 			call ISXRIResume
-
 		}
-			
+		if (${Me.X} < -340 && ${Me.X} > -365 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 45 && ${Me.Z} > 30)
+		{
+			call ISXRIPause
+			call DMove -381 88 7 3 30 TRUE TRUE
+			call DMove -324 90 24 3 30 TRUE TRUE
+			call DMove -283 88 165 3 30 TRUE TRUE
+			call ISXRIResume
+		}	
+		if (${Me.X} < -140 && ${Me.X} > -160 &&  ${Me.Y} < 85 && ${Me.Y} > 75 && ${Me.Z} < 280 && ${Me.Z} > 260)
+		{
+			call ISXRIPause
+			call DMove -168 82 270 3 30 TRUE TRUE
+			call DMove -91 82 312 3 30 TRUE TRUE
+			call ISXRIResume
+		}	
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
 		{
 			RZObj:Pause

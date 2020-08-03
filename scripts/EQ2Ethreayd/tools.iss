@@ -1392,10 +1392,7 @@ function AutoLogin(string T1, string T2,string T3, string T4,string T5, string T
 	variable int i=0
 	variable index:string ToonName
 	;echo ZoneName is ${Zone.Name}
-	while (!${ISXEQ2.IsReady})
-	{
-		wait 10
-	}
+
 	for ( i:Set[1] ; ${i} <= 6 ; i:Inc )
 	{
 		if ${T${i}(exists)}
