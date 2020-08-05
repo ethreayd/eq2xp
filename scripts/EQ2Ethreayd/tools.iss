@@ -616,10 +616,19 @@ function ActivateVerbOnPhantomActor(string verb, float RespectDistance, float Pr
 	}	
 	return ${ActorID}
 }
-function AltTSUp(int Timeout)
+function goNPC(string NPCName, string Where, string How)
+{
+	call go${NPCName.Replace[" ","_"]}
+}
+function AltTSUp(int Timeout, string NPCName)
 {
 	variable int Counter=0
 	variable bool DoAltTSUp
+	
+	if (${NPCName.Length}<1)
+		NPCName:Set["Dercin Marrbrand"]
+	if ${OgreBotAPI.KWAble}
+		NPCName:Set["Londiar Inygad"]
 	
 	echo checking if I am at max Adorning/Tinkering/Transmuting
 	call CheckIfMaxAdorning
@@ -652,8 +661,9 @@ function AltTSUp(int Timeout)
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
+	
 	echo cleaning Quests journal and related inventory items
-	QuestJournalWindow.ActiveQuest["All Purporse Sprockets"]:Delete
+	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
 	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
 	Me.Inventory["Box of Old Boots"]:Destroy
 	Me.Inventory["Box of Tinkering Materials"]:Destroy
@@ -663,15 +673,17 @@ function AltTSUp(int Timeout)
 	Me.Inventory["Crystalline Fillament"]:Destroy
 	Me.Inventory["Protective Fragment"]:Destroy
 	Me.Inventory["Warding Powder"]:Destroy
-	call goDercin_Marrbrand ${Timeout}
+	Me.Inventory["Infusion of Faith"]:Destroy
+	
+	call go${NPCName.Replace[" ","_"]} ${Timeout}
 	if (!${Return})
 		return TRUE
 	wait 50
-	call Converse "Dercin Marrbrand" 4
+	call Converse "${NPCName}" 4
 	wait 20
-	call Converse "Dercin Marrbrand" 4
+	call Converse "${NPCName}" 4
 	wait 20
-	call Converse "Dercin Marrbrand" 4
+	call Converse "${NPCName}" 4
 	wait 20
 
 	call CheckIfMaxTransmuting
@@ -681,7 +693,7 @@ function AltTSUp(int Timeout)
 		wait 50
 		call TransmuteAll "A worn pair of boots"
 		wait 50
-		call Converse "Dercin Marrbrand" 2
+		call Converse "${NPCName}" 2
 		wait 20
 	}
 	call CheckIfMaxAdorning
@@ -691,9 +703,9 @@ function AltTSUp(int Timeout)
 		wait 50
 		call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
 		wait 20
-		call goDercin_Marrbrand ${Timeout}
+		call go${NPCName.Replace[" ","_"]} ${Timeout}
 		wait 20
-		call Converse "Dercin Marrbrand" 2
+		call Converse "${NPCName}" 2
 		wait 20
 	}
 	call CheckIfMaxTinkering
@@ -703,9 +715,9 @@ function AltTSUp(int Timeout)
 		wait 50
 		call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
 		wait 20
-		call goDercin_Marrbrand ${Timeout}
+		call go${NPCName.Replace[" ","_"]} ${Timeout}
 		wait 20
-		call Converse "Dercin Marrbrand" 2
+		call Converse "${NPCName}" 2
 		wait 20
 	}
 	echo go to Guild Hall (with auto fix of stay forever there bug)
@@ -5701,7 +5713,13 @@ function CheckIfLeader(string ActorName)
 
 function CheckIfMaxAdorning()
 {
-	if (${OgreBotAPI.SpewStat[currentadorning]}<${OgreBotAPI.SpewStat[maxadorning]})
+	variable int MaxAdorning
+	if ${OgreBotAPI.SpewStat[maxadorning]}<1
+		MaxAdorning:Set[${Math.Calc64[${Me.Level}*5]}]
+	else
+		MaxAdorning:Set[${OgreBotAPI.SpewStat[maxadorning]}]
+	
+	if (${OgreBotAPI.SpewStat[currentadorning]}<${MaxAdorning})
 		return FALSE
 	else
 		return TRUE

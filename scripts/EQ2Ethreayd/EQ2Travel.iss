@@ -473,6 +473,34 @@ function goFordelMidst()
 		call DMove 112 68 -616 3 30 TRUE FALSE 3
 	}	
 }
+function goLondiar_Inygad(int Timeout)
+{
+	variable int Counter
+	variable float loc0
+	if (${Timeout}<1)
+		Timeout:Set[600]
+	call goZone "Timorous Deep" Globe
+	wait 50
+	if ${OgreBotAPI.KWAble}
+	{
+		OgreBotAPI:KWL["${Me.Name}",2792,121,1240]
+		call TestArrivalCoord 2792 121 1240
+		if (!${Return})
+		{
+			echo bug using KW to 2792 121 1240
+			return FALSE
+		}
+	}
+	else
+	{
+		echo need to write regular path for this NPC
+		return FALSE
+	}
+	call MoveCloseTo "Londiar Inygad"
+	return TRUE
+}
+
+
 function goDercin_Marrbrand(int Timeout)
 {
 	variable int Counter
