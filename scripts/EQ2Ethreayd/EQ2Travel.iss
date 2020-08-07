@@ -360,46 +360,62 @@ function goSanctusSeru()
 	{
 		if (${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 		{
-			if (${Me.X} < 120 && ${Me.X} > 100 &&  ${Me.Y} < 75 && ${Me.Y} > 45 && ${Me.Z} < -600 && ${Me.Z} > -670)
+			if (!${OgreBotAPI.KWAble})
 			{
-				call DMove 113 67 -622 3
-				call DMove 94 72 -596 3
-				call DMove 120 83 -545 3
-				call DMove 121 85 -526 3 30 FALSE FALSE 3
-				call DMove 162 82 -463 3
-				call 3DNav 160 151 -453
-				call 3DNav 231 151 -329
-				call 3DNav 270 151 -263
-				call 3DNav 402 160 -194
-				call 3DNav 549 160 -377
-				call 3DNav 647 160 -446
-				call GoDown
-				call DMove 633 96 -512 3
-				call DMove 576 119 -533 3
-				call DMove 468 132 -480 3
-				call DMove 453 133 -484 3 30 FALSE FALSE 3
+				if (${Me.X} < 120 && ${Me.X} > 100 &&  ${Me.Y} < 75 && ${Me.Y} > 45 && ${Me.Z} < -600 && ${Me.Z} > -670)
+				{
+					call DMove 113 67 -622 3
+					call DMove 94 72 -596 3
+					call DMove 120 83 -545 3
+					call DMove 121 85 -526 3 30 FALSE FALSE 3
+					call DMove 162 82 -463 3
+					call 3DNav 160 151 -453
+					call 3DNav 231 151 -329
+					call 3DNav 270 151 -263
+					call 3DNav 402 160 -194
+					call 3DNav 549 160 -377
+					call 3DNav 647 160 -446
+					call GoDown
+					call DMove 633 96 -512 3
+					call DMove 576 119 -533 3
+					call DMove 468 132 -480 3
+					call DMove 453 133 -484 3 30 FALSE FALSE 3
+				}
+				else
+				{
+					call goto_GH
+					call goSanctusSeru
+					return
+				}
 			}
 			else
 			{
-				call goto_GH
-				call goSanctusSeru
-				return
-			}
+				call KWMove 453 133 -484
+				wait 150
+			}	
 		}
 		else
 		{
 			call goZone "The Blinding"
-			if (${Me.Y}>250)
+			if (!${OgreBotAPI.KWAble})
 			{
-				call 3DNav 85 400 -184
+				if (${Me.Y}>250)
+				{
+					call 3DNav 85 400 -184
+					call GoDown
+					call 3DNav -269 125 132
+					call GoDown
+				}
+				call 3DNav 516 120 532
 				call GoDown
-				call 3DNav -269 125 132
-				call GoDown
+				call DMove 616 43 593 3
+				call DMove 722 58 708 3
 			}
-			call 3DNav 516 120 532
-			call GoDown
-			call DMove 616 43 593 3
-			call DMove 722 58 708 3
+			else
+			{
+				call KWMove 722 58 708
+				wait 150
+			}	
 			oc !c -Zone ${Me.Name}
 			do
 			{
@@ -412,6 +428,8 @@ function goSanctusSeru()
 	}
 	else
 	{
+		if (${OgreBotAPI.KWAble})
+			call KWMove -276 181 0
 		call TestArrivalCoord -276 181 0
 		if ${Return}
 			echo I am in Sanctus Seru (${Zone.Name})
@@ -483,13 +501,8 @@ function goLondiar_Inygad(int Timeout)
 	wait 50
 	if ${OgreBotAPI.KWAble}
 	{
-		OgreBotAPI:KWL["${Me.Name}",2792,121,1240]
-		call TestArrivalCoord 2792 121 1240
-		if (!${Return})
-		{
-			echo bug using KW to 2792 121 1240
-			return FALSE
-		}
+		call KWMove 2792 121 1240
+		return ${Return}
 	}
 	else
 	{
@@ -509,7 +522,7 @@ function goDercin_Marrbrand(int Timeout)
 		Timeout:Set[600]
 	call goMyrist
 	wait 50
-	if (${OgreBotAPI.KWAble})
+	if (!${OgreBotAPI.KWAble})
 	{
 		if (${Me.Y}<15)
 		{
@@ -584,7 +597,10 @@ function goDercin_Marrbrand(int Timeout)
 		}
 	}
 	else
-		OgreBotAPI:KWL["${Me.Name}",649,411,20]
+	{
+		call KWMove 649 411 20
+		wait 150
+	}
 	if (${Me.Y}>410)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 

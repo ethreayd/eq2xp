@@ -661,20 +661,7 @@ function AltTSUp(int Timeout, string NPCName)
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
-	/*
-	echo cleaning Quests journal and related inventory items
-	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
-	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
-	Me.Inventory["Box of Old Boots"]:Destroy
-	Me.Inventory["Box of Tinkering Materials"]:Destroy
-	Me.Inventory["Box of Adorning Materials"]:Destroy
-	Me.Inventory["Metal Sheeting"]:Destroy
-	Me.Inventory["Conducting Diode"]:Destroy
-	Me.Inventory["Crystalline Fillament"]:Destroy
-	Me.Inventory["Protective Fragment"]:Destroy
-	Me.Inventory["Warding Powder"]:Destroy
-	Me.Inventory["Infusion of Faith"]:Destroy
-	*/
+
 	call go${NPCName.Replace[" ","_"]} ${Timeout}
 	if (!${Return})
 		return TRUE
@@ -699,28 +686,58 @@ function AltTSUp(int Timeout, string NPCName)
 	call CheckIfMaxAdorning
 	if (!${Return})
 	{
-		echo Doing Adorning tasks for AltTSUp
-		Me.Inventory["Box of Adorning Materials"]:Unpack
-		wait 300
-		call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
-		wait 20
-		call go${NPCName.Replace[" ","_"]} ${Timeout}
-		wait 20
-		call Converse "${NPCName}" 2
-		wait 20
+		call CheckQuest "Daily Adorning"
+		if (${Return})
+		{
+			echo Doing Adorning tasks for AltTSUp
+			Me.Inventory["Box of Adorning Materials"]:Unpack
+			wait 300
+			call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
+			wait 20
+			if (${Return})
+			{
+				call go${NPCName.Replace[" ","_"]} ${Timeout}
+				wait 20
+				call Converse "${NPCName}" 2
+				wait 20
+			}
+			else
+			{
+				QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
+				Me.Inventory["Box of Adorning Materials"]:Destroy
+				Me.Inventory["Protective Fragment"]:Destroy
+				Me.Inventory["Warding Powder"]:Destroy
+				Me.Inventory["Infusion of Faith"]:Destroy
+			}
+		}
 	}
 	call CheckIfMaxTinkering
 	if (!${Return})
 	{
-		echo Doing Tinkering tasks for AltTSUp
-		Me.Inventory["Box of Tinkering Materials"]:Unpack
-		wait 300
-		call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
-		wait 20
-		call go${NPCName.Replace[" ","_"]} ${Timeout}
-		wait 20
-		call Converse "${NPCName}" 2
-		wait 20
+		call CheckQuest "All Purpose Sprockets"
+		if (${Return})
+		{
+			echo Doing Tinkering tasks for AltTSUp
+			Me.Inventory["Box of Tinkering Materials"]:Unpack
+			wait 300
+			call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
+			wait 20
+			if (${Return})
+			{
+				call go${NPCName.Replace[" ","_"]} ${Timeout}
+				wait 20
+				call Converse "${NPCName}" 2
+				wait 20
+			}
+			else
+			{
+				QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
+				Me.Inventory["Box of Tinkering Materials"]:Destroy
+				Me.Inventory["Metal Sheeting"]:Destroy
+				Me.Inventory["Conducting Diode"]:Destroy
+				Me.Inventory["Crystalline Fillament"]:Destroy
+			}
+		}
 	}
 	echo go to Guild Hall (with auto fix of stay forever there bug)
 	do
@@ -737,6 +754,16 @@ function AltTSUp(int Timeout, string NPCName)
 	while (!${Me.Ability["Call to Guild Hall"].IsReady} || ${Counter}>${Timeout})
 	call goto_GH TRUE
 	echo AltTSUp done
+	call CheckQuest "Daily Adorning"
+	echo CheckQuest "Daily Adorning" returns ${Return}
+	if (${Return})
+		call AltTSUp
+	call CheckQuest "All Purpose Sprockets"
+	echo CheckQuest "All Purpose Sprockets" returns ${Return}
+	if (${Return})
+		call AltTSUp
+	if (${EQ2UIPage[Tradeskills,Tradeskills].IsVisible})
+		EQ2UIPage[Tradeskills,Tradeskills]:Close
 	return TRUE
 }
 function NavRegroup(bool Force)
@@ -990,8 +1017,25 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 	}
 	return TRUE
 }
+function KWMove(float X, float Y, float Z, bool Grouped)
+{
+	if ${Grouped}
+		OgreBotAPI:KWL[All,${X},${Y},${Z}]
+	else
+		OgreBotAPI:KWL["${Me.Name}",${X},${Y},${Z}]
+		call TestArrivalCoord ${X} ${Y} ${Z}
+		if (!${Return})
+		{
+			echo bug using KW to ${X} ${Y} ${Z} (${Grouped})
+			return FALSE
+		}
+	return TRUE
+}
 function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessources, bool QuestCraft, string QuestName)
 {
+	echo in AutoCraft ${tool} ${myrecipe} ${quantity} ${IgnoreRessources} ${QuestCraft} "${QuestName}"
+	call ForceRecipe "${myrecipe}"
+	echo {Me.Recipe["${myrecipe}"](exists)} : ${Me.Recipe["${myrecipe}"](exists)}
 	if (${Me.Recipe["${myrecipe}"](exists)})
 	{
 		if (${QuestCraft})
@@ -1058,9 +1102,13 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 			wait 20
 			ogre end craft
 		}
+		return TRUE
 	}
 	else
+	{
 		echo Error in function AutoCraft ${myrecipe} does not exist
+		return FALSE
+	}	
 }
 function AutoGroup(float Distance)
 {
@@ -2586,6 +2634,12 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	if (${Me.IsDead})
 		return TRUE
 	
+	if (${OgreBotAPI.KWAble})
+	{
+		call KWMove ${X} ${Y} ${Z}
+		return TRUE
+	}	
+	
 	if ${Precision}<1
 		Precision:Set[10]
 	
@@ -3210,6 +3264,18 @@ function goto_GH()
 		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 			call goto_GH
 	}
+}
+function ForceRecipe(string RecipeName)
+{
+	if (!${EQ2UIPage[Tradeskills,Tradeskills].IsVisible})
+		press n
+	wait 50
+	EQ2UIPage[Tradeskills,Tradeskills].Child[Composite,TabPages].Child[2].Child[4].Child[3]:SetProperty[text,""]
+	EQ2UIPage[Tradeskills,Tradeskills].Child[Composite,TabPages].Child[2].Child[4].Child[3]:AppendText["${RecipeName}"]
+	EQ2UIPage[Tradeskills,Tradeskills].Child[Composite,TabPages].Child[2].Child[4].Child[4]:LeftClick
+	wait 100
+	if (${EQ2UIPage[Tradeskills,Tradeskills].IsVisible})
+		EQ2UIPage[Tradeskills,Tradeskills]:Close
 }
 function goto_House()
 {
