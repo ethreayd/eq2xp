@@ -627,8 +627,8 @@ function AltTSUp(int Timeout, string NPCName)
 	
 	if (${NPCName.Length}<1)
 		NPCName:Set["Dercin Marrbrand"]
-	if ${OgreBotAPI.KWAble}
-		NPCName:Set["Londiar Inygad"]
+	;if ${OgreBotAPI.KWAble}
+	;	NPCName:Set["Londiar Inygad"]
 	
 	echo checking if I am at max Adorning/Tinkering/Transmuting
 	call CheckIfMaxAdorning
@@ -661,7 +661,7 @@ function AltTSUp(int Timeout, string NPCName)
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
-	
+	/*
 	echo cleaning Quests journal and related inventory items
 	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
 	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
@@ -674,7 +674,7 @@ function AltTSUp(int Timeout, string NPCName)
 	Me.Inventory["Protective Fragment"]:Destroy
 	Me.Inventory["Warding Powder"]:Destroy
 	Me.Inventory["Infusion of Faith"]:Destroy
-	
+	*/
 	call go${NPCName.Replace[" ","_"]} ${Timeout}
 	if (!${Return})
 		return TRUE
@@ -699,8 +699,9 @@ function AltTSUp(int Timeout, string NPCName)
 	call CheckIfMaxAdorning
 	if (!${Return})
 	{
+		echo Doing Adorning tasks for AltTSUp
 		Me.Inventory["Box of Adorning Materials"]:Unpack
-		wait 50
+		wait 300
 		call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
 		wait 20
 		call go${NPCName.Replace[" ","_"]} ${Timeout}
@@ -711,8 +712,9 @@ function AltTSUp(int Timeout, string NPCName)
 	call CheckIfMaxTinkering
 	if (!${Return})
 	{
+		echo Doing Tinkering tasks for AltTSUp
 		Me.Inventory["Box of Tinkering Materials"]:Unpack
-		wait 50
+		wait 300
 		call AutoCraft "Work Bench" "All Purpose Sprocket" 10 TRUE TRUE "All Purpose Sprockets"
 		wait 20
 		call go${NPCName.Replace[" ","_"]} ${Timeout}

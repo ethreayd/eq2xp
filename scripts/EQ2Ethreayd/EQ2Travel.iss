@@ -509,77 +509,82 @@ function goDercin_Marrbrand(int Timeout)
 		Timeout:Set[600]
 	call goMyrist
 	wait 50
-	if (${Me.Y}<15)
+	if (${OgreBotAPI.KWAble})
 	{
-		press F1
-		wait 20
-		ogre nav "Bottom Lift"
-		do
-		{
-			
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 10
-			Counter:Inc
-			
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				press F1
-				wait 20
-				ogre nav "Bottom Lift"
-			}
-			call TestArrivalCoord 414 -5 -14
-		}
-		while (!${Return} || ${Counter}>${Timeout})
-		if (${Counter}>${Timeout})
-			return FALSE
-		else
-			Counter:Set[0]
-		call DMove 420 -5 -13 3 30 FALSE FALSE 2
-		do
-		{
-			call DMove 418 -5 -15 3 30 FALSE FALSE 2
-			call ActivateVerbOn "Lift Switch Main Floor" "use"
-			wait 10
-		}
-		while (${Me.Y}<15 || ${Counter}>${Timeout})
-		if (${Counter}>${Timeout})
-			return FALSE
-		else
-			Counter:Set[0]
-	}
-	if (${Me.Y}<410 && ${Me.Y}>15)
-	{
-		press F1
-		wait 5
-		ogre nav "Teleporter to Smiths' Gallery"
-		do
-		{
-			wait 10
-			call TestArrivalCoord 389 16 170
-		}
-		while ((!${Return} && ${Me.Y}>15)|| ${Counter}>${Timeout})
-		if (${Counter}>${Timeout})
-			return FALSE
-		else
-			Counter:Set[0]
 		if (${Me.Y}<15)
 		{
-			echo oops I must have gone down again
-			call goDercin_Marrbrand ${Timeout}
+			press F1
+			wait 20
+			ogre nav "Bottom Lift"
+			do
+			{
+				
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				wait 10
+				Counter:Inc
+				
+				call CheckStuck ${loc0}
+				if (${Return})
+				{
+					press F1
+					wait 20
+					ogre nav "Bottom Lift"
+				}
+				call TestArrivalCoord 414 -5 -14
+			}
+			while (!${Return} || ${Counter}>${Timeout})
+			if (${Counter}>${Timeout})
+				return FALSE
+			else
+				Counter:Set[0]
+			call DMove 420 -5 -13 3 30 FALSE FALSE 2
+			do
+			{
+				call DMove 418 -5 -15 3 30 FALSE FALSE 2
+				call ActivateVerbOn "Lift Switch Main Floor" "use"
+				wait 10
+			}
+			while (${Me.Y}<15 || ${Counter}>${Timeout})
+			if (${Counter}>${Timeout})
+				return FALSE
+			else
+				Counter:Set[0]
 		}
-		
-		do
+		if (${Me.Y}<410 && ${Me.Y}>15)
 		{
-			call ActivateVerbOn "Teleporter to Smiths' Gallery" "Touch"
-			wait 100
+			press F1
+			wait 5
+			ogre nav "Teleporter to Smiths' Gallery"
+			do
+			{
+				wait 10
+				call TestArrivalCoord 389 16 170
+			}
+			while ((!${Return} && ${Me.Y}>15)|| ${Counter}>${Timeout})
+			if (${Counter}>${Timeout})
+				return FALSE
+			else
+				Counter:Set[0]
+			if (${Me.Y}<15)
+			{
+				echo oops I must have gone down again
+				call goDercin_Marrbrand ${Timeout}
+			}
+			
+			do
+			{
+				call ActivateVerbOn "Teleporter to Smiths' Gallery" "Touch"
+				wait 100
+			}
+			while (${Me.Y}<410 || ${Counter}>${Timeout} )
+			if (${Counter}>${Timeout})
+				return FALSE
+			else
+				Counter:Set[0]
 		}
-		while (${Me.Y}<410 || ${Counter}>${Timeout} )
-		if (${Counter}>${Timeout})
-			return FALSE
-		else
-			Counter:Set[0]
 	}
+	else
+		OgreBotAPI:KWL["${Me.Name}",649,411,20]
 	if (${Me.Y}>410)
 		call MoveCloseTo "Dercin Marrbrand"
 	else 
