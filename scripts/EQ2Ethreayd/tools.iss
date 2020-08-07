@@ -5192,6 +5192,10 @@ function UseAbility(string MyAbilityName)
 {
 	Me.Ability[Query, ID==${Me.Ability["${MyAbilityName}"].ID}]:Use
 }
+function UseItem((string ItemName, bool NoWait)
+{
+	call UseInventory "${ItemName}" ${NoWait}
+}
 function UseInventory(string ItemName, bool NoWait)
 {
 	;echo in function UseInventory ${ItemName} ${NoWait}

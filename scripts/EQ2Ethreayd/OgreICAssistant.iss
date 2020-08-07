@@ -24,6 +24,7 @@ variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
 variable(script) bool GiveUp
 variable(script) string ZoneName
+variable(script) int ArxCounter=1
 
 function main(string questname)
 {
@@ -65,6 +66,9 @@ function main(string questname)
 			call FordelMidstTheListlessSpiresEventHeroic
 		if (${Zone.Name.Equal["Fordel Midst: Bizarre Bazaar \[Heroic\]"]})
 			call FordelMidstBizarreBazaarHeroic
+		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Divinity \[Heroic\]"]}
+			call Zone_SanctusSeruEchelonofDivinityHeroic
+		
 		ExecuteQueued
 		wait 300
 	}
@@ -207,6 +211,57 @@ function AurelianCoastReishiRumbleEventHeroic()
 function FordelMidstBizarreBazaarHeroic()
 {
 	echo in function FordelMidstBizarreBazaarHeroic (${ZoneTime})
+}
+function Zone_SanctusSeruEchelonofDivinityHeroic()
+{
+	
+	echo in function Zone_SanctusSeruEchelonofDivinityHeroic (${ZoneTime})
+	
+	if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} > 170 && ${Me.Y} < 190 && ${Me.Z} < 10 && ${Me.Z} > -10 && ${ArxCounter}<3 )
+	{
+		echo In front of Arx Seru Door (ArxCounter at ${ArxCounter})
+		call PauseIC
+		wait 50
+		oc !c -Special
+		wait 50
+		relay all run EQ2Ethreayd/wrap ClickOn Door
+		wait 50
+		if ${Me.Y} < 90
+		{
+			call GroupDistance
+			if ${Return}>15
+				relay all run EQ2Ethreayd/wrap ClickOn Door
+		}
+		call ResumeIC
+		ArxCounter:Inc
+	}
+	if (${ArxCounter}>2)
+	{
+		echo Trying to do missed step
+		call PauseIC
+		oc !c -letsgo
+		oc !c -Resume
+		call DMove -226 180 1 3
+		call DMove -170 180 -132 3
+		call DMove -120 176 -163 3
+		call DMove -143 179 -202 3
+		call UseInventory "Horn of the Fallen"
+		wait 300
+		call Converse "Unhilynd" 10
+		call TanknSpank "Unhilynd" 200
+		call DMove -92 176 -174 3
+		call DMove -158 180 -127 3
+		call DMove -222 180 -77 3
+		call DMove -248 181 -7 3
+		call DMove -196 183 -1 3
+		call DMove -244 181 0 3
+		oc !c -CSDefault
+		call TanknSpank "Prysmerah" 100
+		oc !c -letsgo
+		call DMove -196 183 -1 3
+		oc !c -CSDefault
+		call ResumeIC
+	}
 }
 function SelectDifficulty()
 {

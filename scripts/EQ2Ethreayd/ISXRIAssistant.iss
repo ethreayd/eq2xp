@@ -676,7 +676,7 @@ function Zone_SanctusSeruEchelonofDivinitySolo()
 			echo Resuming RZ
 			RZObj:Resume
 		}
-		if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} < 170 && ${Me.Y} > 190 && ${Me.Z} < 10 && ${Me.Z} > -10)
+		if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} > 170 && ${Me.Y} < 190 && ${Me.Z} < 10 && ${Me.Z} > -10)
 		{
 			call ISXRIPause
 			oc !c -Special ${Me.Name}
