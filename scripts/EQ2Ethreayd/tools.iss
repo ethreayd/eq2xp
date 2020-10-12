@@ -692,6 +692,7 @@ function AltTSUp(int Timeout, string NPCName)
 			echo Doing Adorning tasks for AltTSUp
 			Me.Inventory["Box of Adorning Materials"]:Unpack
 			wait 300
+			
 			call AutoCraft "Work Bench" "Adornment of Guarding (Greater)" 10 TRUE TRUE "Daily Adorning"
 			wait 20
 			if (${Return})
@@ -1955,7 +1956,7 @@ function AutoGetFlag()
 {
 	do
 	{
-		call PKey ZOOMOUT 25
+		call ZoomOut
 		oc !c -GetFlag
 		wait 30
 		call CountItem "Tactical Rally Banner"
@@ -5687,10 +5688,7 @@ function GroupToFlag(bool UseToonAssistant)
 	echo waiting for the group to zone
 	do
 	{
-		echo relay all press -hold ZOOMOUT
-		relay all press -hold ZOOMOUT
-		wait 25
-		relay all press -release ZOOMOUT
+		call ZoomOut TRUE
 		oc !c -UseFlag
 		Counter:Set[0]
 		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
@@ -6223,5 +6221,20 @@ function DoEpic(weakref Quests)
 				break
 			}
 		}
+	}
+}
+function ZoomOut(bool ForAll)
+{
+	if (${ForAll})
+	{
+		relay all press -hold ZOOMOUT
+		wait 25
+		relay all press -release ZOOMOUT
+	}
+	else
+	{
+		press -hold ZOOMOUT
+		wait 25
+		press -release ZOOMOUT
 	}
 }
