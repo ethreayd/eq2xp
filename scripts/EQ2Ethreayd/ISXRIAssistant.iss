@@ -288,10 +288,12 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		call MainChecks
 		if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 10 && ${Me.Z} > -10)
 		{
+			echo ${Me.X} in if 1
 			call ActivateVerbOn "circle" "Access"
 		}
 		if (${Me.X} < -355 && ${Me.X} > -385 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 25)
 		{
+			echo ${Me.X} in if 2
 			call ISXRIPause
 			call DMove -389 88 13 3 30 TRUE TRUE
 			call IsPresent "an Echelon vigilant"
@@ -301,6 +303,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -340 && ${Me.X} > -365 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 45 && ${Me.Z} > 30)
 		{
+			echo ${Me.X} in if 3
 			call ISXRIPause
 			call DMove -381 88 7 3 30 TRUE TRUE
 			call DMove -324 90 24 3 30 TRUE TRUE
@@ -309,6 +312,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}	
 		if (${Me.X} < -140 && ${Me.X} > -160 &&  ${Me.Y} < 85 && ${Me.Y} > 75 && ${Me.Z} < 280 && ${Me.Z} > 260)
 		{
+			echo ${Me.X} in if 4
 			call ISXRIPause
 			call DMove -168 82 270 3 30 TRUE TRUE
 			call DMove -91 82 312 3 30 TRUE TRUE
@@ -316,16 +320,17 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}	
 		if (${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < -25 && ${Me.Z} > -40)
 		{
+			echo ${Me.X} in if 5
 			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			}
-			call DMove -389 88 -27 3 30 TRUE
-			call DMove -378 88 -10 3 30 TRUE
-			call DMove -369 91 -28 3 30 TRUE
-			call DMove -363 90 -42 3 30 TRUE
+			call DMove -389 88 -27 3 30 TRUE TRUE 5
+			call DMove -378 88 -10 3 30 TRUE TRUE 5
+			call DMove -369 91 -28 3 30 TRUE TRUE 5
+			call DMove -363 90 -42 3 30 TRUE TRUE 5
 			if (${RI_Var_Bool_Paused})
 			{
 				echo Resuming ISXRI
@@ -336,6 +341,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -255 && ${Me.X} > -280 &&  ${Me.Y} < 100 && ${Me.Y} > 85 && ${Me.Z} < 120 && ${Me.Z} > 100)
 		{
+			echo ${Me.X} in if 6
 			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
@@ -355,6 +361,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 			press Tab 
 		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -345 && ${Me.X} > -365 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 40 && ${Me.Z} > 20)
 		{
+			echo ${Me.X} in if 7
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -419,6 +426,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -235 && ${Me.X} > -255 &&  ${Me.Y} < 95 && ${Me.Y} > 85 && ${Me.Z} < 150 && ${Me.Z} > 130)
 		{
+			echo ${Me.X} in if 8
 			RZObj:Pause
 			if (!${RI_Var_Bool_Paused})
 			{
@@ -448,6 +456,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -270 && ${Me.X} > -290 &&  ${Me.Y} < 95 && ${Me.Y} > 80 && ${Me.Z} < 110 && ${Me.Z} > 95)
 		{
+			echo ${Me.X} in if 9
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -466,6 +475,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -200 && ${Me.X} > -220 &&  ${Me.Y} < 95 && ${Me.Y} > 80 && ${Me.Z} < -215 && ${Me.Z} > -235)
 		{
+			echo ${Me.X} in if 10
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -485,6 +495,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		ExecuteQueued
 		if (${Me.InCombatMode} && (${Me.Target.Distance}>10 || ${CantSeeTarget}) && ${Me.X} < -75 && ${Me.X} > -95 &&  ${Me.Y} < 95 && ${Me.Y} > 75 && ${Me.Z} < 285 && ${Me.Z} > 265)
 		{
+			echo ${Me.X} in if 11
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -510,11 +521,13 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.InCombatMode} && ${Me.X} < -140 && ${Me.X} > -160 &&  ${Me.Y} < 90 && ${Me.Y} > 75 && ${Me.Z} < -290 && ${Me.Z} > -310)
 		{
+			echo ${Me.X} in if 12
 			press Tab
 			wait 300
 		}
 		if (${Me.X} < -160 && ${Me.X} > -190 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < 235 && ${Me.Z} > 210)
 		{
+			echo ${Me.X} in if 13
 			if (!${RI_Var_Bool_Paused})
 			{
 				echo Pausing ISXRI - ISXRIAssistant is taking over until @Herculezz fix the damn thing
@@ -537,6 +550,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -205 && ${Me.X} > -225 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -170 && ${Me.Z} > -190)
 		{
+			echo ${Me.X} in if 14
 			RZObj:Pause
 
 			if (!${RI_Var_Bool_Paused})
@@ -558,6 +572,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -250 && ${Me.X} > -275 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -80 && ${Me.Z} > -110)
 		{
+			echo ${Me.X} in if 15
 			call ISXRIPause
 			
 			echo fixing Seru stucked
@@ -567,6 +582,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -170 && ${Me.X} > -195 &&  ${Me.Y} < 100 && ${Me.Y} > 75 && ${Me.Z} < -220 && ${Me.Z} > -240)
 		{
+			echo ${Me.X} in if 16
 			call ISXRIPause
 			
 			echo fixing Seru stucked
@@ -578,6 +594,7 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (${Me.X} < -75 && ${Me.X} > -95 &&  ${Me.Y} < 90 && ${Me.Y} > 80 && ${Me.Z} < 280 && ${Me.Z} > 260)
 		{
+			echo ${Me.X} in if 17
 			RZObj:Pause
 
 			if (!${RI_Var_Bool_Paused})
@@ -608,21 +625,36 @@ function Zone_SanctusSeruEchelonofOrderSolo()
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < -340 && ${Me.X} > -360 &&  ${Me.Y} < 100 && ${Me.Y} > 80 && ${Me.Z} < -30 && ${Me.Z} > -50)
 		{
+			echo ${Me.X} in if 18
 			RZObj:Pause
 			call RIStop
 			
 			wait 100
-			
 			call DMove -360 90 -13 3
 			call DMove -402 88 0 3
-			RI
-			wait 100
-			RICrashed:Set[0]
-			UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call IsPresent "Lady Warglave"
+			if (!${Return})
+			{	
+				RI
+				wait 100
+				RICrashed:Set[0]
+				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+				
+			}
+			else
+			{
+				call MoveCloseTo "Lady Warglave"
+				call TanknSpank "Lady Warglave"
+				call MoveCloseTo "Exit"
+				do
+				{
+					call ActivateVerbOn "Exit" "Exit"
+					wait 100
+				}	
+				while (${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Solo\]"]})
+			}
 			echo Resuming RZ
 			RZObj:Resume
-			
-			
 			if (${RI_Var_Bool_Paused})
 			{
 				echo Resuming ISXRI

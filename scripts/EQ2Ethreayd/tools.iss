@@ -917,7 +917,6 @@ function AutoAddQuest(bool EraseDuplicate)
 		Items:GetIterator[ItemIterator]
 		if ${ItemIterator:First(exists)}
 		{
-			
 			do
 			{
 				Counter3:Inc
@@ -1494,13 +1493,16 @@ function ChargeOverseer()
 	for ( i:Set[1] ; ${i} <= ${MerchantWindow.NumMerchantItemsForSale} ; i:Inc )
 	{
 		ItemName:Set["${MerchantWindow.MerchantInventory[${i}]}"]
-		echo counting number of "${ItemName}" in bags
-		call CountItem "${ItemName}"
-		
-		if (${Return}<${max})
-			call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${Math.Calc64[${max}-${Return}]} TRUE
-		echo AutoAddQuest Now !
-		call AutoAddQuest TRUE
+		if (!${ItemName.Equal["An Overseer's First Agents"]})
+		{
+			echo counting number of "${ItemName}" in bags
+			call CountItem "${ItemName}"
+			
+			if (${Return}<${max})
+				call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${Math.Calc64[${max}-${Return}]} TRUE
+			echo AutoAddQuest Now !
+			call AutoAddQuest TRUE
+		}
 	}
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WC_CloseButton]:LeftClick
