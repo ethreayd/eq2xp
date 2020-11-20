@@ -925,10 +925,18 @@ function AutoAddQuest(bool EraseDuplicate)
 					call IsOverseerQuest "${ItemIterator.Value.Name}"
 					if ${Return}
 					{
-						echo adding "${ItemIterator.Value.Name}"
-						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
-						Counter:Inc
-						wait 10
+						if (${ItemIterator.Value.Name.Equal["An Overseer's First Agents"]})
+						{
+							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Unpack
+							wait 10
+						}
+						else
+						{
+							echo adding "${ItemIterator.Value.Name}"
+							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
+							Counter:Inc
+							wait 10
+						}
 					}
 				}
 			}	
