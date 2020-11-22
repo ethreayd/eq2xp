@@ -658,6 +658,24 @@ function AltTSUp(int Timeout, string NPCName)
 	if (!${DoAltTSUp})
 		return FALSE
 	
+	call Log Cleaning Everything to avoid quest bugs
+	
+	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
+	Me.Inventory["Box of Adorning Materials"]:Destroy
+	Me.Inventory["Protective Fragment"]:Destroy
+	Me.Inventory["Warding Powder"]:Destroy
+	Me.Inventory["Infusion of Faith"]:Destroy
+	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
+	Me.Inventory["Box of Tinkering Materials"]:Destroy
+	Me.Inventory["Metal Sheeting"]:Destroy
+	Me.Inventory["Conducting Diode"]:Destroy
+	Me.Inventory["Crystalline Fillament"]:Destroy
+	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
+	Me.Inventory["Box of Tinkering Materials"]:Destroy
+	Me.Inventory["Metal Sheeting"]:Destroy
+	Me.Inventory["Conducting Diode"]:Destroy
+	Me.Inventory["Crystalline Fillament"]:Destroy
+	
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
@@ -922,21 +940,22 @@ function AutoAddQuest(bool EraseDuplicate)
 				Counter3:Inc
 				if (${ItemIterator.Value.Name(exists)})
 				{
+					if (${ItemIterator.Value.Name.Equal["An Overseer's First Agents"]} || ${ItemIterator.Value.Name.Equal["Overseer Quests"]} || ${ItemIterator.Value.Name.Find["Overseer Pack"]}>0)
+					{
+							call Log Found "${ItemIterator.Value.Name}" to unpack
+							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Unpack
+							wait 10
+							call AutoAddQuest FALSE
+					}
 					call IsOverseerQuest "${ItemIterator.Value.Name}"
 					if ${Return}
 					{
-						if (${ItemIterator.Value.Name.Equal["An Overseer's First Agents"]})
-						{
-							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Unpack
-							wait 10
-						}
-						else
-						{
-							echo adding "${ItemIterator.Value.Name}"
-							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
-							Counter:Inc
-							wait 10
-						}
+						
+						call Log adding "${ItemIterator.Value.Name}"
+						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
+						Counter:Inc
+						wait 10
+						
 					}
 				}
 			}	
@@ -5175,17 +5194,22 @@ function Toggle_FORCEPOTIONS()
 
 function Transmute(string ItemName)
 {
-	echo in Transmute
-	call UseAbility Transmute
-	wait 5
-	Me.Inventory[Query, Name =- "${ItemName}"]:Transmute
-	wait 5
-	call AcceptReward TRUE
-	echo out Transmute
+	;echo in Transmute
+	echo if (${Math.Calc64[(${Me.Inventory[Query, Name =- "${ItemName}"].EffectiveLevel}-5)*5]} <= ${OgreBotAPI.SpewStat[currenttransmuting]})
+	if (${Math.Calc64[(${Me.Inventory[Query, Name =- "${ItemName}"].EffectiveLevel}-5)*5]} <= ${OgreBotAPI.SpewStat[currenttransmuting]})
+	{
+		call UseAbility Transmute
+		wait 5
+		Me.Inventory[Query, Name =- "${ItemName}"]:Transmute
+		wait 5
+		call AcceptReward TRUE
+	}
+	;echo out Transmute
 }
 function TransmuteAll(string ItemName)
 {
 	variable int i
+	variable int Counter
 	echo in TransmuteAll
 	call CountItem "${ItemName}"
 	echo transmuting ${Return} ${ItemName} (in TransmuteAll)
@@ -5195,9 +5219,10 @@ function TransmuteAll(string ItemName)
 		{
 			call Transmute "${ItemName}"
 			wait 10
+			Counter:Inc
 			call CountItem "${ItemName}"
 		}
-		while (${Return}>0)
+		while (${Return}>0 && ${Counter}<50)
 	}
 	echo out of TransmuteAll loop
 	call CountItem "${ItemName}"
