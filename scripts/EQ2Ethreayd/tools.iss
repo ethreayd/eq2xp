@@ -620,7 +620,7 @@ function goNPC(string NPCName, string Where, string How)
 {
 	call go${NPCName.Replace[" ","_"]}
 }
-function AltTSUp(int Timeout, string NPCName)
+function AltTSUp(int Timeout, string NPCName, bool Purge)
 {
 	variable int Counter=0
 	variable bool DoAltTSUp
@@ -658,24 +658,26 @@ function AltTSUp(int Timeout, string NPCName)
 	if (!${DoAltTSUp})
 		return FALSE
 	
-	call Log Cleaning Everything to avoid quest bugs
+	if (${Purge})
+	{
+		call Log Purging Quest and associated items
 	
-	QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
-	Me.Inventory["Box of Adorning Materials"]:Destroy
-	Me.Inventory["Protective Fragment"]:Destroy
-	Me.Inventory["Warding Powder"]:Destroy
-	Me.Inventory["Infusion of Faith"]:Destroy
-	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
-	Me.Inventory["Box of Tinkering Materials"]:Destroy
-	Me.Inventory["Metal Sheeting"]:Destroy
-	Me.Inventory["Conducting Diode"]:Destroy
-	Me.Inventory["Crystalline Fillament"]:Destroy
-	QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
-	Me.Inventory["Box of Tinkering Materials"]:Destroy
-	Me.Inventory["Metal Sheeting"]:Destroy
-	Me.Inventory["Conducting Diode"]:Destroy
-	Me.Inventory["Crystalline Fillament"]:Destroy
-	
+		QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
+		Me.Inventory["Box of Adorning Materials"]:Destroy
+		Me.Inventory["Protective Fragment"]:Destroy
+		Me.Inventory["Warding Powder"]:Destroy
+		Me.Inventory["Infusion of Faith"]:Destroy
+		QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
+		Me.Inventory["Box of Tinkering Materials"]:Destroy
+		Me.Inventory["Metal Sheeting"]:Destroy
+		Me.Inventory["Conducting Diode"]:Destroy
+		Me.Inventory["Crystalline Fillament"]:Destroy
+		QuestJournalWindow.ActiveQuest["All Purpose Sprockets"]:Delete
+		Me.Inventory["Box of Tinkering Materials"]:Destroy
+		Me.Inventory["Metal Sheeting"]:Destroy
+		Me.Inventory["Conducting Diode"]:Destroy
+		Me.Inventory["Crystalline Fillament"]:Destroy
+	}
 	if (${Timeout}<1)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
@@ -1693,10 +1695,12 @@ function GetNodeType(string ActorName)
 		return "Stone"
 	if ${ActorName.Find["formation"]}>0
 		return "Stone"
+	if ${ActorName.Find["ryjesium"]}>0
+		return "Stone"
 	if ${ActorName.Find["stone"]}>0
 		return "Stone"
-	if ${ActorName.Find["ryjesium"]}>0
-		return "Stone"	
+	if ${ActorName.Find[" vein"]}>0
+		return "Stone"
 	if ${ActorName.Find[" foot"]}>0
 		return "Root"
 	if ${ActorName.Find["root"]}>0
