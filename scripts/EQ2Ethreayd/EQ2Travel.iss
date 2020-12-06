@@ -264,16 +264,21 @@ function goAurelianCoast()
 	{
 		echo Going to Aurelian Coast
 		call goZone "The Blinding"
-		if (${Me.Y}>250)
+		if (!${OgreBotAPI.KWAble})
 		{
-			call 3DNav 85 400 -184
-			call GoDown
-			call 3DNav -269 125 132
+			if (${Me.Y}>250)
+			{
+				call 3DNav 85 400 -184
+				call GoDown
+				call 3DNav -269 125 132
+				call GoDown
+			}
+			call 3DNav 516 120 532
 			call GoDown
 		}
-		call 3DNav 516 120 532
+		call DMove 754 38 624 3
+		wait 20
 		call GoDown
-		call DMove 754 37 624 3
 		face 879 590
 		press -hold MOVEFORWARD
 		wait 30
@@ -466,10 +471,32 @@ function goSanctusSeru()
 		}
 	}	
 }
-
+function goObulusFrontier(bool NoTotem)
+{
+	call Log "in function goObulusFrontier(${NoTotem})"
+	if (!${NoTotem})
+	{
+		call Log "Using Twark Teleport"
+		call UseInventory "Twark Transport Totem"
+		call waitfor_Zone "Obulus Frontier"
+	}
+	call Log "end of goObulusFrontier(${NoTotem}) function"
+}
+function goNyeCaelona(bool NoTotem)
+{
+	call Log "in function goNyeCaelona(${NoTotem})"
+	call goObulusFrontier ${NoTotem}
+	wait 50
+	call navwrap -215 91 -186
+}
 function goFordelMidst()
 {
 	echo going to Fordel Midst
+	if (${Zone.Name.Left[15].Equal["Aurelian Coast"]} && ${OgreBotAPI.KWAble})
+		call KWMove 112 68 -616
+	
+	wait 20
+	
 	if (${Zone.Name.Left[15].Equal["Aurelian Coast"]} && ${Me.X} < 120 && ${Me.X} > 100 &&  ${Me.Y} < 75 && ${Me.Y} > 45 && ${Me.Z} < -600 && ${Me.Z} > -670)
 	{
 		echo Already in Fordel Midst
@@ -477,6 +504,7 @@ function goFordelMidst()
 	else
 	{
 		call goAurelianCoast
+		wait 50
 		call DMove 623 99 -512 3 30 TRUE FALSE 5
 		call DMove 643 92 -473 3 30 TRUE FALSE 5
 		call 3DNav 591 110 -386

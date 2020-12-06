@@ -26,7 +26,183 @@ variable(globalkeep) int PollCounter
 variable(globalkeep) int ISNotLogged
 variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
 variable(globalkeep) bool NODEBUG
-variable(global) bool NoNavWrap 
+variable(global) bool NoNavWrap
+variable(script) bool REBOOT
+variable(script) bool SKIP
+
+function ActorPort(string ActorName)
+{
+	call Port ${Me.Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Y} ${Actor["${ActorName}"].Z}
+}
+function TargetPort()
+{
+	call Port ${Me.Name} ${Target.X} ${Target.Y} ${Target.Z}
+}
+function Port(string Who, float X, float Y, float Z)
+{
+	if (${Who(exists)} && ${OgreBotAPI.KWAble} )
+		oc !c -kwl ${Who} ${X} ${Y} ${Z}
+}
+function TPHarvest(string Node, int Try)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable float X0
+	variable float Y0
+	variable float Z0
+	variable float X
+	variable float Y
+	variable float Z
+	variable int i
+	variable int Count
+	variable int TryCount
+	variable int CombatCount
+	variable int NodeCount
+	variable string NodeType
+	
+	if (!${OgreBotAPI.KWAble})
+	{
+		call Harvest
+		return
+	}
+		
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	echo entering TPHarvest function ${ItemName} ${Safe} v2
+	X0:Set[${Me.X}] 
+	Y0:Set[${Me.Y}]
+	Z0:Set[${Me.Z}]
+	
+	do
+	{
+		if (${Me.IsDead})
+			oc !c -Revive ${Me.Name}
+		EQ2:QueryActors[Actors, Type == "Resource"]
+		Actors:GetIterator[ActorIterator]
+		if ${ActorIterator:First(exists)}
+		{
+			ogre harvestlite
+			eq2execute merc resume
+			do
+			{
+				X:Set[${ActorIterator.Value.X}] 
+				Y:Set[${ActorIterator.Value.Y}]
+				Z:Set[${ActorIterator.Value.Z}]
+				Count:Set[0]
+				SKIP:Set[FALSE]
+				call Port ${Me.Name} ${X} ${Y} ${Z}
+				wait 10
+				if ${Me.FlyingUsingMount}
+					call GoDown
+				call GetNodeType "${ActorIterator.Value.Name}"
+				NodeType:Set["${Return}"]
+				if (${NodeType.Equal["Shiny"]} || ${NodeType.Equal["Unknown"]})
+					wait 20
+				if (${NodeType.Equal["Buggy"]})
+					SKIP:Set[TRUE]
+				echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] is a ${Return} Node (Skip:${SKIP})
+				
+				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<30 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
+				{
+					;target "${ActorIterator.Value.Name}"
+					
+					TryCount:Inc
+					if (${Me.InCombatMode})
+						CombatCount:Inc
+					if (${CombatCount}>60)
+					{
+						echo Combat Count at ${CombatCount}
+						press Tab
+					}
+					wait 5
+					if (${Me.InCombatMode} && !${Me.Target.IsAggro})
+					{
+						press Tab
+					}
+					if (${ActorIterator.Value.Distance}>5)
+						call Port ${Me.Name} ${X} ${Y} ${Z}
+					if ${Me.Health} < 50
+					{
+						call Port ${Me.Name} ${X} ${Math.Calc64[${Y}+600]} ${Z}
+						Count:Inc
+						eq2execute merc backoff
+						wait 5
+						if (${Me.InCombat})
+						{
+							i:Set[${Math.Rand[${Actors.Used}]}]
+							if ${Actors.Used}>0
+								call Port ${Me.Name} ${Actors[${i}].X} ${Actors[${i}].Y} ${Actors[${i}].Z}
+							else
+								call Port ${Me.Name} ${X0} ${Y0} ${Z0}
+							wait 5
+						}
+						while ${Me.Health} < 95
+						{
+							call CastAbility "Bind Wound" TRUE
+							eq2execute merc backoff
+							wait 10
+							if (${Me.InCombat} || ${Me.IsDead})
+								break
+						}
+						call Port ${Me.Name} ${X} ${Y} ${Z}
+					}
+					eq2execute merc resume
+					if (${Me.IsDead})
+						oc !c -Revive ${Me.Name}
+					wait 10
+					if (${ActorIterator.Value.Name(exists)} && ${ActorIterator.Value.Type.Equal["Resource"]})
+						target ${ActorIterator.Value.Name}
+					NodeCount:Inc
+				}
+				CombatCount:Set[0]
+				NodeCount:Set[0]
+			}	
+			while (${ActorIterator:Next(exists)})	
+		}
+		
+		EQ2:QueryActors[Actors, Distance > 10]
+		i:Set[${Math.Rand[${Actors.Used}]}]
+		echo random port if ${Actors.Used}>0 else go X0 Y0 Z0 (using i at ${i})
+		if ${Actors.Used}>0
+			call Port ${Me.Name} ${Actors[${i}].X} ${Actors[${i}].Y} ${Actors[${i}].Z}
+		else
+			call Port ${Me.Name} ${X0} ${Y0} ${Z0}
+		wait 20
+	}
+	while (${TryCount} < ${Try} || ${Try} < 1  && !${REBOOT})
+	echo exiting TPHarvest function
+	call goto_GH
+	wait 50
+	call waitfor_Zoning
+	wait 50
+	ogre im -Depot
+}
+function Qho()
+{
+	variable index:string QhoQuests
+	variable int i
+	QhoQuests:Insert["A Gathering Obsession"]
+	QhoQuests:Insert["A Gathering Obsession, Part II"]
+	QhoQuests:Insert["A Gathering Obsession, Part III"]
+	QhoQuests:Insert["A Gathering Obsession, Part IV"]
+	QhoQuests:Insert["A Gathering Obsession, Part V"]
+	QhoQuests:Insert["A Gathering Obsession, Part VI"]
+	QhoQuests:Insert["A Gathering Obsession, Part VII"]
+	QhoQuests:Insert["A Gathering Obsession, Part VIII"]
+	QhoQuests:Insert["A Gathering Obsession, Final Errand"]
+	QhoQuests:Insert["The Return of a Gathering Obsession"]
+	QhoQuests:Insert["A Gathering Obsession Beyond The Grave"]
+	call DoEpic ${QhoQuests}
+}
+function EpicArtisan()
+{
+	;variable weakref ObjectRef="EAQuests"
+	call AutoQuest "New Lands, New Profits" FALSE FALSE
+}
+
+function PortMe(float X, float Y, float Z)
+{
+	call Port ${Me.Name} ${X} ${Y} ${Z}
+}
 
 function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision, bool IgnoreStuck)
 {
@@ -37,164 +213,172 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 		Precision:Set[10]
 	echo Moving on my own to ${X} ${Z} (entering 2DNav)
 	face ${X} ${Z}
-
-	if (${Me.Loc.X}>${X})
+	if (${OgreBotAPI.KWAble})
 	{
-		Stucky:Set[0]
-		echo "doing X>"
-		face ${X} ${Z}
-		press -hold MOVEFORWARD
-		
-		do
-		{	
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			
-			if (${ForceWalk})
-			{
-				call CheckWalking
-				if (!${Return})
-				{
-					echo Force Walk
-					WasRunning:Set[TRUE]
-					press WALK
-				}
-			}
-			if (!${IgnoreStuck})
-			{
-				call CheckStuck ${loc0}
-				if (${Return})
-				{
-					Stucky:Inc
-				}
-			}
-			if (!${IgnoreFight})
-			{
-				call CheckCombat
-			}	
-		}
-		while (${Me.Loc.X}>${X} && ${Stucky}<10)
-		press -release MOVEFORWARD
-		eq2execute loc
+		call KWMove ${X} ${Y} ${Z}
+		return TRUE
 	}
 	else
 	{
-		Stucky:Set[0]
-		echo "doing X<"
-		face ${X} ${Z}
-		press -hold MOVEFORWARD
-		do
-		{
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			if (${ForceWalk})
-			{
-				call CheckWalking
-				if (!${Return})
-				{
-					echo Force Walk
-					WasRunning:Set[TRUE]
-					press WALK
-				}
-			}
-			if (!${IgnoreStuck})
-			{
-				echo Check Stuck
-				call CheckStuck ${loc0}
-				if (${Return})
-				{
-					Stucky:Inc
-				}
-			}
-			if (!${IgnoreFight})
-			{
-				call CheckCombat
-			}	
-		}
-		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
-		press -release MOVEFORWARD
-		eq2execute loc
-	}
-	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
-	if (!${Return})
-	{
-		face ${X} ${Z}
-		if (${Me.Loc.Z}>${Z})
+		if (${Me.Loc.X}>${X})
 		{
 			Stucky:Set[0]
-			echo "doing Z>"
+			echo "doing X>"
 			face ${X} ${Z}
 			press -hold MOVEFORWARD
+			
 			do
 			{	
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-				wait 2
+				wait 5
+				
 				if (${ForceWalk})
-				{	
+				{
 					call CheckWalking
 					if (!${Return})
 					{
+						echo Force Walk
 						WasRunning:Set[TRUE]
 						press WALK
 					}
 				}
-				call CheckStuck ${loc0}
-				if (${Return})
+				if (!${IgnoreStuck})
 				{
-					Stucky:Inc
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
 				}
 				if (!${IgnoreFight})
 				{
 					call CheckCombat
 				}	
 			}
-			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+			while (${Me.Loc.X}>${X} && ${Stucky}<10)
 			press -release MOVEFORWARD
 			eq2execute loc
 		}
 		else
 		{
 			Stucky:Set[0]
-			echo "doing Z<"
+			echo "doing X<"
 			face ${X} ${Z}
 			press -hold MOVEFORWARD
 			do
-			{	
+			{
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-				wait 2
+				wait 5
 				if (${ForceWalk})
 				{
 					call CheckWalking
 					if (!${Return})
 					{
+						echo Force Walk
 						WasRunning:Set[TRUE]
 						press WALK
 					}
 				}
-				call CheckStuck ${loc0}
-				if (${Return})
+				if (!${IgnoreStuck})
 				{
-					Stucky:Inc
+					echo Check Stuck
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
 				}
 				if (!${IgnoreFight})
 				{
 					call CheckCombat
 				}	
 			}
-			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+			while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 			press -release MOVEFORWARD
 			eq2execute loc
 		}
-	}
-	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
+	
+		call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
+		if (!${Return})
+		{
+			face ${X} ${Z}
+			if (${Me.Loc.Z}>${Z})
+			{
+				Stucky:Set[0]
+				echo "doing Z>"
+				face ${X} ${Z}
+				press -hold MOVEFORWARD
+				do
+				{	
+					face ${X} ${Z}
+					loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+					wait 2
+					if (${ForceWalk})
+					{	
+						call CheckWalking
+						if (!${Return})
+						{
+							WasRunning:Set[TRUE]
+							press WALK
+						}
+					}
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
+					if (!${IgnoreFight})
+					{
+						call CheckCombat
+					}	
+				}
+				while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+				press -release MOVEFORWARD
+				eq2execute loc
+			}
+			else
+			{
+				Stucky:Set[0]
+				echo "doing Z<"
+				face ${X} ${Z}
+				press -hold MOVEFORWARD
+				do
+				{	
+					face ${X} ${Z}
+					loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+					wait 2
+					if (${ForceWalk})
+					{
+						call CheckWalking
+						if (!${Return})
+						{
+							WasRunning:Set[TRUE]
+							press WALK
+						}
+					}
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
+					if (!${IgnoreFight})
+					{
+						call CheckCombat
+					}	
+				}
+				while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+				press -release MOVEFORWARD
+				eq2execute loc
+			}
+		}
+		call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
 
-	if (${WasRunning})
-		press WALK
-	echo exit from 2DNav
+		if (${WasRunning})
+			press WALK
+	}
+	call Log exit from 2DNav
 }
 function 2DWalk(float X, float Z, int Precision)
 {
@@ -215,71 +399,24 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 		Precision:Set[10]
 	echo Moving on my own to ${X} ${Y} ${Z}
 	face ${X} ${Z}
-
-	if (${Me.Loc.X}>${X})
+	if (${OgreBotAPI.KWAble})
 	{
-		Stucky:Set[0]
-		echo "doing X>"
-		press -hold MOVEFORWARD
-		
-		do
-		{	
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			call Ascend ${Y} ${Swim}
-			Y:Set[${Return}]
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				Stucky:Inc
-			}
-		}
-		while (${Me.Loc.X}>${X} && ${Stucky}<10)
-		press -release MOVEFORWARD
-		call Ascend ${Y} ${Swim}
-		Y:Set[${Return}]
-		eq2execute loc
+		call KWMove ${X} ${Y} ${Z}
+		return TRUE
 	}
 	else
 	{
-		Stucky:Set[0]
-		echo "doing X<"
-	
-		press -hold MOVEFORWARD
-		do
-		{
-			face ${X} ${Z}
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			wait 5
-			call Ascend ${Y} ${Swim}
-			Y:Set[${Return}]
-			call CheckStuck ${loc0}
-			if (${Return})
-			{
-				Stucky:Inc
-			}
-		}
-		while (${Me.Loc.X}<${X} && ${Stucky}<10 )
-		press -release MOVEFORWARD
-		call Ascend ${Y} ${Swim}
-		Y:Set[${Return}]
-		eq2execute loc
-	}
-	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
-	if (!${Return})
-	{
-		face ${X} ${Z}
-		if (${Me.Loc.Z}>${Z})
+		if (${Me.Loc.X}>${X})
 		{
 			Stucky:Set[0]
-			echo "doing Z>"
+			echo "doing X>"
 			press -hold MOVEFORWARD
+			
 			do
 			{	
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-				wait 2
+				wait 5
 				call Ascend ${Y} ${Swim}
 				Y:Set[${Return}]
 				call CheckStuck ${loc0}
@@ -288,7 +425,7 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 					Stucky:Inc
 				}
 			}
-			while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+			while (${Me.Loc.X}>${X} && ${Stucky}<10)
 			press -release MOVEFORWARD
 			call Ascend ${Y} ${Swim}
 			Y:Set[${Return}]
@@ -297,14 +434,14 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 		else
 		{
 			Stucky:Set[0]
-			echo "doing Z<"
-	
+			echo "doing X<"
+		
 			press -hold MOVEFORWARD
 			do
-			{	
+			{
 				face ${X} ${Z}
 				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-				wait 2
+				wait 5
 				call Ascend ${Y} ${Swim}
 				Y:Set[${Return}]
 				call CheckStuck ${loc0}
@@ -313,11 +450,65 @@ function 3DNav(float X, float Y, float Z, int Precision, bool Swim)
 					Stucky:Inc
 				}
 			}
-			while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+			while (${Me.Loc.X}<${X} && ${Stucky}<10 )
 			press -release MOVEFORWARD
 			call Ascend ${Y} ${Swim}
 			Y:Set[${Return}]
 			eq2execute loc
+		}
+		call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
+		if (!${Return})
+		{
+			face ${X} ${Z}
+			if (${Me.Loc.Z}>${Z})
+			{
+				Stucky:Set[0]
+				echo "doing Z>"
+				press -hold MOVEFORWARD
+				do
+				{	
+					face ${X} ${Z}
+					loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+					wait 2
+					call Ascend ${Y} ${Swim}
+					Y:Set[${Return}]
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
+				}
+				while (${Me.Loc.Z}>${Z} && ${Stucky}<10 )
+				press -release MOVEFORWARD
+				call Ascend ${Y} ${Swim}
+				Y:Set[${Return}]
+				eq2execute loc
+			}
+			else
+			{
+				Stucky:Set[0]
+				echo "doing Z<"
+		
+				press -hold MOVEFORWARD
+				do
+				{	
+					face ${X} ${Z}
+					loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+					wait 2
+					call Ascend ${Y} ${Swim}
+					Y:Set[${Return}]
+					call CheckStuck ${loc0}
+					if (${Return})
+					{
+						Stucky:Inc
+					}
+				}
+				while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+				press -release MOVEFORWARD
+				call Ascend ${Y} ${Swim}
+				Y:Set[${Return}]
+				eq2execute loc
+			}
 		}
 	}
 	call TestArrivalCoord ${X} 0 ${Z} ${Precision} TRUE
@@ -627,8 +818,6 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 	
 	if (${NPCName.Length}<1)
 		NPCName:Set["Dercin Marrbrand"]
-	;if ${OgreBotAPI.KWAble}
-	;	NPCName:Set["Londiar Inygad"]
 	
 	echo checking if I am at max Adorning/Tinkering/Transmuting
 	call CheckIfMaxAdorning
@@ -1046,9 +1235,9 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 	}
 	return TRUE
 }
-function KWMove(float X, float Y, float Z, bool Grouped)
+function KWMove(float X, float Y, float Z)
 {
-	if ${Grouped}
+	if (${Me.GroupCount}>2)
 		OgreBotAPI:KWL[All,${X},${Y},${Z}]
 	else
 		OgreBotAPI:KWL["${Me.Name}",${X},${Y},${Z}]
@@ -1721,6 +1910,8 @@ function GetNodeType(string ActorName)
 		return "Wood"
 	if ${ActorName.Find["timber"]}>0
 		return "Wood"
+	if ${ActorName.Find["shadeweave bud"]}>0
+		return "Buggy"
 	if ${ActorName.Find["Tizmak"]}>0
 		return "Quest"
 	if ${ActorName.Equal["NULL"]}
@@ -2668,17 +2859,15 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	if (${Me.IsDead})
 		return TRUE
 	
+	if ${Precision}<1
+		Precision:Set[10]
+	
+	eq2execute waypoint ${X}, ${Y}, ${Z}
 	if (${OgreBotAPI.KWAble})
 	{
 		call KWMove ${X} ${Y} ${Z}
 		return TRUE
 	}	
-	
-	if ${Precision}<1
-		Precision:Set[10]
-	
-	eq2execute waypoint ${X}, ${Y}, ${Z}
-	
 	call TestNullCoord ${X} ${Y} ${Z} ${Precision}
 	if (!${Return})
 		call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
@@ -3091,45 +3280,53 @@ function Go2D(float X, float Y, float Z, int Precision, bool Icy)
 	variable bool There
 	variable string strafe
 	echo enter function Go2D
-	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
-		strafe:Set["STRAFERIGHT"]
-	else
-		strafe:Set["STRAFELEFT"]
-	
-	do
+	if (${OgreBotAPI.KWAble})
 	{
-		Stucky:Set[0]
+		call KWMove ${X} ${Y} ${Z}
+		return TRUE
+	}	
+	else
+	{
+		if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
+			strafe:Set["STRAFERIGHT"]
+		else
+			strafe:Set["STRAFELEFT"]
+	
 		do
 		{
-			face ${X} ${Z}
-			call CheckCombat
-			call waitfor_Health 99
-			loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-			press -hold MOVEFORWARD
-			wait 1
-			press -release MOVEFORWARD
-			wait 1
-			press -hold MOVEFORWARD
-			wait 1
-			press -release MOVEFORWARD
-			call CheckStuck ${loc0}
-			if (${Return})
-				Stucky:Inc
-			echo Stucky=${Stucky}
+			Stucky:Set[0]
+			do
+			{
+				face ${X} ${Z}
+				call CheckCombat
+				call waitfor_Health 99
+				loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
+				press -hold MOVEFORWARD
+				wait 1
+				press -release MOVEFORWARD
+				wait 1
+				press -hold MOVEFORWARD
+				wait 1
+				press -release MOVEFORWARD
+				call CheckStuck ${loc0}
+				if (${Return})
+					Stucky:Inc
+				echo Stucky=${Stucky}
+				call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
+				There:Set[${Return}]
+			}
+			while (${Stucky}<10 && !${There})
+			if (!${There})
+			{
+				face ${X} ${Z}
+				press -hold ${strafe}
+				wait 5
+				press -release ${strafe}
+			}		
 			call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
-			There:Set[${Return}]
 		}
-		while (${Stucky}<10 && !${There})
-		if (!${There})
-		{
-			face ${X} ${Z}
-			press -hold ${strafe}
-			wait 5
-			press -release ${strafe}
-		}		
-		call TestArrivalCoord ${X} ${Y} ${Z} ${Precision}
+		while (!${Return})
 	}
-	while (!${Return})
 	if (${Icy})
 		press JUMP
 	echo exit function go2D
@@ -3215,6 +3412,7 @@ function goZone(string ZoneName, string Transport)
 	
 	call CorrectZone "${ZoneName}"
 	AltZoneName:Set["${Return}"]
+	call Log "goZone called for ${ZoneName} (changed to ${Return})"
 	
 	if (!${Transport(exists)})
 		Transport:Set["Globe"]
@@ -3232,6 +3430,22 @@ function goZone(string ZoneName, string Transport)
 		}
 		call Log "Can't find ${Transport} in ${Zone.Name} to go to ${ZoneName}" WARNING
 		return
+	}
+	if (${ZoneName.Equal["Nye'Caelona"]})
+	{
+		call Log "in Nye'Caelona goZone condition. calling goNyeCaelona in EQ2Travel"
+		call goNyeCaelona
+		return TRUE
+	}
+	if (${ZoneName.Equal["Obulous Frontier"]})
+	{
+		call goObulousFrontier
+		return TRUE
+	}
+	if (${ZoneName.Equal["Fordel Midst"]})
+	{
+		call goFordelMidst
+		return TRUE
 	}
 	if (${ZoneName.Equal["Aurelian Coast"]})
 	{
@@ -4318,6 +4532,8 @@ function navwrap(string XS, string YS, string ZS)
 		echo ogre navtest is already running
 		return
 	}
+	if (${OgreBotAPI.KWAble})
+		call KWMove ${X} ${Y} ${Z}
 	call TestArrivalCoord ${X} ${Y} ${Z}
 	if (${Return})
 	{
@@ -6202,7 +6418,7 @@ function AutoQuest(string questname, bool ForceAlreadyDone, bool DoNotContinue)
 			call goZone "${WQ.StartingZone}"
 			
 			if (${OgreBotAPI.KWAble})
-				call KannkorRulez ${WQ.StartLoc}
+				call KWMove ${WQ.StartLoc}
 			else
 				call navwrap ${WQ.StartLoc}
 			echo I must ${WQ.HowtoStart} Action is ${WQ.StartAction} on Actor ${WQ.StartActor}
