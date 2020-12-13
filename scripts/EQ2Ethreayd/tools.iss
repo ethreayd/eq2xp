@@ -29,6 +29,7 @@ variable(globalkeep) bool NODEBUG
 variable(global) bool NoNavWrap
 variable(script) bool REBOOT
 variable(script) bool SKIP
+variable(script) bool CANTSEE
 
 function ActorPort(string ActorName)
 {
@@ -42,6 +43,104 @@ function Port(string Who, float X, float Y, float Z)
 {
 	if (${Who(exists)} && ${OgreBotAPI.KWAble} )
 		oc !c -kwl ${Who} ${X} ${Y} ${Z}
+}
+function TPHunt(bool NamedOnly, bool Stay, bool NoLoot)
+{
+	variable index:actor Actors
+	variable iterator ActorIterator
+	variable float X0
+	variable float Y0
+	variable float Z0
+	variable float X
+	variable float Y
+	variable float Z
+	variable int i
+	variable int Count
+	
+	if (!${OgreBotAPI.KWAble})
+	{
+		echo This is only working with KW
+		return
+	}
+		
+	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	echo entering TPHunt function
+	X0:Set[${Me.X}]
+	Y0:Set[${Me.Y}]
+	Z0:Set[${Me.Z}]
+	
+	do
+	{
+		if (${Me.IsDead})
+			oc !c -Revive ${Me.Name}
+		if ${NamedOnly}
+			EQ2:QueryActors[Actors, Type  == "NPC" && Distance < 5000 && IsNamed == 1]
+		else
+			EQ2:QueryActors[Actors, Type  == "NPC" && Distance < 5000]
+		Actors:GetIterator[ActorIterator]
+		echo Found ${Actors.Used} Actors
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","TRUE"]
+		if ${ActorIterator:First(exists)}
+		{
+			eq2execute merc resume
+			do
+			{
+				if (${ActorIterator.Value.IsNamed} || !${NamedOnly})
+				{
+					X:Set[${ActorIterator.Value.X}] 
+					Y:Set[${ActorIterator.Value.Y}]
+					Z:Set[${ActorIterator.Value.Z}]
+					Count:Set[0]
+					SKIP:Set[FALSE]
+					eq2execute summon
+					wait 10
+					if (!${X}==0)
+						call KWMove ${X} ${Y} ${Z}
+					wait 10
+					if ${Me.FlyingUsingMount}
+						call GoDown
+					echo Hunting ${ActorIterator.Value.Name} (${ActorIterator.Value.ID}) [${ActorIterator.Value.IsNamed}] 
+				
+					while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && !${Me.IsDead} && !${SKIP} && !${REBOOT})			
+					{
+						target "${ActorIterator.Value.Name}"
+						wait 10
+						
+						if (${ActorIterator.Value.Distance}>20 && ${ActorIterator.Value.Distance(exists)} && !${X}==0)
+							call KWMove ${X} ${Y} ${Z}
+						
+						call Waitfor_Combat TRUE TRUE
+						eq2execute merc resume
+						if (${Me.IsDead})
+							oc !c -Revive ${Me.Name}
+						wait 10
+					}
+				}
+				else
+					echo skipping ${ActorIterator.Value.Name} (${ActorIterator.Value.ID}) [${ActorIterator.Value.IsNamed}] 
+				echo testing if Inventory is full (${Me.InventorySlotsFree}) except if No Loot Condition (${NoLoot})
+				if (${Me.InventorySlotsFree}<1 && !${NoLoot})
+					break
+			}
+			while (${ActorIterator:Next(exists)})	
+		}
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
+		EQ2:QueryActors[Actors, Type  == "NPC"]
+		i:Set[${Math.Rand[${Actors.Used}]}]
+		echo random port if ${Actors.Used}>0 else go X0 Y0 Z0 (using i at ${i})
+		if (${Actors.Used}>0 && !${Actors[${i}].X}==0)
+			call KWMove ${Actors[${i}].X} ${Actors[${i}].Y} ${Actors[${i}].Z}
+		else
+			call KWMove ${X0} ${Y0} ${Z0}
+		wait 20
+		call Waitfor_Combat TRUE TRUE
+		echo testing if Inventory is full (${Me.InventorySlotsFree}) except if No Loot Condition (${NoLoot})
+		if (${Me.InventorySlotsFree}<1 && !${NoLoot})
+			break
+		call CheckIfZoneIsCleaned ${NamedOnly}
+	}
+	while ((!${REBOOT} && !${Return}) || ${Stay})
+	echo exiting TPHunt function
 }
 function TPHarvest(string Node, int Try)
 {
@@ -119,10 +218,10 @@ function TPHarvest(string Node, int Try)
 						press Tab
 					}
 					if (${ActorIterator.Value.Distance}>5)
-						call Port ${Me.Name} ${X} ${Y} ${Z}
+						call KWMove ${X} ${Y} ${Z}
 					if ${Me.Health} < 50
 					{
-						call Port ${Me.Name} ${X} ${Math.Calc64[${Y}+600]} ${Z}
+						call KWMove ${X} ${Math.Calc64[${Y}+600]} ${Z}
 						Count:Inc
 						eq2execute merc backoff
 						wait 5
@@ -1066,6 +1165,29 @@ function AttackClosest(float MaxDistance)
 	
         target ${ActorIterator.Value.ID}
     }
+}
+function AutoScribe()
+{
+	variable index:item Items
+	variable iterator ItemIterator
+    variable int Counter=0
+	echo AutoScribe
+	Me:QueryInventory[Items, Location == "Inventory"]
+	Items:GetIterator[ItemIterator]
+	if ${ItemIterator:First(exists)}
+	{
+		do
+		{
+			Counter:Inc
+			if ${ItemIterator.Value.IsScribeable}
+			{
+				Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Scribe[confirm]
+				Counter:Inc
+			}	
+		}	
+		while ${ItemIterator:Next(exists)}
+	}
+	echo ${Counter} items scribed
 }
 function AutoAddAgent(bool EraseDuplicate)
 {
@@ -2145,13 +2267,29 @@ function CheckItem(string ItemName, int Quantity, bool ForAll)
 		return 0
 	}
 }
+function CheckIfItemPresent(string ItemName, int Quantity)
+{
+	if (${Quantity}<1)
+		Quantity:Set[1]
+		
+	call CountItem "${ItemName}"
+	if (${Return}<${Quantity})
+	{
+		return FALSE
+	}
+	else
+	{
+		return TRUE
+	}
+}
+
 function CheckIfRepairIsNeeded(int MinCondition)
 {
 	if (${MinCondition}<1)
 		MinCondition:Set[10]
 	call waitfor_Zoning
 	call ReturnEquipmentSlotHealth Primary
-	;echo Gear at ${Return}% (min is ${MinCondition})
+	echo Gear at ${Return}% (min is ${MinCondition})
 	wait 10
 	if (${Return}<${MinCondition})
 		return TRUE
@@ -2488,7 +2626,7 @@ function ClickOn(string ActorName)
 		Actor[name,"${ActorIterator.Value.Name}"]:DoubleClick
 	}
 }
-function ClickZone(int startX, int startY, int stopX, int stopY, int step)
+function ClickZone(int startX, int startY, int stopX, int stopY, int step, bool Zoning)
 {
 	variable int X
 	variable int Y
@@ -2508,8 +2646,10 @@ function ClickZone(int startX, int startY, int stopX, int stopY, int step)
 		}
 		X:Set[${Math.Calc[${X}+${step}]}]
 		wait 5
+		if ${Zoning}
+			call IsZoning
 	}
-	while (${Y}<${stopY})
+	while (${Y}<${stopY} && !${Return})
 	echo End of ClickZone
 }
 function CloseCombat(string Named, float Distance, bool MoveIn)
@@ -3356,55 +3496,47 @@ function GoDown()
 {
 	call goDown
 }
-function goHate()
+function RepairGear()
 {	
-	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
-	{
-		call IsPresent "Mechanical Travel Gear"
-		if (${Return})
-		{
-			call MoveCloseTo "Mechanical Travel Gear"
-			wait 20
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Mechanical Travel Gear","Travel to the Planes"]
-			wait 20
-			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
-			call waitfor_Zone "Coliseum of Valor"
-		}
-		call IsPresent "Large Ulteran Spire"
-		if (${Return})
-		{
-			call MoveCloseTo "Large Ulteran Spire"
-			wait 20
-			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
-			wait 50
-			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
-			wait 600
-		}
-	}
-	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
-	{
-		;call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
-		;call DMove -2 5 4 3
-	}
-	if (${Zone.Name.Left[17].Equal["Coliseum of Valor"]})
-	{
-		call DMove -2 5 4 3
-		call ExitCoV
-		call goHate
-	}
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
-	{
-		call goto_GH
-		wait 600
-		call goHate
-	}
-	call waitfor_Zone "Plane of Magic"
+	call UseRepairRobot
+	wait 100
+	oc !c -Repair ${Me.Name}
+	wait 100
 }
 function CorrectZone(string ZoneName)
 {
 	if (${ZoneName.Equal["Freeport"]})
 		return "The City of Freeport"	
+	if (${ZoneName.Equal["The Great Divide"]})
+		return "Great Divide"	
 	return "${ZoneName}"
+}
+function goHunt(string ZoneName, bool NamedOnly)
+{
+	echo in goHunt "${ZoneName}" ${NamedOnly} function
+	call goZone "${ZoneName}"
+	do
+	{
+		call TPHunt ${NamedOnly}
+		call CheckIfRepairIsNeeded 10
+	}
+	while (${Me.InventorySlotsFree}>1 && !${Return})
+	echo Stopping TPHunt and try to Repair
+	call RepairGear
+	call CheckIfRepairIsNeeded 10
+	if (${Me.InventorySlotsFree}<10 || ${Return})
+	{
+		echo Need to go to GH
+		call goto_GH
+		wait 50
+		call waitfor_Zoning
+		oc !c -Repair
+		ogre im -TSE -Sell -Depot
+		wait 6000
+		ogre end im
+	}
+	echo calling goHunt "${ZoneName}" ${NamedOnly}
+	call goHunt "${ZoneName}" ${NamedOnly}
 }
 function goZone(string ZoneName, string Transport)
 {
@@ -3412,24 +3544,67 @@ function goZone(string ZoneName, string Transport)
 	
 	call CorrectZone "${ZoneName}"
 	AltZoneName:Set["${Return}"]
-	call Log "goZone called for ${ZoneName} (changed to ${Return})"
+	call Log "goZone called for ${ZoneName} (changed to ${Return})" with ${Transport}
 	
 	if (!${Transport(exists)})
+		Transport:Set["Spire"]
+	if (${ZoneName.Equal["Freeport"]})
 		Transport:Set["Globe"]
+		
+	if (${Transport.Equal["Globe"]})
+	{
+		call IsPresent "mariners_bell"
+		if (${Return})
+		{
+			Transport:Set["mariners_bell"]
+		}
+		call IsPresent "Pirate Captain"
+		if (${Return})
+		{
+			Transport:Set["Pirate Captain"]
+		}
+	}
+	
 	call IsPresent ${Transport}
 	if (!${Return})
 	{
-		if (${Transport.Equal["Globe"]})
-		{
-			call IsPresent "Pirate Captain"
-			if (${Return})
-			{
-				call goZone "${ZoneName}" "Pirate Captain"
-				return
-			}	
-		}
 		call Log "Can't find ${Transport} in ${Zone.Name} to go to ${ZoneName}" WARNING
-		return
+	}
+
+	if (${ZoneName.Equal["Fallen Gate"]})
+	{
+		call goFallenGate
+		return TRUE
+	}
+	if (${ZoneName.Equal["Sanctum of the Scaleborn"]})
+	{
+		call goSanctumoftheScaleborn
+		return TRUE
+	}
+	if (${ZoneName.Equal["Castle Mistmoore"]})
+	{
+		call goCastleMistmoore
+		return TRUE
+	}
+	if (${ZoneName.Equal["Karnor's Castle"]})
+	{
+		call goKarnorsCastle
+		return TRUE
+	}
+	if (${ZoneName.Equal["Kaladim"]})
+	{
+		call goKaladim
+		return TRUE
+	}
+	if (${ZoneName.Equal["Hold of Rime: The Ascent"]})
+	{
+		call goHoldofRime_TheAscent
+		return TRUE
+	}
+	if (${ZoneName.Equal["The Temple of Cazic-Thule"]})
+	{
+		call goCazicThule
+		return TRUE
 	}
 	if (${ZoneName.Equal["Nye'Caelona"]})
 	{
@@ -3437,9 +3612,9 @@ function goZone(string ZoneName, string Transport)
 		call goNyeCaelona
 		return TRUE
 	}
-	if (${ZoneName.Equal["Obulous Frontier"]})
+	if (${ZoneName.Equal["Obulus Frontier"]})
 	{
-		call goObulousFrontier
+		call goObulusFrontier
 		return TRUE
 	}
 	if (${ZoneName.Equal["Fordel Midst"]})
@@ -3462,14 +3637,12 @@ function goZone(string ZoneName, string Transport)
 		call goWracklands
 		return TRUE
 	}
-	echo Going to Zone: ${ZoneName} (${AltZoneName}) (inside goZone in tools)
+	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call ActivateSpire "${Transport}"
 		wait 30
 		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-		;wait 50
-		;RIMUIObj:TravelMap["${Me.Name}","${ZoneName}",1,2]
 		wait 300
 		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
 	}
@@ -3477,6 +3650,7 @@ function goZone(string ZoneName, string Transport)
 	
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
 	{
+		echo Something is wrong : (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]}) ${Zone.Name}/${AltZoneName}
 		call goto_GH
 		wait 300
 		call goZone "${ZoneName}" "${Transport}"
@@ -3490,7 +3664,9 @@ function goZone(string ZoneName, string Transport)
 function goto_GH()
 {
 	variable int Counter=0
+	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	call GoDown
+	
 	if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
 		call GoDown
@@ -4220,15 +4396,29 @@ function Move(string ActorName, float X, float Y, float Z, bool is2D)
 	}
 	wait 10
 }
+
 function MoveCloseTo(string ActorName, float Distance)
+{
+	call MoveCloseToID ${Actor["${ActorName}"].ID} ${Distance}
+}
+function MoveCloseToID(string ActorID, float Distance)
 {
 	variable float loc0=0
 	variable int Stucky=0
 	variable string strafe
 	if (${Distance}<1)
 		Distance:Set[5]
-	echo Moving closer to ${Actor["${ActorName}"].Name}
-	face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+	echo Moving closer to ${Actor[${ActorID}].Name} (${OgreBotAPI.KWAble}) at ${Actor[${ActorID}].Distance}m
+	if (${OgreBotAPI.KWAble})
+	{
+		echo KWMove ${Math.Calc64[${Actor[${ActorID}].X}+${Math.Rand[5]}]} ${Math.Calc64[${Actor[${ActorID}].Y}+${Math.Rand[5]}]} ${Math.Calc64[${Actor[${ActorID}].Z}+${Math.Rand[5]}]}
+		call KWMove ${Math.Calc64[${Actor[${ActorID}].X}+${Math.Rand[5]}]} ${Math.Calc64[${Actor[${ActorID}].Y}+${Math.Rand[5]}]} ${Math.Calc64[${Actor[${ActorID}].Z}+${Math.Rand[5]}]}
+		return
+	}
+	echo Not KWABLE ! moving normally
+	face ${Actor[${ActorID}].X} ${Actor[${ActorID}].Z}
+	
+		
 	if (((${X} < ${Me.X}) && (${Z} < ${Me.Z})) || ((${X} > ${Me.X}) && (${Z} > ${Me.Z})))
 		strafe:Set["STRAFERIGHT"]
 	else
@@ -4238,7 +4428,7 @@ function MoveCloseTo(string ActorName, float Distance)
 	do
 	{
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
-		face ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Z}
+		face ${Actor[${ActorID}].X} ${Actor[${ActorID}].Z}
 		wait 1
 		call CheckStuck ${loc0}
 		if (${Return})
@@ -4249,7 +4439,7 @@ function MoveCloseTo(string ActorName, float Distance)
 		else
 			Stucky:Set[0]
 	}
-	while (${Actor["${ActorName}"].Distance}>${Distance} && ${Actor["${ActorName}"].Distance(exists)} && ${Stucky}<300)
+	while (${Actor[${ActorID}].Distance}>${Distance} && ${Actor[${ActorID}].Distance(exists)} && ${Stucky}<300)
 	press -release MOVEFORWARD
 	wait 10
 	if (${Stucky}>299)
@@ -4511,8 +4701,7 @@ function navwrap(string XS, string YS, string ZS)
 	variable float Z=${ZS}
 	variable float FlyingZone
 	
-	call CheckFlyingZone
-	FlyingZone:Set[${Return}]
+	
 	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
@@ -4540,6 +4729,10 @@ function navwrap(string XS, string YS, string ZS)
 		echo already there
 		return
 	}
+	
+	call CheckFlyingZone
+	FlyingZone:Set[${Return}]
+	
 	echo "moving to location ${X} ${Y} ${Z} (wrapping ogre navtest -loc)"
 	eq2execute waypoint ${X} ${Y} ${Z}
 	do
@@ -5630,14 +5823,85 @@ function waitfor_Combat()
 {
 	call Waitfor_Combat
 }
-function Waitfor_Combat()
+atom Atom_Waitfor_Combat(string Message)
 {
+	if (${Message.Equal["Can't see target"]} || ${Message.Equal["Too far away"]})
+	{
+		echo setting CANTSEE at TRUE
+		CANTSEE:Set[TRUE]
+		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
+		QueueCommand call Zero_CANTSEE 60
+	}
+}
+function Zero_CANTSEE(int timeout)
+{
+	wait ${Math.Calc64[${Timeout}*10]}
+	echo setting CANTSEE at FALSE
+	CANTSEE:Set[FALSE]
+	
+}	
+function Waitfor_Combat(bool AutoPool, bool GetCloser)
+{
+	Event[EQ2_onIncomingText]:AttachAtom[Atom_Waitfor_Combat]
 	wait 50
 	do
 	{
+		if (${AutoPool} && ${OgreBotAPI.KWAble})
+		{
+			if ${Me.Health} < 20
+			{
+				if (!${Me.X}==0) 
+					call KWMove ${Me.X} ${Math.Calc64[${Me.Y}+600]} ${Me.Z}
+				Count:Inc
+				eq2execute merc backoff
+				wait 5
+				while ${Me.Health} < 95
+				{
+					call CastAbility "Bind Wound" TRUE
+					eq2execute merc backoff
+					wait 10
+					if (${Me.InCombat} || ${Me.IsDead})
+						break
+				}
+				if (!${Me.X}==0) 
+					call KWMove ${Me.X} ${Math.Calc64[${Me.Y}-600]} ${Me.Z}
+			}
+			if ${Me.Power} < 5
+			{
+				if (!${Me.X}==0) 
+					call KWMove ${Me.X} ${Math.Calc64[${Me.Y}+600]} ${Me.Z}
+				Count:Inc
+				eq2execute merc backoff
+				wait 5
+				while ${Me.Power} < 25
+				{
+					call UsePotions
+					eq2execute merc backoff
+					wait 10
+					if (${Me.InCombat} || ${Me.IsDead})
+						break
+				}
+				if (!${Me.X}==0) 
+					call KWMove ${Me.X} ${Math.Calc64[${Me.Y}-600]} ${Me.Z}
+			}
+		}
+		if (${CANTSEE})
+		{
+			echo CANTSEE at TRUE : call MoveCloseTo "${Me.Target}"
+			eq2execute merc backoff
+			call MoveCloseTo "${Me.Target}"
+			eq2execute merc attack
+		} 
+		if (${GetCloser} && ${Me.Target(exists)} && ${Me.Target.Distance}>20 )
+		{
+			eq2execute merc backoff
+			call MoveCloseTo "${Me.Target}"
+			eq2execute merc attack
+		}
+		ExecuteQueued
 		wait 5
 	} 
-	while (${Me.InCombatMode})
+	while (${Me.InCombatMode} && ${Me.Target(exists)})
 }
 
 function waitfor_Corpse()
@@ -6063,6 +6327,10 @@ function CheckIfMaxTransmuting()
 	else
 		return TRUE
 }
+function getTransmutingLevel()
+{
+	return ${Math.Calc64[${OgreBotAPI.SpewStat[currenttransmuting]}\\5]}
+}
 function Hireling(string NPCName)
 {
 	;NPC should be Miner, Gatherer or Hunter	
@@ -6104,14 +6372,14 @@ function ListActors(float MaxDistance, bool Detail)
     variable index:actor Actors
     variable iterator ActorIterator
     
-    EQ2:QueryActors[Actors, Distance <= ${MaxDistance} ]
+    EQ2:QueryActors[Actors, Distance <= ${MaxDistance}]
     Actors:GetIterator[ActorIterator]
   
     if ${ActorIterator:First(exists)}
     {
         do
         {
-            echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m)
+            echo "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m) (Named : ${ActorIterator.Value.IsNamed})
 			if ${Detail}
 				call DescribeActor ${ActorIterator.Value.ID}
 
@@ -6119,7 +6387,21 @@ function ListActors(float MaxDistance, bool Detail)
         while ${ActorIterator:Next(exists)}
     }
 }
-
+function CheckIfZoneIsCleaned(bool NamedOnly)
+{
+    variable index:actor Actors
+    variable iterator ActorIterator
+	if ${NamedOnly}
+		EQ2:QueryActors[Actors, Type  == "NPC" && IsNamed == 1]
+	else
+		EQ2:QueryActors[Actors, Type  == "NPC"]
+    Actors:GetIterator[ActorIterator]
+  
+    if ${ActorIterator:First(exists)}
+		return FALSE
+	echo Zone is cleaned
+	return TRUE
+}
 objectdef WebLog
 {
 	variable webrequest WR
@@ -6492,4 +6774,135 @@ function ZoomOut(bool ForAll)
 		wait 25
 		press -release ZOOMOUT
 	}
+}
+function AutoLevelTransmute()
+{
+	oc !c -ZoneResetAll ${Me.Name}
+	call getTransmutingLevel
+	echo Transmuting at ${Return}
+	if (${Return}) >= 110
+	{
+		echo auto dungeon (${Return}) and transmute
+		return
+	}
+	if (${Return}) >= 100
+	{
+		echo auto dungeon (${Return}) and transmute
+		return
+	}
+	if (${Return}) >= 90
+	{
+		call goZone "Hold of Rime: The Ascent"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		call goZone "Forgotten Pools"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		return
+	}
+	if (${Return}) >= 80
+	{
+		echo auto dungeon (${Return}) and transmute
+		return
+	}
+	if (${Return}) >= 70
+	{
+		call goZone "Karnor's Castle"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		return
+	}
+	if (${Return}) >= 60
+	{
+		call goZone "Sanctum of the Scaleborn"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		return
+	}
+	if (${Return}) >= 50
+	{
+		echo auto dungeon (${Return}) and transmute
+		return
+	}
+	if (${Return}) >= 40
+	{
+		call goZone "The Temple of Cazic-Thule"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		return
+	}
+	if (${Return}) >= 30
+	{
+		call goZone "Kaladim"
+		if ${OgreBotAPI.KWAble}
+			call TPHunt
+		return
+	}
+	if (${Return}) >= 20
+	{
+		echo auto dungeon (${Return}) and transmute
+		return
+	}
+	call AltTSUp
+}
+
+function ZoneIn(string ZoneName)
+{
+	do
+	{
+		oc !c -Zone ${Me.Name}
+		wait 10
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}","${ZoneName}"]
+		wait 10
+		call IsZoning
+	}
+	while (!${Return} && !${Zone.Name.Equal["${ZoneName}"]})
+	call waitfor_Zone "${ZoneName}"
+}
+
+function StartArtisan()
+{
+	if ${Me.TSLevel}<20
+	{	
+		if ${Me.TSLevel}<9
+		{	
+			call goArtisanTrainer
+			call Converse "Dvarkor Ska'nin" 2
+			wait 50
+			call AutoScribe
+			wait 50
+			call goto_GH
+			call waitfor_Zoning
+			ogre craft -LLL
+			do
+			{
+				wait 600
+			}
+			while (${Me.TSLevel}<9)
+			ogre end craft
+		}
+		else
+		{
+			call goArtisanTrainer
+			call Converse "Dvarkor Ska'nin" 1
+			echo MUST DO THE SELECT
+			call AutoScribe
+			wait 50
+			call goto_GH
+			call waitfor_Zoning
+			ogre craft -LLL
+			do
+			{
+				wait 600
+			}
+			while (${Me.TSLevel}<19)
+			ogre end craft
+			call goArtisanTrainer
+			call Converse "Dvarkor Ska'nin" 1
+			echo MUST DO THE SELECT
+		}
+		
+	}
+	else
+		echo This script is for TS Level < 20
 }

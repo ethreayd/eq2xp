@@ -471,23 +471,262 @@ function goSanctusSeru()
 		}
 	}	
 }
-function goObulusFrontier(bool NoTotem)
+function goObulusFrontier()
 {
 	call Log "in function goObulusFrontier(${NoTotem})"
-	if (!${NoTotem})
+	call CheckIfItemPresent "Twark Transport Totem" 1
+	
+	if (${Return})
 	{
 		call Log "Using Twark Teleport"
 		call UseInventory "Twark Transport Totem"
-		call waitfor_Zone "Obulus Frontier"
 	}
+	else
+	{
+		call Log "Going there by foot"
+		call goZone "Kylong Plains" Globe
+		call navwrap 2141 141 -3002
+		face 90
+		press -hold MOVEFORWARD
+		wait 30
+		press -release MOVEFORWARD
+	}
+	call waitfor_Zone "Obulus Frontier"
 	call Log "end of goObulusFrontier(${NoTotem}) function"
 }
-function goNyeCaelona(bool NoTotem)
+
+function goHate()
+{	
+	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	{
+		call IsPresent "Mechanical Travel Gear"
+		if (${Return})
+		{
+			call MoveCloseTo "Mechanical Travel Gear"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Mechanical Travel Gear","Travel to the Planes"]
+			wait 20
+			OgreBotAPI:ZoneDoorForWho["${Me.Name}",1]
+			call waitfor_Zone "Coliseum of Valor"
+		}
+		call IsPresent "Large Ulteran Spire"
+		if (${Return})
+		{
+			call MoveCloseTo "Large Ulteran Spire"
+			wait 20
+			OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
+			wait 50
+			OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
+			wait 600
+		}
+	}
+	if (${Zone.Name.Left[14].Equal["Plane of Magic"]})
+	{
+		;call ActivateVerb "zone_to_pov" -785 345 1116 "Enter the Coliseum of Valor"
+		;call DMove -2 5 4 3
+	}
+	if (${Zone.Name.Left[17].Equal["Coliseum of Valor"]})
+	{
+		call DMove -2 5 4 3
+		call ExitCoV
+		call goHate
+	}
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[14].Equal["Plane of Magic"]} && !${Zone.Name.Equal["Coliseum of Valor"]})
+	{
+		call goto_GH
+		wait 600
+		call goHate
+	}
+	call waitfor_Zone "Plane of Magic"
+}
+function goNyeCaelona()
 {
-	call Log "in function goNyeCaelona(${NoTotem})"
-	call goObulusFrontier ${NoTotem}
+	call Log "in function goNyeCaelona"
+	call goObulusFrontier
 	wait 50
 	call navwrap -215 91 -186
+}
+
+function goArtisanTrainer()
+{
+	call goZone "Timorous Deep" Globe
+	call navwrap 2508 12 1221
+	face 45
+	press -hold MOVEFORWARD
+	wait 20
+	press -release MOVEFORWARD
+	call waitfor_Zoning
+	call navwrap 2817 121 1240
+}
+function goNPCEvaniaValSara(bool NoTotem)
+{
+	call Log "in function goNPCEvaniaValSara(${NoTotem})"
+	call goObulusFrontier ${NoTotem}
+	wait 50
+	call navwrap -117 92 -270
+}
+
+function goFallenGate()
+{
+	;Level 20 Zone
+	call CheckZone "Fallen Gate"
+	if (!${Return})
+	{
+		call goZone "The Commonlands" Globe
+		wait 50
+		call navwrap 1485 -39 -408
+		wait 50
+		call ZoneIn "Fallen Gate"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goKaladim()
+{
+	;Level 30 Zone
+	call CheckZone "Kaladim"
+	if (!${Return})
+	{
+		call goZone "Butcherblock Mountains" Globe
+		wait 50
+		call navwrap -170 165 -567
+		wait 50
+		face -175 -575
+		wait 10
+		do
+		{
+			oc !c -Zone ${Me.Name}
+			wait 10
+			call IsZoning
+		}
+		while (!${Return} && !${Zone.Name.Equal["Kaladim"]})
+		call waitfor_Zone "Kaladim"
+		wait 50
+		call DMove -4 -2 -20 3
+		return TRUE
+	}
+	return FALSE
+}
+
+function goSanctumoftheScaleborn()
+{
+	;Level 60 Zone
+	call CheckZone "Sanctum of the Scaleborn"
+	if (!${Return})
+	{
+		call goZone "Tenebrous Tangle" Spire
+		wait 50
+		call navwrap 512 21 -186
+		wait 50
+		call ZoneIn "Sanctum of the Scaleborn"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goCastleMistmoore()
+{
+	;Level 70 Zone
+	call CheckZone "Castle Mistmoore"
+	if (!${Return})
+	{
+		call goZone "Loping Plains" Spire
+		wait 50
+		call navwrap 515 210 182
+		wait 50
+		do
+		{
+			oc !c -Zone ${Me.Name}
+			wait 10
+			call IsZoning
+		}
+		while (!${Return} && !${Zone.Name.Equal["Castle Mistmoore"]})
+		call waitfor_Zone "Castle Mistmoore"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goKarnorsCastle()
+{
+	;Level 70 Zone
+	call CheckZone "Karnor's Castle"
+	if (!${Return})
+	{
+		call goZone "Kylong Plains" Globe
+		wait 50
+		call navwrap 449 65 -388
+		wait 50
+		oc !c -Zone ${Me.Name}
+		call waitfor_Zone "Karnor's Castle"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goCazicThule()
+{
+	;Level 40 Zone
+	call CheckZone "The Temple of Cazic-Thule"
+	if (!${Return})
+	{
+		call goZone "The Feerrott" Globe
+		wait 20
+		call navwrap -1702 -8 816
+		wait 30
+		oc !c -Zone ${Me.Name}
+		wait 10
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}","The Temple of Cazic-Thule"]
+		call waitfor_Zone "The Temple of Cazic-Thule"
+		return TRUE
+	}
+	return FALSE
+}
+function goKraytoc()
+{
+	call goZone "Great Divide" Globe
+	wait 50
+	call navwrap -47 -322 424	
+}
+function goHoldofRime_TheAscent()
+{
+	call CheckZone "Hold of Rime: The Ascent"
+	if (!${Return})
+	{
+		call goZone "Great Divide" Globe
+		wait 50
+		call navwrap 309 -316 1159
+		wait 50
+		face 0 0
+		call ClickZone 250 250 1250 1250 100 TRUE
+		call waitfor_Zone "Hold of Rime: The Ascent"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goForgottenPools()
+{
+	call CheckZone "Forgotten Pools"
+	if (!${Return})
+	{
+		call goZone "Great Divide" Globe
+		wait 50
+		call navwrap 366 -339 1073
+		wait 50
+		call ClickOn Enter
+		call waitfor_Zone "Forgotten Pools"
+		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goOssuary()
+{
+	call goZone "Phantom Sea" Globe
+	wait 50
+	call navwrap 697 53 771
 }
 function goFordelMidst()
 {
