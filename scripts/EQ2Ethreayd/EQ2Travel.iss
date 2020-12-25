@@ -115,13 +115,14 @@ function goRecusoTor(bool Force)
 		else
 		{
 			call DMove 594 429 -582 3
-			call ActivateVerbOn "a tamed Shik'Nar drone" "Ride Shik'Nar To Recuso Tor"
+			call MoveCloseTo "a tamed Shik'Nar drone"
 			do
 			{
-				wait 10
+				call ActivateVerbOn "a tamed Shik'Nar drone" "Ride Shik'Nar To Recuso Tor"
+				wait 100
 				call TestArrivalCoord -584 34 363
 			}
-			while (${Return})
+			while (!${Return})
 		}
 	}
 	call GoDown
