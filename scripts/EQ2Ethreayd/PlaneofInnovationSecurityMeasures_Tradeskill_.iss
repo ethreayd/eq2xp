@@ -14,8 +14,8 @@ variable(script) bool Bot1
 
 function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 {
-
 	variable int laststep=14
+	echo launching "A Stitch in Time, Part I: Security Measures" RunZone
 	call StopHunt
 	oc !c -letsgo ${Me.Name}
 
@@ -23,7 +23,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	;	endscript livedierepeat
 	;run EQ2Ethreayd/livedierepeat ${NoShiny}
 	
-	call check_quest "A Stitch in Time, Part I: Security Measures"
+	call CheckQuest "A Stitch in Time, Part I: Security Measures"
 	
 	if (${setspeed}==0)
 		speed:Set[3]
@@ -54,6 +54,16 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:AutoTarget_SetScanRadius["${Me.Name}",0]
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	
+	call CheckQuestStep 2
+	if (${Return})
+		stepstart:Set[3]
+	call CheckQuestStep 3
+	if (${Return})
+		stepstart:Set[5]
+	if ${Me.Ability["Hackbot 3000"](exists)}
+		stepstart:Set[9]
+	ogre cl
+	echo call StartQuest ${stepstart} ${stepstop} TRUE
 	call StartQuest ${stepstart} ${stepstop} TRUE
 	
 	echo End of Quest reached
@@ -184,6 +194,8 @@ function step001()
 
 function step002()
 {
+	if (${nodes}<20 || ${wires}<20 || ${springs}<20)
+		call step001
 	call CheckQuestStep 1
 	if (${Return})
 	{
@@ -240,25 +252,30 @@ function step003()
 		call OpenDoor "Junkyard West Door 03"
 		call DMove 42 4 -122 3
 	}
-	
-	call DMove 42 4 -122 3
-	call WaitByPass "an Innovative protector" -123 -140
-	echo an Innovative protector is far enough > going in in 5s
-	wait 50
-	call OpenDoor "Junkyard West Door 02"
-	call SMove 23 4 -123 100 12 5
-	call SMove 25 4 -161 100 15 5
-	wait 50
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
-	call DMove 23 4 -130 3
-	echo waiting 1.5 minutes Please be patient
-	face 25 -161
-	wait 900
-	call SMove 24 4 -213 100 50 5 
+	if (!${OgreBotAPI.KWAble})
+	{
+		
+		call DMove 42 4 -122 3
+		call WaitByPass "an Innovative protector" -123 -140
+		echo an Innovative protector is far enough > going in in 5s
+		wait 50
+		call OpenDoor "Junkyard West Door 02"
+		call SMove 23 4 -123 100 12 5
+		call SMove 25 4 -161 100 15 5
+		wait 50
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 50
+		call DMove 23 4 -130 3
+		echo waiting 1.5 minutes Please be patient
+		face 25 -161
+		wait 900
+		call SMove 24 4 -213 100 50 5 
+	}
 	call DMove 24 21 -281 3
+	call MoveCloseTo "Meldrath the Marvelous"
+	
 	call Converse "Meldrath the Marvelous" 4
 	wait 50
 	call DMove 25 21 -297 3
@@ -269,68 +286,72 @@ function step003()
 function step004()
 {
 	;Inside the Manaetic Factory
-	call DMove 25 7 -340 3
-	wait 10
-	call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
-	wait 20
-	face 97 -344
-	echo waiting for Purge
-	do
+	if (!${OgreBotAPI.KWAble})
 	{
+		wait 10
+		call DMove 25 7 -340 3
+		call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
+		wait 20
+		face 97 -344
+		echo waiting for Purge
+		do
+		{
+			wait 5
+		}
+		while (!${WestPurged})
+		call DMove 92 7 -344 3
+		WestPurged:Set[False]
+		call DMove 97 -7 -405 3
+		wait 50
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 100
+		call PKey STRAFERIGHT 1
+		call PKey MOVEFORWARD 1
+		call DMove 97 -7 -416 3
+		call OpenDoor "Factory Center West Hall Door 01"
 		wait 5
+		call DMove 97 -7 -405 3
+		
+		call SMove 97 -7 -430 100 15 5
+		call OpenDoor "Factory Center West Hall Door 02"
+		call DMove 97 -7 -473 3
+		wait 50
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 100
+		
+		call PKey STRAFERIGHT 1
+		call PKey MOVEFORWARD 1
+		call DMove 97 -7 -488 1
+		call DMove 84 -7 -485 3
+		face 90 -485
+		wait 50
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 100
+		face 79 -485
+		call SMove 79 -7 -485 100 15 5
+		call OpenDoor "Factory Center West Hall Door 03"
+		face 90 -485
+		call PKey STRAFERIGHT 1
+		call PKey MOVEFORWARD 1
+		call DMove 94 -7 -486 3
+		wait 300
+		call SMove 84 -7 -489 100 15 5
+		call SMove 75 -7 -484 100 15 5
+		call SMove 23 -7 -484 100 15 5
+		call DMove 24 -7 -501 3
+		call OpenDoor "Factory Center North Hall Door 01"
+		call DMove 24 3 -541 3
+		call OpenDoor "Factory Control Room Door 01"
 	}
-	while (!${WestPurged})
-	call DMove 92 7 -344 3
-	WestPurged:Set[False]
-	call DMove 97 -7 -405 3
-	wait 50
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 100
-	call PKey STRAFERIGHT 1
-	call PKey MOVEFORWARD 1
-	call DMove 97 -7 -416 3
-	call OpenDoor "Factory Center West Hall Door 01"
-	wait 5
-	call DMove 97 -7 -405 3
-	
-	call SMove 97 -7 -430 100 15 5
-	call OpenDoor "Factory Center West Hall Door 02"
-	call DMove 97 -7 -473 3
-	wait 50
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 100
-	
-	call PKey STRAFERIGHT 1
-	call PKey MOVEFORWARD 1
-	call DMove 97 -7 -488 1
-	call DMove 84 -7 -485 3
-	face 90 -485
-	wait 50
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 100
-	face 79 -485
-	call SMove 79 -7 -485 100 15 5
-	call OpenDoor "Factory Center West Hall Door 03"
-	face 90 -485
-	call PKey STRAFERIGHT 1
-	call PKey MOVEFORWARD 1
-	call DMove 94 -7 -486 3
-	wait 300
-	call SMove 84 -7 -489 100 15 5
-	call SMove 75 -7 -484 100 15 5
-	call SMove 23 -7 -484 100 15 5
-	call DMove 24 -7 -501 3
-	call OpenDoor "Factory Center North Hall Door 01"
-	call DMove 24 3 -541 3
-	call OpenDoor "Factory Control Room Door 01"
 	call DMove 23 3 -563 3
 	wait 20
+	call UnstuckR 20
 	call MoveCloseTo "Meldrath the Marvelous" 
 	call Converse "Meldrath the Marvelous" 11
 	wait 50
@@ -340,16 +361,22 @@ function step004()
 	
 function step005()
 {	
-	call DMove 25 3 -545 3
-	call DMove 24 -7 -488 3
-	call DMove 70 -7 -484 3
-	call DMove 80 -7 -484 3
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	call DMove 96 -7 -484 3
-	call DMove 97 -7 -437 3
-	call DMove 98 -7 -427 3
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 25 3 -545 3
+		call DMove 24 -7 -488 3
+		call DMove 70 -7 -484 3
+	}
+		call DMove 80 -7 -484 3
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		call DMove 96 -7 -484 3
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 97 -7 -437 3
+		call DMove 98 -7 -427 3
+	}
 	call DMove 107 -6 -423 3 30 FALSE FALSE 5
 	do
 	{
@@ -358,58 +385,66 @@ function step005()
 		call CheckItem "shorted circuitry" 1
 	}
 	while (${Return}>0)
-	call DMove 98 -7 -427 3 30 FALSE FALSE 3
-	call DMove 99 -7 -409 3
-	call DMove 96 6 -355 3
-	call DMove 105 7 -340 3
-	call ActivateVerb "West Purge Lever" 94 7 -342 "Purge" TRUE FALSE TRUE
-	do
+	if (!${OgreBotAPI.KWAble})
 	{
-		wait 5
+		call DMove 98 -7 -427 3 30 FALSE FALSE 3
+		call DMove 99 -7 -409 3
+		call DMove 96 6 -355 3
+		call DMove 105 7 -340 3
+		call ActivateVerb "West Purge Lever" 94 7 -342 "Purge" TRUE FALSE TRUE
+		do
+		{
+			wait 5
+		}
+		while (!${WestPurged})
+		call DMove 40 7 -344 3
+		call DMove 26 7 -346 2
+		WestPurged:Set[False]
 	}
-	while (!${WestPurged})
-	call DMove 40 7 -344 3
-	call DMove 26 7 -346 2
-	WestPurged:Set[False]
 }
 	
 function step006()
-{		
-	call DMove 25 7 -345 1 30 FALSE FALSE 2
-	call ActivateVerb "East Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
-	wait 20
-	face -64 -345
-	echo waiting for Purge
-	do
+{	
+	if (!${OgreBotAPI.KWAble})
 	{
-		wait 5
+		call DMove 25 7 -345 1 30 FALSE FALSE 2
+		call ActivateVerb "East Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
+		wait 20
+		face -64 -345
+		echo waiting for Purge
+		do
+		{
+			wait 5
+		}
+		while (!${EastPurged})
+		call DMove -64 7 -345 3
+		EastPurged:Set[False]
+		
+		call OpenDoor "Factory East Side Door 01"
+		call SMove -85 4 -344 100 20 5
+		call DMove -89 -3 -378 3
+		call SMove -88 4 -399 100 12 5
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 50
+		call DMove -89 -3 -378 3
+		call DMove -78 -3 -382 3 30 TRUE FALSE 5
+		call DMove -75 -3 -453 3
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 50
+		call PetitPas -78 -3 -446 3 TRUE
+		wait 600
+		call OpenDoor "Factory East Side Door 02"
+		call PetitPas -76 -3 -453 3 TRUE 
+		call ActivateVerb "Electric Manaetic Device (EMD)" -76 -3 -453 "Destroy Device"
+		call DMove -73 -3 -463 3
+		call PetitPas -62 -3 -461 3 TRUE
 	}
-	while (!${EastPurged})
-	call DMove -64 7 -345 3
-	EastPurged:Set[False]
-	
-	call OpenDoor "Factory East Side Door 01"
-	call SMove -85 4 -344 100 20 5
-	call DMove -89 -3 -378 3
-	call SMove -88 4 -399 100 12 5
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
-	call DMove -89 -3 -378 3
-	call DMove -78 -3 -382 3 30 TRUE FALSE 5
-	call DMove -75 -3 -453 3
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
-	call PetitPas -78 -3 -446 3 TRUE
-	wait 600
-	call OpenDoor "Factory East Side Door 02"
-	call PetitPas -76 -3 -453 3 TRUE 
-	call ActivateVerb "Electric Manaetic Device (EMD)" -76 -3 -453 "Destroy Device"
-	call DMove -73 -3 -463 3
-	call PetitPas -62 -3 -461 3 TRUE
+	else
+		call KWMove -62 -3 -461
 	do
 	{
 		OgreBotAPI:Special["${Me.Name}"]
@@ -417,48 +452,54 @@ function step006()
 		call CheckItem "chassis shell" 1
 	}
 	while (${Return}>0)
-	call PetitPas -73 -3 -461 3 TRUE
-	call DMove -78 -3 -439 3
-	call DMove -77 -3 -378 3
-	call DMove -88 -3 -374 3
-	
-	call SMove -89 4 -345 100 20 5
-	call DMove -67 7 -345 3
-	call OpenDoor "Factory East Side Door 01"
-	call DMove -46 7 -342 3
-	
-	call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
-	wait 20
-	echo waiting for Purge
-	do
+	if (!${OgreBotAPI.KWAble})
 	{
-		wait 5
+		call PetitPas -73 -3 -461 3 TRUE
+		call DMove -78 -3 -439 3
+		call DMove -77 -3 -378 3
+		call DMove -88 -3 -374 3
+		
+		call SMove -89 4 -345 100 20 5
+		call DMove -67 7 -345 3
+		call OpenDoor "Factory East Side Door 01"
+		call DMove -46 7 -342 3
+		
+		call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
+		wait 20
+		echo waiting for Purge
+		do
+		{
+			wait 5
+		}
+		while (!${EastPurged})
+		call DMove 10 7 -346 3
+		call DMove 24 7 -346 2
+		EastPurged:Set[False]
 	}
-	while (!${EastPurged})
-	call DMove 10 7 -346 3
-	call DMove 24 7 -346 2
-	EastPurged:Set[False]
 }
 function step007()
 {	
-	call ActivateVerb "West Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
-	wait 20
-	echo waiting for Purge
-	do
+	if (!${OgreBotAPI.KWAble})
 	{
-		wait 5
+		call ActivateVerb "West Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
+		wait 20
+		echo waiting for Purge
+		do
+		{
+			wait 5
+		}
+		while (!${WestPurged})
+		call DMove 110 7 -344 3
+		WestPurged:Set[False]
+		call OpenDoor "Factory West Side Door 01"
+		call DMove 122 7 -344 1 30 TRUE FALSE 3
+		call SMove 135 4 -345 100 20 5
+		call DMove 137 -3 -375 3
+		call SMove 139 4 -401 100 20 5
+		call SMove 154 4 -400 100 20 5
+		call DMove 156 4 -415 3
+		call DMove 148 4 -417 3
 	}
-	while (!${WestPurged})
-	call DMove 110 7 -344 3
-	WestPurged:Set[False]
-	call OpenDoor "Factory West Side Door 01"
-	call DMove 122 7 -344 1 30 TRUE FALSE 3
-	call SMove 135 4 -345 100 20 5
-	call DMove 137 -3 -375 3
-	call SMove 139 4 -401 100 20 5
-	call SMove 154 4 -400 100 20 5
-	call DMove 156 4 -415 3
-	call DMove 148 4 -417 3
 	call DMove 149 4 -427 3
 	do
 	{
@@ -509,20 +550,23 @@ function step008()
 }
 function step009()
 {
-	call SMove 154 4 -400 100 20 5
-	call DMove 139 4 -401 3
-	call SMove 139 4 -347 100 20 5
-	call DMove 121 7 -344 3
-	call OpenDoor "Factory West Side Door 01"
-	call DMove 100 7 -344 3
-	call DMove 97 -7 -408 3
-	call ActivateVerb "Electric Manaetic Device (EMD)" 97 -7 -408 "Destroy Device"
-	call DMove 97 -7 -440 3
-	call DMove 96 -7 -486 3
-	call DMove 29 -7 -485 3
-	call DMove 24 -7 -500 3
-	call DMove 25 3 -538 3
-	call DMove 24 3 -555 3
+	if (!${OgreBotAPI.KWAble})
+	{
+		call SMove 154 4 -400 100 20 5
+		call DMove 139 4 -401 3
+		call SMove 139 4 -347 100 20 5
+		call DMove 121 7 -344 3
+		call OpenDoor "Factory West Side Door 01"
+		call DMove 100 7 -344 3
+		call DMove 97 -7 -408 3
+		call ActivateVerb "Electric Manaetic Device (EMD)" 97 -7 -408 "Destroy Device"
+		call DMove 97 -7 -440 3
+		call DMove 96 -7 -486 3
+		call DMove 29 -7 -485 3
+		call DMove 24 -7 -500 3
+		call DMove 25 3 -538 3
+		call DMove 24 3 -555 3
+	}
 	call DMove 16 3 -565 3 30 TRUE FALSE 5
 	call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Chassis"
 	wait 20
@@ -544,172 +588,248 @@ function step009()
 }
 function step010()
 {
-	call DMove 24 3 -551 3
-	call DMove 25 -7 -487 3
-	call DMove -25 -7 -485 3
-	call OpenDoor "Factory Center East Hall Door 03"
-	call DMove -49 -7 -486 3
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 24 3 -551 3
+		call DMove 25 -7 -487 3
+		call DMove -25 -7 -485 3
+		call OpenDoor "Factory Center East Hall Door 03"
+	}
+	call DMove -48 -7 -490 3
+	call MoveCloseTo "Binary Control Bot"
 	wait 50
-	call DMove -23 -7 -486 3
-	call DMove 98 -7 -486 3
+	do
+	{
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
+	}
+	while (!${Bot32(exists)})
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove -23 -7 -486 3
+		call DMove 98 -7 -486 3
+	}	
 	call DMove 94 -7 -463 3
 	call DMove 85 -7 -463 1 30 TRUE FALSE 3
-	call DMove 99 -7 -462 1
-	call DMove 97 -7 -436 3
-	call DMove 96 7 -348 3
-	call DMove 114 7 -345 3
-	call OpenDoor "Factory West Side Door 01"
-	call DMove 122 7 -344 1 30 TRUE FALSE 3
-	call SMove 135 4 -345 100 20 5
-	call DMove 137 -3 -375 3
-	call DMove 128 -3 -374 2 30 TRUE FALSE 3
-	call DMove 127 -3 -362 3
-	call DMove 128 -3 -435 3
-	call DMove 125 -3 -451 3
-	wait 20
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+	call MoveCloseTo "Binary Control Bot"
 	wait 50
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
-		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
-	call PetitPas 120 -3 -446 3 TRUE
-	call OpenDoor "Factory West Side Door 02"
-	call PetitPas 125 -3 -444 3 TRUE
-	wait 600
-	call PetitPas 124 -3 -452 3 TRUE
-	;call ActivateVerb "Electric Manaetic Device (EMD)" 124 -3 -452 "Destroy Device"
-	call DMove 125 -3 -463 3 30 TRUE FALSE 5
-	call DMove 153 -3 -462 3
-	call OpenDoor "Factory West Side Door 03"
-	call DMove 154 -3 -482 3
-	call DMove 188 -3 -496 3
-	wait 50
-	call DMove 157 -3 -479 3
-	call DMove 150 -3 -461 3
-	call DMove 127 -3 -461 3
-	call DMove 122 -3 -440 3
-	call DMove 132 -3 -379 3
-	call DMove 139 -1 -365 3
-	call SMove 139 4 -347 100 20 5
-	call DMove 121 7 -344 3
-	call OpenDoor "Factory West Side Door 01"
-	call DMove 100 7 -344 3
-	call ActivateVerb "West Purge Lever" 94 7 -342 "Purge" TRUE FALSE TRUE
 	do
 	{
-		wait 5
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
 	}
-	while (!${WestPurged})
-	call DMove 40 7 -344 3
-	call DMove 26 7 -346 2
-	WestPurged:Set[FALSE]
-}
-function step011()
-{		
-	call DMove 25 7 -345 1 30 FALSE FALSE 2
-	call ActivateVerb "East Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
-	wait 20
-	face -64 -345
-	echo waiting for Purge
+	while (!${Bot16(exists)})
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 99 -7 -462 1
+		call DMove 97 -7 -436 3
+		call DMove 96 7 -348 3
+		call DMove 114 7 -345 3
+		call OpenDoor "Factory West Side Door 01"
+		call DMove 122 7 -344 1 30 TRUE FALSE 3
+		call SMove 135 4 -345 100 20 5
+		call DMove 137 -3 -375 3
+		call DMove 128 -3 -374 2 30 TRUE FALSE 3
+	}
+	call DMove 127 -3 -361 3
+	call MoveCloseTo "Binary Control Bot"
+	wait 50
 	do
 	{
-		wait 5
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
 	}
-	while (!${EastPurged})
-	call DMove -64 7 -345 3
-	EastPurged:Set[FALSE]
-	
-	call OpenDoor "Factory East Side Door 01"
-	call SMove -85 4 -344 100 20 5
-	call DMove -89 -3 -378 3
-	call SMove -89 3 -401 100 12 5
-	call IsPresent "Electric Manaetic Device (EMD)" 15
-	if (!${Return})
+	while (!${Bot8(exists)})
+	if (!${OgreBotAPI.KWAble})
 	{
+		call DMove 128 -3 -435 3
+		call DMove 125 -3 -451 3
+		wait 20
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 50
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+		wait 50
+		call PetitPas 120 -3 -446 3 TRUE
+		call OpenDoor "Factory West Side Door 02"
+		call PetitPas 125 -3 -444 3 TRUE
+		wait 600
+		call PetitPas 124 -3 -452 3 TRUE
+		;call ActivateVerb "Electric Manaetic Device (EMD)" 124 -3 -452 "Destroy Device"
+		call DMove 125 -3 -463 3 30 TRUE FALSE 5
+		call DMove 153 -3 -462 3
+		call OpenDoor "Factory West Side Door 03"
+		call DMove 154 -3 -482 3
+	}
+	call DMove 189 -3 -495 3
+	call MoveCloseTo "Binary Control Bot"
+	wait 50
+	do
+	{
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
+	}
+	while (!${Bot4(exists)})
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 157 -3 -479 3
+		call DMove 150 -3 -461 3
+		call DMove 127 -3 -461 3
+		call DMove 122 -3 -440 3
+		call DMove 132 -3 -379 3
+		call DMove 139 -1 -365 3
+		call SMove 139 4 -347 100 20 5
+		call DMove 121 7 -344 3
+		call OpenDoor "Factory West Side Door 01"
+		call DMove 100 7 -344 3
+		call ActivateVerb "West Purge Lever" 94 7 -342 "Purge" TRUE FALSE TRUE
 		do
 		{
-			Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-			wait 50
-			call IsPresent "Electric Manaetic Device (EMD)" 15
+			wait 5
 		}
-		while (!${Return})
+		while (!${WestPurged})
+		call DMove 40 7 -344 3
+		call DMove 26 7 -346 2
+		WestPurged:Set[FALSE]
 	}
-	call DMove -89 -3 -378 3
-	wait 600
-	call DMove -88 3 -401 3
-	call DMove -93 4 -445
-	wait 20
-	call DMove -73 -3 -445 3 30 TRUE FALSE 5
-	call DMove -75 -3 -453 3
-	call DMove -77 -3 -466 3
-	call DMove -102 -3 -460 3
-	call OpenDoor "Factory East Side Door 03"
-	call DMove -107 -3 -481 3
-	call DMove -134 -3 -516 3
-	wait 20
-	call DMove -106 -3 -477 3
-	call DMove -102 -3 -460 3
-	call DMove -78 -3 -460 3
-	call DMove -74 -3 -450 3
-	call DMove -72 -3 -436 3
-	call DMove -87 -3 -372
-	
-	call SMove -86 4 -343 100 20 5
-	call DMove -67 7 -345 3
-	call OpenDoor "Factory East Side Door 01"
-	call DMove -46 7 -342 3
-	
-	call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
-	wait 20
-	echo waiting for Purge
+}
+function step011()
+{	
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove 25 7 -345 1 30 FALSE FALSE 2
+		call ActivateVerb "East Purge Lever" 25 7 -345 "Purge" TRUE FALSE TRUE
+		wait 20
+		face -64 -345
+		echo waiting for Purge
+		do
+		{
+			wait 5
+		}
+		while (!${EastPurged})
+		call DMove -64 7 -345 3
+		EastPurged:Set[FALSE]
+		
+		call OpenDoor "Factory East Side Door 01"
+		call SMove -85 4 -344 100 20 5
+		call DMove -89 -3 -378 3
+		call SMove -89 3 -401 100 12 5
+		call IsPresent "Electric Manaetic Device (EMD)" 15
+		if (!${Return})
+		{
+			do
+			{
+				Me.Inventory["Electric Manaetic Device (EMD)"]:Use
+				wait 50
+				call IsPresent "Electric Manaetic Device (EMD)" 15
+			}
+			while (!${Return})
+		}
+		call DMove -89 -3 -378 3
+		wait 600
+		call DMove -88 3 -401 3
+		}
+	call DMove -92 4 -444
+	call MoveCloseTo "Binary Control Bot"
+	wait 50
 	do
 	{
-		wait 5
-		call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
-	
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
 	}
-	while (!${EastPurged})
-	call DMove 10 7 -346 3
-	call DMove 24 7 -346 2
-	EastPurged:Set[False]
+	while (!${Bot2(exists)})
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove -73 -3 -445 3 30 TRUE FALSE 5
+		call DMove -75 -3 -453 3
+		call DMove -77 -3 -466 3
+		call DMove -102 -3 -460 3
+		call OpenDoor "Factory East Side Door 03"
+		call DMove -107 -3 -481 3
+	}
+	call DMove -134 -3 -516 3
+	call MoveCloseTo "Binary Control Bot"
+	wait 50
+	do
+	{
+		call UnstuckR 2
+		call MoveCloseTo "Binary Control Bot"
+		wait 20
+	}
+	while (!${Bot1(exists)})
+	if (!${OgreBotAPI.KWAble})
+	{
+		call DMove -106 -3 -477 3
+		call DMove -102 -3 -460 3
+		call DMove -78 -3 -460 3
+		call DMove -74 -3 -450 3
+		call DMove -72 -3 -436 3
+		call DMove -87 -3 -372
+		
+		call SMove -86 4 -343 100 20 5
+		call DMove -67 7 -345 3
+		call OpenDoor "Factory East Side Door 01"
+		call DMove -46 7 -342 3
+		
+		call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
+		wait 20
+		echo waiting for Purge
+		do
+		{
+			wait 5
+			call ActivateVerb "East Purge Lever" -46 7 -342 "Purge" TRUE FALSE TRUE
+		
+		}
+		while (!${EastPurged})
+		call DMove 10 7 -346 3
+		call DMove 24 7 -346 2
+		EastPurged:Set[False]
+	}
 }
 function step012()
-{	
-	call DMove 25 7 -340 3
-	wait 10
-	call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
-	wait 20
-	face 97 -344
-	echo waiting for Purge
-	do
+{
+	if (!${OgreBotAPI.KWAble})
 	{
-		wait 5
+		call DMove 25 7 -340 3
+		wait 10
 		call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
+		wait 20
+		face 97 -344
+		echo waiting for Purge
+		do
+		{
+			wait 5
+			call ActivateVerb "West Purge Lever" 25 7 -340 "Purge" TRUE FALSE TRUE
+		}
+		while (!${WestPurged})
+		call DMove 70 7 -344 3
+		call DMove 92 7 -344 2
+		WestPurged:Set[False]
+		call DMove 97 -7 -405 3
+		call DMove 97 -7 -416 3
+		call DMove 97 -7 -405 3
+		call DMove 97 -7 -430 3
+		call DMove 97 -7 -473 3
+		call DMove 97 -7 -488 1
+		call DMove 84 -7 -485 3
+		call DMove 79 -7 -485 3
+		call DMove 94 -7 -486 3
+		call DMove 84 -7 -489 3
+		call DMove 75 -7 -484 3
+		call DMove 23 -7 -484 3
+		call DMove 24 -7 -501 3
+		call DMove 24 3 -541 3
 	}
-	while (!${WestPurged})
-	call DMove 70 7 -344 3
-	call DMove 92 7 -344 2
-	WestPurged:Set[False]
-	call DMove 97 -7 -405 3
-	call DMove 97 -7 -416 3
-	call DMove 97 -7 -405 3
-	call DMove 97 -7 -430 3
-	call DMove 97 -7 -473 3
-	call DMove 97 -7 -488 1
-	call DMove 84 -7 -485 3
-	call DMove 79 -7 -485 3
-	call DMove 94 -7 -486 3
-	call DMove 84 -7 -489 3
-	call DMove 75 -7 -484 3
-	call DMove 23 -7 -484 3
-	call DMove 24 -7 -501 3
-	call DMove 24 3 -541 3
-	call DMove 23 3 -563 3
-}	
-
+	call DMove 23 3 -563 3	
+}
 function step013()
 {
 	call InitBot
@@ -772,19 +892,19 @@ function step014()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
+	wait 100
 	call DMove 68 -7 -455 2
 	call DMove 63 -7 -447 2 30 FALSE FALSE 5
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
+	wait 100
 	call DMove 72 -7 -412 3
 	call DMove 62 -7 -401 2 
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
+	wait 100
 	call DMove 70 -7 -413 3
 	call DMove 66 -7 -454 3
 	call DMove -13 -7 -458 3
@@ -792,14 +912,14 @@ function step014()
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
+	wait 100
 	call DMove -21 -7 -433 3
 	call DMove -17 -7 -414 3
 	call DMove -17 -7 -398 2
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
-	wait 50
+	wait 100
 	call DMove -6 -7 -380 3
 	call DMove 19 -5 -378 3
 	do

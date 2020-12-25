@@ -158,13 +158,16 @@ function TPHarvest(string Node, int Try)
 	variable int CombatCount
 	variable int NodeCount
 	variable string NodeType
+	variable string ZoneName
 	
-	if (!${OgreBotAPI.KWAble})
+		if (!${OgreBotAPI.KWAble})
 	{
 		call Harvest
 		return
 	}
-		
+	
+	ZoneName:Set[${Zone.Name}]
+	
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	echo entering TPHarvest function ${ItemName} ${Safe} v2
 	X0:Set[${Me.X}] 
@@ -177,7 +180,7 @@ function TPHarvest(string Node, int Try)
 			oc !c -Revive ${Me.Name}
 		EQ2:QueryActors[Actors, Type == "Resource"]
 		Actors:GetIterator[ActorIterator]
-		if ${ActorIterator:First(exists)}
+		if (${ActorIterator:First(exists)} && ${Me.InventorySlotsFree} > 0)
 		{
 			ogre harvestlite
 			eq2execute merc resume
@@ -255,7 +258,7 @@ function TPHarvest(string Node, int Try)
 				CombatCount:Set[0]
 				NodeCount:Set[0]
 			}	
-			while (${ActorIterator:Next(exists)})	
+			while (${ActorIterator:Next(exists)} && ${Me.InventorySlotsFree} > 0)	
 		}
 		
 		EQ2:QueryActors[Actors, Distance > 10]
@@ -267,13 +270,17 @@ function TPHarvest(string Node, int Try)
 			call Port ${Me.Name} ${X0} ${Y0} ${Z0}
 		wait 20
 	}
-	while (${TryCount} < ${Try} || ${Try} < 1  && !${REBOOT})
+	while (${TryCount} < ${Try} || ${Try} < 1  && !${REBOOT} && ${Me.InventorySlotsFree} > 0)
 	echo exiting TPHarvest function
 	call goto_GH
 	wait 50
 	call waitfor_Zoning
 	wait 50
 	ogre im -Depot
+	wait 3000
+	call goZone "${ZoneName}"
+	wait 600
+	call TPHarvest
 }
 function Qho()
 {
@@ -3068,6 +3075,7 @@ function EndZone()
 	variable string sQN
 	call strip_QN "${Zone.Name}"
 	sQN:Set[${Return}]
+	echo ending ${sQN}
 	if ${Script[${sQN}](exists)}
 		endscript ${sQN}
 	press -release MOVEFORWARD
@@ -3537,129 +3545,6 @@ function goHunt(string ZoneName, bool NamedOnly)
 	}
 	echo calling goHunt "${ZoneName}" ${NamedOnly}
 	call goHunt "${ZoneName}" ${NamedOnly}
-}
-function goZone(string ZoneName, string Transport)
-{
-	variable string AltZoneName
-	
-	call CorrectZone "${ZoneName}"
-	AltZoneName:Set["${Return}"]
-	call Log "goZone called for ${ZoneName} (changed to ${Return})" with ${Transport}
-	
-	if (!${Transport(exists)})
-		Transport:Set["Spire"]
-	if (${ZoneName.Equal["Freeport"]})
-		Transport:Set["Globe"]
-		
-	if (${Transport.Equal["Globe"]})
-	{
-		call IsPresent "mariners_bell"
-		if (${Return})
-		{
-			Transport:Set["mariners_bell"]
-		}
-		call IsPresent "Pirate Captain"
-		if (${Return})
-		{
-			Transport:Set["Pirate Captain"]
-		}
-	}
-	
-	call IsPresent ${Transport}
-	if (!${Return})
-	{
-		call Log "Can't find ${Transport} in ${Zone.Name} to go to ${ZoneName}" WARNING
-	}
-
-	if (${ZoneName.Equal["Fallen Gate"]})
-	{
-		call goFallenGate
-		return TRUE
-	}
-	if (${ZoneName.Equal["Sanctum of the Scaleborn"]})
-	{
-		call goSanctumoftheScaleborn
-		return TRUE
-	}
-	if (${ZoneName.Equal["Castle Mistmoore"]})
-	{
-		call goCastleMistmoore
-		return TRUE
-	}
-	if (${ZoneName.Equal["Karnor's Castle"]})
-	{
-		call goKarnorsCastle
-		return TRUE
-	}
-	if (${ZoneName.Equal["Kaladim"]})
-	{
-		call goKaladim
-		return TRUE
-	}
-	if (${ZoneName.Equal["Hold of Rime: The Ascent"]})
-	{
-		call goHoldofRime_TheAscent
-		return TRUE
-	}
-	if (${ZoneName.Equal["The Temple of Cazic-Thule"]})
-	{
-		call goCazicThule
-		return TRUE
-	}
-	if (${ZoneName.Equal["Nye'Caelona"]})
-	{
-		call Log "in Nye'Caelona goZone condition. calling goNyeCaelona in EQ2Travel"
-		call goNyeCaelona
-		return TRUE
-	}
-	if (${ZoneName.Equal["Obulus Frontier"]})
-	{
-		call goObulusFrontier
-		return TRUE
-	}
-	if (${ZoneName.Equal["Fordel Midst"]})
-	{
-		call goFordelMidst
-		return TRUE
-	}
-	if (${ZoneName.Equal["Aurelian Coast"]})
-	{
-		call goAurelianCoast
-		return TRUE
-	}
-	if (${ZoneName.Right[12].Equal["Sanctus Seru"]})
-	{
-		call goSanctusSeru
-		return TRUE
-	}
-	if (${ZoneName.Equal["Wracklands"]})
-	{
-		call goWracklands
-		return TRUE
-	}
-	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
-	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
-	{
-		call ActivateSpire "${Transport}"
-		wait 30
-		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-		wait 300
-		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
-	}
-	call waitfor_Zoning
-	
-	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
-	{
-		echo Something is wrong : (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]}) ${Zone.Name}/${AltZoneName}
-		call goto_GH
-		wait 300
-		call goZone "${ZoneName}" "${Transport}"
-	}
-	if (!${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
-	{
-		call goZone "${ZoneName}" "${Transport}"
-	}
-	echo I am in ${ZoneName} (${AltZoneName}) (end of goZone)
 }
 function goto_GH()
 {
@@ -5149,7 +5034,21 @@ function RunInstance()
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-
+function RunZone()
+{
+	call RunInstance
+}
+function EndInstance()
+{
+	variable string sQN
+	call strip_QN "${Zone.Name}" TRUE
+	sQN:Set[${Return}]
+	
+	if (${Script[${sQN}](exists)})
+		endcript ${sQN}
+	
+	echo zone RunInstance stopped	
+}
 function EndICZone()
 {
 	variable string sQN
@@ -5395,7 +5294,7 @@ function StealthMoveTo(string ItemName, float Distance, float RespectDistance, i
 	variable bool Found2
 	variable float loc0
 	variable int Stucky
-	
+	echo into StealthMoveTo (${OgreBotAPI.KWAble})
 	if (${Precision}<1)
 		Precision:Set[10]
 	totaldistance:Set[${Math.Calc64[${Distance}+${RespectDistance}]}]
@@ -5427,32 +5326,37 @@ function StealthMoveTo(string ItemName, float Distance, float RespectDistance, i
 				if (!${Found})
 				{
 					echo seems that target ${ActorIterator.Value.Name} at ${ActorIterator.Value.Distance}m is safe
-					if (!${ActorIterator.Value.CheckCollision} || !${CheckCollision})
+					if (${OgreBotAPI.KWAble})
+						call KWMove ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z}
+					else	
 					{
-						press -hold MOVEFORWARD
-						do
+						if (!${ActorIterator.Value.CheckCollision} || !${CheckCollision})
 						{
-							loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
-							face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
-							wait 1
-							call CheckStuck ${loc0}
-							if (${Return})
+							press -hold MOVEFORWARD
+							do
 							{
-								Stucky:Inc
-								echo Stucky count: ${Stucky}/20
+								loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
+								face ${ActorIterator.Value.X} ${ActorIterator.Value.Z}
+								wait 1
+								call CheckStuck ${loc0}
+								if (${Return})
+								{
+									Stucky:Inc
+									echo Stucky count: ${Stucky}/20
+								}
+								else
+									Stucky:Set[0]
+								call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
 							}
-							else
-								Stucky:Set[0]
-							call TestArrivalCoord ${ActorIterator.Value.X} ${ActorIterator.Value.Y} ${ActorIterator.Value.Z} ${Precision}
+							while (!${Return} && ${Stucky}<20 && ${MobIterator.Value.Distance} < ${RespectDistance})
+							press -release MOVEFORWARD
+							if (${Stucky}<20)
+								Found2:Set[TRUE]
 						}
-						while (!${Return} && ${Stucky}<20 && ${MobIterator.Value.Distance} < ${RespectDistance})
-						press -release MOVEFORWARD
-						if (${Stucky}<20)
-							Found2:Set[TRUE]
-					}
-					else
-					{
-						echo aborted - collision detected
+						else
+						{
+							echo aborted - collision detected
+						}
 					}
 				}
 			}
