@@ -104,4 +104,12 @@ function step004()
 	call Converse "${NPCName}" 10 TRUE
 	OgreBotAPI:AcceptReward["${Me.Name}"]			
 }
-
+function MendToon()
+{
+	call waitfor_Zone "Coliseum of Valor"
+	call ReturnEquipmentSlotHealth Primary
+	if (${Return}<100)
+	{
+		call CoVMender
+	}
+}

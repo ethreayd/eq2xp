@@ -8,16 +8,16 @@ function main(int stepstart, int stepstop, int speed)
 	; thanks to Kannkor for the index usage example
 	variable index:string ScriptsToRun
 	variable string sQN
-	ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
-	ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
-	ScriptsToRun:Insert["Legacy of Power: An Innovative Approach"]
-	ScriptsToRun:Insert["Legacy of Power: Realm of the Plaguebringer"]
-	ScriptsToRun:Insert["Legacy of Power: Through Storms and Mists"]
-	ScriptsToRun:Insert["Legacy of Power: Glimpse of the Hereother"]
-	ScriptsToRun:Insert["Legacy of Power: Drawn to the Fire"]
-	ScriptsToRun:Insert["Legacy of Power: Deep Trouble"]
-	ScriptsToRun:Insert["Legacy of Power: Tyrant's Throne"]
-	ScriptsToRun:Insert["Conservation of Planar Energy"]
+	;ScriptsToRun:Insert["Legacy of Power: Secrets in an Arcane Land"]
+	;ScriptsToRun:Insert["Legacy of Power: Hero's Devotion"]
+	;ScriptsToRun:Insert["Legacy of Power: An Innovative Approach"]
+	;ScriptsToRun:Insert["Legacy of Power: Realm of the Plaguebringer"]
+	;ScriptsToRun:Insert["Legacy of Power: Through Storms and Mists"]
+	;ScriptsToRun:Insert["Legacy of Power: Glimpse of the Hereother"]
+	;ScriptsToRun:Insert["Legacy of Power: Drawn to the Fire"]
+	;ScriptsToRun:Insert["Legacy of Power: Deep Trouble"]
+	;ScriptsToRun:Insert["Legacy of Power: Tyrant's Throne"]
+	;ScriptsToRun:Insert["Conservation of Planar Energy"]
 	ScriptsToRun:Insert["A Stitch in Time, Part I: Security Measures"]
 	ScriptsToRun:Insert["A Stitch in Time, Part II: Lightning Strikes"]
 	echo "Starting PoP quests"

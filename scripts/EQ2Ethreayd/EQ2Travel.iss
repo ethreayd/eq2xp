@@ -15,85 +15,135 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
-function GetCDQuests()
+; Main goZone script (entry point) run wrap goZone "Zone Name"
+function goZone(string ZoneName, string Transport)
 {
-	variable string NPCName
-	if (${Me.Y}<400 || ${Me.Y}>430)
-		call goEPG
-	call DMove 751 411 -364 3
+	variable string AltZoneName
 	
-	switch ${ZoneName}
+	call CorrectZone "${ZoneName}"
+	AltZoneName:Set["${Return}"]
+	call Log "goZone called for ${ZoneName} (changed to ${Return})" with ${Transport}
+	
+	if (!${Transport(exists)})
+		Transport:Set["Spire"]
+	if (${ZoneName.Equal["Freeport"]})
+		Transport:Set["Globe"]
+		
+	if (${Transport.Equal["Globe"]})
 	{
-		default
+		call IsPresent "mariners_bell"
+		if (${Return})
 		{
-			call MoveCloseTo "Researcher Tulvina"
-			target "Researcher Tulvina"
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			target "Quillion Frain"
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			call MoveCloseTo "Vazgron the Loremonger"
-			target "Vazgron the Loremonger"
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			target "a Planar Chronicler Vol. 2"
-			call MoveCloseTo "a Planar Chronicler Vol. 2"
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,5]:LeftClick
-			
-			target "a Planar Chronicler Vol. 2"
-			call MoveCloseTo "a Planar Chronicler Vol. 2"
-			eq2execute hail
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,3]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
-			wait 10
-			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			Transport:Set["mariners_bell"]
 		}
-		break
+		call IsPresent "Pirate Captain"
+		if (${Return})
+		{
+			Transport:Set["Pirate Captain"]
+		}
 	}
+	call IsPresent ${Transport}
+	if (!${Return})
+	{
+		call Log "Can't find ${Transport} in ${Zone.Name} to go to ${ZoneName}" WARNING
+	}
+
+	if (${ZoneName.Equal["Fallen Gate"]})
+	{
+		call goFallenGate
+		return TRUE
+	}
+	if (${ZoneName.Equal["Sanctum of the Scaleborn"]})
+	{
+		call goSanctumoftheScaleborn
+		return TRUE
+	}
+	if (${ZoneName.Equal["Castle Mistmoore"]})
+	{
+		call goCastleMistmoore
+		return TRUE
+	}
+	if (${ZoneName.Equal["Karnor's Castle"]})
+	{
+		call goKarnorsCastle
+		return TRUE
+	}
+	if (${ZoneName.Equal["Kaladim"]})
+	{
+		call goKaladim
+		return TRUE
+	}
+	if (${ZoneName.Equal["Hold of Rime: The Ascent"]})
+	{
+		call goHoldofRime_TheAscent
+		return TRUE
+	}
+	if (${ZoneName.Equal["The Temple of Cazic-Thule"]})
+	{
+		call goCazicThule
+		return TRUE
+	}
+	if (${ZoneName.Equal["Wayward Manor"]})
+	{
+		call goWaywardManor
+		return TRUE
+	}
+	if (${ZoneName.Equal["Nye'Caelona"]})
+	{
+		call Log "in Nye'Caelona goZone condition. calling goNyeCaelona in EQ2Travel"
+		call goNyeCaelona
+		return TRUE
+	}
+	if (${ZoneName.Equal["Obulus Frontier"]})
+	{
+		call goObulusFrontier
+		return TRUE
+	}
+	if (${ZoneName.Equal["Fordel Midst"]})
+	{
+		call goFordelMidst
+		return TRUE
+	}
+	if (${ZoneName.Equal["Aurelian Coast"]})
+	{
+		call goAurelianCoast
+		return TRUE
+	}
+	if (${ZoneName.Right[12].Equal["Sanctus Seru"]})
+	{
+		call goSanctusSeru
+		return TRUE
+	}
+	if (${ZoneName.Equal["Wracklands"]} || ${ZoneName.Equal["The Wracklands"]})
+	{
+		call goWracklands
+		return TRUE
+	}
+	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
+	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
+	{
+		call ActivateSpire "${Transport}"
+		wait 30
+		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
+		wait 300
+		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
+	}
+	call waitfor_Zoning
+	
+	if (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
+	{
+		echo Something is wrong : (!${Zone.Name.Right[10].Equal["Guild Hall"]} && !${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]}) ${Zone.Name}/${AltZoneName}
+		call goto_GH
+		wait 300
+		call goZone "${ZoneName}" "${Transport}"
+	}
+	if (!${Zone.Name.Left[${AltZoneName.Length}].Equal["${AltZoneName}"]})
+	{
+		call goZone "${ZoneName}" "${Transport}"
+	}
+	echo I am in ${ZoneName} (${AltZoneName}) (end of goZone)
 }
+
 function goRecusoTor(bool Force)
 {
 	call goZone "The Blinding"	
@@ -137,128 +187,6 @@ function goDainitheWright(bool Force)
 	call DMove -586 38 463 3
 	call DMove -585 38 453 3 30 FALSE FALSE 5
 }	
-function getBoLTSQuests(string version)
-{
-	variable string NPCName
-	NPCName:Set["Daini the Wright"]
-	call goDainitheWright
-	wait 50
-	call Converse "${NPCName}" 1
-}	
-
-function getBoLQuests()
-{
-	variable string NPCName
-	variable int MissingQuest
-
-	call goRecusoTor TRUE
-	
-	call 3DNav -644 47 353
-	call navwrap -689 45 362 3
-	call DMove -638 58 258 3
-	call DMove -580 60 261 3
-	call DMove -542 62 261 3
-	call DMove -545 61 285 3
-	call GoDown
-	echo Getting all Solo Quests
-	NPCName:Set["Sage Ayzuku"]
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	NPCName:Set["Sage Ayzuku"]
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	NPCName:Set["Master Enzelan"]
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	NPCName:Set["Master Enzelan"]
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",2]
-	wait 20
-	NPCName:Set["Apprentice Tansya"]
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	NPCName:Set["Researcher Felquist"]
-	call MoveCloseTo "${NPCName}"
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	OgreBotAPI:ConversationBubble["${Me.Name}",1]
-	wait 20
-	
-	call DMove -532 62 261 3 30 FALSE FALSE 5
-	call DMove -580 60 260 3 30 FALSE TRUE 5
-	call DMove -620 58 256 3 30
-}
 function goAurelianCoast()
 {
 	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
@@ -306,8 +234,6 @@ function goQeynos()
 	else
 		echo already in Qeynos (${Zone.Name})
 }
-
-
 function goStanleyParnem()
 {
 	if (${Actor["Stanley Parnem"].Distance} > 10 || !${Actor["Stanley Parnem"].Distance(exists)})
@@ -359,7 +285,6 @@ function goSsraeshzaPortal()
 	call goWracklands
 	call navwrap 724 77 679
 }
-
 function goSanctusSeru()
 {
 	if (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
@@ -495,7 +420,6 @@ function goObulusFrontier()
 	call waitfor_Zone "Obulus Frontier"
 	call Log "end of goObulusFrontier(${NoTotem}) function"
 }
-
 function goHate()
 {	
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -566,7 +490,6 @@ function goNPCEvaniaValSara(bool NoTotem)
 	wait 50
 	call navwrap -117 92 -270
 }
-
 function goFallenGate()
 {
 	;Level 20 Zone
@@ -609,7 +532,24 @@ function goKaladim()
 	}
 	return FALSE
 }
-
+function goCazicThule()
+{
+	;Level 40 Zone
+	call CheckZone "The Temple of Cazic-Thule"
+	if (!${Return})
+	{
+		call goZone "The Feerrott" Globe
+		wait 20
+		call navwrap -1702 -8 816
+		wait 30
+		oc !c -Zone ${Me.Name}
+		wait 10
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}","The Temple of Cazic-Thule"]
+		call waitfor_Zone "The Temple of Cazic-Thule"
+		return TRUE
+	}
+	return FALSE
+}
 function goSanctumoftheScaleborn()
 {
 	;Level 60 Zone
@@ -666,20 +606,21 @@ function goKarnorsCastle()
 	}
 	return FALSE
 }
-function goCazicThule()
+function goWaywardManor()
 {
-	;Level 40 Zone
-	call CheckZone "The Temple of Cazic-Thule"
+	;Level 120 Zone
+	call CheckZone "Wayward Manor"
 	if (!${Return})
 	{
-		call goZone "The Feerrott" Globe
-		wait 20
-		call navwrap -1702 -8 816
-		wait 30
+		call goZone "Fordel Midst"
+		wait 50
+		call navwrap 169 62 -680
+		wait 50
 		oc !c -Zone ${Me.Name}
 		wait 10
-		OgreBotAPI:ZoneDoorForWho["${Me.Name}","The Temple of Cazic-Thule"]
-		call waitfor_Zone "The Temple of Cazic-Thule"
+		OgreBotAPI:ZoneDoorForWho["${Me.Name}","Fordel Midst: Wayward Manor \[Solo\]"]
+		wait 50
+		call waitfor_Zone "Wayward Manor"
 		return TRUE
 	}
 	return FALSE
@@ -728,6 +669,40 @@ function goOssuary()
 	call goZone "Phantom Sea" Globe
 	wait 50
 	call navwrap 697 53 771
+}
+function goPoM()
+{
+	call goZone "Plane of Magic" Spire
+}
+function goValorsRoost()
+{
+	call goPoM
+	call navwrap -780 343 1091
+}
+function goNPCDruzzilRo_PoM()
+{
+	call goValorsRoost
+	call DMove -766 343 1092 3
+}
+
+function goCoV()
+{
+	call CheckZone "Colisseum of Valor"
+	if (!${Return})
+	{
+		call goZone "Plane of Magic" Spire
+		wait 50
+		call navwrap -789 345 1120
+		do
+		{
+			oc !c -Zone ${Me.Name}
+			wait 10
+			call IsZoning
+		}
+		while (!${Return} && !${Zone.Name.Equal["Colisseum of Valor"]})
+		return TRUE
+	}
+	return FALSE
 }
 function goFordelMidst()
 {
@@ -780,8 +755,6 @@ function goLondiar_Inygad(int Timeout)
 	call MoveCloseTo "Londiar Inygad"
 	return TRUE
 }
-
-
 function goDercin_Marrbrand(int Timeout)
 {
 	variable int Counter
@@ -875,7 +848,6 @@ function goDercin_Marrbrand(int Timeout)
 		call goDercin_Marrbrand ${Timeout}
 	return TRUE
 }
-
 function goMyrist()
 {
 	call goZone "Myrist, the Great Library"
@@ -972,6 +944,212 @@ function goCDPublicZone(string ZoneName)
 	call waitfor_Zone "${LongZoneName}"
 	echo in zone ${ZoneName} (${LongZoneName})
 }
+
+;get quests script per xpac
+function GetCDQuests()
+{
+	variable string NPCName
+	if (${Me.Y}<400 || ${Me.Y}>430)
+		call goEPG
+	call DMove 751 411 -364 3
+	
+	switch ${ZoneName}
+	{
+		default
+		{
+			call MoveCloseTo "Researcher Tulvina"
+			target "Researcher Tulvina"
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			target "Quillion Frain"
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			call MoveCloseTo "Vazgron the Loremonger"
+			target "Vazgron the Loremonger"
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			target "a Planar Chronicler Vol. 2"
+			call MoveCloseTo "a Planar Chronicler Vol. 2"
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,5]:LeftClick
+			
+			target "a Planar Chronicler Vol. 2"
+			call MoveCloseTo "a Planar Chronicler Vol. 2"
+			eq2execute hail
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,3]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,2]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+			wait 10
+			EQ2UIPage[ProxyActor,Conversation].Child[composite,replies].Child[button,1]:LeftClick
+		}
+		break
+	}
+}
+function getBoLTSQuests(string version)
+{
+	variable string NPCName
+	NPCName:Set["Daini the Wright"]
+	call goDainitheWright
+	wait 50
+	call Converse "${NPCName}" 1
+}	
+
+function getBoLQuests()
+{
+	variable string NPCName
+	variable int MissingQuest
+
+	call goRecusoTor TRUE
+	
+	call 3DNav -644 47 353
+	call navwrap -689 45 362 3
+	call DMove -638 58 258 3
+	call DMove -580 60 261 3
+	call DMove -542 62 261 3
+	call DMove -545 61 285 3
+	call GoDown
+	echo Getting all Solo Quests
+	NPCName:Set["Sage Ayzuku"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Sage Ayzuku"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Master Enzelan"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Master Enzelan"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",2]
+	wait 20
+	NPCName:Set["Apprentice Tansya"]
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	NPCName:Set["Researcher Felquist"]
+	call MoveCloseTo "${NPCName}"
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:HailNPC["${Me.Name}","${NPCName}"]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	wait 20
+	
+	call DMove -532 62 261 3 30 FALSE FALSE 5
+	call DMove -580 60 260 3 30 FALSE TRUE 5
+	call DMove -620 58 256 3 30
+}
+
+
+;Need to rationalize following functions
 /*
 function ExitCoV()
 {	
@@ -985,21 +1163,6 @@ function ExitCoV()
 		}
 	call waitfor_Zone "Plane of Magic"
 }
-;function ExitZone()
-;{
-	;string ZoneName
-	;ZoneName:Set["${Zone.Name}"]
-	;if (!${Zone.Name.Left[40].Equal["Torden, Bastion of Thunder: Tower Breach"]})
-	;{
-	;	call DMove 0 0 -1 3 30 TRUE
-	;}
-	;do
-	;{
-	;	wait 50
-	;	oc !c -Zone
-	;}
-	;while (${Zone.Name.Equal["${ZoneName}"]})
-;}
 function GetCoVQuests(string ZoneName, string version)
 {
 	variable string NPCName
@@ -1487,62 +1650,3 @@ function goVarig()
 	call MoveCloseTo "Varig Ro"
 }
 */
-/*
-function MendToon()
-{
-	call waitfor_Zone "Coliseum of Valor"
-	call ReturnEquipmentSlotHealth Primary
-	if (${Return}<100)
-	{
-		call CoVMender
-	}
-}
-function PrepareToon()
-{
-	variable string sQN
-	call waitfor_Zone "Coliseum of Valor"
-	call GetCoVQuests
-	call MendToon
-}
-*/
-/*
-function RebootZones()
-{
-	variable int Counter
-	variable bool LR
-	echo rebooting session
-	call StopHunt
-	oc !c -letsgo ${Me.Name}
-	run EQ2Ethreayd/killall
-	call PKey MOVEFORWARD 1
-	OgreBotAPI:Revive[${Me.Name}]
-	wait 300
-	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
-	call goto_GH
-	wait 100
-	OgreBotAPI:RepairGear[${Me.Name}]
-	wait 100
-	ogre depot -allh -hda -llda -cda
-	wait 100
-	OgreBotAPI:RepairGear[${Me.Name}]
-	wait 100
-	OgreBotAPI:ApplyVerbForWho["${Me.Name}","Large Ulteran Spire","Voyage Through Norrath"]
-	wait 100
-	OgreBotAPI:CancelMaintained["${Me.Name}","Singular Focus"]
-	OgreBotAPI:RepairGear[${Me.Name}]
-	OgreBotAPI:Travel["${Me.Name}", "Plane of Magic"]
-	call waitfor_Zone "Plane of Magic"
-	call goCoV
-	call DMove -2 5 4 3
-	run EQ2Ethreayd/autopop
-}
-*/
-;function EnterZone(int num)
-;{
-;	do
-;	{
-;		OgreBotAPI:ZoneDoorForWho["${Me.Name}",${num}]
-;		wait 50
-;	}
-;	while (${Zone.Name.Equal["Coliseum of Valor"]})
-;}
