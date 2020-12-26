@@ -153,7 +153,7 @@ function goRecusoTor(bool Force)
 		call TestArrivalCoord 623 428 -582
 		if (!${Return})
 		{
-			I am somewhere in the middle of the Blinding...
+			echo I am somewhere in the middle of the Blinding...
 			if (!${Force})
 				call navwrap -584 34 363
 			else

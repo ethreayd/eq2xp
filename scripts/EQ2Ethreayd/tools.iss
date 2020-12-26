@@ -26,6 +26,7 @@ variable(globalkeep) int PollCounter
 variable(globalkeep) int ISNotLogged
 variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
 variable(globalkeep) bool NODEBUG
+variable(globalkeep) int STUCKCOUNTER
 variable(global) bool NoNavWrap
 variable(script) bool REBOOT
 variable(script) bool SKIP
@@ -3042,6 +3043,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			{
 				Stucky:Inc
 				SuperStucky:Inc
+				STUCKCOUNTER:Inc
 				echo DMove:Stucky=${Stucky} / ${SuperStucky}
 			}
 			if (${Stucky}>1)
