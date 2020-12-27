@@ -15,6 +15,19 @@
 #define ZOOMOUT "Num -"
 #define JUMP Space
 
+
+
+function CorrectZone(string ZoneName)
+{
+	if (${ZoneName.Equal["Freeport"]})
+		return "The City of Freeport"	
+	if (${ZoneName.Equal["The Great Divide"]})
+		return "Great Divide"	
+	return "${ZoneName}"
+	if (${ZoneName.Equal["The Sundered Frontier"]})
+		return "Sundered Frontier"	
+	return "${ZoneName}"
+}
 ; Main goZone script (entry point) run wrap goZone "Zone Name"
 function goZone(string ZoneName, string Transport)
 {
@@ -119,6 +132,11 @@ function goZone(string ZoneName, string Transport)
 		call goWracklands
 		return TRUE
 	}
+	if (${ZoneName.Equal["The Hole"]} || ${ZoneName.Equal["Hole"]})
+	{
+		call goTheHole
+		return TRUE
+	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -186,7 +204,11 @@ function goDainitheWright(bool Force)
 	call DMove -605 38 463 3
 	call DMove -586 38 463 3
 	call DMove -585 38 453 3 30 FALSE FALSE 5
-}	
+}
+function goAc()
+{
+	call goAurelianCoast
+}
 function goAurelianCoast()
 {
 	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
@@ -400,6 +422,8 @@ function goSanctusSeru()
 function goObulusFrontier()
 {
 	call Log "in function goObulusFrontier(${NoTotem})"
+	if ${Zone.Name.Left[15].Equal["Obulus Frontier"]}
+		return TRUE
 	call CheckIfItemPresent "Twark Transport Totem" 1
 	
 	if (${Return})
@@ -482,13 +506,6 @@ function goArtisanTrainer()
 	press -release MOVEFORWARD
 	call waitfor_Zoning
 	call navwrap 2817 121 1240
-}
-function goNPCEvaniaValSara(bool NoTotem)
-{
-	call Log "in function goNPCEvaniaValSara(${NoTotem})"
-	call goObulusFrontier ${NoTotem}
-	wait 50
-	call navwrap -117 92 -270
 }
 function goFallenGate()
 {
@@ -679,11 +696,7 @@ function goValorsRoost()
 	call goPoM
 	call navwrap -780 343 1091
 }
-function goNPCDruzzilRo_PoM()
-{
-	call goValorsRoost
-	call DMove -766 343 1092 3
-}
+
 
 function goCoV()
 {
@@ -734,6 +747,11 @@ function goFordelMidst()
 		call DMove 112 68 -616 3 30 TRUE FALSE 3
 	}	
 }
+function goTheHole()
+{
+	call goZone "The Sundered Frontier" Spire
+	call navwrap 1894 -373 3452
+}
 function goLondiar_Inygad(int Timeout)
 {
 	variable int Counter
@@ -756,6 +774,10 @@ function goLondiar_Inygad(int Timeout)
 	return TRUE
 }
 function goDercin_Marrbrand(int Timeout)
+{
+	call goNPCDercinMarrbrand ${Timeout}
+}
+function goNPCDercinMarrbrand(int Timeout)
 {
 	variable int Counter
 	variable float loc0
@@ -852,6 +874,45 @@ function goMyrist()
 {
 	call goZone "Myrist, the Great Library"
 }
+
+
+function goNPCDruzzilRo_PoM()
+{
+	call goValorsRoost
+	call DMove -766 343 1092 3
+}
+function goNPCEvaniaValSara(bool NoTotem)
+{
+	call Log "in function goNPCEvaniaValSara(${NoTotem})"
+	call goObulusFrontier ${NoTotem}
+	wait 50
+	call navwrap -117 92 -270
+}
+function goNPCVarigRo()
+{
+	call goCoV
+	call DMove -2 5 4 3
+	call DMove 66 0 116 3
+	do
+	{
+		wait 10
+		call IsPresent "Varig Ro" 30
+	}
+	while (!${Return})
+	call PKey "Page Up" 3
+	call PKey ZOOMOUT 20
+	call MoveCloseTo "Varig Ro"
+}
+function goNPCYunZi()
+{
+	call goZone "Sundered Frontier" Spire
+	call navwrap 2299 -200 2500
+}	
+
+
+
+
+
 function RunIC(bool Loop)
 {
 	call goFordelMidst
@@ -1635,18 +1696,5 @@ function goThrone()
 	}
 	echo Debug end of The Molten Throne
 }
-function goVarig()
-{
-	call DMove -2 5 4 3
-	call DMove 66 0 116 3
-	do
-	{
-		wait 10
-		call IsPresent "Varig Ro" 30
-	}
-	while (!${Return})
-	call PKey "Page Up" 3
-	call PKey ZOOMOUT 20
-	call MoveCloseTo "Varig Ro"
-}
+
 */

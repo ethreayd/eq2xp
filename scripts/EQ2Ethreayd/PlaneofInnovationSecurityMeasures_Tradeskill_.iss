@@ -273,10 +273,12 @@ function step003()
 		wait 900
 		call SMove 24 4 -213 100 50 5 
 	}
-	call DMove 24 21 -281 3
-	call MoveCloseTo "Meldrath the Marvelous"
 	
-	call Converse "Meldrath the Marvelous" 4
+	call DMove 24 21 -281 3
+	wait 50
+	call MoveCloseTo "Meldrath the Marvelous"
+	wait 50
+	call Converse "Meldrath the Marvelous" 5
 	wait 50
 	call DMove 25 21 -297 3
 	call OpenDoor "Factory Door 01"
@@ -352,10 +354,16 @@ function step004()
 	call DMove 23 3 -563 3
 	wait 20
 	call UnstuckR 20
-	call MoveCloseTo "Meldrath the Marvelous" 
-	call Converse "Meldrath the Marvelous" 11
-	wait 50
-	oc !c -acceptreward ${Me.Name}
+	do
+	{
+		call MoveCloseTo "Meldrath the Marvelous" 
+		wait 20
+		call Converse "Meldrath the Marvelous" 11
+		wait 50
+		oc !c -acceptreward ${Me.Name}
+		call CheckQuestStep 3
+	}
+	while (!${Return})
 }
 
 	
@@ -567,17 +575,21 @@ function step009()
 		call DMove 25 3 -538 3
 		call DMove 24 3 -555 3
 	}
-	call DMove 16 3 -565 3 30 TRUE FALSE 5
-	call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Chassis"
-	wait 20
-	call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Circuitry"
-	wait 20
-	call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Gears"
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	wait 20
-	OgreBotAPI:AcceptReward["${Me.Name}"]
-	wait 20
+	do
+	{
+		call DMove 16 3 -565 3 30 TRUE FALSE 5
+		call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Chassis"
+		wait 20
+		call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Circuitry"
+		wait 20
+		call ActivateVerb "Hackbot 3000" 16 3 -565 "Install the Gears"
+		wait 20
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		wait 20
+		OgreBotAPI:AcceptReward["${Me.Name}"]
+		wait 20
+	}
+	while (!${Me.Ability["Hackbot 3000"](exists)})
 	do
 	{
 		call UseAbility "Hackbot 3000"

@@ -459,17 +459,7 @@ function GoThrone()
 }
 function GoVarig()
 {
-	call DMove -2 5 4 3
-	call DMove 66 0 116 3
-	do
-	{
-		wait 10
-		call IsPresent "Varig Ro" 30
-	}
-	while (!${Return})
-	call PKey "Page Up" 3
-	call PKey ZOOMOUT 20
-	call MoveCloseTo "Varig Ro"
+	call goNPCVarigRo
 }
 
 function PrepareToon()

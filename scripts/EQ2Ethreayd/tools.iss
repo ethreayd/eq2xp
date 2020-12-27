@@ -1365,8 +1365,14 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 	}
 	return TRUE
 }
-function KWMove(float X, float Y, float Z)
+function KWMove(string Waypoint, float X, float Y, float Z)
 {
+	if (!${Waypoint.Equal[/waypoint]})
+	{
+		Z:Set[${Y}]
+		Y:Set[${X}]
+		X:Set[${Waypoint}]
+	}
 	if (${Me.GroupCount}>2)
 		OgreBotAPI:KWL[All,${X},${Y},${Z}]
 	else
@@ -1394,6 +1400,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 				call CheckQuestStep
 				if (!${Return})
 				{
+					call CheckFlyingZone
 					call MoveCloseTo "${tool}"
 					ogre craft
 					wait 100
@@ -1943,6 +1950,8 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["Trythec"]}>0
 		return "Quest"
 	if ${ActorName.Find["Velious Pine"]}>0
+		return "Quest"
+	if ${ActorName.Find["clay deposit"]}>0
 		return "Quest"
 	if ${ActorName.Find["bed of "]}>0
 		return "Bush"
@@ -3513,14 +3522,7 @@ function RepairGear()
 	oc !c -Repair ${Me.Name}
 	wait 100
 }
-function CorrectZone(string ZoneName)
-{
-	if (${ZoneName.Equal["Freeport"]})
-		return "The City of Freeport"	
-	if (${ZoneName.Equal["The Great Divide"]})
-		return "Great Divide"	
-	return "${ZoneName}"
-}
+
 function goHunt(string ZoneName, bool NamedOnly)
 {
 	echo in goHunt "${ZoneName}" ${NamedOnly} function
