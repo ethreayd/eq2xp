@@ -320,13 +320,13 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 		Precision:Set[10]
 	call Log "Moving on my own to ${X} ${Z} (entering 2DNav)" INFO
 	face ${X} ${Z}
-	if (${OgreBotAPI.KWAble})
-	{
-		call KWMove ${X} ${Y} ${Z}
-		return TRUE
-	}
-	else
-	{
+	;if (${OgreBotAPI.KWAble})
+	;{
+	;	call KWMove ${X} ${Y} ${Z}
+	;	return TRUE
+	;}
+	;else
+	;{
 		if (${Me.Loc.X}>${X})
 		{
 			Stucky:Set[0]
@@ -486,7 +486,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 
 		if (${WasRunning})
 			press WALK
-	}
+	;}
 	call Log "exit from 2DNav" INFO
 }
 function 2DWalk(float X, float Z, int Precision)
