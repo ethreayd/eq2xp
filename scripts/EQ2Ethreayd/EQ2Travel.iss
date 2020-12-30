@@ -258,6 +258,10 @@ function goQeynos()
 }
 function goStanleyParnem()
 {
+	call goNPCStanleyParnem
+}
+function goNPCStanleyParnem()
+{
 	if (${Actor["Stanley Parnem"].Distance} > 10 || !${Actor["Stanley Parnem"].Distance(exists)})
 	{
 		
@@ -278,6 +282,8 @@ function goStanleyParnem()
 			wait 50
 			call DMove 972 -26 89 3
 		}
+		wait 50
+		call goNPCStanleyParnem
 	}
 	call MoveCloseTo "Stanley Parnem"
 }	
@@ -287,7 +293,6 @@ function goWracklands()
 		return
 	else
 	{
-		call goto_GH
 		call goZone "The Blinding"
 		call navwrap -275 219 -825
 		call DMove -285 218 -900 3
@@ -776,6 +781,7 @@ function goLondiar_Inygad(int Timeout)
 function goDercin_Marrbrand(int Timeout)
 {
 	call goNPCDercinMarrbrand ${Timeout}
+	return ${Return}
 }
 function goNPCDercinMarrbrand(int Timeout)
 {

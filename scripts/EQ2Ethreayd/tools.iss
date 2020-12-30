@@ -485,7 +485,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 		if (${WasRunning})
 			press WALK
 	}
-	call Log exit from 2DNav
+	call Log "exit from 2DNav" INFO
 }
 function 2DWalk(float X, float Z, int Precision)
 {
@@ -956,7 +956,7 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 	
 	if (${Purge})
 	{
-		call Log Purging Quest and associated items
+		call Log "Purging Quest and associated items" INFO
 	
 		QuestJournalWindow.ActiveQuest["Daily Adorning"]:Delete
 		Me.Inventory["Box of Adorning Materials"]:Destroy
@@ -978,7 +978,7 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 		Timeout:Set[600]
 	echo Starting Alternate TradeSkill Upgrade (using Myrist locations)
 
-	call go${NPCName.Replace[" ","_"]} ${Timeout}
+	call goNPC${NPCName.Replace[" ",""]} ${Timeout}
 	if (!${Return})
 		return TRUE
 	wait 50
@@ -1263,7 +1263,7 @@ function AutoAddQuest(bool EraseDuplicate)
 				{
 					if (${ItemIterator.Value.Name.Equal["An Overseer's First Agents"]} || ${ItemIterator.Value.Name.Equal["Overseer Quests"]} || ${ItemIterator.Value.Name.Find["Overseer Pack"]}>0)
 					{
-							call Log Found "${ItemIterator.Value.Name}" to unpack
+							call "Log Found ${ItemIterator.Value.Name} to unpack" INFO
 							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Unpack
 							wait 10
 							call AutoAddQuest FALSE
@@ -1272,7 +1272,7 @@ function AutoAddQuest(bool EraseDuplicate)
 					if ${Return}
 					{
 						
-						call Log adding "${ItemIterator.Value.Name}"
+						call Log "adding ${ItemIterator.Value.Name}" INFO
 						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Use
 						Counter:Inc
 						wait 10
@@ -1400,8 +1400,9 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 				call CheckQuestStep
 				if (!${Return})
 				{
-					call CheckFlyingZone
 					call MoveCloseTo "${tool}"
+					press JUMP
+					call CheckFlyingZone
 					ogre craft
 					wait 100
 					echo adding recipe
@@ -1434,6 +1435,8 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 		else
 		{
 			call MoveCloseTo "${tool}"
+			press JUMP
+			call CheckFlyingZone		
 			ogre craft
 			wait 100
 			echo adding recipe
@@ -1452,16 +1455,17 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 					wait 50
 					call CountItem "${myrecipe}"
 				}
-				while (${Return}<${quantity})		
+				while (${OgreCraft.Crafting})		
 			}
 			wait 20
-			ogre end craft
 		}
+		ogre end craft
 		return TRUE
 	}
 	else
 	{
 		echo Error in function AutoCraft ${myrecipe} does not exist
+		ogre end craft
 		return FALSE
 	}	
 }
@@ -1839,7 +1843,7 @@ function ChargeOverseer()
 	variable string MerchantName
 	
 	MerchantName:Set["Stanley Parnem"]
-	call goStanleyParnem
+	call goNPCStanleyParnem
 	wait 5
 	Actor["${MerchantName}"]:DoTarget
 	Actor["${MerchantName}"]:DoubleClick
@@ -5020,14 +5024,15 @@ function ISXRIResume()
 	if (${RI_Var_Bool_Paused})
 		UIElement[RI].FindUsableChild[Start,button]:LeftClick
 }
-function RunInstance()
+function RunInstance(int qstart)
 {
 	variable string sQN
 	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	echo will clear zone "${Zone.Name}" (${sQN}) Now !
 	if (!${Script[${sQN}](exists)})
-		runscript EQ2Ethreayd/${sQN} ${qstart} ${qstop} ${speed} ${NoShiny}
+		runscript EQ2Ethreayd/${sQN} ${qstart} 
+		;${qstop} ${speed} ${NoShiny}
 	else
 		Script[${sQN}]:Resume
     wait 5
@@ -5038,9 +5043,9 @@ function RunInstance()
 		echo zone "${Zone.Name}" Cleared !
 	}
 }
-function RunZone()
+function RunZone(int qstart)
 {
-	call RunInstance
+	call RunInstance ${qstart} 
 }
 function EndInstance()
 {

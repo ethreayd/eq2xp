@@ -55,13 +55,16 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 	
 	call CheckQuestStep 2
-	if (${Return})
+	if (${Return} && ${stepstart}<3)
 		stepstart:Set[3]
 	call CheckQuestStep 3
-	if (${Return})
+	if (${Return} && ${stepstart}<5)
 		stepstart:Set[5]
-	if ${Me.Ability["Hackbot 3000"](exists)}
+	if (${Me.Ability["Hackbot 3000"](exists)} && ${stepstart}<9)
 		stepstart:Set[9]
+	call CheckQuestStep 3
+	if (${Return} && ${stepstart}<13)
+		stepstart:Set[13]
 	ogre cl
 	echo call StartQuest ${stepstart} ${stepstop} TRUE
 	call StartQuest ${stepstart} ${stepstop} TRUE
@@ -528,16 +531,41 @@ function step008()
 	{
 		call CheckItem "Retrofitted Chassis" 1
 		if (${Return}>0)
+		{
 			call AutoCraft "an innovative workstation" "Retrofitted Chassis" 1
+		}
 		call CheckItem "Retrofitted Circuitry" 1
 		if (${Return}>0)
+		{
 			call AutoCraft "an innovative workstation" "Retrofitted Circuitry" 1
+		}
 		call CheckItem "Retrofitted Gears" 1
 		if (${Return}>0)
-			call AutoCraft "an innovative workstation" "Retrofitted Gears" 1	
+		{
+			call AutoCraft "an innovative workstation" "Retrofitted Gears" 1
+		}
+		echo Out of first if in step008
 	}
 	do
 	{
+		call CheckItem "Retrofitted Chassis" 1
+		if (${Return}>0)
+		{
+			call AutoCraft "an innovative workstation" "Retrofitted Chassis" 1
+		}
+		call CheckItem "Retrofitted Circuitry" 1
+		if (${Return}>0)
+		{
+			call AutoCraft "an innovative workstation" "Retrofitted Circuitry" 1
+		}
+		echo doing CheckItem "Retrofitted Gears" 1
+		call CheckItem "Retrofitted Gears" 1
+		if (${Return}>0)
+		{
+			echo in case Retrofitted Gears
+			call AutoCraft "an innovative workstation" "Retrofitted Gears" 1
+		}
+		echo All parts should be done but checking
 		ItemCounter:Set[0]
 		call CheckItem "Retrofitted Chassis" 1
 		if (${Return}>0)
@@ -545,6 +573,7 @@ function step008()
 		call CheckItem "Retrofitted Circuitry" 1
 		if (${Return}>0)
 			ItemCounter:Inc
+		echo other CheckItem "Retrofitted Gears" 1
 		call CheckItem "Retrofitted Gears" 1
 		if (${Return}>0)
 			ItemCounter:Inc
@@ -851,6 +880,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 5 3 -548 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve XXXII" "Turn Clockwise"
+			call MoveCloseTo "Valve XXXII"
+			call ActivateVerbOn "Valve XXXII" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
@@ -859,6 +891,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 10 4 -548 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve XVI" "Turn Clockwise"
+			call MoveCloseTo "Valve XVI"
+			call ActivateVerbOn "Valve XVI" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
@@ -867,6 +902,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 18 5 -547 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve VIII" "Turn Clockwise"
+			call MoveCloseTo "Valve VIII"
+			call ActivateVerbOn "Valve VIII" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
@@ -875,6 +913,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 30 3 -547 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve IV" "Turn Clockwise"
+			call MoveCloseTo "Valve IV"
+			call ActivateVerbOn "Valve IV" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
@@ -883,6 +924,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 37 4 -547 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve II" "Turn Clockwise"
+			call MoveCloseTo "Valve II"
+			call ActivateVerbOn "Valve II" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
@@ -891,6 +935,9 @@ function step013()
 		{
 			call DMove 24 3 -561 2
 			call DMove 47 3 -547 2 30 TRUE FALSE 3
+			call ActivateVerbOn "Valve I" "Turn Clockwise"
+			call MoveCloseTo "Valve I"
+			call ActivateVerbOn "Valve I" "Turn Clockwise"
 			echo right click turn clockwise
 			wait 200
 		}
