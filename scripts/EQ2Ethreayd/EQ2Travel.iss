@@ -182,7 +182,7 @@ function goRecusoTor(bool Force)
 		}
 		else
 		{
-			call DMove 594 429 -582 3
+			call DMove 594 429 -582 3 
 			call MoveCloseTo "a tamed Shik'Nar drone"
 			do
 			{
@@ -217,6 +217,7 @@ function goAurelianCoast()
 		call goZone "The Blinding"
 		if (!${OgreBotAPI.KWAble})
 		{
+			;call goRecusoTor
 			if (${Me.Y}>250)
 			{
 				call 3DNav 85 400 -184

@@ -318,7 +318,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 	variable bool WasRunning
 	if ${Precision}<1
 		Precision:Set[10]
-	echo Moving on my own to ${X} ${Z} (entering 2DNav)
+	call Log "Moving on my own to ${X} ${Z} (entering 2DNav)" INFO
 	face ${X} ${Z}
 	if (${OgreBotAPI.KWAble})
 	{
@@ -361,10 +361,12 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 				if (!${IgnoreFight})
 				{
 					call CheckCombat
-				}	
+				}
 			}
 			while (${Me.Loc.X}>${X} && ${Stucky}<10)
+			call Log "releasing MOVEFOWARD" INFO
 			press -release MOVEFORWARD
+			call Log "MOVEFORWARD released" INFO
 			eq2execute loc
 		}
 		else
@@ -3056,7 +3058,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 			{
 				Stucky:Inc
 				SuperStucky:Inc
-				STUCKCOUNTER:Inc
+				;STUCKCOUNTER:Inc
 				echo DMove:Stucky=${Stucky} / ${SuperStucky}
 			}
 			if (${Stucky}>1)
