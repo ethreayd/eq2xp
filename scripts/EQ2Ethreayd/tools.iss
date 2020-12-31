@@ -1424,6 +1424,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 					if (${OgreCraft.MissingResources} && !${IgnoreRessources})
 					{
 						echo Missing some ressources ! Something wrong happen on the way :(
+						return FALSE
 					}
 					else
 					{
@@ -1443,6 +1444,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 			else
 			{
 				echo Quest ${QuestName} not in Journal !
+				return FALSE
 			}
 		}
 		else
@@ -1458,6 +1460,7 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 			if (${OgreCraft.MissingResources})
 			{
 				echo Missing some ressources ! Something wrong happen on the way :(
+				return FALSE
 			}
 			else
 			{
@@ -1480,7 +1483,8 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 		echo Error in function AutoCraft ${myrecipe} does not exist
 		ogre end craft
 		return FALSE
-	}	
+	}
+	return FALSE
 }
 function AutoGroup(float Distance)
 {
