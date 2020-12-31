@@ -31,6 +31,7 @@ variable(global) bool NoNavWrap
 variable(script) bool REBOOT
 variable(script) bool SKIP
 variable(script) bool CANTSEE
+variable(script) bool QCHARGED
 
 function ActorPort(string ActorName)
 {
@@ -1253,6 +1254,7 @@ function AutoAddQuest(bool EraseDuplicate)
     variable int Counter=0
 	variable int Counter2=0
 	variable int Counter3=0
+	
 		echo Auto Adding Quest (${EraseDuplicate})
 		Me:QueryInventory[Items, Location == "Inventory"]
 		Items:GetIterator[ItemIterator]
@@ -1297,10 +1299,13 @@ function AutoAddQuest(bool EraseDuplicate)
 					Counter2:Inc
 					if ${EraseDuplicate}
 					{
+						call Log "Destroying duplicate ${Counter2} of ${ItemIterator.Value.Name}" INFO
 						Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Destroy[confirm]
 						wait 10
 					}
 				}
+				else
+					echo ${ItemIterator.Value.Name} is not seen as an Overseer Quest
 			}	
 			while ${ItemIterator:Next(exists)}
 		}
@@ -1369,16 +1374,22 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 }
 function KWMove(string Waypoint, float X, float Y, float Z)
 {
+	if ${Me.GroupCount}<1
+		return FALSE
 	if (!${Waypoint.Equal[/waypoint]})
 	{
 		Z:Set[${Y}]
 		Y:Set[${X}]
 		X:Set[${Waypoint}]
 	}
+	Y:Set[${Math.Calc64[${Y}+1]}]
 	if (${Me.GroupCount}>2)
 		OgreBotAPI:KWL[All,${X},${Y},${Z}]
 	else
 		OgreBotAPI:KWL["${Me.Name}",${X},${Y},${Z}]
+		press JUMP
+		if ${Me.FlyingUsingMount}
+			call goDown
 		call TestArrivalCoord ${X} ${Y} ${Z}
 		if (!${Return})
 		{
@@ -1844,25 +1855,33 @@ function ChargeOverseer()
 	variable string ItemName
 	variable string MerchantName
 	
+	Event[EQ2_onIncomingText]:AttachAtom[Quest_Charged]
+	
 	MerchantName:Set["Stanley Parnem"]
 	call goNPCStanleyParnem
-	wait 5
+	wait 50
 	Actor["${MerchantName}"]:DoTarget
 	Actor["${MerchantName}"]:DoubleClick
 	wait 5
+	call AutoAddQuest TRUE
 	
 	for ( i:Set[1] ; ${i} <= ${MerchantWindow.NumMerchantItemsForSale} ; i:Inc )
 	{
 		ItemName:Set["${MerchantWindow.MerchantInventory[${i}]}"]
 		if (!${ItemName.Equal["An Overseer's First Agents"]})
 		{
-			echo counting number of "${ItemName}" in bags
-			call CountItem "${ItemName}"
-			
-			if (${Return}<${max})
-				call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" ${Math.Calc64[${max}-${Return}]} TRUE
-			echo AutoAddQuest Now !
-			call AutoAddQuest TRUE
+			QCHARGED:Set[FALSE]
+			do
+			{
+				echo AutoBuyItemFrom "${ItemName}" "Stanley Parnem" 1 TRUE
+				call AutoBuyItemFrom "${ItemName}" "Stanley Parnem" 1 TRUE
+				wait 10
+				Me.Inventory[Query, Name == "${ItemName}"]:Use
+				wait 10
+				;call CountItem "${ItemName}"
+			}	
+			while (!${QCHARGED} && ${Return}<2)
+			Me.Inventory[Query, Name == "${ItemName}"]:Destroy
 		}
 	}
 	EQ2UIPage[Inventory,Merchant].Child[button,Merchant.WindowFrame.Close]:LeftClick   
@@ -4294,7 +4313,8 @@ function Move(string ActorName, float X, float Y, float Z, bool is2D)
 
 function MoveCloseTo(string ActorName, float Distance)
 {
-	call MoveCloseToID ${Actor["${ActorName}"].ID} ${Distance}
+	if ${Actor["${ActorName}"].ID(exists)}
+		call MoveCloseToID ${Actor["${ActorName}"].ID} ${Distance}
 }
 function MoveCloseToID(string ActorID, float Distance)
 {
@@ -5746,6 +5766,14 @@ atom Atom_Waitfor_Combat(string Message)
 		CANTSEE:Set[TRUE]
 		OgreBotAPI:UplinkOptionChange["${Me.Name}","checkbox_autohunt_autohunt","FALSE"]
 		QueueCommand call Zero_CANTSEE 60
+	}
+}
+atom Quest_Charged(string Message)
+{
+	if (${Message.Find["overseer quest failed to be added because"]}>0)
+	{
+		echo setting QCHARGED at TRUE
+		QCHARGED:Set[TRUE]
 	}
 }
 function Zero_CANTSEE(int timeout)

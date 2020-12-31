@@ -801,6 +801,14 @@ function Zone_AurelianCoastReishiRumbleSolo()
 		{
 			call DMove 568 19 505 3 30 TRUE TRUE 5
 		}
+		if (!${Me.InCombatMode} && ${Me.X} < 615 && ${Me.X} > 600 &&  ${Me.Y} < 35 && ${Me.Y} > 25 && ${Me.Z} < 555 && ${Me.Z} > 535)
+		{
+			call ISXRIPause
+			call DMove 609 32 544 3 30 TRUE TRUE
+			call DMove 624 24 530 3 30 TRUE TRUE
+			call ISXRIResume
+			
+		}
 		wait 10
 	}
 	while (${Zone.Name.Equal["Aurelian Coast: Reishi Rumble \[Solo\]"]})
