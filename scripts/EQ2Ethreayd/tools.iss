@@ -1002,6 +1002,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 		call Converse "${NPCName}" 2
 		wait 20
 	}
+	else
+		echo I am at MAX transmuting
 	call CheckIfMaxAdorning
 	if (!${Return})
 	{
@@ -1031,6 +1033,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 			}
 		}
 	}
+	else
+		echo I am at MAX Adorning
 	call CheckIfMaxTinkering
 	if (!${Return})
 	{
@@ -1059,6 +1063,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 			}
 		}
 	}
+	else
+		echo I am at MAX Tinkering
 	echo go to Guild Hall (with auto fix of stay forever there bug)
 	do
 	{
@@ -1428,14 +1434,28 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 					}
 					else
 					{
-						echo Crafting ${quantity} "${myrecipe}"
-						OgreCraft:Start[]
-						do
+						call CheckQuest "${myrecipe}"
+						if (${Return})
 						{
-							wait 50
-							call CheckQuestStep
+							echo Crafting ${quantity} "${myrecipe}"
+							OgreCraft:Start[]
+							wait 300
+							;do
+							;{
+								do
+								{
+									wait 50
+								}
+								while (${OgreCraft.Crafting})
+						;		call CheckQuestStep
+						;	}
+						;	while (!${Return})
 						}
-						while (!${Return})		
+						else
+						{
+							echo Quest "${myrecipe}" is buggy. Aborting.
+							return FALSE
+						}
 					}
 					wait 20
 					ogre end craft
@@ -1465,13 +1485,15 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 			else
 			{
 				echo Crafting ${quantity} "${myrecipe}"
+				wait 300
 				OgreCraft:Start[]
 				do
 				{
 					wait 50
-					call CountItem "${myrecipe}"
 				}
-				while (${OgreCraft.Crafting})		
+				while (${OgreCraft.Crafting})
+				call CountItem "${myrecipe}"
+				echo end of Crafting "${myrecipe}" (${Return}/${quantity})
 			}
 			wait 20
 		}
