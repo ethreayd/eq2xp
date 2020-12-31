@@ -66,7 +66,10 @@ function main(string questname)
 		if (${Me.Health}<10 && !${Me.IsDead})
 			eq2execute gsay I really need healing now !
 		if (${Me.IsDead})
+		{
 			eq2execute gsay Can I have a rez please ?
+			wait 100
+		}
 		if (!${Zone.Name.Right[10].Equal["Guild Hall"]})
 		{
 			if (${Solo} || ${FORCEPOTIONS})
