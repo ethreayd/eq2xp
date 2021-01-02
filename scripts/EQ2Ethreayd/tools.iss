@@ -4642,8 +4642,6 @@ function navwrap(string XS, string YS, string ZS)
 	variable float Z=${ZS}
 	variable float FlyingZone
 	
-	
-	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
 		echo something wrong is happening, cancelling movement
@@ -4673,6 +4671,14 @@ function navwrap(string XS, string YS, string ZS)
 	
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
+	call IsFlyingZone
+	if (!${FlyingZone} && ${Return})
+	{
+		call Remount
+		wait 100
+		call CheckFlyingZone
+		FlyingZone:Set[${Return}]
+	}
 	
 	echo "moving to location ${X} ${Y} ${Z} (wrapping ogre navtest -loc)"
 	eq2execute waypoint ${X} ${Y} ${Z}
@@ -4952,7 +4958,16 @@ function RelayAll(string w0, string w1, string w2, string w3, string w4, string 
 {
 	relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
 }
-
+function Remount()
+{
+	call CheckFlyingZone
+	echo Mounted:${Return}
+	if (!${Return})
+	{
+		echo need to summon mount now !
+		oc !c -Force_MountOn ${Me.Name}
+	}
+}
 function ReplaceStr(string inputText, string toReplace, string replaceWith)
 {
 ; thanx to user01 for this one
