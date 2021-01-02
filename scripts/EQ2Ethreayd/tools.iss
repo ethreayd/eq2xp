@@ -5631,6 +5631,16 @@ function UnpackItem(string ItemName, int RewardID)
 		wait 5
    }
 }
+function MassIngot()
+{
+	; thanks to Saha
+	while ${Me.Inventory["Ingot"](exists)}
+	{
+		Me.Inventory["Ingot"]:Examine
+		wait 5
+		oc !ci -select_zone_version ${Me.Name}
+	}
+}
 function Unstuck(bool LR)
 {
 	ExecuteQueued
