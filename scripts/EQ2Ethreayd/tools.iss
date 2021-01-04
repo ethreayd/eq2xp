@@ -4966,11 +4966,8 @@ function RelayAll(string w0, string w1, string w2, string w3, string w4, string 
 }
 function Remount()
 {
-	if (!${Return})
-	{
-		echo need to summon mount now !
+	echo force summon mount now !
 		oc !c -Force_MountOn ${Me.Name}
-	}
 }
 function ReplaceStr(string inputText, string toReplace, string replaceWith)
 {
