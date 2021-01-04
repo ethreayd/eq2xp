@@ -4963,8 +4963,6 @@ function RelayAll(string w0, string w1, string w2, string w3, string w4, string 
 }
 function Remount()
 {
-	call CheckFlyingZone
-	echo Mounted:${Return}
 	if (!${Return})
 	{
 		echo need to summon mount now !
