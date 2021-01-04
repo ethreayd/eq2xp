@@ -801,7 +801,7 @@ function Zone_AurelianCoastReishiRumbleSolo()
 		{
 			call DMove 568 19 505 3 30 TRUE TRUE 5
 		}
-		if (!${Me.InCombatMode} && ${Me.X} < 615 && ${Me.X} > 600 &&  ${Me.Y} < 35 && ${Me.Y} > 25 && ${Me.Z} < 555 && ${Me.Z} > 535)
+		if (!${Me.InCombatMode} && ${Me.X} < 615 && ${Me.X} > 590 &&  ${Me.Y} < 35 && ${Me.Y} > 25 && ${Me.Z} < 570 && ${Me.Z} > 535)
 		{
 			call ISXRIPause
 			call DMove 609 32 544 3 30 TRUE TRUE
@@ -1773,6 +1773,11 @@ atom HandleAllEvents(string Message)
 	{
 		UIElement[RI].FindUsableChild[Start,button]:LeftClick
 		QueueCommand UIElement[RI].FindUsableChild[Start,button]:LeftClick
+	}
+	if (${Message.Find["RROR: Destination zone name can not be determined"]}>0)
+	{
+		call Log "Lost in some zone and fast travel is not working - Rebooting loop" WARNING
+		QueueCommand run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

@@ -32,6 +32,7 @@ variable(script) bool REBOOT
 variable(script) bool SKIP
 variable(script) bool CANTSEE
 variable(script) bool QCHARGED
+variable(script) WebLog WL
 
 function ActorPort(string ActorName)
 {
@@ -2296,7 +2297,9 @@ function CheckFlyingZone()
 	variable bool Flying
 	if ${Me.FlyingUsingMount}
 		return TRUE
+	
 	call CheckCombat 30
+	call Remount
 	press -hold FLYUP
 	wait 20
 	press -release FLYUP
@@ -6425,8 +6428,8 @@ objectdef WebLog
 				if ${WR.Result(exists)}
 				{
 		;			echo Result=${WR.Result.AsJSON}
-					WR:Reset
-					This:Initialize
+					;WR:Reset
+					;This:Initialize
 					break
 				}
 			}
@@ -6452,14 +6455,13 @@ objectdef WebLog
 }
 function Log(string Message,string Criticity)
 {
-	variable WebLog WL
 	Message:Set["${Message.Replace["\,",""]}"]
 	if (${NODEBUG})
 		return
 	if (${Criticity.Length}==0)
 		Criticity:Set["DEBUG"]
-	WL:Add["${Criticity}","${Message}"]
-	WL:Send
+	;WL:Add["${Criticity}","${Message}"]
+	;WL:Send
 	echo "${Message}"
 }
 objectdef WikiaQuest
