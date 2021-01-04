@@ -405,7 +405,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 					call CheckCombat
 				}	
 			}
-			while (${Me.Loc.X}<${X} && ${Stucky}<10 )
+			while (${Me.Loc.X}<${X} && ${Stucky}<10)
 			press -release MOVEFORWARD
 			eq2execute loc
 		}
@@ -478,7 +478,7 @@ function 2DNav(float X, float Z, bool IgnoreFight, bool ForceWalk, int Precision
 						call CheckCombat
 					}	
 				}
-				while (${Me.Loc.Z}<${Z} && ${Stucky}<10 )
+				while (${Me.Loc.Z}<${Z} && ${Stucky}<10)
 				press -release MOVEFORWARD
 				eq2execute loc
 			}

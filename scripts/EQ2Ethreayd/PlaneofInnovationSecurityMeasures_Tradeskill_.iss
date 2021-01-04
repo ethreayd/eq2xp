@@ -63,7 +63,7 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	if (${Me.Ability["Hackbot 3000"](exists)} && ${stepstart}<9)
 		stepstart:Set[9]
 	call CheckQuestStep 3
-	if (${Return} && ${stepstart}<13)
+	if (${Me.Ability["Hackbot 3000"](exists)} && ${Return} && ${stepstart}<13)
 		stepstart:Set[13]
 	ogre cl
 	echo call StartQuest ${stepstart} ${stepstop} TRUE
