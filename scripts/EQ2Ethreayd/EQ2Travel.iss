@@ -161,7 +161,21 @@ function goZone(string ZoneName, string Transport)
 	}
 	echo I am in ${ZoneName} (${AltZoneName}) (end of goZone)
 }
-
+function IsFlyingZone()
+{	
+	variable index:string FlyingZone
+	variable int i
+	FlyingZone:Insert["The Blinding"]
+	FlyingZone:Insert["Aurelian Coast"]
+	FlyingZone:Insert["The Wracklands"]
+	for ( i:Set[1] ; ${i} <= ${FlyingZone.Used} ; i:Inc )
+	{
+		 
+		if ${Zone.Name.Left[${FlyingZone[${i}].Length}].Equal["${FlyingZone[${i}]}"]}
+			return TRUE
+	}
+	return FALSE
+}
 function goRecusoTor(bool Force)
 {
 	call goZone "The Blinding"	

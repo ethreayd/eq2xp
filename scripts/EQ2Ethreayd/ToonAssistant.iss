@@ -247,8 +247,19 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 	{
 		if (!${Session.Equal["is1"]})
 		{
-			echo QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
-			QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
+			if (!${Me.IsDead})
+			{
+				echo QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
+				QueueCommand call navwrap ${Actor[name,${Speaker}].X} ${Actor[name,${Speaker}].Y} ${Actor[name,${Speaker}].Z}
+			}
+			else
+			{
+				echo Leader is at ${Actor[name,${Speaker}].Distance} m - Reviving
+				if ${Actor[name,${Speaker}].Distance} < 50
+					eq2execute gsay Can I have a rez please ?
+				else
+					oc !c -Revive ${Me.Name}
+			}
 		}
 	}
 	if (${Message.Find["your equipment is broken"]} > 0)

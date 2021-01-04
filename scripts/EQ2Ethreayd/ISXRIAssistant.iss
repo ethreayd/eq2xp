@@ -807,7 +807,15 @@ function Zone_AurelianCoastReishiRumbleSolo()
 			call DMove 609 32 544 3 30 TRUE TRUE
 			call DMove 624 24 530 3 30 TRUE TRUE
 			call ISXRIResume
-			
+		}
+		if (!${Me.InCombatMode} && ${Me.X} < 505 && ${Me.X} > 490 &&  ${Me.Y} < 40 && ${Me.Y} > 30 && ${Me.Z} < 575 && ${Me.Z} > 565)
+		{
+			call ISXRIPause
+			call DMove 492 32 593 3 30 TRUE TRUE
+			call IsPresent exit
+			if ${Return}
+				oc !c -Zone ${Me.Name}
+			call ISXRIResume
 		}
 		wait 10
 	}

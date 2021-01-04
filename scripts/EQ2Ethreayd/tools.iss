@@ -1002,6 +1002,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 		call Converse "${NPCName}" 2
 		wait 20
 	}
+	else
+		echo I am at MAX transmuting
 	call CheckIfMaxAdorning
 	if (!${Return})
 	{
@@ -1031,6 +1033,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 			}
 		}
 	}
+	else
+		echo I am at MAX Adorning
 	call CheckIfMaxTinkering
 	if (!${Return})
 	{
@@ -1059,6 +1063,8 @@ function AltTSUp(int Timeout, string NPCName, bool Purge)
 			}
 		}
 	}
+	else
+		echo I am at MAX Tinkering
 	echo go to Guild Hall (with auto fix of stay forever there bug)
 	do
 	{
@@ -1428,14 +1434,28 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 					}
 					else
 					{
-						echo Crafting ${quantity} "${myrecipe}"
-						OgreCraft:Start[]
-						do
+						call CheckQuest "${myrecipe}"
+						if (${Return})
 						{
-							wait 50
-							call CheckQuestStep
+							echo Crafting ${quantity} "${myrecipe}"
+							OgreCraft:Start[]
+							wait 300
+							;do
+							;{
+								do
+								{
+									wait 50
+								}
+								while (${OgreCraft.Crafting})
+						;		call CheckQuestStep
+						;	}
+						;	while (!${Return})
 						}
-						while (!${Return})		
+						else
+						{
+							echo Quest "${myrecipe}" is buggy. Aborting.
+							return FALSE
+						}
 					}
 					wait 20
 					ogre end craft
@@ -1465,13 +1485,15 @@ function AutoCraft(string tool, string myrecipe, int quantity, bool IgnoreRessou
 			else
 			{
 				echo Crafting ${quantity} "${myrecipe}"
+				wait 300
 				OgreCraft:Start[]
 				do
 				{
 					wait 50
-					call CountItem "${myrecipe}"
 				}
-				while (${OgreCraft.Crafting})		
+				while (${OgreCraft.Crafting})
+				call CountItem "${myrecipe}"
+				echo end of Crafting "${myrecipe}" (${Return}/${quantity})
 			}
 			wait 20
 		}
@@ -4620,8 +4642,6 @@ function navwrap(string XS, string YS, string ZS)
 	variable float Z=${ZS}
 	variable float FlyingZone
 	
-	
-	
 	if (${X}==0 && ${Y}==0 && ${Z}==0)
 	{
 		echo something wrong is happening, cancelling movement
@@ -4651,6 +4671,14 @@ function navwrap(string XS, string YS, string ZS)
 	
 	call CheckFlyingZone
 	FlyingZone:Set[${Return}]
+	call IsFlyingZone
+	if (!${FlyingZone} && ${Return})
+	{
+		call Remount
+		wait 100
+		call CheckFlyingZone
+		FlyingZone:Set[${Return}]
+	}
 	
 	echo "moving to location ${X} ${Y} ${Z} (wrapping ogre navtest -loc)"
 	eq2execute waypoint ${X} ${Y} ${Z}
@@ -4930,7 +4958,16 @@ function RelayAll(string w0, string w1, string w2, string w3, string w4, string 
 {
 	relay all run EQ2Ethreayd/wrap ${w0} "${w1}" "${w2}" "${w3}" "${w4}" "${w5}" "${w6}" "${w7}" "${w8}" "${w9}"
 }
-
+function Remount()
+{
+	call CheckFlyingZone
+	echo Mounted:${Return}
+	if (!${Return})
+	{
+		echo need to summon mount now !
+		oc !c -Force_MountOn ${Me.Name}
+	}
+}
 function ReplaceStr(string inputText, string toReplace, string replaceWith)
 {
 ; thanx to user01 for this one
@@ -5593,6 +5630,16 @@ function UnpackItem(string ItemName, int RewardID)
 		RewardWindow:AcceptReward[${RewardWindow.Reward[${RewardID}].LinkID}]
 		wait 5
    }
+}
+function MassIngot()
+{
+	; thanks to Saha
+	while ${Me.Inventory["Ingot"](exists)}
+	{
+		Me.Inventory["Ingot"]:Examine
+		wait 5
+		oc !ci -select_zone_version ${Me.Name}
+	}
 }
 function Unstuck(bool LR)
 {
