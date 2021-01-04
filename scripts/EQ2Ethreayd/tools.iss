@@ -36,7 +36,10 @@ variable(script) WebLog WL
 
 function ActorPort(string ActorName)
 {
-	call Port ${Me.Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Y} ${Actor["${ActorName}"].Z}
+	if ${Actor["${ActorName}"].X(exists)}
+		call Port ${Me.Name} ${Actor["${ActorName}"].X} ${Actor["${ActorName}"].Y} ${Actor["${ActorName}"].Z}
+	else
+		echo can't find ${ActorName}
 }
 function TargetPort()
 {
