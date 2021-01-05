@@ -668,6 +668,18 @@ function goKraytoc()
 	wait 50
 	call navwrap -47 -322 424	
 }
+function goMajDul()
+{
+	return FALSE
+	echo not implemented yet
+	call CheckZone "Maj'Dul"
+	if (!${Return})
+	{
+		call goZone "Great Divide" Globe
+		wait 50
+		call navwrap -47 -322 424	
+	}
+}
 function goHoldofRime_TheAscent()
 {
 	call CheckZone "Hold of Rime: The Ascent"

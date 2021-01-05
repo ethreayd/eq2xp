@@ -5175,6 +5175,40 @@ function SetAscensionCS()
 	
 	echo you need to restart ogre when changing Ascension Class !!!
 }
+
+function SetMentorLevel(int MentorLevel)
+{
+	var int PageLevel
+	var int TierLevel
+	if (${MentorLevel}<1)
+		return FALSE
+	
+	PageLevel:Set[${Math.Calc64[${MentorLevel}\\5+3]}]
+	TierLevel:Set[${Math.Calc64[(${MentorLevel}+4)\\5*5]}]
+	
+	if (${Me.EffectiveLevel} == ${TierLevel})
+	{
+		return TRUE
+	}
+	while ${Me.EffectiveLevel} != ${correctLevel}
+	{
+		call goto_GH
+		eq2ex /unmentor
+		call ActorPort chronomage
+		wait 10
+		target chronomage
+		Actor[chronomage]:DoubleClick
+		wait 10
+		EQ2UIPage[_HUD,select].Child[page,_HUD.Select.Body.BodyData].Child[Page,5]:LeftClick
+		wait 10
+		EQ2UIPage[_HUD,select].Child[page,_HUD.Select.Body.BodyData].Child[Page,${PageLevel}]:LeftClick
+		wait 10
+		EQ2UIPage[_HUD,select].Child[page,_HUD.select].Child[Page,4].Child[Button,2]:LeftClick
+		wait 30
+	}
+	return TRUE
+}
+
 function SetSoloEnv()
 {
 	oc !c -ChangeCastStackListBoxItemByTag ${Me.Name} potion TRUE
