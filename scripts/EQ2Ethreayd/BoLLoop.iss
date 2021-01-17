@@ -40,6 +40,7 @@ function main(bool UseOgreIC)
 	
 	oc !c -ZoneResetAll ${Me.Name}
 	oc !c -letsgo ${Me.Name}
+	eq2execute unmentor
 	if (${UseOgreIC})
 	{
 		ScriptsToRun:Insert["ISXRIAssistant"]
@@ -99,7 +100,7 @@ function main(bool UseOgreIC)
 		}
 		wait 400
 	}
-	
+	call Remount
 	call IsPresent dungeons
 	if (!${Return} || !${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{

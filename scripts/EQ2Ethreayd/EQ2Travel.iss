@@ -41,7 +41,11 @@ function goZone(string ZoneName, string Transport)
 		Transport:Set["Spire"]
 	if (${ZoneName.Equal["Freeport"]})
 		Transport:Set["Globe"]
-		
+	if (${ZoneName.Equal["Butcherblock"]} || ${ZoneName.Equal["Butcherblock Mountains"]})
+	{
+		ZoneName:Set["Butcherblock Mountains"]
+		Transport:Set["Globe"]
+	}
 	if (${Transport.Equal["Globe"]})
 	{
 		call IsPresent "mariners_bell"
@@ -64,6 +68,11 @@ function goZone(string ZoneName, string Transport)
 	if (${ZoneName.Equal["Fallen Gate"]})
 	{
 		call goFallenGate
+		return TRUE
+	}
+	if (${ZoneName.Equal["Temple of Scale"]} || ${ZoneName.Equal["The Temple of Scale"]})
+	{
+		call goTempleofScale
 		return TRUE
 	}
 	if (${ZoneName.Equal["Sanctum of the Scaleborn"]})
@@ -103,7 +112,7 @@ function goZone(string ZoneName, string Transport)
 	}
 	if (${ZoneName.Equal["Nye'Caelona"]})
 	{
-		call Log "in Nye'Caelona goZone condition. calling goNyeCaelona in EQ2Travel"
+		call Log "in Nye'Caelona goZone condition. calling goNyeCaelona in EQ2Travel" INFO
 		call goNyeCaelona
 		return TRUE
 	}
@@ -135,6 +144,11 @@ function goZone(string ZoneName, string Transport)
 	if (${ZoneName.Equal["The Hole"]} || ${ZoneName.Equal["Hole"]})
 	{
 		call goTheHole
+		return TRUE
+	}
+	if (${ZoneName.Equal["Maj'Dul"]})
+	{
+		call goMajDul
 		return TRUE
 	}
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
@@ -270,6 +284,15 @@ function goQeynos()
 	}
 	else
 		echo already in Qeynos (${Zone.Name})
+}
+function goMasterofCoins()
+{
+	call goNPCBarnabyBlunderbuss
+}
+function goNPCBarnabyBlunderbuss()
+{
+	call goZone "Butcherblock Mountains"
+	call navwrap 636 26 596
 }
 function goStanleyParnem()
 {
@@ -533,6 +556,7 @@ function goFallenGate()
 	call CheckZone "Fallen Gate"
 	if (!${Return})
 	{
+		call SetMentorLevel 20
 		call goZone "The Commonlands" Globe
 		wait 50
 		call navwrap 1485 -39 -408
@@ -549,6 +573,7 @@ function goKaladim()
 	call CheckZone "Kaladim"
 	if (!${Return})
 	{
+		call SetMentorLevel 30
 		call goZone "Butcherblock Mountains" Globe
 		wait 50
 		call navwrap -170 165 -567
@@ -575,6 +600,7 @@ function goCazicThule()
 	call CheckZone "The Temple of Cazic-Thule"
 	if (!${Return})
 	{
+		call SetMentorLevel 40
 		call goZone "The Feerrott" Globe
 		wait 20
 		call navwrap -1702 -8 816
@@ -593,12 +619,36 @@ function goSanctumoftheScaleborn()
 	call CheckZone "Sanctum of the Scaleborn"
 	if (!${Return})
 	{
+		call SetMentorLevel 60
 		call goZone "Tenebrous Tangle" Spire
 		wait 50
-		call navwrap 512 21 -186
+		call navwrap 214 21 -185
 		wait 50
 		call ZoneIn "Sanctum of the Scaleborn"
 		wait 50
+		return TRUE
+	}
+	return FALSE
+}
+function goTempleofScale()
+{
+	;Level 65 Zone
+	call CheckZone "The Temple of Scale"
+	if (!${Return})
+	{
+		call SetMentorLevel 65
+		call goZone "Tenebrous Tangle" Spire
+		wait 50
+		call navwrap -11 48 -203
+		wait 50
+		do
+		{
+			face -11 -203
+			call ClickZone 250 250 1250 1250 100 TRUE
+			wait 5
+			call IsZoning
+		}
+		while (!${Return} && !${Zone.Name.Equal["The Temple of Scale"]})
 		return TRUE
 	}
 	return FALSE
@@ -609,6 +659,7 @@ function goCastleMistmoore()
 	call CheckZone "Castle Mistmoore"
 	if (!${Return})
 	{
+		call SetMentorLevel 70
 		call goZone "Loping Plains" Spire
 		wait 50
 		call navwrap 515 210 182
@@ -632,6 +683,7 @@ function goKarnorsCastle()
 	call CheckZone "Karnor's Castle"
 	if (!${Return})
 	{
+		call SetMentorLevel 70
 		call goZone "Kylong Plains" Globe
 		wait 50
 		call navwrap 449 65 -388
@@ -670,14 +722,18 @@ function goKraytoc()
 }
 function goMajDul()
 {
-	return FALSE
-	echo not implemented yet
 	call CheckZone "Maj'Dul"
 	if (!${Return})
 	{
-		call goZone "Great Divide" Globe
+		call SetMentorLevel 55
+		call goZone "The Sinking Sands" Globe
 		wait 50
-		call navwrap -47 -322 424	
+		call navwrap -1446 -223 -379
+		wait 20
+		call Converse "a nomadic carpet keeper" 1
+		wait 20
+		OgreBotAPI:Travel["${Me.Name}", "Maj'Dul"]
+		call waitfor_Zone "Maj'Dul"
 	}
 }
 function goHoldofRime_TheAscent()
@@ -941,10 +997,6 @@ function goNPCYunZi()
 	call goZone "Sundered Frontier" Spire
 	call navwrap 2299 -200 2500
 }	
-
-
-
-
 
 function RunIC(bool Loop)
 {

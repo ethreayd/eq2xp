@@ -114,11 +114,12 @@ function TPHunt(bool NamedOnly, bool Stay, bool NoLoot)
 						
 						if (${ActorIterator.Value.Distance}>20 && ${ActorIterator.Value.Distance(exists)} && !${X}==0)
 							call KWMove ${X} ${Y} ${Z}
-						
 						call Waitfor_Combat TRUE TRUE
 						eq2execute merc resume
 						if (${Me.IsDead})
 							oc !c -Revive ${Me.Name}
+						eq2execute summon
+						Actor[corpse]:DoubleClick
 						wait 10
 					}
 				}
@@ -140,7 +141,7 @@ function TPHunt(bool NamedOnly, bool Stay, bool NoLoot)
 			call KWMove ${X0} ${Y0} ${Z0}
 		wait 20
 		call Waitfor_Combat TRUE TRUE
-		echo testing if Inventory is full (${Me.InventorySlotsFree}) except if No Loot Condition (${NoLoot})
+		;echo testing if Inventory is full (${Me.InventorySlotsFree}) except if No Loot Condition (${NoLoot})
 		if (${Me.InventorySlotsFree}<1 && !${NoLoot})
 			break
 		call CheckIfZoneIsCleaned ${NamedOnly}
@@ -1324,7 +1325,7 @@ function AutoAddQuest(bool EraseDuplicate)
 	if (${Counter2} > 0 && ${EraseDuplicate})
 		call AutoAddQuest TRUE
 }
-function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, bool DoNotManageMerchantWindow)
+function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, bool DoNotManageMerchantWindow, bool ForcePurchase)
 {
 	echo inspired from https://forums.ogregaming.com/viewtopic.php?f=15&t=140 (ty Kannkor)
 	
@@ -1370,6 +1371,8 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 		RandomDelay:Set[ ${Math.Rand[3]} ]
 		RandomDelay:Inc[5]
         wait ${RandomDelay}
+		if ${ForcePurchase}
+			ChoiceWindow:DoChoice1
 		Bought:Inc
 	}
 	call CountItem "${ItemName}"
@@ -1381,6 +1384,20 @@ function AutoBuyItemFrom(string ItemName, string MerchantName, int Quantity, boo
 		wait 5
 	}
 	return TRUE
+}
+function TransmuteLevelUp(string StoneType, bool IgnoreLevel)
+{
+	eq2execute unmentor
+	call goMasterofCoins
+	wait 50
+	if (${StoneType.Length}<1)
+		StoneType:Set[Lapis Lazuli]
+	while (${Math.Calc64[(${Me.EffectiveLevel}-1)*5]}>${OgreBotAPI.SpewStat[currenttransmuting]} || ${IgnoreLevel} )
+	{
+		call AutoBuyItemFrom "Minor ${StoneType} Transmuter's Stone" Barnaby ${Me.InventorySlotsFree} FALSE TRUE
+		wait 100
+		call TransmuteAll "Minor ${StoneType} Transmuter's Stone"
+	}
 }
 function KWMove(string Waypoint, float X, float Y, float Z)
 {
@@ -2384,6 +2401,25 @@ function AutoRepair(int Damaged)
 	if (${Return})
 	{	
 		call UseRepairRobot
+	}
+	call CheckIfRepairIsNeeded ${Damaged}
+	if (${Return})
+	{
+		oc !c -Repair ${Me.Name}
+		wait 100
+	}
+	call CheckIfRepairIsNeeded ${Damaged}
+	if (${Return})
+	{
+		call goto_GH
+		oc !c -Repair ${Me.Name}
+		wait 100
+	}
+	call CheckIfRepairIsNeeded ${Damaged}
+	if (${Return})
+	{
+		oc !c -Repair ${Me.Name}
+		wait 100
 	}
 	call CheckIfRepairIsNeeded ${Damaged}
 	return !${Return}
@@ -4918,10 +4954,12 @@ function RebootLoop(string DefaultScriptName)
 	{
 		end ToonAssistant
 	}
+	/*
 	if (${Script["ISXRIAssistant"](exists)})
 	{
 		end ISXRIAssistant
 	}
+	*/
 	if (${Script["OgreICAssistant"](exists)})
 	{
 		end OgreICAssistant
@@ -5114,6 +5152,7 @@ function RunZone(int qstart)
 function EndInstance()
 {
 	variable string sQN
+	call waitfor_Zoning
 	call strip_QN "${Zone.Name}" TRUE
 	sQN:Set[${Return}]
 	
@@ -5178,19 +5217,20 @@ function SetAscensionCS()
 
 function SetMentorLevel(int MentorLevel)
 {
-	var int PageLevel
-	var int TierLevel
+	variable int PageLevel
+	variable int TierLevel
 	if (${MentorLevel}<1)
 		return FALSE
 	
-	PageLevel:Set[${Math.Calc64[${MentorLevel}\\5+3]}]
+	PageLevel:Set[${Math.Calc64[(${MentorLevel}-1)\\5+4]}]
 	TierLevel:Set[${Math.Calc64[(${MentorLevel}+4)\\5*5]}]
+	echo PageLevel=${PageLevel} / TierLevel=${TierLevel}
 	
 	if (${Me.EffectiveLevel} == ${TierLevel})
 	{
 		return TRUE
 	}
-	while ${Me.EffectiveLevel} != ${correctLevel}
+	while ${Me.EffectiveLevel} != ${TierLevel}
 	{
 		call goto_GH
 		eq2ex /unmentor
@@ -5840,9 +5880,9 @@ function WaitByPass(string ActorName, float GLeft, float GRight, bool XNOZ)
 		echo "${ActorName}" has bypassed ${GLeft}) and ${GRight}
 	}		
 }
-function waitfor_Combat()
+function waitfor_Combat(bool AutoPool, bool GetCloser)
 {
-	call Waitfor_Combat
+	call Waitfor_Combat ${AutoPool} ${GetCloser}
 }
 atom Atom_Waitfor_Combat(string Message)
 {
@@ -5926,6 +5966,7 @@ function Waitfor_Combat(bool AutoPool, bool GetCloser)
 			eq2execute merc backoff
 			call MoveCloseTo "${Me.Target}"
 			eq2execute merc attack
+			wait 20
 		}
 		ExecuteQueued
 		wait 5

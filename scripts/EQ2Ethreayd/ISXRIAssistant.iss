@@ -52,7 +52,9 @@ function main(string questname)
 			
 		if (!${Me.Grouped} &&!${Me.InCombatMode})
 			eq2execute merc resume
-		
+			
+		if ${Zone.Name.Equal["Myrist, the Great Library"]}
+			call RebootLoop
 		if ${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]}
 			call Zone_AwuidorTheNebulousDeepSolo
 		if ${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]}
@@ -144,6 +146,7 @@ function MainChecks()
 	if (!${Script["ToonAssistant"](exists)})
 		run EQ2Ethreayd/ToonAssistant
 	echo in MainChecks Loop (${ScriptIdleTime} - ${ZoneTime} - ${SuperStucky})
+	ExecuteQueued
 	/*
 	if ${Me.Target(exists)}
 		echo target is ${Me.Target.Name}
@@ -840,6 +843,12 @@ function Zone_AurelianCoastSambataVillageSolo()
 			if (${RI_Var_Bool_Paused})
 				UIElement[RI].FindUsableChild[Start,button]:LeftClick
 			wait 50
+		}
+		if (!${Me.InCombatMode} && ${Me.X} < 85 && ${Me.X} > 70 &&  ${Me.Y} < 85 && ${Me.Y} > 70 && ${Me.Z} < -180 && ${Me.Z} > -205)
+		{
+			call ISXRIPause
+			call DMove 186 63 -311 3
+			call ISXRIResume
 		}
 		; must be the LAST test of the loop
 		if (!${Me.InCombatMode} && ${Me.X} < -130 && ${Me.X} > -150 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < -680 && ${Me.Z} > -700)
