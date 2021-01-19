@@ -203,6 +203,16 @@ function InHeroicZone()
 function FordelMidstTheListlessSpiresEventHeroic()
 {
 	echo in function FordelMidstTheListlessSpiresEventHeroic (${ZoneTime})
+	call IsPresent "Aurelian Coast"
+	if (!${Me.InCombatMode} && ${Me.X} < 290 && ${Me.X} > 250 &&  ${Me.Y} > -50 && ${Me.Y} < -20 && ${Me.Z} < 750 && ${Me.Z} > 720 && ${Return})
+	{
+		echo In front of exit as dummies
+		call PauseIC
+		wait 50
+		call ResumeIC
+		wait 5
+		oc !c -Special
+	}
 }
 function AurelianCoastReishiRumbleEventHeroic()
 {
