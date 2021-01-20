@@ -412,6 +412,48 @@ function TheHeroics_SS()
 	return TRUE
 }
 
+function TheHeroics_SZ()
+{
+	variable int i
+	variable int Counter
+	variable bool GoHunt
+	variable bool Grouped
+
+	echo Launching The Heroics of Ssraeshza
+	
+	call goSs
+	wait 50
+	call waitfor_Zoning
+	wait 50
+	if (${Me.GroupCount}<6)
+	{
+		echo This is not a full Group. ABORTING 
+		return FALSE
+	}	
+	Grouped:Set[TRUE]
+	call GroupToFlag TRUE
+	ogre ic
+	wait 50
+	oc !c -ZoneResetAll
+    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+    Obj_FileExplorer:Scan
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Event_Heroic.iss"]
+	wait 50
+	oc !c -LoadProfile Bol_Heroic
+	wait 50
+	relay all run EQ2Ethreayd/wrap EquipHeroic
+	wait 20
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+	wait 50
+	while (${Script["Buffer:OgreInstanceController"](exists)})
+	{
+		wait 10
+	}
+	echo The Heroics of Ssraeshza has ended
+	return TRUE
+}
 function KorVaXian()
 {
 	Event[EQ2_onIncomingText]:AttachAtom[HandleKorVaXianEvents]
