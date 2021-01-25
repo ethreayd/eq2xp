@@ -125,6 +125,7 @@ function MainChecks()
 		oc !c -resume
 		wait 100
 		Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+		call EndIC
 	}
 	
 	call CheckS

@@ -4856,6 +4856,18 @@ function ResumeIC()
 	else
 		echo can't find IC running iss file...
 }
+function EndIC()
+{
+	variable string sQN
+	call strip_IC "${Zone.Name}"
+	sQN:Set[${Return}]
+	if ${Script[${sQN}](exists)}
+	{
+		end ${sQN}
+	}
+	else
+		echo can't find IC running iss file...
+}
 function PauseZone(bool Catch22)
 {
 	variable string sQN
