@@ -33,6 +33,7 @@ variable(script) bool SKIP
 variable(script) bool CANTSEE
 variable(script) bool QCHARGED
 variable(script) WebLog WL
+variable(global) index:string ReturnList
 
 function ActorPort(string ActorName)
 {
@@ -208,6 +209,11 @@ function TPHarvest(string Node, int Try)
 					wait 20
 				if (${NodeType.Equal["Buggy"]})
 					SKIP:Set[TRUE]
+				if (${NodeType.Equal["Special"]})
+				{
+					wait 100
+					press JUMP
+				}
 				echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] is a ${Return} Node (Skip:${SKIP})
 				
 				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<30 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
@@ -682,6 +688,7 @@ function ActivateAll(string ActorName, string verb, float MaxDistance)
         while ${ActorIterator:Next(exists)}
     }
 }
+
 function ActionOnItemTier(string Tier, string Action, bool ExtractFirst)
 {
 	variable index:item Items
@@ -1184,7 +1191,6 @@ function AttackClosest(float MaxDistance)
     if ${ActorIterator:First(exists)}
     {
 		echo targetting "${ActorIterator.Value.Name}" [${ActorIterator.Value.ID}] (${ActorIterator.Value.Distance} m) (from AttackClosest)
-	
         target ${ActorIterator.Value.ID}
     }
 }
@@ -2122,7 +2128,7 @@ function GetNodeType(string ActorName)
 	if ${ActorName.Find["timber"]}>0
 		return "Wood"
 	if ${ActorName.Find["shadeweave bud"]}>0
-		return "Buggy"
+		return "Special"
 	if ${ActorName.Find["Tizmak"]}>0
 		return "Quest"
 	if ${ActorName.Equal["NULL"]}
@@ -3310,6 +3316,76 @@ function Gardener()
       wait ${RandomDelay}
       Collected:Inc[1]
    }
+}
+function getAbilityTier(string TierName)
+{
+	switch ${TierName}
+	{
+		case Journeyman
+			return 2
+		case Adept
+			return 3
+		case Expert
+			return 4
+		case Master
+			return 5
+		case Grandmaster
+			return 6
+		case Ancient
+			return 7
+		case Celestial
+			return 8
+		default
+			return 1
+	}
+}
+function getAbilityMaster(int minLevel, string maxTierName)
+{
+    variable index:ability MyAbilities
+	variable iterator MyAbilitiesIterator
+    variable int Counter = 1
+    variable int Timer = 0
+	variable int maxTier
+	variable int i
+	
+	if ${minLevel}<1
+		minLevel:Set[1]
+	call getAbilityTier ${maxTierName}
+	maxTier:Set[${Return}]
+    Me:QueryAbilities[MyAbilities]
+    MyAbilities:GetIterator[MyAbilitiesIterator]
+	if ${MyAbilitiesIterator:First(exists)}
+    {
+        do
+        {
+            if (!${MyAbilitiesIterator.Value.IsAbilityInfoAvailable})
+            {
+                do
+                {
+                    wait 2
+                }
+                while (!${MyAbilitiesIterator.Value.IsAbilityInfoAvailable} && ${Timer:Inc} < 1500)
+            }
+			if ${MyAbilitiesIterator.Value.ToAbilityInfo.Class[${Me.SubClass}].Level} > ${minLevel}
+            {
+				call getAbilityTier "${MyAbilitiesIterator.Value.ToAbilityInfo.Tier}"
+				if ${Return}<${maxTier}
+				{
+					echo "- ${Counter}. ${MyAbilitiesIterator.Value.ToAbilityInfo.Name} [${MyAbilitiesIterator.Value.ToAbilityInfo.Class[${Me.SubClass}].Level}] (${MyAbilitiesIterator.Value.ID}) ${MyAbilitiesIterator.Value.ToAbilityInfo.Tier} [${Return}]"
+					Counter:Inc
+					ReturnList:Insert["${MyAbilitiesIterator.Value.ToAbilityInfo.Name}"]
+				}
+			}
+            Timer:Set[0]
+        }
+        while ${MyAbilitiesIterator:Next(exists)}
+		/*
+		for ( i:Set[1] ; ${i} <= ${ReturnList.Used} ; i:Inc )
+		{
+			echo need to improve ${ReturnList[${i}]} 
+		}
+		*/
+    }
 }
 function getChest(string ChestName, bool NoRetry)
 {
