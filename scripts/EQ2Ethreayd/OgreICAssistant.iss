@@ -68,7 +68,8 @@ function main(string questname)
 			call FordelMidstBizarreBazaarHeroic
 		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Divinity \[Heroic\]"]}
 			call Zone_SanctusSeruEchelonofDivinityHeroic
-		
+		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Heroic\]"]}
+			call Zone_SanctusSeruEchelonofOrderHeroic
 		ExecuteQueued
 		wait 300
 	}
@@ -222,9 +223,17 @@ function FordelMidstBizarreBazaarHeroic()
 {
 	echo in function FordelMidstBizarreBazaarHeroic (${ZoneTime})
 }
+function Zone_SanctusSeruEchelonofOrderHeroic()
+{
+	echo in function Zone_SanctusSeruEchelonofOrderHeroic (${ZoneTime})
+	if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} > 80 && ${Me.Y} < 95 && ${Me.Z} < 10 && ${Me.Z} > -10)
+	{
+		echo In front of Level Circle
+		call SelectDifficulty
+	}
+}
 function Zone_SanctusSeruEchelonofDivinityHeroic()
 {
-	
 	echo in function Zone_SanctusSeruEchelonofDivinityHeroic (${ZoneTime})
 	
 	if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} > 170 && ${Me.Y} < 190 && ${Me.Z} < 10 && ${Me.Z} > -10 && ${ArxCounter}<3 )
@@ -278,11 +287,12 @@ function SelectDifficulty()
 	variable string Selector="door entrance - difficulty setting"
 	variable string SelectAction="Open"
 	variable bool MustSelect
+	call PauseIC
 	echo in SelectDifficulty function
-	call IsPresent "difficulty setting" 15
+	call IsPresent "difficulty setting" 25
 	if (${Return})
 		MustSelect:Set[TRUE]
-	call IsPresent "starting circle - difficulty setting" 15
+	call IsPresent "starting circle - difficulty setting" 25
 	if (${Return})
 	{
 		Selector:Set["starting circle - difficulty setting"]
@@ -299,6 +309,8 @@ function SelectDifficulty()
 		wait 10
 		oc !c -Select_Zone_Version all
 	}
+	wait 50
+	call ResumeIC
 }
 atom HandleAllEvents(string Message)
 {
