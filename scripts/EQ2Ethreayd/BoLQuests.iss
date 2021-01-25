@@ -437,7 +437,7 @@ function TheHeroics_SZ()
 	oc !c -ZoneResetAll
     Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
     Obj_FileExplorer:Scan
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
+	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Event_Heroic.iss"]
 	wait 50
 	oc !c -LoadProfile Bol_Heroic
