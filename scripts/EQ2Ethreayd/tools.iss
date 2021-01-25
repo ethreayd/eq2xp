@@ -2429,7 +2429,7 @@ function AutoGetFlag()
 	do
 	{
 		call ZoomOut
-		oc !c -GetFlag
+		oc !c -GetFlag ${Me.Name}
 		wait 30
 		call CountItem "Tactical Rally Banner"
 	}
@@ -5696,6 +5696,43 @@ function TransmuteAll(string ItemName)
 		echo still !!!!!!!
 	}
 }
+function Unadorn(string ItemName)
+{
+	Me.Ability[id,2858354953]:Use
+	wait 5
+	Me.Inventory[Query, Name =- "${ItemName}"]:ReclaimAdornments
+	wait 5
+	call AcceptReward TRUE
+}
+function UnadornID(int ItemID)
+{
+	Me.Ability[id,2858354953]:Use
+	wait 5
+	Me.Inventory[Query, ID == ${ItemID}]:ReclaimAdornments
+	wait 5
+	call AcceptReward TRUE
+}
+function UnadornAll(string PartialName)
+{
+	variable index:item Items
+    variable iterator ItemIterator
+
+	echo I will unadorn everything in all my bags looking like ${PartialName} items
+	Me:QueryInventory[Items, Location == "Inventory" && Name =- "${PartialName}"]
+	Items:GetIterator[ItemIterator]
+	if ${ItemIterator:First(exists)}
+	{
+		echo found some stuff in my bags
+		do
+		{
+			echo Unadorn "${ItemIterator.Value.Name}"
+			call UnadornID "${ItemIterator.Value.ID}"
+			wait 5
+		}	
+		while ${ItemIterator:Next(exists)}
+	}	
+	echo out of UnadornAll loop
+}
 function UnpackItem(string ItemName, int RewardID)
 {
 	while ${Me.Inventory["${ItemName}"](exists)}
@@ -6931,13 +6968,19 @@ function ZoneIn(string ZoneName)
 
 function StartArtisan()
 {
-	if ${Me.TSLevel}<20
+	while ${Me.TSLevel}<20
 	{	
-		if ${Me.TSLevel}<9
+		if (${Me.TSLevel}<9)
 		{	
 			call goArtisanTrainer
+	
 			call Converse "Dvarkor Ska'nin" 2
 			wait 50
+			while ${Me.TSLevel}<2
+			{	
+				call Converse "Dvarkor Ska'nin" 2
+				wait 50
+			}
 			call AutoScribe
 			wait 50
 			call goto_GH
@@ -6949,14 +6992,24 @@ function StartArtisan()
 			}
 			while (${Me.TSLevel}<9)
 			ogre end craft
+			call StartArtisan
 		}
-		else
+		if ${Me.TSLevel}<10
 		{
 			call goArtisanTrainer
-			call Converse "Dvarkor Ska'nin" 1
-			echo MUST DO THE SELECT
+			do
+			{
+				call Converse "Dvarkor Ska'nin" 1
+				echo MUST DO THE SELECT < 10
+				wait 600
+			}
+			while (${Me.TSLevel}<10)
 			call AutoScribe
 			wait 50
+			call StartArtisan
+		}
+		if ${Me.TSLevel}<19
+		{
 			call goto_GH
 			call waitfor_Zoning
 			ogre craft -LLL
@@ -6966,12 +7019,21 @@ function StartArtisan()
 			}
 			while (${Me.TSLevel}<19)
 			ogre end craft
-			call goArtisanTrainer
-			call Converse "Dvarkor Ska'nin" 1
-			echo MUST DO THE SELECT
 		}
-		
+		if ${Me.TSLevel}<20
+		{
+			call goArtisanTrainer
+			do
+			{
+				call Converse "Dvarkor Ska'nin" 1
+				echo MUST DO THE SELECT < 20
+				wait 600
+			}
+			while (${Me.TSLevel}<20)
+			call AutoScribe
+			wait 50
+			call goto_GH
+		}
 	}
-	else
-		echo This script is for TS Level < 20
+	echo This script is for TS Level < 20
 }

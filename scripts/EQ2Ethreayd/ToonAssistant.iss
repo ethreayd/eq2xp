@@ -203,6 +203,7 @@ function GHStuck()
 		call goDown
 		call CastAbility "Call to Guild Hall"
 		run EQ2Ethreayd/${ScriptName}
+		end ToonAssistant
 }
 atom HandleAllEvents(string Message)
 {

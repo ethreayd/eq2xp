@@ -835,20 +835,22 @@ function Zone_AurelianCoastSambataVillageSolo()
 
 		if (!${Me.InCombatMode} && ${Me.X} < 215 && ${Me.X} > 200 &&  ${Me.Y} < 80 && ${Me.Y} > 65 && ${Me.Z} < -370 && ${Me.Z} > -390)
 		{
-			if (!${RI_Var_Bool_Paused})
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
+			call ISXRIPause
 			call DMove 213 63 -343 3
 			call DMove 182 66 -338 3			
 			call DMove 130 62 -359 3
-			if (${RI_Var_Bool_Paused})
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			wait 50
+			call ISXRIResume
 		}
 		if (!${Me.InCombatMode} && ${Me.X} < 85 && ${Me.X} > 70 &&  ${Me.Y} < 85 && ${Me.Y} > 70 && ${Me.Z} < -180 && ${Me.Z} > -205)
 		{
 			call ISXRIPause
 			call DMove 186 63 -311 3
 			call ISXRIResume
+		}
+		if (!${Me.InCombatMode} && ${Me.X} < -30 && ${Me.X} > -50 &&  ${Me.Y} < 80 && ${Me.Y} > 65 && ${Me.Z} < -650 && ${Me.Z} > -680)
+		{
+			call ISXRIPause
+			call RebootLoop
 		}
 		; must be the LAST test of the loop
 		if (!${Me.InCombatMode} && ${Me.X} < -130 && ${Me.X} > -150 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < -680 && ${Me.Z} > -700)
