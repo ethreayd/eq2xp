@@ -237,7 +237,9 @@ function main(bool UseOgreIC)
 					}
 					echo starting RZ
 					RZ
-					wait 30
+					wait 10
+					RZObj:Expac["Blood of Luclin"]
+					wait 10
 					UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
 				}
 			}

@@ -205,15 +205,15 @@ function TPHarvest(string Node, int Try)
 					call GoDown
 				call GetNodeType "${ActorIterator.Value.Name}"
 				NodeType:Set["${Return}"]
-				if (${NodeType.Equal["Shiny"]} || ${NodeType.Equal["Unknown"]})
-					wait 20
-				if (${NodeType.Equal["Buggy"]})
+				if (${NodeType.Equal["Shiny"]} || ${NodeType.Equal["Unknown"]} || ${NodeType.Equal["Special"]})
+					wait 30
+				if (${NodeType.Equal["Buggy"]} )
 					SKIP:Set[TRUE]
 				if (${NodeType.Equal["Special"]})
 				{
-					wait 100
 					press JUMP
 				}
+				
 				echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] is a ${Return} Node (Skip:${SKIP})
 				
 				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<30 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
@@ -3366,7 +3366,7 @@ function getAbilityMaster(int minLevel, string maxTierName)
                 }
                 while (!${MyAbilitiesIterator.Value.IsAbilityInfoAvailable} && ${Timer:Inc} < 1500)
             }
-			if ${MyAbilitiesIterator.Value.ToAbilityInfo.Class[${Me.SubClass}].Level} > ${minLevel}
+			if ${MyAbilitiesIterator.Value.ToAbilityInfo.Class[${Me.SubClass}].Level} >= ${minLevel}
             {
 				call getAbilityTier "${MyAbilitiesIterator.Value.ToAbilityInfo.Tier}"
 				if ${Return}<${maxTier}

@@ -387,7 +387,12 @@ function goSanctusSeru()
 			else
 			{
 				call KWMove 453 133 -484
-				wait 150
+				wait 10
+				call goDown
+				wait 10
+				oc !c -Zone ${Me.Name}
+				wait 50
+				call waitfor_Zoning
 			}	
 		}
 		else
