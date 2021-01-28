@@ -70,6 +70,8 @@ function main(string questname)
 			call Zone_SanctusSeruEchelonofDivinityHeroic
 		if ${Zone.Name.Equal["Sanctus Seru: Echelon of Order \[Heroic\]"]}
 			call Zone_SanctusSeruEchelonofOrderHeroic
+		if ${Zone.Name.Equal["The Venom of Ssraeshza \[Event Heroic\]"]}
+			call Zone_TheVenomofSsraeshzaEventHeroic
 		ExecuteQueued
 		wait 300
 	}
@@ -283,6 +285,15 @@ function Zone_SanctusSeruEchelonofDivinityHeroic()
 		call ResumeIC
 	}
 }
+function Zone_TheVenomofSsraeshzaEventHeroic()
+{
+	echo in function Zone_TheVenomofSsraeshzaEventHeroic (${ZoneTime})
+	if (!${Me.InCombatMode} && ${Me.X} < 40 && ${Me.X} > 35 &&  ${Me.Y} > -200 && ${Me.Y} < -175 && ${Me.Z} < 260 && ${Me.Z} > 230)
+	{
+		echo In front of Level Circle
+		call SelectDifficulty
+	}
+}
 function SelectDifficulty()
 {
 	variable string Selector="door entrance - difficulty setting"
@@ -298,7 +309,12 @@ function SelectDifficulty()
 	{
 		Selector:Set["starting circle - difficulty setting"]
 		SelectAction:Set["Access"]
-	}	
+	}
+	call IsPresent "tunnel blocker on - difficulty setting sign" 15
+	if (${Return})
+	{
+		Selector:Set["tunnel blocker on - difficulty setting sign"]
+	}
 	echo if (!${Me.InCombatMode} && ${MustSelect} && ${ZoneTime}>0)
 	if (!${Me.InCombatMode} && ${MustSelect} && ${ZoneTime}>0)
 	{
