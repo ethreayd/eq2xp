@@ -6374,7 +6374,7 @@ function DailyQuest()
 	relay is7 exit
 	run EQ2Ethreayd/DoDaily Churns
 	wait 10
-	relay all run endscript Churns
+	relay all run EQ2Ethreayd/wrap3 EndScript Churns
 }
 function ForceGroup()
 {
@@ -6408,7 +6408,7 @@ function ForceGroup()
 		relay is5 ChoiceWindow:DoChoice1
 		relay is6 ChoiceWindow:DoChoice1
 		wait 100
-		relay all run endscript Churns
+		relay all run EQ2Ethreayd/wrap3 EndScript Churns
 		Counter:Inc
 	}
 	while (!${Grouped} && ${Counter}<50)

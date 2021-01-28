@@ -196,15 +196,18 @@ function TheHunt(bool DoNotWait, int Timeout)
 						oc !c -Resume
 					else
 						oc !c -Resume ${Me.Name}
-					call navwrap ${NamedCoordinates[${i}]}
+					if (${OgreBotAPI.KWAble})
+						call KWMove ${NamedCoordinates[${i}]}
+					else
+						call navwrap ${NamedCoordinates[${i}]}
+		
 					call GroupDistance
 					if (${Return}>20 && !${Me.FlyingUsingMount})
 						eq2execute gsay "Please nav to me now !"
-					call AttackClosest
+					
 					call CheckPlayer
 					if (!${Return})
 					{
-						target "${NamedToHunt[${i}]}"
 						call Campfor_NPC "${NamedToHunt[${i}]}"
 						NamedDone[${i}]:Set[TRUE]
 					}
