@@ -168,9 +168,9 @@ function TPHarvest(string Node, int Try)
 	variable string NodeType
 	variable string ZoneName
 	
-		if (!${OgreBotAPI.KWAble})
+	if (!${OgreBotAPI.KWAble})
 	{
-		call Harvest
+		call Harvest ${Node}
 		return
 	}
 	
@@ -205,15 +205,33 @@ function TPHarvest(string Node, int Try)
 					call GoDown
 				call GetNodeType "${ActorIterator.Value.Name}"
 				NodeType:Set["${Return}"]
-				if (${NodeType.Equal["Shiny"]} || ${NodeType.Equal["Unknown"]} || ${NodeType.Equal["Special"]})
+				
+				if (!${NodeType.Equal["${Node}"]} && ${Node.Length}>0)
+					SKIP:Set[TRUE]
+				if (${NodeType.Equal["Shiny"]} || ${NodeType.Equal["Unknown"]})
 					wait 30
 				if (${NodeType.Equal["Buggy"]} )
 					SKIP:Set[TRUE]
+					
+				if (${NodeType.Equal["Fish"]} && !${SKIP})
+				{
+					echo up we go
+					press -hold Space
+					wait 3
+					press -release Space
+					while (${ActorIterator.Value.Distance(exists)})
+					{
+						Actor["${ActorIterator.Value.Name}"]:DoTarget
+						wait 5
+					}
+				}
 				if (${NodeType.Equal["Special"]})
 				{
 					press JUMP
+					wait 5
+					if ${ActorIterator.Value.Distance(exists)}
+					wait 25
 				}
-				
 				echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] is a ${Return} Node (Skip:${SKIP})
 				
 				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<30 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
@@ -233,8 +251,15 @@ function TPHarvest(string Node, int Try)
 					{
 						press Tab
 					}
-					if (${ActorIterator.Value.Distance}>5)
+					if (${ActorIterator.Value.Distance}>8)
 						call KWMove ${X} ${Y} ${Z}
+					if (${Me.Health} < 90 && !${Me.InCombat} && ${NodeType.Equal["Fish"]})
+					{
+						echo stop drowning
+						press -hold Space
+						wait 10
+						press -release Space
+					}
 					if ${Me.Health} < 50
 					{
 						call KWMove ${X} ${Math.Calc64[${Y}+600]} ${Z}

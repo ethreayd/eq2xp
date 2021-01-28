@@ -41,6 +41,8 @@ function goZone(string ZoneName, string Transport)
 		Transport:Set["Spire"]
 	if (${ZoneName.Equal["Freeport"]})
 		Transport:Set["Globe"]
+	if (${ZoneName.Equal["Tranquil Sea"]})
+		Transport:Set["Globe"]
 	if (${ZoneName.Equal["Butcherblock"]} || ${ZoneName.Equal["Butcherblock Mountains"]})
 	{
 		ZoneName:Set["Butcherblock Mountains"]
