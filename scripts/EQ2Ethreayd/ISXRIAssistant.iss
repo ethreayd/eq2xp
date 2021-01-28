@@ -95,6 +95,8 @@ function main(string questname)
 			if (${Return})
 			{
 				echo seems stuck in ${Zone.Name}
+				if (${Zone.Name.Left[14].Equal["Aurelian Coast"]} && ${Me.Loc.X} < 130 && ${Me.Loc.X} > 110 && ${Me.Loc.Z} < -625 && ${Me.Loc.Z} > -640)
+					call navwrap 126 66 -620
 				ZoneStuck:Inc
 				ZoneStuck:Inc
 				ZoneStuck:Inc
