@@ -3688,6 +3688,7 @@ function goDown()
 {
 	variable float loc0=0
 	echo "Going Down : 5 5 5"
+	press -release FLYUP
 	if (${Me.FlyingUsingMount})
 	{
 		do
