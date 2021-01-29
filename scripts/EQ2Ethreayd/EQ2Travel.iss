@@ -156,6 +156,7 @@ function goZone(string ZoneName, string Transport)
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
+		call MoveCloseTo "${Transport}"
 		call ActivateSpire "${Transport}"
 		wait 30
 		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]

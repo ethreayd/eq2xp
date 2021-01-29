@@ -149,12 +149,7 @@ function MainChecks()
 		run EQ2Ethreayd/ToonAssistant
 	echo in MainChecks Loop (${ScriptIdleTime} - ${ZoneTime} - ${SuperStucky})
 	ExecuteQueued
-	/*
-	if ${Me.Target(exists)}
-		echo target is ${Me.Target.Name}
-	else
-		echo No Target
-	*/
+	
 	if (!${Me.Grouped} && !${Me.InCombatMode})
 	{
 		eq2execute merc resume
@@ -220,7 +215,7 @@ function MainChecks()
 	}	
 	if ${Stucky}>10
 	{
-		call UnstuckR 10
+		call UnstuckR 20
 		Stucky:Set[0]
 	}
 	if ${SuperStucky}>30
@@ -1029,9 +1024,10 @@ function Zone_FordelMidstTheListlessSpiresSolo()
 		call MainChecks
 		echo Zone is ${Zone.Name} (${Counter})
 
-		;if (!${Me.InCombatMode} && ${Me.X} < -185 && ${Me.X} > -205 &&  ${Me.Y} < 10 && ${Me.Y} > 0 && ${Me.Z} < 40 && ${Me.Z} > 25)
-		;{
-		;}
+		if (!${Me.InCombatMode} && ${Me.X} < 305 && ${Me.X} > 285 &&  ${Me.Y} < -20 && ${Me.Y} > -40 && ${Me.Z} < 930 && ${Me.Z} > 900)
+		{
+			call ActivateVerbOn "door entrance" "Open"
+		}
 		wait 10
 	}
 	while (${Zone.Name.Equal["Fordel Midst: The Listless Spires \[Solo\]"]})

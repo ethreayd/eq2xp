@@ -24,7 +24,8 @@ function main(string questname)
 	variable int GroupCounter=0
 	variable int ZoneCounter=0
 	variable string ToonName=${Me.Name}
-	
+	variable float loc0 
+		
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
 	
@@ -59,7 +60,7 @@ function main(string questname)
 	{
 		ExecuteQueued
 		call waitfor_Zoning
-		
+		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 		;echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
@@ -128,6 +129,7 @@ function main(string questname)
 		wait 10
 		if (${Zone.Name.Right[10].Equal["Guild Hall"]} && ${Me.Y}>-100)
 			call GHStuck
+		
 		
 	}
 	while (TRUE)
