@@ -242,7 +242,7 @@ function goAc()
 }
 function goAurelianCoast()
 {
-	if (!${Zone.Name.Left[15].Equal["Aurelian Coast"]})
+	if (!${Zone.Name.Left[14].Equal["Aurelian Coast"]})
 	{
 		echo Going to Aurelian Coast
 		call goZone "The Blinding"
@@ -827,7 +827,7 @@ function goFordelMidst()
 	}
 	else
 	{
-		call goAurelianCoast
+		call goZone "Aurelian Coast"
 		wait 50
 		call DMove 623 99 -512 3 30 TRUE FALSE 5
 		call DMove 643 92 -473 3 30 TRUE FALSE 5

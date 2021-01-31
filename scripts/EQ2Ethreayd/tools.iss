@@ -5328,7 +5328,22 @@ function SetAscensionCS()
 	
 	echo you need to restart ogre when changing Ascension Class !!!
 }
-
+function OgreIMAll(string param, bool ForAll)
+{
+	;Thanks to LostOne for that code
+	if ${ForAll}
+	{
+		relay all run EQ2Ethreayd/wrap2 OgreIMAll "${param}"
+		return
+	}
+	else
+	{
+		ogre im ${param} -end
+		wait 30
+		while ${Script[Buffer:OgreInventoryManager](exists)}
+			waitframe
+	}
+}
 function SetMentorLevel(int MentorLevel)
 {
 	variable int PageLevel
@@ -6380,6 +6395,7 @@ function ForceGroup()
 {
 	variable bool Grouped
 	variable int Counter
+	relay all eq2execute decline_groups false
 	do
 	{
 		relay all eq2execute merc suspend
