@@ -6433,6 +6433,24 @@ function HelloWorld()
 {
 	echo Hello World !!!
 }
+function WaitforAll()
+{
+	variable int Counter=0
+	do
+	{
+		call ZoomOut TRUE
+		Counter:Set[0]
+		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
+		{
+			echo  ${i}:${Me.Group[${i}].Distance}
+			if (!${Me.Group[${i}].Distance(exists)})
+				Counter:Inc
+		}
+		wait 50
+		echo in waiting for group ready loop with ${Counter} missing member
+	}
+	while (${Counter}>0)
+}
 function GroupToFlag(bool UseToonAssistant)
 {
 	variable int Counter

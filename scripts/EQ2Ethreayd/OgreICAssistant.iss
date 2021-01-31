@@ -72,6 +72,8 @@ function main(string questname)
 			call Zone_SanctusSeruEchelonofOrderHeroic
 		if ${Zone.Name.Equal["The Venom of Ssraeshza \[Event Heroic\]"]}
 			call Zone_TheVenomofSsraeshzaEventHeroic
+		if ${Zone.Name.Equal["The Vault of Ssraeshza \[Heroic\]"]}
+			call Zone_TheVaultofSsraeshzaHeroic
 		ExecuteQueued
 		wait 300
 	}
@@ -307,6 +309,22 @@ function Zone_TheVenomofSsraeshzaEventHeroic()
 			call ResumeIC
 		}
 	}
+}
+function Zone_TheVaultofSsraeshzaHeroic()
+{
+	echo in function Zone_TheVaultofSsraeshzaHeroic (${ZoneTime})
+	/*
+	if (!${Me.InCombatMode} && ${Me.X} < -250 && ${Me.X} > -275 &&  ${Me.Y} > -150 && ${Me.Y} < -175 && ${Me.Z} < 790 && ${Me.Z} > 760)
+	{
+		call WaitforAll
+		call PauseIC
+		oc !c -letsgo
+		oc !c -OgreFollow All ${Me.Name}
+		call DMove -262 -161 752 3
+		oc !c -CSDefault
+		call ResumeIC
+	}
+	*/
 }
 function SelectDifficulty()
 {
