@@ -142,8 +142,10 @@ function MainChecks()
 	
 	if ${Stucky}>10
 	{
+		call PauseIC
 		call UnstuckR 10
 		Stucky:Set[0]
+		call ResumeIC
 	}	
 	if ${SuperStucky}>30
 	{
@@ -288,10 +290,22 @@ function Zone_SanctusSeruEchelonofDivinityHeroic()
 function Zone_TheVenomofSsraeshzaEventHeroic()
 {
 	echo in function Zone_TheVenomofSsraeshzaEventHeroic (${ZoneTime})
-	if (!${Me.InCombatMode} && ${Me.X} < 40 && ${Me.X} > 35 &&  ${Me.Y} > -200 && ${Me.Y} < -175 && ${Me.Z} < 260 && ${Me.Z} > 230)
+	if (!${Me.InCombatMode} && ${Me.X} < 40 && ${Me.X} > 25 &&  ${Me.Y} > -200 && ${Me.Y} < -175 && ${Me.Z} < 260 && ${Me.Z} > 230)
 	{
 		echo In front of Level Circle
 		call SelectDifficulty
+		wait 50
+		if (!${Me.InCombatMode} && ${Me.X} < 40 && ${Me.X} > 25 &&  ${Me.Y} > -200 && ${Me.Y} < -175 && ${Me.Z} < 260 && ${Me.Z} > 230)
+		{
+			call PauseIC
+			call DMove 37 -188 269 3
+			oc !c -resume
+			oc !c -letsgo
+			call DMove 35 -188 300 3
+			call DMove 35 -188 335 3
+			oc !c -CSDefault
+			call ResumeIC
+		}
 	}
 }
 function SelectDifficulty()

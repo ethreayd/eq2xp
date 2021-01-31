@@ -215,8 +215,10 @@ function MainChecks()
 	}	
 	if ${Stucky}>10
 	{
+		call ISXRIPause
 		call UnstuckR 20
 		Stucky:Set[0]
+		call ISXRIResume
 	}
 	if ${SuperStucky}>30
 	{
