@@ -317,7 +317,7 @@ function TheHeroics_FM(bool Expert)
 	wait 50
 	call waitfor_Zoning
 	wait 50
-	if (${Me.GroupCount}<6)
+	if (${Me.GroupCount}<=6)
 	{
 		echo This is not a full Group. ABORTING 
 		return FALSE

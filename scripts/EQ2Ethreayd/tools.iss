@@ -6433,12 +6433,14 @@ function HelloWorld()
 {
 	echo Hello World !!!
 }
-function WaitforAll()
+function WaitforAll(bool UseFlag)
 {
 	variable int Counter=0
 	do
 	{
 		call ZoomOut TRUE
+		if ${UseFlag}
+			oc !c -UseFlag
 		Counter:Set[0]
 		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
 		{
@@ -6456,25 +6458,17 @@ function GroupToFlag(bool UseToonAssistant)
 	variable int Counter
 	variable int i
 	
-	Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
+	do
+	{
+		Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
+		wait 50
+		call IsPresent  "Tactician Banner"
+	}
+	while (!${Return})
 	wait 50
 	echo All group should now come here
 	echo waiting for the group to zone
-	do
-	{
-		call ZoomOut TRUE
-		oc !c -UseFlag
-		Counter:Set[0]
-		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
-		{
-			echo  ${i}:${Me.Group[${i}].Distance}
-			if (!${Me.Group[${i}].Distance(exists)})
-				Counter:Inc
-		}
-		wait 50
-		echo in waiting for group ready loop with ${Counter} missing member
-	}
-	while (${Counter}>0)
+	call WaitforAll TRUE
 
 	if (${UseToonAssistant})
 	{
