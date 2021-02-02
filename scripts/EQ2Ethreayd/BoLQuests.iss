@@ -313,11 +313,11 @@ function TheHeroics_FM(bool Expert)
 
 	echo Launching The Heroics of Fordel Midst
 	
-	call goFordelMidst
+	call goZone "Fordel Midst"
 	wait 50
 	call waitfor_Zoning
 	wait 50
-	if (${Me.GroupCount}<=6)
+	if (${Me.GroupCount}<6)
 	{
 		echo This is not a full Group. ABORTING 
 		return FALSE
@@ -325,12 +325,16 @@ function TheHeroics_FM(bool Expert)
 	Grouped:Set[TRUE]
 	call GroupToFlag TRUE
 	ogre ic
-	wait 50
+	while ( !${Ogre_Instance_Controller(exists)} || ${Ogre_Instance_Controller.Get_Status.NotEqual["Idle_NotRunning"]} )
+		wait 5
 	oc !c -ZoneResetAll
 	if (!${Expert})
     {
 		relay all ExpertZone:Set[FALSE]
-		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+		if ${OgreBotAPI.KWAble}
+			call OgreICDir "DefaultKW/Blood_of_Luclin/Heroic"
+		else
+			call OgreICDir "Default/Blood_of_Luclin/Heroic"
 		Obj_FileExplorer:Scan
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
@@ -347,7 +351,10 @@ function TheHeroics_FM(bool Expert)
 	else
 	 {
 		relay all ExpertZone:Set[TRUE]
-		Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Expert"]
+		if ${OgreBotAPI.KWAble}
+			call OgreICDir "DefaultKW/Blood_of_Luclin/Expert"
+		else
+			call OgreICDir "Default/Blood_of_Luclin/Expert"
 		Obj_FileExplorer:Scan
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
@@ -380,7 +387,7 @@ function TheHeroics_SS()
 
 	echo Launching The Heroics of Sanctus Seru
 	
-	call goSanctusSeru
+	call goZone "Sanctus Seru"
 	wait 50
 	call waitfor_Zoning
 	wait 50
@@ -394,7 +401,10 @@ function TheHeroics_SS()
 	ogre ic
 	wait 50
 	oc !c -ZoneResetAll
-    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+    if ${OgreBotAPI.KWAble}
+		call OgreICDir "DefaultKW/Blood_of_Luclin/Heroic"
+	else
+		call OgreICDir "Default/Blood_of_Luclin/Heroic"
     Obj_FileExplorer:Scan
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Order_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Divinity_Heroic.iss"]
@@ -438,7 +448,10 @@ function TheHeroics_SZ()
 	ogre ic
 	wait 50
 	oc !c -ZoneResetAll
-    Obj_FileExplorer:Change_CurrentDirectory["ICEthreayd/Blood_of_Luclin/Heroic"]
+    if ${OgreBotAPI.KWAble}
+		call OgreICDir "DefaultKW/Blood_of_Luclin/Heroic"
+	else
+		call OgreICDir "Default/Blood_of_Luclin/Heroic"
     Obj_FileExplorer:Scan
 	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Event_Heroic.iss"]

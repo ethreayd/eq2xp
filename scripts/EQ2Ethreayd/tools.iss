@@ -4877,14 +4877,14 @@ function navwrap(string XS, string YS, string ZS)
 	oc !c -Letsgo ${Me.Name}
 	echo End of navwrap
 }
-function OgreICRun(string Dir, string Iss)
+function OgreICDir(string Dir)
 {
-	ogre ic
-	wait 50
-    Obj_FileExplorer:Change_CurrentDirectory["${Dir}"]
-    Obj_FileExplorer:Scan
-	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["${Iss}"]
-	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+	while ( !${Ogre_Instance_Controller(exists)} || ${Ogre_Instance_Controller.Get_Status.NotEqual["Idle_NotRunning"]} )
+		wait 5
+	Ogre_Instance_Controller:Set_BaseDirectory["${LavishScript.HomeDirectory}/Scripts/EQ2OgreBot/InstanceController/Instance_Files/"]
+	Ogre_Instance_Controller:Set_CurrentDirectory[""]
+	Ogre_Instance_Controller:Change_CurrentDirectory["${Dir}"]
+	
 }
 function OgreTransmute(int Bag)
 {
@@ -6067,6 +6067,13 @@ atom Quest_Charged(string Message)
 		echo setting QCHARGED at TRUE
 		QCHARGED:Set[TRUE]
 	}
+	if (${Message.Find["are currently not in a merchant transaction"]}>0)
+	{
+		variable string MerchantName
+		MerchantName:Set["Stanley Parnem"]
+		Actor["${MerchantName}"]:DoTarget
+		Actor["${MerchantName}"]:DoubleClick
+	}
 }
 function Zero_CANTSEE(int timeout)
 {
@@ -6436,11 +6443,21 @@ function HelloWorld()
 function WaitforAll(bool UseFlag)
 {
 	variable int Counter=0
+	variable int i
 	do
 	{
 		call ZoomOut TRUE
 		if ${UseFlag}
+		{
+			call IsPresent "Tactician Banner"
+			while (!${Return})
+			{
+				Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
+				wait 50
+				call IsPresent "Tactician Banner"
+			}
 			oc !c -UseFlag
+		}	
 		Counter:Set[0]
 		for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
 		{
@@ -6462,7 +6479,7 @@ function GroupToFlag(bool UseToonAssistant)
 	{
 		Me.Inventory[Query, Name =- "Tactical Rally Banner"]:Use
 		wait 50
-		call IsPresent  "Tactician Banner"
+		call IsPresent "Tactician Banner"
 	}
 	while (!${Return})
 	wait 50
