@@ -24,7 +24,9 @@ function CorrectZone(string ZoneName)
 	if (${ZoneName.Equal["The Great Divide"]})
 		return "Great Divide"
 	if (${ZoneName.Equal["The Sundered Frontier"]})
-		return "Sundered Frontier"	
+		return "Sundered Frontier"
+	if (${ZoneName.Equal["Sanctus Seru"]})
+		return "Sanctus Seru \[City\]"	
 	return "${ZoneName}"
 }
 ; Main goZone script (entry point) run wrap goZone "Zone Name"
@@ -438,6 +440,7 @@ function goSanctusSeru()
 			echo I am in Sanctus Seru (${Zone.Name})
 		else
 		{
+			call waitfor_Zone "Sanctus Seru \[City\]"
 			call TestArrivalCoord -399 88 2
 			if ${Return}
 			{
@@ -449,20 +452,16 @@ function goSanctusSeru()
 					call MoveCloseTo "Teleporter Base"
 					wait 10
 				}
-				while (${Me.Y}<100)
+				while (${Me.Y}<100 && !${OgreBotAPI.KWAble})
 				call DMove -230 180 -46 3
 				call DMove -258 181 -1 3
 				call DMove -276 181 0 3
 			}
 			else
 			{
+				call waitfor_Zone "Sanctus Seru \[City\]"
 				call Evac
-				wait 300
-				do
-				{
-					wait 10
-				}
-				while (!${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
+				call waitfor_Zone "Sanctus Seru \[City\]"
 				call goSanctusSeru
 				return
 			}
