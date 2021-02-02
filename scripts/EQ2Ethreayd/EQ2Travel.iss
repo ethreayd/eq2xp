@@ -22,8 +22,7 @@ function CorrectZone(string ZoneName)
 	if (${ZoneName.Equal["Freeport"]})
 		return "The City of Freeport"	
 	if (${ZoneName.Equal["The Great Divide"]})
-		return "Great Divide"	
-	return "${ZoneName}"
+		return "Great Divide"
 	if (${ZoneName.Equal["The Sundered Frontier"]})
 		return "Sundered Frontier"	
 	return "${ZoneName}"

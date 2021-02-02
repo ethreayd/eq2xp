@@ -387,7 +387,7 @@ function TheHeroics_SS()
 
 	echo Launching The Heroics of Sanctus Seru
 	
-	call goZone "Sanctus Seru"
+	call goSanctusSeru
 	wait 50
 	call waitfor_Zoning
 	wait 50
