@@ -176,7 +176,7 @@ function TPHarvest(string Node, int Try)
 	
 	ZoneName:Set[${Zone.Name}]
 	
-	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
+	Event[EQ2_onIncomingText]:AttachAtom[HandleHarvestEvent]
 	echo entering TPHarvest function ${ItemName} ${Safe} v2
 	X0:Set[${Me.X}] 
 	Y0:Set[${Me.Y}]
@@ -213,28 +213,37 @@ function TPHarvest(string Node, int Try)
 				if (${NodeType.Equal["Buggy"]} )
 					SKIP:Set[TRUE]
 					
-				if (${NodeType.Equal["Fish"]} && !${SKIP})
+				if (${NodeType.Equal["Fish"]} && !${SKIP} && ${CANTSEE})
 				{
 					echo up we go
-					press -hold Space
+					press -hold FLYUP
 					wait 3
-					press -release Space
-					while (${ActorIterator.Value.Distance(exists)})
+					press -release FLYUP
+					while (${Me.FlyingUsingMount})
+					{
+						echo oops too much
+						press -hold FLYDOWN
+						wait 1
+						press -release FLYDOWN
+					}
+					while (${ActorIterator.Value.Distance(exists)} && ${ActorIterator.Value.Distance}<9 && !${Me.FlyingUsingMount} && ${NodeCount}<20)
 					{
 						Actor["${ActorIterator.Value.Name}"]:DoTarget
 						wait 5
+						NodeCount:Inc
+						NodeCount:Inc
 					}
 				}
 				if (${NodeType.Equal["Special"]})
 				{
-					press JUMP
-					wait 5
-					if ${ActorIterator.Value.Distance(exists)}
 					wait 25
+					press JUMP
+					if ${ActorIterator.Value.Distance(exists)}
+						wait 25
 				}
 				echo ${ActorIterator.Value.Name} [${ActorIterator.Value.ID}] is a ${Return} Node (Skip:${SKIP})
-				
-				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<30 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
+				echo (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<20 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
+				while (${ActorIterator.Value.Distance(exists)} && ${Count}<5  && ${NodeCount}<20 && !${Me.IsDead} && !${SKIP} && !${REBOOT} && (${NodeType.Equal["${Node}"]} || ${Node.Equal[""]}) && !${NodeType.Equal["Quest"]})			
 				{
 					;target "${ActorIterator.Value.Name}"
 					
@@ -252,7 +261,7 @@ function TPHarvest(string Node, int Try)
 						press Tab
 					}
 					if (${ActorIterator.Value.Distance}>8)
-						call KWMove ${X} ${Y} ${Z}
+						call KWMove ${X} ${Y} ${Z}						
 					if (${Me.Health} < 90 && !${Me.InCombat} && ${NodeType.Equal["Fish"]})
 					{
 						echo stop drowning
@@ -260,6 +269,8 @@ function TPHarvest(string Node, int Try)
 						wait 10
 						press -release Space
 					}
+					if (${Me.Health} < 95 && ${Me.InCombat})
+						call CheckCombat
 					if ${Me.Health} < 50
 					{
 						call KWMove ${X} ${Math.Calc64[${Y}+600]} ${Z}
@@ -292,6 +303,10 @@ function TPHarvest(string Node, int Try)
 					if (${ActorIterator.Value.Name(exists)} && ${ActorIterator.Value.Type.Equal["Resource"]})
 						target ${ActorIterator.Value.Name}
 					NodeCount:Inc
+					if ${NodeType.Equal["Fish"]}
+						NodeCount:Inc
+					echo NodeCount:${NodeCount}
+					SKIP:Set[FALSE]
 				}
 				CombatCount:Set[0]
 				NodeCount:Set[0]
@@ -302,7 +317,7 @@ function TPHarvest(string Node, int Try)
 		EQ2:QueryActors[Actors, Distance > 10]
 		i:Set[${Math.Rand[${Actors.Used}]}]
 		echo random port if ${Actors.Used}>0 else go X0 Y0 Z0 (using i at ${i})
-		if ${Actors.Used}>0
+		if (${Actors.Used}>0 && ${Actors[${i}].X(exists)})
 			call Port ${Me.Name} ${Actors[${i}].X} ${Actors[${i}].Y} ${Actors[${i}].Z}
 		else
 			call Port ${Me.Name} ${X0} ${Y0} ${Z0}
@@ -314,11 +329,19 @@ function TPHarvest(string Node, int Try)
 	wait 50
 	call waitfor_Zoning
 	wait 50
-	ogre im -Depot
+	call OgreIMAll "-Depot"
 	wait 3000
 	call goZone "${ZoneName}"
 	wait 600
-	call TPHarvest
+	if ${Node(exists)}
+	{
+		if ${Try(exists)}
+			call TPHarvest ${Node} ${Try}
+		else
+			call TPHarvest ${Node}
+	}
+	else
+		call TPHarvest
 }
 function Qho()
 {
@@ -6075,6 +6098,15 @@ atom Quest_Charged(string Message)
 		Actor["${MerchantName}"]:DoubleClick
 	}
 }
+atom HandleHarvestEvent(string Message)
+{
+	if (${Message.Equal["Can't see target"]} || ${Message.Equal["Too far away"]})
+	{
+		CANTSEE:Set[TRUE]
+		QueueCommand call Zero_CANTSEE 60
+	}
+}
+
 function Zero_CANTSEE(int timeout)
 {
 	wait ${Math.Calc64[${Timeout}*10]}
@@ -6388,6 +6420,7 @@ function KillIS(int lastis)
 	{
 		echo relay is${i} run killall
 		relay is${i} run killall
+		relay is${i} ogre end im
 	}
 }
 function DailyQuest()

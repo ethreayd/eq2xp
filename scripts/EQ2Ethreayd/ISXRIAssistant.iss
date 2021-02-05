@@ -144,6 +144,7 @@ function main(string questname)
 function MainChecks()
 {
 	variable float loc0
+	variable bool NearExit
 	loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z}]}]
 	if (!${Script["ToonAssistant"](exists)})
 		run EQ2Ethreayd/ToonAssistant
@@ -155,8 +156,13 @@ function MainChecks()
 		eq2execute merc resume
 		wait 100
 	}
+	call IsPresent exit 10
+	if ${Return}
+		NearExit:Set[TRUE]
+	else
+		NearExit:Set[FALSE]
 	call IsPublicZone
-	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode} && !${ManualMode} && !${Return})
+	if (!${Script["Buffer:RunInstances"](exists)} && !${Me.InCombatMode} && !${ManualMode} && !${Return} && !${NearExit})
 	{
 		RICrashed:Inc
 		echo RI seems crashed (test N=${RICrashed})
@@ -203,6 +209,7 @@ function MainChecks()
 	{
 		Stucky:Inc
 		SuperStucky:Inc
+		echo Stucky : ${Stucky} / SuperStucky : ${SuperStucky}
 	}	
 	else
 	{
@@ -213,7 +220,7 @@ function MainChecks()
 			SuperStucky:Set[0]
 		}
 	}	
-	if ${Stucky}>10
+	if (${Stucky}>10 && !${NearExit})
 	{
 		call ISXRIPause
 		call UnstuckR 20
@@ -223,7 +230,19 @@ function MainChecks()
 	if ${SuperStucky}>30
 	{
 		SuperStucky:Set[0]
-		call RIRestart ${Me.IsDead}
+		if (${NearExit})
+		{
+			if ${Script["Buffer:RZ"](exists)}
+				endscript Buffer:RZ
+			echo starting RZ
+			RZ
+			wait 10
+			RZObj:Expac["Blood of Luclin"]
+			wait 10
+			UIElement[RZm].FindUsableChild[StartButton,button]:LeftClick
+		}
+		else
+			call RIRestart ${Me.IsDead}
 	}
 	
 	call CheckIfRepairIsNeeded 50
@@ -854,10 +873,10 @@ function Zone_AurelianCoastSambataVillageSolo()
 		; must be the LAST test of the loop
 		if (!${Me.InCombatMode} && ${Me.X} < -130 && ${Me.X} > -150 &&  ${Me.Y} < 90 && ${Me.Y} > 70 && ${Me.Z} < -680 && ${Me.Z} > -700)
 		{
-			if (!${RI_Var_Bool_Paused})
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			RZObj:Pause
-			wait 300
+			if (!${Script["Buffer:RunInstances"](exists)})
+				call ActivateVerbOn "Zone exit" Exit
+			call ISXRIPause
+			wait 300	
 			if ${Zone.Name.Equal["Aurelian Coast: Sambata Village \[Solo\]"]}
 			{
 				call DMove -78 82 -704 3
@@ -880,11 +899,9 @@ function Zone_AurelianCoastSambataVillageSolo()
 				call DMove -136 82 -687 3 30 TRUE TRUE
 				call TanknSpank "Mrokor"
 				call TanknSpank "Purpyron"
+				
 			}
-			if (${RI_Var_Bool_Paused})
-				UIElement[RI].FindUsableChild[Start,button]:LeftClick
-			wait 30
-			RZObj:Resume
+			call ISXRIResume
 			wait 600
 		}
 		wait 10
@@ -1029,6 +1046,11 @@ function Zone_FordelMidstTheListlessSpiresSolo()
 		if (!${Me.InCombatMode} && ${Me.X} < 305 && ${Me.X} > 285 &&  ${Me.Y} < -20 && ${Me.Y} > -40 && ${Me.Z} < 930 && ${Me.Z} > 900)
 		{
 			call ActivateVerbOn "door entrance" "Open"
+		}
+		wait 10
+		if (!${Me.InCombatMode} && ${Me.X} < 285 && ${Me.X} > 260 &&  ${Me.Y} < -20 && ${Me.Y} > -50 && ${Me.Z} < 740 && ${Me.Z} > 710 && !${Script["Buffer:RunInstances"](exists)})
+		{
+			call ActivateVerbOn "Aurelian Coast" "Aurelian Coast"
 		}
 		wait 10
 	}

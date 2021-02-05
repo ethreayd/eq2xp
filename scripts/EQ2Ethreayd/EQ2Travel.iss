@@ -26,7 +26,9 @@ function CorrectZone(string ZoneName)
 	if (${ZoneName.Equal["The Sundered Frontier"]})
 		return "Sundered Frontier"
 	if (${ZoneName.Equal["Sanctus Seru"]})
-		return "Sanctus Seru \[City\]"	
+		return "Sanctus Seru \[City\]"
+	if (${ZoneName.Equal["Vegarlson"]})
+		return "Vegarlson, the Earthen Badlands"
 	return "${ZoneName}"
 }
 ; Main goZone script (entry point) run wrap goZone "Zone Name"
@@ -154,6 +156,8 @@ function goZone(string ZoneName, string Transport)
 		call goMajDul
 		return TRUE
 	}
+	if (${ZoneName.Equal["Vegarlson, the Earthen Badlands"]} || ${ZoneName.Equal["Vegarlson"]})
+		call goCDPublicZone "Vergalson"
 	echo Going to Zone: ${ZoneName} (${AltZoneName}) with ${Transport} (inside goZone in tools)
 	if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 	{
@@ -194,6 +198,7 @@ function IsFlyingZone()
 	}
 	return FALSE
 }
+
 function goRecusoTor(bool Force)
 {
 	call goZone "The Blinding"	
@@ -1059,7 +1064,7 @@ function goEPG()
 function goCDPublicZone(string ZoneName)
 {
 	variable string LongZoneName
-	
+	echo launching goCDPublicZone ${ZoneName}
 	if ((${Zone.Name.Left[6].Equal["Myrist"]} || ${Zone.Name.Right[10].Equal["Guild Hall"]}) && (${Me.Y}<400 || ${Me.Y}>430))
 		call goEPG
 	
@@ -1071,6 +1076,7 @@ function goCDPublicZone(string ZoneName)
 			echo Going to ${ZoneName} (${LongZoneName})
 			call DMove 730 412 -338 3
 			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE	
+			oc !c -Zone ${Me.Name}
 		}
 		break
 		case Vergalson
@@ -1079,6 +1085,7 @@ function goCDPublicZone(string ZoneName)
 			echo no Zone selected going to ${ZoneName} (${LongZoneName})
 			call DMove 771 412 -338 3
 			call ActivateVerbOn "zone_to_poe" "Enter ${LongZoneName}" TRUE
+			oc !c -Zone ${Me.Name}
 		}
 		break
 		case default
@@ -1086,7 +1093,8 @@ function goCDPublicZone(string ZoneName)
 			LongZoneName:Set["Doomfire, the Burning Lands"]
 			echo Going to ${ZoneName} (${LongZoneName})
 			call DMove 730 412 -338 3
-			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE	
+			call ActivateVerbOn "zone_to_pof" "Enter ${LongZoneName}" TRUE
+			oc !c -Zone ${Me.Name}
 		}
 		break
 	}

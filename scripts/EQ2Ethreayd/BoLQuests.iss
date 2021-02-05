@@ -208,7 +208,10 @@ function TheHunt(bool DoNotWait, int Timeout)
 					call CheckPlayer
 					if (!${Return})
 					{
-						call Campfor_NPC "${NamedToHunt[${i}]}"
+						if (${OgreBotAPI.KWAble})
+							call Campfor_NPC "${NamedToHunt[${i}]}" 1
+						else
+							call Campfor_NPC "${NamedToHunt[${i}]}" 1200
 						NamedDone[${i}]:Set[TRUE]
 					}
 					call StopHunt
@@ -262,6 +265,9 @@ function TheHunt(bool DoNotWait, int Timeout)
 							else
 								oc !c -CampSpot ${Me.Name}
 								
+							if (${OgreBotAPI.KWAble})
+							call Campfor_NPC "${NamedToHunt[${i}]}" 1
+						else
 							call Campfor_NPC "${NamedToHunt[${i}]}" 1200
 							NamedDone[${i}]:Set[${Return}]
 							do
