@@ -5047,6 +5047,11 @@ function PKey(string KName, int ntime)
 	wait ${ntime}
 	press -release "${KName}"
 }
+function QB(string xpac)
+{
+	call RunOnce ToonAssistant
+	run custom/questscripts/UserQB ${xpac}_Adv_Sig
+}
 function PullNamed(string Named)
 {
 	variable float X0=${Me.X}
@@ -5319,6 +5324,7 @@ function RunICZone()
 	else
 		run "EQ2Ethreayd/IC/Blood_of_Luclin/Solo/${sQN}.iss"
 }
+
 function RZStop()
 {
 	RIObj:EndScript;ui -unload "${LavishScript.HomeDirectory}/Scripts/RI/RZ.xml"
@@ -6553,6 +6559,11 @@ function EquipHeroic()
 		Me.Inventory[Query, Name =- "Festering Mushroom Mash"]:Equip
 	}
 }
+function RunOnce(string scriptname)
+{
+	if (!${Script["${scriptname}"](exists)})
+		run EQ2Ethreayd/${scriptname}
+}		
 function PotPotion()
 {
 	Me.Inventory[Query, Name =- "Elixir of Intellect"]:Use

@@ -35,7 +35,7 @@ function main(string questname)
 	
 	if (!${Script["ToonAssistant"](exists)})
 		relay all run EQ2Ethreayd/ToonAssistant
-
+	oc !c -resume
 	do
 	{	
 		echo Zone is ${Zone.Name} (${IdleTime} | ${ZoneTime})
@@ -360,6 +360,7 @@ function SelectDifficulty()
 	}
 	wait 50
 	call ResumeIC
+	oc !c -resume
 }
 atom HandleAllEvents(string Message)
 {

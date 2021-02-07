@@ -23,8 +23,8 @@ function CorrectZone(string ZoneName)
 		return "The City of Freeport"	
 	if (${ZoneName.Equal["The Great Divide"]})
 		return "Great Divide"
-	if (${ZoneName.Equal["The Sundered Frontier"]})
-		return "Sundered Frontier"
+	if (${ZoneName.Equal["Sundered Frontier"]})
+		return "The Sundered Frontier"
 	if (${ZoneName.Equal["Sanctus Seru"]})
 		return "Sanctus Seru \[City\]"
 	if (${ZoneName.Equal["Vegarlson"]})
@@ -165,7 +165,9 @@ function goZone(string ZoneName, string Transport)
 		call ActivateSpire "${Transport}"
 		wait 30
 		OgreBotAPI:Travel["${Me.Name}", "${ZoneName}"]
-		wait 300
+		echo ${Me.Name} should have clicked on ${ZoneName}
+		wait 50
+		call waitfor_Zoning
 		echo I am in ${ZoneName} ((${Zone.Name.Right[10].Equal["Guild Hall"]})) / ${Zone.Name.Left[${ZoneName.Length}].Equal["${ZoneName}"]}
 	}
 	call waitfor_Zoning
@@ -265,13 +267,23 @@ function goAurelianCoast()
 			call 3DNav 516 120 532
 			call GoDown
 		}
-		call DMove 754 38 624 3
-		wait 20
-		call GoDown
-		face 879 590
-		press -hold MOVEFORWARD
-		wait 30
-		press -release MOVEFORWARD
+		
+			call DMove 754 38 624 3
+			wait 20
+			call GoDown
+		do
+		{
+			face 879 590
+			press -hold MOVEFORWARD
+			wait 50
+			press -release MOVEFORWARD
+			wait 100
+			call waitfor_Zoning
+			call CheckZone "Aurelian Coast"
+	
+		}
+		while (!${Return})
+		
 	}
 	else
 		call navwrap 500 145 -591
@@ -848,7 +860,7 @@ function goFordelMidst()
 }
 function goTheHole()
 {
-	call goZone "The Sundered Frontier" Spire
+	call goZone "Sundered Frontier" Spire
 	call navwrap 1894 -373 3452
 }
 function goLondiar_Inygad(int Timeout)

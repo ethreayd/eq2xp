@@ -43,11 +43,13 @@ function main(string questname)
 		call Log "back on login screen - trying to log on" WARNING
 		ZoneCounter:Set[0]
 		call ForceLogin ${ToonName}
-	}		
+	}
+	if (!${Me.Grouped} &&!${Me.InCombatMode})
+			eq2execute merc resume
 	if (${Me.Group}<3)
 	{
 		Solo:Set[TRUE]
-		oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_forcenamedcatab TRUE
+		;oc !c -UplinkOptionChange ${Me.Name} checkbox_settings_forcenamedcatab TRUE
 	}
 	if (${Me.Group}>2 && ${Me.Group}<5)
 	{	
@@ -75,6 +77,8 @@ function main(string questname)
 		{
 			if (${Solo} || ${FORCEPOTIONS})
 				call UsePotions FALSE TRUE
+			if (!${Me.Grouped} &&!${Me.InCombatMode})
+				eq2execute merc resume
 			if (!${Solo})
 			{
 				;echo not in Solo instance --> Heroic
@@ -88,8 +92,8 @@ function main(string questname)
 					Counter:Set[0]
 					call PotPotion
 					wait 300
-					echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds
-					while (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && ${Counter}<10)
+					echo Pot Potion at ${Me.Effect["Elixir of Intellect"].Duration} seconds (Dead:${Me.IsDead})
+					while (!${Me.Effect["Elixir of Intellect"].Duration(exists)} && ${Counter}<10 && !${Me.IsDead})
 					{
 						wait 30
 						Counter:Inc

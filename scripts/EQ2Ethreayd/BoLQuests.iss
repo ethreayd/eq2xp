@@ -348,7 +348,7 @@ function TheHeroics_FM(bool Expert)
 		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
 		wait 50
-		oc !c -LoadProfile Bol_Heroic
+		;oc !c -LoadProfile Bol_Heroic
 		wait 50
 		relay all run EQ2Ethreayd/wrap EquipHeroic
 		wait 20
@@ -368,7 +368,7 @@ function TheHeroics_FM(bool Expert)
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
 		wait 50
-		oc !c -LoadProfile Bol_Heroic
+		;oc !c -LoadProfile Bol_Heroic
 		wait 50
 		relay all run EQ2Ethreayd/wrap EquipHeroic
 		wait 20
@@ -416,7 +416,7 @@ function TheHeroics_SS()
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Divinity_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Event_Heroic.iss"]
 	wait 50
-	oc !c -LoadProfile Bol_Heroic
+	;oc !c -LoadProfile Bol_Heroic
 	wait 50
 	relay all run EQ2Ethreayd/wrap EquipHeroic
 	wait 20
@@ -462,7 +462,7 @@ function TheHeroics_SZ()
 	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
 	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Event_Heroic.iss"]
 	wait 50
-	oc !c -LoadProfile Bol_Heroic
+	;oc !c -LoadProfile Bol_Heroic
 	wait 50
 	relay all run EQ2Ethreayd/wrap EquipHeroic
 	wait 20

@@ -104,7 +104,7 @@ function main(bool UseOgreIC)
 	call IsPresent dungeons
 	if (!${Return} || !${Zone.Name.Left[15].Equal["Aurelian Coast"]})
 	{
-		call Log " Starting BoL Loop
+		call Log "Starting BoL Loop" INFO
 		call goto_GH
 		if (${Me.InventorySlotsFree}<50)
 			call ActionOnPrimaryAttributeValue 1040 ${Action}
@@ -255,6 +255,7 @@ function main(bool UseOgreIC)
 			if (!${Script["ISXRIAssistant"](exists)})
 				run EQ2Ethreayd/ISXRIAssistant
 		}
+		echo looping BoLLoop
 	}
 	while (TRUE)
 	echo BoLLoop has exited its infinite loop properly which should not happen...

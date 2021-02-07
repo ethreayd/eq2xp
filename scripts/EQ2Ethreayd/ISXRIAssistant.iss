@@ -85,6 +85,7 @@ function main(string questname)
 			IdleTime:Inc
 		Else
 			IdleTime:Set[0]
+		call waitfor_Zoning
 		call IsPublicZone
 		if (${Me.IsIdle} && !${Me.InCombat} && ${Return})
 			oc !c -ZoneResetAll ${Me.Name}
