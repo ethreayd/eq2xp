@@ -2480,9 +2480,11 @@ function AutoRepair(int Damaged)
 }
 function AutoGetFlag()
 {
+	call ZoomOut
 	do
 	{
 		call ZoomOut
+		wait 5 
 		oc !c -GetFlag ${Me.Name}
 		wait 30
 		call CountItem "Tactical Rally Banner"
@@ -7074,13 +7076,13 @@ function ZoomOut(bool ForAll)
 	if (${ForAll})
 	{
 		relay all press -hold ZOOMOUT
-		wait 25
+		wait 50
 		relay all press -release ZOOMOUT
 	}
 	else
 	{
 		press -hold ZOOMOUT
-		wait 25
+		wait 50
 		press -release ZOOMOUT
 	}
 }
