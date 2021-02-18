@@ -165,9 +165,12 @@ function FixCombat()
 	}
 	else
 	{
-		call AttackClosest
-		wait 20
-		call MoveCloseTo "${Me.Target.Name}"
+		if !${DONTMOVE}
+		{
+			call AttackClosest
+			wait 20
+			call MoveCloseTo "${Me.Target.Name}"
+		}
 	}
 	wait 10
 }
@@ -230,6 +233,10 @@ atom HandleAllEvents(string Message)
 	{
 		if (!${Script["wrap"](exists)})
 			run EQ2Ethreayd/wrap UnstuckR 20
+	}
+	if (${Message.Find["nterrupt"]}>0)
+	{
+		 call Interrupt
 	}
 }
 atom HandleEvents(int ChatType, string Message, string Speaker, string TargetName, bool SpeakerIsNPC, string ChannelName)

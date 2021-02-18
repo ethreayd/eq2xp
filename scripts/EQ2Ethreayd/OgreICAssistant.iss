@@ -24,7 +24,6 @@ variable(script) int ScriptIdleTime
 variable(script) int ZoneTime
 variable(script) bool GiveUp
 variable(script) string ZoneName
-variable(script) int ArxCounter=1
 
 function main(string questname)
 {
@@ -74,6 +73,8 @@ function main(string questname)
 			call Zone_TheVenomofSsraeshzaEventHeroic
 		if ${Zone.Name.Equal["The Vault of Ssraeshza \[Heroic\]"]}
 			call Zone_TheVaultofSsraeshzaHeroic
+		if ({Zone.Name.Right[10].Equal["Guild Hall"]})
+			ogre end ic
 		ExecuteQueued
 		wait 300
 	}
@@ -232,15 +233,20 @@ function FordelMidstBizarreBazaarHeroic()
 }
 function Zone_SanctusSeruEchelonofOrderHeroic()
 {
+	variable int Counter=1
 	echo in function Zone_SanctusSeruEchelonofOrderHeroic (${ZoneTime})
 	if (!${Me.InCombatMode} && ${Me.X} < -365 && ${Me.X} > -385 &&  ${Me.Y} > 80 && ${Me.Y} < 95 && ${Me.Z} < 10 && ${Me.Z} > -10)
 	{
 		echo In front of Level Circle
-		call SelectDifficulty
+		wait 50
+		Counter:Inc
+		if ${Counter}>10
+			call SelectDifficulty
 	}
 }
 function Zone_SanctusSeruEchelonofDivinityHeroic()
 {
+	variable int ArxCounter=1
 	echo in function Zone_SanctusSeruEchelonofDivinityHeroic (${ZoneTime})
 	
 	if (!${Me.InCombatMode} && ${Me.X} < -190 && ${Me.X} > -210 &&  ${Me.Y} > 170 && ${Me.Y} < 190 && ${Me.Z} < 10 && ${Me.Z} > -10 && ${ArxCounter}<3 )
@@ -331,8 +337,10 @@ function SelectDifficulty()
 	variable string Selector="door entrance - difficulty setting"
 	variable string SelectAction="Open"
 	variable bool MustSelect
-	call PauseIC
 	echo in SelectDifficulty function
+	echo Pausing IC from SelectDifficulty function
+	call PauseIC
+	
 	call IsPresent "difficulty setting" 25
 	if (${Return})
 		MustSelect:Set[TRUE]

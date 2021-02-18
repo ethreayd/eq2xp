@@ -38,6 +38,7 @@ function main(bool UseOgreIC)
 	ScriptsToRun:Insert["wrap2"]
 	ScriptsToRun:Insert["wrap"]
 	
+	
 	oc !c -ZoneResetAll ${Me.Name}
 	oc !c -letsgo ${Me.Name}
 	eq2execute unmentor

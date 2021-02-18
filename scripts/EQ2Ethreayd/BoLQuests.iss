@@ -20,6 +20,7 @@ variable(script) string QZ
 variable(script) index:string NamedToHunt
 variable(script) index:string NamedCoordinates
 variable(script) index:bool NamedDone
+variable(script) bool ForceInterrupt
 
 function HarvestQuest(string HarvestQ)
 {
@@ -310,6 +311,46 @@ function TheHarvest(string QuestName, int Timeout)
 {
 
 }
+function DrunderHeroics()
+{
+	while (${Me.GroupCount}<6)
+	{
+		call AutoGroup
+		wait 10
+	}	
+	ogre ic
+	while ( !${Ogre_Instance_Controller(exists)} || ${Ogre_Instance_Controller.Get_Status.NotEqual["Idle_NotRunning"]} )
+		wait 5
+	oc !c -ZoneResetAll
+	call OgreICDir "DefaultKW/Blood_of_Luclin/Heroic"
+	Obj_FileExplorer:Scan
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
+	;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Order_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Echelon_of_Divinity_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Sanctus_Seru_Arx_Aeturnus_Event_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Vault_of_Ssraeshza_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Venom_of_Ssraeshza_Event_Heroic.iss"]
+	Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["The_Ruins_of_Ssraeshza_Heroic.iss"]
+
+	
+	wait 50
+	relay all run EQ2Ethreayd/wrap EquipHeroic
+	wait 20
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
+	wait 50
+	while (${Script["Buffer:OgreInstanceController"](exists)})
+	{
+		wait 10
+	}
+	echo The Heroics of Drunder has ended
+	return TRUE
+	
+}
 function TheHeroics_FM(bool Expert)
 {
 	variable int i
@@ -352,7 +393,8 @@ function TheHeroics_FM(bool Expert)
 		wait 50
 		relay all run EQ2Ethreayd/wrap EquipHeroic
 		wait 20
-		Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+		;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["call_to_gh_when_finished",TRUE]
 	}
 	else
 	 {
@@ -362,16 +404,18 @@ function TheHeroics_FM(bool Expert)
 		else
 			call OgreICDir "Default/Blood_of_Luclin/Expert"
 		Obj_FileExplorer:Scan
-		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
+		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Sambata_Village_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Maidens_Eye_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Aurelian_Coast_Reishi_Rumble_Event_Heroic.iss"]
-		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
+		Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_The_Listless_Spires_Event_Heroic.iss"]
 		;Obj_InstanceControllerXML:AddInstance_ViaCode_ViaName["Fordel_Midst_Bizarre_Bazaar_Heroic.iss"]
 		wait 50
 		;oc !c -LoadProfile Bol_Heroic
 		wait 50
 		relay all run EQ2Ethreayd/wrap EquipHeroic
 		wait 20
+		;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+		Obj_InstanceControllerXML:ChangeUIOptionViaCode["call_to_gh_when_finished",TRUE]
 		;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
 	}
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
@@ -420,7 +464,8 @@ function TheHeroics_SS()
 	wait 50
 	relay all run EQ2Ethreayd/wrap EquipHeroic
 	wait 20
-	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["call_to_gh_when_finished",TRUE]
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 	wait 50
 	while (${Script["Buffer:OgreInstanceController"](exists)})
@@ -466,7 +511,8 @@ function TheHeroics_SZ()
 	wait 50
 	relay all run EQ2Ethreayd/wrap EquipHeroic
 	wait 20
-	Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	;Obj_InstanceControllerXML:ChangeUIOptionViaCode["loop_list_checkbox",TRUE]
+	Obj_InstanceControllerXML:ChangeUIOptionViaCode["call_to_gh_when_finished",TRUE]
 	Obj_InstanceControllerXML:ChangeUIOptionViaCode["run_instances_checkbox",TRUE]
 	wait 50
 	while (${Script["Buffer:OgreInstanceController"](exists)})
@@ -524,7 +570,53 @@ function EegutStonegut()
 	while (!${Return})
 	oc !c -letsgo
 }
-
+function Broglyn()
+{
+	Event[EQ2_onIncomingText]:AttachAtom[HandleBroglynEvents]
+	DONTMOVE:Set[TRUE]
+	do
+	{
+		if ${ForceInterrupt}
+		{
+			oc !c -Pause ${Me.Name}
+			target "Chief Broglyn"
+			call Interrupt
+			wait 5
+			oc !c -Resume ${Me.Name}
+		}
+		else
+		{
+			
+			call IsPresent "corrupted bogling"
+			if (${Return})
+				target "corrupted bogling"
+			wait 5
+		}
+		wait 1
+		call IsPresent "Chief Broglyn" 500
+	}	
+	while (${Return})
+	DONTMOVE:Set[FALSE]
+	echo end of Broglyn
+}
+atom HandleBroglynEvents(string Message)
+{
+	if (${Message.Find["nterrupt "]}>0)
+	{
+		echo ${Message}
+		ForceInterrupt:Set[TRUE]
+	}
+	if (${Message.Find["s interrupted"]}>0)
+	{
+		echo interrupt done
+		ForceInterrupt:Set[FALSE]
+	}
+	if (${Message.Find["screams and spits"]}>0)
+	{
+		echo interrupt missed
+		ForceInterrupt:Set[FALSE]
+	}
+}
 atom HandleKorVaXianEvents(string Message)
 {
 	if (${Message.Find["prepares to knock back everyone within"]} > 0)

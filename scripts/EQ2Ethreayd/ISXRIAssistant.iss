@@ -54,7 +54,10 @@ function main(string questname)
 			eq2execute merc resume
 			
 		if ${Zone.Name.Equal["Myrist, the Great Library"]}
+		{
+			ZoneStuck:Set[0]
 			call RebootLoop
+		}
 		if ${Zone.Name.Equal["Awuidor: The Nebulous Deep \[Solo\]"]}
 			call Zone_AwuidorTheNebulousDeepSolo
 		if ${Zone.Name.Equal["Doomfire: The Enkindled Towers \[Solo\]"]}
@@ -118,6 +121,7 @@ function main(string questname)
 		if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
 		{
 			echo call reboot because I am stuck in ${Zone.Name} if (${ZoneStuck}> 100 && ${Zone.Name.Left[19].Equal["Sanctus Seru \[City\]"]})
+			ZoneStuck:Set[0]
 			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 		if ((${ZoneStuck}> 40) && ${Zone.Name.Left[14].Equal["Aurelian Coast"]})
@@ -135,6 +139,7 @@ function main(string questname)
 		if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
 		{
 			echo Rebooting Loop if (${IdleTime} > 100 && !${Zone.Name.Left[12].Equal["The Blinding"]})
+			ZoneStuck:Set[0]
 			run EQ2Ethreayd/safescript wrap RebootLoop
 		}	
 		wait 300
@@ -274,6 +279,7 @@ function MainChecks()
 		if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)})
 		{
 			echo call RebootLoop if (((${Me.InventorySlotsFree}<5 && !${Me.IsDead} && !${Me.InCombatMode}) || ${Return}) && ${Me.IsIdle(exists)}) - ${Me.Equipment["Primary"].ToItemInfo.Condition}
+			ZoneStuck:Set[0]
 			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 	}
@@ -294,6 +300,7 @@ function MainChecks()
 	{
 		echo call RebootLoop if (${ZoneTime} > 600)
 		ZoneTime:Set[0]
+		ZoneStuck:Set[0]
 		run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 	ZoneTime:Inc
@@ -869,6 +876,7 @@ function Zone_AurelianCoastSambataVillageSolo()
 		if (!${Me.InCombatMode} && ${Me.X} < -30 && ${Me.X} > -50 &&  ${Me.Y} < 80 && ${Me.Y} > 65 && ${Me.Z} < -650 && ${Me.Z} > -680)
 		{
 			call ISXRIPause
+			ZoneStuck:Set[0]
 			call RebootLoop
 		}
 		; must be the LAST test of the loop
@@ -966,6 +974,7 @@ function Zone_AurelianCoastMaidensEyeSolo()
 			Counter:Set[0]
 		if (!${Me.InCombatMode} && ${Me.InCombatMode(exists)} && ${Me.X} < -515 && ${Me.X} > -535 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < 20 && ${Me.Z} > 0)
 		{
+			ZoneStuck:Set[0]
 			run EQ2Ethreayd/safescript wrap RebootLoop
 		}
 		if (${Me.InCombatMode} && ${Me.X} < -445 && ${Me.X} > -465 &&  ${Me.Y} < 10 && ${Me.Y} > -10 && ${Me.Z} < -90 && ${Me.Z} > -110)
@@ -1797,6 +1806,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["ve got better things to do"]}>0)
 	{
 		echo Merc gone because of inactivity - Rebooting loop
+		ZoneStuck:Set[0]
 		QueueCommand run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 	if (${Message.Find["must first be taken down"]}>0)
@@ -1811,6 +1821,7 @@ atom HandleAllEvents(string Message)
 	if (${Message.Find["RROR: Destination zone name can not be determined"]}>0)
 	{
 		call Log "Lost in some zone and fast travel is not working - Rebooting loop" WARNING
+		ZoneStuck:Set[0]
 		QueueCommand run EQ2Ethreayd/safescript wrap RebootLoop
 	}
 }

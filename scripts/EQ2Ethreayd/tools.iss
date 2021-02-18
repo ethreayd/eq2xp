@@ -27,6 +27,7 @@ variable(globalkeep) int ISNotLogged
 variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
 variable(globalkeep) bool NODEBUG
 variable(globalkeep) int STUCKCOUNTER
+variable(globalkeep) bool DONTMOVE
 variable(global) bool NoNavWrap
 variable(script) bool REBOOT
 variable(script) bool SKIP
@@ -1332,7 +1333,7 @@ function AutoAddQuest(bool EraseDuplicate)
 				{
 					if (${ItemIterator.Value.Name.Equal["An Overseer's First Agents"]} || ${ItemIterator.Value.Name.Equal["Overseer Quests"]} || ${ItemIterator.Value.Name.Find["Overseer Pack"]}>0)
 					{
-							call "Log Found ${ItemIterator.Value.Name} to unpack" INFO
+							;call "Log Found ${ItemIterator.Value.Name} to unpack" INFO
 							Me.Inventory[Query, Name == "${ItemIterator.Value.Name}"]:Unpack
 							wait 10
 							call AutoAddQuest FALSE
@@ -3172,6 +3173,7 @@ function DMove(float X, float Y, float Z, int speed, int MyDistance, bool Ignore
 	if (${OgreBotAPI.KWAble})
 	{
 		call KWMove ${X} ${Y} ${Z}
+		wait 10
 		return TRUE
 	}	
 	call TestNullCoord ${X} ${Y} ${Z} ${Precision}
@@ -3267,6 +3269,22 @@ function Evac()
 		default
 			echo debug: in default case
 			Me.Inventory["Totem of Escape"]:Use
+		break
+	}
+}
+function Interrupt()
+{
+	echo debugging Interrupt I am ${Me.Class}/${Me.Archetype}
+	switch ${Me.Class}
+	{
+		case ranger
+			Me.Ability["Hilt Strike"]:Use
+		break
+		case defiler
+			Me.Ability["Absolute Corruption"]:Use
+		break
+		default
+			echo debug: in default case
 		break
 	}
 }
@@ -5054,6 +5072,14 @@ function QB(string xpac)
 	call RunOnce ToonAssistant
 	run custom/questscripts/UserQB ${xpac}_Adv_Sig
 }
+function QBPause()
+{
+	Script["UserQB"]:Pause
+}
+function QBResume()
+{
+	Script["UserQB"]:Resume
+}
 function PullNamed(string Named)
 {
 	variable float X0=${Me.X}
@@ -6022,6 +6048,7 @@ function UseCurePotion(string Detriment, bool NoWait)
 		do
 		{
 			call UseInventory "Cure ${Detriment}" ${NoWait}
+			call UseInventory "${Detriment} Remedy" ${NoWait}
 			eq2execute gsay "glou glou ${Detriment} Potion"
 			wait 10
 		}
@@ -6643,19 +6670,29 @@ function getTransmutingLevel()
 {
 	return ${Math.Calc64[${OgreBotAPI.SpewStat[currenttransmuting]}\\5]}
 }
+
 function Hireling(string NPCName)
 {
 	;NPC should be Miner, Gatherer or Hunter	
 	echo Hireling script for ${NPCName}
 	call MoveCloseTo "${NPCName}"
-	
+	wait 50
 	target "${NPCName}"
+	face "${NPCName}"
 	eq2execute hail "${NPCName}"
 	wait 50
 	OgreBotAPI:ConversationBubble["${Me.Name}",3]
 	wait 50
 	OgreBotAPI:ConversationBubble["${Me.Name}",3]	
 	wait 50
+	OgreBotAPI:ConversationBubble["${Me.Name}",1]
+	target "${NPCName}"
+	face "${NPCName}"
+	eq2execute hail "${NPCName}"
+	wait 50
+	OgreBotAPI:ConversationBubble["${Me.Name}",3]
+	wait 50
+	OgreBotAPI:ConversationBubble["${Me.Name}",3]	
 }
 function CleanBags()
 {

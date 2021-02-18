@@ -60,11 +60,18 @@ function main(int stepstart, int stepstop, int setspeed, bool NoShiny)
 	call CheckQuestStep 3
 	if (${Return} && ${stepstart}<5)
 		stepstart:Set[5]
-	if (${Me.Ability["Hackbot 3000"](exists)} && ${stepstart}<9)
-		stepstart:Set[9]
+	
 	call CheckQuestStep 3
-	if (${Me.Ability["Hackbot 3000"](exists)} && ${Return} && ${stepstart}<13)
-		stepstart:Set[13]
+	if (${Return} && ${stepstart}<10)
+	{
+		call IsPresent "Hackbot 3000"
+		if (!${Return})
+			call UseAbility "Hackbot 3000"
+		wait 50
+		call IsPresent "Hackbot 3000"
+		if (${Return})
+			stepstart:Set[10]
+	}
 	ogre cl
 	echo call StartQuest ${stepstart} ${stepstop} TRUE
 	call StartQuest ${stepstart} ${stepstop} TRUE
@@ -587,6 +594,8 @@ function step008()
 }
 function step009()
 {
+	Actor[name,"Hackbot 3000"]:DoubleClick
+	ExecuteQueue
 	if (!${OgreBotAPI.KWAble})
 	{
 		call SMove 154 4 -400 100 20 5
@@ -617,18 +626,22 @@ function step009()
 		wait 20
 		OgreBotAPI:AcceptReward["${Me.Name}"]
 		wait 20
+		ExecuteQueue
 	}
 	while (!${Me.Ability["Hackbot 3000"](exists)})
 	do
 	{
+		
 		call UseAbility "Hackbot 3000"
 		wait 50
+		ExecuteQueue
 		call IsPresent "Hackbot 3000" 10
 	}
 	while (!${Return})
 }
 function step010()
 {
+	ExecuteQueue
 	if (!${OgreBotAPI.KWAble})
 	{
 		call DMove 24 3 -551 3
@@ -743,6 +756,7 @@ function step010()
 }
 function step011()
 {	
+	ExecuteQueue
 	if (!${OgreBotAPI.KWAble})
 	{
 		call DMove 25 7 -345 1 30 FALSE FALSE 2
@@ -837,6 +851,7 @@ function step011()
 }
 function step012()
 {
+	ExecuteQueue
 	if (!${OgreBotAPI.KWAble})
 	{
 		call DMove 25 7 -340 3
@@ -873,6 +888,7 @@ function step012()
 }
 function step013()
 {
+	ExecuteQueue
 	call InitBot
 	do
 	{
@@ -948,6 +964,7 @@ function step013()
 function step014()
 {
 	call DMove 24 -7 -457 2
+	
 	call IsPresent "Electric Manaetic Device (EMD)" 15
 	if (!${Return})
 		Me.Inventory["Electric Manaetic Device (EMD)"]:Use
@@ -1006,6 +1023,7 @@ function InitBot()
 {
 	do
 	{
+		ExecuteQueue
 		call UseAbility "Hackbot 3000"
 		wait 50
 		call IsPresent "Hackbot 3000" 10
@@ -1092,4 +1110,8 @@ atom HandleAllEvents(string Message)
 	{
 		Doors:Set[TRUE]
 	}
+	if (${Message.Find["damaged and worn"]} > 0)
+	{
+		echo problem with quest step order !
+	}	
 }
