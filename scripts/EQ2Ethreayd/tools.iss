@@ -6466,6 +6466,18 @@ function DailyQuest()
 	wait 10
 	relay all run EQ2Ethreayd/wrap3 EndScript Churns
 }
+function MercInGroup()
+{
+	variable int GroupCounter=0
+	
+	while (${GroupCounter:Inc} <= 5)
+	{
+		if ${Me.Group[${GroupCounter}].Type.Equal["Mercenary"]}
+			return TRUE
+	}
+	return FALSE
+}
+
 function ForceGroup()
 {
 	variable bool Grouped
@@ -6478,6 +6490,8 @@ function ForceGroup()
 		relay all ChoiceWindow:DoChoice1
 		oc !c -Disband
 		wait 50
+		relay all ChoiceWindow:DoChoice1
+		
 	}
 	while (${Me.GroupCount}>1 && ${Counter}<50)
 	do
@@ -6493,6 +6507,13 @@ function ForceGroup()
 			Grouped:Set[TRUE]
 		call AutoGroup 500
 		wait 10
+		call MercInGroup
+		if (${Return})
+		{
+			relay all eq2execute merc suspend
+			wait 20
+			relay all ChoiceWindow:DoChoice1
+		}
 		relay is2 ChoiceWindow:DoChoice1
 		relay is3 ChoiceWindow:DoChoice1
 		relay is4 ChoiceWindow:DoChoice1
