@@ -28,6 +28,7 @@ variable(globalkeep) bool FORCEPOTIONS=${FORCEPOTIONS}
 variable(globalkeep) bool NODEBUG
 variable(globalkeep) int STUCKCOUNTER
 variable(globalkeep) bool DONTMOVE
+variable(globalkeep) string ZONETOBE
 variable(global) bool NoNavWrap
 variable(script) bool REBOOT
 variable(script) bool SKIP
@@ -2481,13 +2482,26 @@ function AutoRepair(int Damaged)
 }
 function AutoGetFlag()
 {
+	call CountItem "Tactical Rally Banner"
+	if (${Return}>0)
+		return TRUE
+	
 	call ZoomOut
 	do
 	{
 		call ZoomOut
-		wait 5 
+		wait 5
+		
+		face strategist
 		oc !c -GetFlag ${Me.Name}
 		wait 30
+		call CountItem "Tactical Rally Banner"
+		if (${Return}<1)
+		{
+			call MoveCloseTo strategist
+			wait 10
+			call goDown
+		}
 		call CountItem "Tactical Rally Banner"
 	}
 	while (${Return}<1 && ${Zone.Name.Right[10].Equal["Guild Hall"]})
@@ -6237,9 +6251,15 @@ function WaitforCorpse()
 {
 	call waitfor_Corpse
 }
+function PorttoMe(string ToonName, string ToonZone)
+{
+	ZONETOBE:Set["${ToonZone}"]
+	eq2execute gsay ${ToonName} Zone to me now !
+}
 function waitfor_Group()
 {
 	variable int Counter
+	variable int WaitCounter
 	variable int i
 	
 	do
@@ -6252,7 +6272,19 @@ function waitfor_Group()
 				Counter:Inc
 		}
 		wait 50
-		echo in waitfor_Group() loop with ${Counter} missing member
+		echo in waitfor_Group() loop with ${Counter} missing member (${WaitCounter}/30)
+		WaitCounter:Inc
+		if ${WaitCounter}>30
+		{
+			relay all run EQ2Ethreayd/safescript ToonAssistant
+			wait 200
+			for ( i:Set[1] ; ${i} < ${Me.GroupCount} ; i:Inc )
+			{	
+				if (!${Me.Group[${i}].Distance(exists)})
+					call PorttoMe ${Me.Group[${i}].Name} "${ZoneName}" 
+			}
+			WaitCounter:Set[0]
+		}		
 	}
 	while (${Counter}>0)
 		

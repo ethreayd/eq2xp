@@ -28,7 +28,9 @@ function main(string questname)
 		
 	Event[EQ2_onIncomingText]:AttachAtom[HandleAllEvents]
 	Event[EQ2_onIncomingChatText]:AttachAtom[HandleEvents]
-	
+
+	call waitfor_Zoning
+
 	echo Starting ToonAssistant (Force Potions : ${FORCEPOTIONS})
 	eq2execute spend_deity_point 2282608707 1
 	eq2execute spend_deity_point 2282608707 1
@@ -58,12 +60,15 @@ function main(string questname)
 	}
 	else
 		GroupCounter:Set[0]
+	if (${Me.Speed}<115)
+		call Remount
 	do
 	{
 		ExecuteQueued
 		call waitfor_Zoning
 		loc0:Set[${Math.Calc64[${Me.Loc.X} * ${Me.Loc.X} + ${Me.Loc.Y} * ${Me.Loc.Y} + ${Me.Loc.Z} * ${Me.Loc.Z} ]}]
 		;echo into ToonAssistant : Power at ${Me.Power} - Health at ${Me.Health} - Dead at ${Me.IsDead}
+		
 		if (${Me.Power}<10 && !${Me.IsDead})
 			eq2execute gsay I really need mana now !
 		if (${Me.Health}<10 && !${Me.IsDead})
@@ -273,6 +278,21 @@ atom HandleEvents(int ChatType, string Message, string Speaker, string TargetNam
 					eq2execute gsay Can I have a rez please ?
 				else
 					oc !c -Revive ${Me.Name}
+			}
+		}
+	}
+	if (${Message.Find["Zone to me now"]} > 0)
+	{
+		if (!${Session.Equal["is1"]})
+		{
+			if (!${Me.IsDead})
+			{
+				call goZone "${ZONETOBE}"
+			}
+			else
+			{
+				oc !c -Revive ${Me.Name}
+				QueueCommand oc !c -Repair ${Me.Name}
 			}
 		}
 	}
