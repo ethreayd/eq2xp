@@ -59,6 +59,7 @@ function main(bool UseOgreIC)
 	call RZStop
 	oc !c -letsgo ${Me.Name}
 	oc !c -Revive ${Me.Name}
+	oc !c -Disband ${Me.Name}
 	call waitfor_Zoning
 	call GoDown
 	
