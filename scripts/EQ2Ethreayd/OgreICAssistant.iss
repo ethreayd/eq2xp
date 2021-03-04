@@ -73,7 +73,7 @@ function main(string questname)
 			call Zone_TheVenomofSsraeshzaEventHeroic
 		if ${Zone.Name.Equal["The Vault of Ssraeshza \[Heroic\]"]}
 			call Zone_TheVaultofSsraeshzaHeroic
-		if ({Zone.Name.Right[10].Equal["Guild Hall"]})
+		if (${Zone.Name.Right[10].Equal["Guild Hall"]})
 			ogre end ic
 		ExecuteQueued
 		wait 300
